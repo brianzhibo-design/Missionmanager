@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://taskmanager.local/schemas/task-analysis-result.json",
+  "title": "TaskAnalysisResult",
+  "description": "AI 任务分析结果的标准化 JSON Schema",
+  "type": "object",
+  "required": ["progress_assessment", "next_actions", "risks"],
+  "properties": {
+    "progress_assessment": {
+      "type": "object",
+      "description": "进度评估",
+      "required": ["completion_percentage", "status", "summary"],
+      "properties": {
+        "completion_percentage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "完成百分比 (0-100)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["on_track", "at_risk", "delayed", "blocked", "completed"],
+          "description": "当前状态: on_track(正常), at_risk(有风险), delayed(延迟), blocked(阻塞), completed(完成)"
+        },
+        "summary": {
+          "type": "string",
+          "description": "进度摘要说明"
+        },
+        "milestones_completed": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "已完成的里程碑列表"
+        },
+        "milestones_remaining": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "剩余的里程碑列表"
+        },
+        "estimated_completion_date": {
+          "type": "string",
+          "format": "date",
+          "description": "预计完成日期 (YYYY-MM-DD)"
+        },
+        "confidence_level": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "评估置信度"
+        }
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "description": "下一步行动建议列表",
+      "items": {
+        "type": "object",
+        "required": ["action", "priority"],
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "具体行动描述"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"],
+            "description": "优先级: critical(紧急), high(高), medium(中), low(低)"
+          },
+          "assignee": {
+            "type": "string",
+            "description": "建议负责人"
+          },
+          "due_date": {
+            "type": "string",
+            "format": "date",
+            "description": "建议截止日期"
+          },
+          "dependencies": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "依赖项"
+          },
+          "estimated_effort": {
+            "type": "string",
+            "description": "预估工作量 (如: 2h, 1d, 1w)"
+          }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "风险评估列表",
+      "items": {
+        "type": "object",
+        "required": ["description", "severity", "probability"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "风险描述"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"],
+            "description": "严重程度"
+          },
+          "probability": {
+            "type": "string",
+            "enum": ["high", "medium", "low"],
+            "description": "发生概率"
+          },
+          "impact": {
+            "type": "string",
+            "description": "影响说明"
+          },
+          "mitigation": {
+            "type": "string",
+            "description": "缓解措施"
+          },
+          "contingency": {
+            "type": "string",
+            "description": "应急方案"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "分析元数据",
+      "properties": {
+        "analysis_type": {
+          "type": "string",
+          "enum": ["task_level", "project_level", "event_stream"],
+          "description": "分析类型"
+        },
+        "analyzed_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "分析时间"
+        },
+        "model_version": {
+          "type": "string",
+          "description": "使用的 AI 模型版本"
+        }
+      }
+    }
+  }
+}
+

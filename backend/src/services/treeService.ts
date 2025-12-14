@@ -1,0 +1,354 @@
+/**
+ * 树状视图查询服务
+ * 提供成员任务树和项目树查询功能
+ */
+import { prisma } from '../infra/database';
+import { projectMemberRepository } from '../repositories/projectMemberRepository';
+import { workspaceRepository } from '../repositories/workspaceRepository';
+import { projectRepository } from '../repositories/projectRepository';
+import { AppError } from '../middleware/errorHandler';
+import {
+  MemberNode,
+  MemberTreeResponse,
+  ProjectNode,
+  ProjectTreeResponse,
+  TaskStats,
+} from '../types/tree';
+
+export const treeService = {
+  // ==================== 成员任务树 ====================
+
+  /**
+   * 获取项目的成员任务树
+   * 显示工作区所有成员及其在该项目中的任务
+   */
+  async getMemberTree(userId: string, projectId: string): Promise<MemberTreeResponse> {
+    // 1. 验证项目存在
+    const project = await projectRepository.findById(projectId);
+    if (!project) {
+      throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    // 2. 验证用户权限
+    const workspaceMembership = await workspaceRepository.getMembership(project.workspaceId, userId);
+    if (!workspaceMembership) {
+      throw new AppError('无权访问此项目', 403, 'ACCESS_DENIED');
+    }
+
+    // 3. 获取工作区所有成员
+    const workspaceMembers = await prisma.workspaceUser.findMany({
+      where: { workspaceId: project.workspaceId },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+      },
+      orderBy: [
+        { role: 'asc' }, // owner 优先
+        { joinedAt: 'asc' },
+      ],
+    });
+
+    // 4. 构建扁平化的成员树（所有成员都作为根节点的子节点）
+    const children: MemberNode[] = [];
+    
+    for (const member of workspaceMembers) {
+      // 获取该成员在此项目中的任务
+      const tasks = await prisma.task.findMany({
+        where: { projectId, assigneeId: member.userId },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          priority: true,
+          dueDate: true,
+        },
+        orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+      });
+
+      // 计算任务统计
+      const taskStats = this.calculateTaskStats(tasks);
+
+      // 获取项目成员角色（如果有的话）
+      const projectMember = await projectMemberRepository.findByProjectAndUser(projectId, member.userId);
+      // 优先使用项目角色，如果没有则使用工作区角色
+      const role = projectMember?.role || member.role;
+
+      children.push({
+        userId: member.user.id,
+        name: member.user.name,
+        email: member.user.email,
+        role, // 使用项目角色（优先）或工作区角色
+        taskStats,
+        tasks: tasks.map((t) => ({
+          id: t.id,
+          title: t.title,
+          status: t.status,
+          priority: t.priority,
+          dueDate: t.dueDate?.toISOString() || null,
+        })),
+        children: [], // 扁平结构，没有嵌套
+      });
+    }
+
+    // 5. 返回树结构（使用第一个成员作为根节点，或创建虚拟根节点）
+    const rootMember = workspaceMembers.find(m => m.role === 'owner') || workspaceMembers[0];
+    
+    if (!rootMember) {
+      throw new AppError('工作区没有成员', 404, 'NO_MEMBERS');
+    }
+
+    // 计算整体统计
+    const allTasks = await prisma.task.findMany({
+      where: { projectId },
+      select: { status: true },
+    });
+    const overallStats = this.calculateTaskStats(allTasks);
+
+    // 构建根节点（代表整个项目/团队）
+    const tree: MemberNode = {
+      userId: 'team-root',
+      name: project.name + ' 团队',
+      email: '',
+      role: 'team',
+      taskStats: overallStats,
+      tasks: [],
+      children,
+    };
+
+    return {
+      projectId,
+      projectName: project.name,
+      tree,
+    };
+  },
+
+  /**
+   * 递归构建成员节点
+   */
+  async buildMemberNode(
+    projectId: string,
+    userId: string,
+    visited: Set<string>
+  ): Promise<MemberNode> {
+    // 防止循环引用
+    if (visited.has(userId)) {
+      throw new AppError('检测到循环汇报关系', 500, 'CIRCULAR_REFERENCE');
+    }
+    visited.add(userId);
+
+    // 获取用户信息
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true },
+    });
+
+    if (!user) {
+      throw new AppError('用户不存在', 404, 'USER_NOT_FOUND');
+    }
+
+    // 获取项目成员信息
+    const membership = await projectMemberRepository.findByProjectAndUser(projectId, userId);
+    const role = membership?.role || 'member';
+
+    // 获取该成员负责的任务
+    const tasks = await prisma.task.findMany({
+      where: { projectId, assigneeId: userId },
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+      },
+      orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+    });
+
+    // 计算任务统计
+    const taskStats = this.calculateTaskStats(tasks);
+
+    // 获取直属下属
+    const subordinates = await projectMemberRepository.findSubordinates(projectId, userId);
+
+    // 递归构建下属节点
+    const children: MemberNode[] = [];
+    for (const sub of subordinates) {
+      const childNode = await this.buildMemberNode(projectId, sub.userId, new Set(visited));
+      children.push(childNode);
+    }
+
+    return {
+      userId: user.id,
+      name: user.name,
+      email: user.email,
+      role,
+      taskStats,
+      tasks: tasks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        dueDate: t.dueDate?.toISOString() || null,
+      })),
+      children,
+    };
+  },
+
+  // ==================== 项目树 ====================
+
+  /**
+   * 获取工作区的项目树
+   * 最高管理员视角：查看所有项目的工作情况
+   */
+  async getProjectTree(userId: string, workspaceId: string): Promise<ProjectTreeResponse> {
+    // 1. 验证工作区存在
+    const workspace = await workspaceRepository.findById(workspaceId);
+    if (!workspace) {
+      throw new AppError('工作区不存在', 404, 'WORKSPACE_NOT_FOUND');
+    }
+
+    // 2. 验证用户是 owner 或 director
+    const membership = await workspaceRepository.getMembership(workspaceId, userId);
+    if (!membership || !['owner', 'director'].includes(membership.role)) {
+      throw new AppError('需要管理员权限', 403, 'REQUIRE_ADMIN');
+    }
+
+    // 3. 获取工作区下所有项目
+    const projects = await projectRepository.findByWorkspaceId(workspaceId);
+
+    // 4. 构建每个项目的节点
+    const projectNodes: ProjectNode[] = [];
+    const overallStats: TaskStats = {
+      total: 0,
+      todo: 0,
+      inProgress: 0,
+      review: 0,
+      blocked: 0,
+      done: 0,
+    };
+
+    for (const project of projects) {
+      const node = await this.buildProjectNode(project.id);
+      projectNodes.push(node);
+
+      // 累加总体统计
+      overallStats.total += node.taskStats.total;
+      overallStats.todo += node.taskStats.todo;
+      overallStats.inProgress += node.taskStats.inProgress;
+      overallStats.review += node.taskStats.review;
+      overallStats.blocked += node.taskStats.blocked;
+      overallStats.done += node.taskStats.done;
+    }
+
+    // 按进度排序（进度低的排前面，优先关注）
+    projectNodes.sort((a, b) => a.progress - b.progress);
+
+    return {
+      workspaceId,
+      workspaceName: workspace.name,
+      totalProjects: projects.length,
+      overallStats,
+      projects: projectNodes,
+    };
+  },
+
+  /**
+   * 构建单个项目节点
+   */
+  async buildProjectNode(projectId: string): Promise<ProjectNode> {
+    const project = await prisma.project.findUnique({
+      where: { id: projectId },
+      include: {
+        tasks: {
+          select: { id: true, status: true, updatedAt: true },
+        },
+        members: {
+          where: { role: { in: ['project_admin', 'team_lead'] } },
+          include: {
+            user: { select: { id: true, name: true } },
+          },
+        },
+      },
+    });
+
+    if (!project) {
+      throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    // 计算任务统计
+    const taskStats = this.calculateTaskStats(project.tasks);
+
+    // 计算进度百分比
+    const progress = taskStats.total > 0
+      ? Math.round((taskStats.done / taskStats.total) * 100)
+      : 0;
+
+    // 获取主要成员及其任务数
+    const topMembers = await Promise.all(
+      project.members.map(async (m) => {
+        const taskCount = await prisma.task.count({
+          where: { projectId, assigneeId: m.userId },
+        });
+        return {
+          userId: m.userId,
+          name: m.user.name,
+          role: m.role,
+          taskCount,
+        };
+      })
+    );
+
+    // 获取最近活动时间
+    const recentTask = project.tasks.sort(
+      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+    )[0];
+
+    return {
+      projectId: project.id,
+      name: project.name,
+      description: project.description,
+      progress,
+      taskStats,
+      topMembers,
+      recentActivity: recentTask?.updatedAt.toISOString() || null,
+    };
+  },
+
+  // ==================== 辅助方法 ====================
+
+  /**
+   * 计算任务统计
+   * 注意：数据库中的状态值是小写的 (todo, in_progress, review, blocked, done)
+   */
+  calculateTaskStats(tasks: Array<{ status: string }>): TaskStats {
+    const stats: TaskStats = {
+      total: tasks.length,
+      todo: 0,
+      inProgress: 0,
+      review: 0,
+      blocked: 0,
+      done: 0,
+    };
+
+    for (const task of tasks) {
+      switch (task.status) {
+        case 'todo':
+          stats.todo++;
+          break;
+        case 'in_progress':
+          stats.inProgress++;
+          break;
+        case 'review':
+          stats.review++;
+          break;
+        case 'blocked':
+          stats.blocked++;
+          break;
+        case 'done':
+          stats.done++;
+          break;
+      }
+    }
+
+    return stats;
+  },
+};
+

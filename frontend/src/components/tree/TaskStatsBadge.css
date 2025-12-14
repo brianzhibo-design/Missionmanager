@@ -1,0 +1,34 @@
+.task-stats-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.task-stats-badge.compact {
+  gap: 6px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-secondary);
+  font-weight: 500;
+}
+
+.stat-total {
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 2px 8px;
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+}
+
+.stat-blocked {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+

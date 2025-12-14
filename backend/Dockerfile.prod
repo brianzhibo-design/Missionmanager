@@ -1,0 +1,43 @@
+# 构建阶段
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# 安装依赖
+COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm ci --only=production=false
+
+# 复制源码并构建
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+# 生产阶段
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# 安装生产依赖
+COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm ci --only=production && \
+    npx prisma generate && \
+    npm cache clean --force
+
+# 复制构建产物
+COPY --from=builder /app/dist ./dist
+
+# 创建非 root 用户
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 taskflow
+USER taskflow
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD wget -q --spider http://localhost:3000/health || exit 1
+
+EXPOSE 3000
+
+CMD ["node", "dist/index.js"]
+

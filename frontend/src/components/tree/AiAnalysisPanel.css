@@ -1,0 +1,486 @@
+/* AI 分析面板样式 */
+
+.ai-analysis-panel {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  overflow: hidden;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* 头部 */
+.analysis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, var(--accent-light) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border-primary);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.analysis-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.close-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background-color: var(--bg-hover);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all var(--transition-fast);
+}
+
+.close-btn:hover {
+  background-color: var(--bg-active);
+  color: var(--text-primary);
+}
+
+/* 健康评分区域 */
+.health-section {
+  padding: 20px;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.health-score {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.score-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 4px solid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card-bg);
+  flex-shrink: 0;
+}
+
+.score-number {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.health-info {
+  flex: 1;
+}
+
+.health-status {
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+
+.health-summary {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* 分析区块 */
+.analysis-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.analysis-section:last-child {
+  border-bottom: none;
+}
+
+.analysis-section h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.analysis-section h5 {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 12px 0 8px 0;
+}
+
+/* 进度条 */
+.balance-score,
+.resource-score {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.progress-bar {
+  flex: 1;
+  height: 8px;
+  background-color: var(--bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* 工作负载均衡度数值 - 使用更具体的选择器避免与 AiInsights.css 冲突 */
+.balance-score .score-value,
+.resource-score .score-value {
+  position: static !important;
+  transform: none !important;
+  font-size: 13px !important;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 40px;
+  text-align: right;
+}
+
+/* 成员列表 */
+.member-list {
+  margin-top: 12px;
+}
+
+.member-item {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.member-item.overloaded {
+  border-left: 3px solid var(--color-danger);
+}
+
+.member-item.idle {
+  border-left: 3px solid var(--color-warning);
+}
+
+.member-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.member-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.task-count {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.member-suggestion {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 瓶颈列表 */
+.bottleneck-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bottleneck-item {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.bottleneck-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.priority-badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  color: white;
+}
+
+.bottleneck-type {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.bottleneck-desc {
+  font-size: 13px;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.affected-members {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.bottleneck-suggestion {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: 8px;
+  background-color: var(--accent-light);
+  border-radius: var(--radius-sm);
+}
+
+/* 建议列表 */
+.recommendation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recommendation-item {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.recommendation-badges {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.impact-badge,
+.effort-badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.impact-badge {
+  color: white;
+}
+
+.effort-badge {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.recommendation-action {
+  font-size: 13px;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 风险热图 */
+.risk-heatmap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.risk-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.risk-label {
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.risk-projects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.project-tag {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.risk-group.high .project-tag {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+}
+
+.risk-group.medium .project-tag {
+  background-color: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.risk-group.low .project-tag {
+  background-color: rgba(16, 185, 129, 0.1);
+  color: var(--color-success);
+}
+
+/* 项目对比 */
+.project-comparison {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.project-compare-item {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.project-compare-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.project-compare-header .project-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.health-score-mini {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.project-issue {
+  font-size: 12px;
+  color: var(--color-warning);
+  margin: 0 0 8px 0;
+}
+
+.project-recommendation {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* 不平衡列表 */
+.imbalance-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.imbalance-item {
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.imbalance-desc {
+  font-size: 13px;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.affected-projects {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.imbalance-suggestion {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0;
+  padding: 8px;
+  background-color: var(--accent-light);
+  border-radius: var(--radius-sm);
+}
+
+/* 优先行动 */
+.priority-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.priority-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background-color: var(--bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.urgency-badge {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  color: white;
+  flex-shrink: 0;
+}
+
+.priority-project {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+}
+
+.priority-action {
+  font-size: 13px;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+/* 洞察区域 */
+.analysis-section.insights {
+  background-color: var(--accent-light);
+}
+
+.analysis-section.insights p {
+  font-size: 13px;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.6;
+}
+

@@ -1,0 +1,31 @@
+.admin-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.page-description {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.placeholder-card {
+  background-color: var(--card-bg);
+  border: 1px dashed var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 48px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+

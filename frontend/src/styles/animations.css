@@ -1,0 +1,417 @@
+/**
+ * TaskFlow Animation System
+ * 专业级动画系统 - 灵感来源: Linear, Framer
+ */
+
+/* ========================================
+ * 入场动画
+ * ======================================== */
+
+/* 淡入 */
+.fade-in {
+  animation: fadeIn var(--duration-normal) var(--ease-out);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 从下向上滑入 */
+.slide-up {
+  animation: slideUp var(--duration-normal) var(--ease-out);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 从上向下滑入 */
+.slide-down {
+  animation: slideDown var(--duration-normal) var(--ease-out);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 从左向右滑入 */
+.slide-right {
+  animation: slideRight var(--duration-normal) var(--ease-out);
+}
+
+@keyframes slideRight {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 从右向左滑入 */
+.slide-left {
+  animation: slideLeft var(--duration-normal) var(--ease-out);
+}
+
+@keyframes slideLeft {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 缩放进入 */
+.scale-in {
+  animation: scaleIn var(--duration-fast) var(--ease-bounce);
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 弹入 */
+.pop-in {
+  animation: popIn var(--duration-normal) var(--ease-elastic);
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ========================================
+ * 循环动画
+ * ======================================== */
+
+/* 旋转 (加载) */
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 脉冲 (提示) */
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 弹跳 */
+.bounce {
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* 呼吸效果 */
+.breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+/* 摇晃 (错误提示) */
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+/* 闪烁 (通知) */
+.blink {
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ========================================
+ * 悬停效果
+ * ======================================== */
+
+/* 悬停上浮 */
+.hover-lift {
+  transition: transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 悬停放大 */
+.hover-scale {
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* 悬停发光 */
+.hover-glow {
+  transition: box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.hover-glow:hover {
+  box-shadow: var(--glow-brand);
+}
+
+/* 悬停亮度 */
+.hover-bright {
+  transition: filter var(--duration-fast) var(--ease-out);
+}
+
+.hover-bright:hover {
+  filter: brightness(1.1);
+}
+
+/* 悬停变淡 */
+.hover-dim {
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.hover-dim:hover {
+  opacity: 0.8;
+}
+
+/* ========================================
+ * 骨架屏 (加载占位)
+ * ======================================== */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-secondary) 0%,
+    var(--bg-surface-tertiary) 50%,
+    var(--bg-surface-secondary) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes skeleton {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: var(--space-2);
+}
+
+.skeleton-text:last-child {
+  width: 60%;
+  margin-bottom: 0;
+}
+
+.skeleton-title {
+  height: 24px;
+  width: 50%;
+  margin-bottom: var(--space-4);
+}
+
+.skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.skeleton-button {
+  height: 36px;
+  width: 100px;
+}
+
+.skeleton-card {
+  height: 120px;
+}
+
+/* ========================================
+ * 进度条动画
+ * ======================================== */
+.progress-indeterminate {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-indeterminate::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 50%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-brand-alpha-20),
+    transparent
+  );
+  animation: indeterminate 1.5s ease-in-out infinite;
+}
+
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/* ========================================
+ * 延迟动画 (交错效果)
+ * ======================================== */
+.delay-0 { animation-delay: 0ms; }
+.delay-75 { animation-delay: 75ms; }
+.delay-100 { animation-delay: 100ms; }
+.delay-150 { animation-delay: 150ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* ========================================
+ * 动画持续时间
+ * ======================================== */
+.duration-fast { animation-duration: var(--duration-fast); }
+.duration-normal { animation-duration: var(--duration-normal); }
+.duration-slow { animation-duration: var(--duration-slow); }
+.duration-slower { animation-duration: var(--duration-slower); }
+
+/* ========================================
+ * 过渡效果
+ * ======================================== */
+.transition-none { transition: none !important; }
+.transition-all { transition: all var(--duration-normal) var(--ease-default); }
+.transition-colors { transition: color var(--duration-fast) var(--ease-default), background-color var(--duration-fast) var(--ease-default), border-color var(--duration-fast) var(--ease-default); }
+.transition-opacity { transition: opacity var(--duration-normal) var(--ease-default); }
+.transition-transform { transition: transform var(--duration-normal) var(--ease-default); }
+.transition-shadow { transition: box-shadow var(--duration-normal) var(--ease-default); }
+
+/* ========================================
+ * 变换
+ * ======================================== */
+.translate-y-0 { transform: translateY(0); }
+.translate-y-1 { transform: translateY(4px); }
+.translate-y-2 { transform: translateY(8px); }
+.-translate-y-1 { transform: translateY(-4px); }
+.-translate-y-2 { transform: translateY(-8px); }
+
+.scale-95 { transform: scale(0.95); }
+.scale-100 { transform: scale(1); }
+.scale-105 { transform: scale(1.05); }
+.scale-110 { transform: scale(1.1); }
+
+.rotate-0 { transform: rotate(0deg); }
+.rotate-45 { transform: rotate(45deg); }
+.rotate-90 { transform: rotate(90deg); }
+.rotate-180 { transform: rotate(180deg); }
+.-rotate-90 { transform: rotate(-90deg); }
+
+/* ========================================
+ * 减少动画 (无障碍)
+ * ======================================== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

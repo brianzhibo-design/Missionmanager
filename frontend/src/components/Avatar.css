@@ -1,0 +1,92 @@
+/**
+ * Avatar 头像组件样式
+ */
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: white;
+  font-weight: var(--font-semibold);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.avatar-sm {
+  width: 28px;
+  height: 28px;
+  font-size: 10px;
+}
+
+.avatar-md {
+  width: 36px;
+  height: 36px;
+  font-size: var(--text-xs);
+}
+
+.avatar-lg {
+  width: 44px;
+  height: 44px;
+  font-size: var(--text-sm);
+}
+
+.avatar-xl {
+  width: 56px;
+  height: 56px;
+  font-size: var(--text-base);
+}
+
+.avatar-initials {
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+img.avatar {
+  object-fit: cover;
+}
+
+/* 头像组 */
+.avatar-group {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.avatar-group .avatar {
+  margin-left: -8px;
+  border: 2px solid var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.avatar-group .avatar:last-child {
+  margin-left: 0;
+}
+
+/* 带状态的头像 */
+.avatar-with-status {
+  position: relative;
+}
+
+.avatar-status {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-surface);
+}
+
+.avatar-status.online {
+  background-color: var(--color-success);
+}
+
+.avatar-status.offline {
+  background-color: var(--text-tertiary);
+}
+
+.avatar-status.busy {
+  background-color: var(--color-danger);
+}
+

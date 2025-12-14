@@ -1,0 +1,80 @@
+# 任务管理系统 - Docker Compose 配置
+# 
+# 使用方法:
+#   启动: docker-compose up -d
+#   停止: docker-compose down
+#   查看日志: docker-compose logs -f
+#
+# 环境变量映射:
+#   POSTGRES_USER     -> 数据库用户名
+#   POSTGRES_PASSWORD -> 数据库密码
+#   POSTGRES_DB       -> 数据库名称
+
+version: '3.8'
+
+services:
+  # ==========================================
+  # PostgreSQL 数据库
+  # ==========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: task_manager_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: taskdb
+      TZ: Asia/Shanghai
+    volumes:
+      # 数据持久化位置: ./data/postgres
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - task_manager_network
+
+  # ==========================================
+  # Redis 缓存（可选）
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: task_manager_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    environment:
+      TZ: Asia/Shanghai
+    command: redis-server --appendonly yes
+    volumes:
+      # 数据持久化位置: ./data/redis
+      - ./data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - task_manager_network
+
+# ==========================================
+# 网络配置
+# ==========================================
+networks:
+  task_manager_network:
+    driver: bridge
+    name: task_manager_network
+
+# ==========================================
+# 数据持久化说明
+# ==========================================
+# PostgreSQL 数据: ./data/postgres
+# Redis 数据:      ./data/redis
+#
+# 连接信息:
+# - PostgreSQL: postgresql://postgres:postgres@localhost:5432/taskdb
+# - Redis: redis://localhost:6379

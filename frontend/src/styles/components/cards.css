@@ -1,0 +1,266 @@
+/**
+ * TaskFlow Card Component System
+ * 专业级卡片组件 - 灵感来源: Linear, Notion, Vercel
+ */
+
+/* ========================================
+ * 基础卡片
+ * ======================================== */
+.card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: all var(--duration-normal) var(--ease-default);
+}
+
+/* 可交互卡片 */
+.card-interactive {
+  cursor: pointer;
+}
+
+.card-interactive:hover {
+  border-color: var(--border-secondary);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.card-interactive:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 静态卡片 */
+.card-static {
+  cursor: default;
+}
+
+/* 无边框卡片 */
+.card-borderless {
+  border: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* ========================================
+ * 卡片结构
+ * ======================================== */
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--divider);
+}
+
+.card-title {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+.card-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
+}
+
+.card-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.card-body {
+  padding: var(--space-5);
+}
+
+.card-body-sm {
+  padding: var(--space-4);
+}
+
+.card-body-lg {
+  padding: var(--space-6);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--divider);
+  background-color: var(--bg-surface-secondary);
+}
+
+/* ========================================
+ * 状态卡片 (左边框)
+ * ======================================== */
+.card-status {
+  border-left-width: 4px;
+}
+
+.card-success {
+  border-left-color: var(--color-success);
+}
+
+.card-warning {
+  border-left-color: var(--color-warning);
+}
+
+.card-danger {
+  border-left-color: var(--color-danger);
+}
+
+.card-info {
+  border-left-color: var(--color-info);
+}
+
+.card-primary {
+  border-left-color: var(--color-brand);
+}
+
+/* ========================================
+ * 卡片网格
+ * ======================================== */
+.card-grid {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.card-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.card-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.card-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.card-grid-auto {
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+@media (max-width: 1024px) {
+  .card-grid-4,
+  .card-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .card-grid-2,
+  .card-grid-3,
+  .card-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .card-body {
+    padding: var(--space-4);
+  }
+}
+
+/* ========================================
+ * 空状态卡片
+ * ======================================== */
+.card-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+}
+
+.card-empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+  opacity: 0.5;
+}
+
+.card-empty-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.card-empty-desc {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  max-width: 320px;
+  margin-bottom: var(--space-6);
+}
+
+/* ========================================
+ * 统计卡片
+ * ======================================== */
+.card-stat {
+  padding: var(--space-5);
+}
+
+.card-stat-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background-color: var(--color-brand-alpha-10);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+}
+
+.card-stat-value {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: var(--space-1);
+}
+
+.card-stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+/* ========================================
+ * 可选择卡片
+ * ======================================== */
+.card-selectable {
+  cursor: pointer;
+  position: relative;
+}
+
+.card-selectable.is-selected {
+  border-color: var(--color-brand);
+  box-shadow: var(--glow-brand);
+}
+
+/* ========================================
+ * 加载状态
+ * ======================================== */
+.card-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--bg-hover), transparent);
+  animation: card-shimmer 1.5s infinite;
+}
+
+@keyframes card-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+

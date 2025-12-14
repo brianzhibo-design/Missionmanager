@@ -1,0 +1,313 @@
+/**
+ * TaskFlow Design Tokens
+ * 专业级设计系统 - 设计令牌
+ * 灵感来源: Linear, Notion, Vercel
+ */
+
+:root {
+  /* ========================================
+   * 品牌色彩系统
+   * ======================================== */
+  --color-brand: #6366F1;
+  --color-brand-light: #818CF8;
+  --color-brand-dark: #4F46E5;
+  --color-brand-alpha-10: rgba(99, 102, 241, 0.1);
+  --color-brand-alpha-20: rgba(99, 102, 241, 0.2);
+
+  /* 语义色 */
+  --color-success: #10B981;
+  --color-success-light: #34D399;
+  --color-success-dark: #059669;
+  --color-success-alpha-10: rgba(16, 185, 129, 0.1);
+
+  --color-warning: #F59E0B;
+  --color-warning-light: #FBBF24;
+  --color-warning-dark: #D97706;
+  --color-warning-alpha-10: rgba(245, 158, 11, 0.1);
+
+  --color-danger: #EF4444;
+  --color-danger-light: #F87171;
+  --color-danger-dark: #DC2626;
+  --color-danger-alpha-10: rgba(239, 68, 68, 0.1);
+
+  --color-info: #3B82F6;
+  --color-info-light: #60A5FA;
+  --color-info-dark: #2563EB;
+  --color-info-alpha-10: rgba(59, 130, 246, 0.1);
+
+  /* ========================================
+   * 浅色主题 - Zenith 极简风格
+   * ======================================== */
+  --bg-base: #FFFFFF;
+  --bg-surface: #FFFFFF;
+  --bg-surface-secondary: #FAFAFA;
+  --bg-surface-tertiary: #F5F5F5;
+  --bg-hover: #F5F5F5;
+  --bg-active: #EFEFEF;
+  --bg-selected: #F0F0F0;
+
+  --text-primary: #171717;
+  --text-secondary: #525252;
+  --text-tertiary: #A3A3A3;
+  --text-disabled: #D4D4D4;
+  --text-inverse: #FFFFFF;
+
+  --border-primary: #E5E5E5;
+  --border-secondary: #F0F0F0;
+  --border-subtle: #F5F5F5;
+  --border-focus: var(--color-brand);
+  --divider: #E5E5E5;
+  
+  /* Zenith 强调色 */
+  --accent-primary: #2563EB;
+  --brand-primary: #171717;
+  --brand-light: #F5F5F5;
+
+  /* 阴影 - Zenith 更轻 */
+  --shadow-xs: 0 1px 1px rgba(0, 0, 0, 0.02);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.06);
+  --shadow-2xl: 0 16px 32px rgba(0, 0, 0, 0.08);
+
+  /* 发光效果 */
+  --glow-brand: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  --glow-success: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  --glow-warning: 0 0 0 3px rgba(245, 158, 11, 0.15);
+  --glow-danger: 0 0 0 3px rgba(239, 68, 68, 0.15);
+
+  /* ========================================
+   * 间距系统 (8px 基准)
+   * ======================================== */
+  --space-0: 0;
+  --space-px: 1px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-14: 56px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ========================================
+   * 圆角系统
+   * ======================================== */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-full: 9999px;
+
+  /* ========================================
+   * 字体系统
+   * ======================================== */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Fira Mono', 'Roboto Mono', monospace;
+
+  /* 字号 */
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 20px;
+  --text-3xl: 24px;
+  --text-4xl: 30px;
+  --text-5xl: 36px;
+
+  /* 行高 */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* 字重 */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* 字间距 */
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+
+  /* ========================================
+   * 过渡动画
+   * ======================================== */
+  --duration-instant: 50ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-slower: 400ms;
+  --duration-slowest: 500ms;
+
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* ========================================
+   * Z-Index 层级
+   * ======================================== */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+  --z-toast: 800;
+
+  /* ========================================
+   * 布局
+   * ======================================== */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --topbar-height: 56px;
+  --container-max: 1280px;
+}
+
+/* ========================================
+ * 深色主题
+ * ======================================== */
+[data-theme="dark"] {
+  --bg-base: #09090B;
+  --bg-surface: #18181B;
+  --bg-surface-secondary: #27272A;
+  --bg-surface-tertiary: #3F3F46;
+  --bg-hover: rgba(255, 255, 255, 0.04);
+  --bg-active: rgba(255, 255, 255, 0.08);
+  --bg-selected: rgba(99, 102, 241, 0.16);
+
+  --text-primary: #FAFAFA;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #71717A;
+  --text-disabled: #52525B;
+  --text-inverse: #09090B;
+
+  --border-primary: #27272A;
+  --border-secondary: #3F3F46;
+  --divider: #27272A;
+
+  /* 阴影 - 深色主题 */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.25);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+
+  /* 发光效果 - 深色主题更明显 */
+  --glow-brand: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  --glow-success: 0 0 0 3px rgba(16, 185, 129, 0.25);
+  --glow-warning: 0 0 0 3px rgba(245, 158, 11, 0.25);
+  --glow-danger: 0 0 0 3px rgba(239, 68, 68, 0.25);
+}
+
+/* ========================================
+ * 全局基础样式
+ * ======================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-base);
+  transition: background-color var(--duration-normal) var(--ease-default),
+              color var(--duration-normal) var(--ease-default);
+}
+
+/* 选中文本样式 */
+::selection {
+  background-color: var(--color-brand);
+  color: white;
+}
+
+/* Focus 可见性 */
+:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
+
+/* ========================================
+ * 美化滚动条
+ * ======================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--text-tertiary);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--text-secondary);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--text-tertiary) transparent;
+}
+
+/* ========================================
+ * 链接基础样式
+ * ======================================== */
+a {
+  color: var(--color-brand);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+a:hover {
+  color: var(--color-brand-dark);
+}
+

@@ -1,0 +1,253 @@
+// Prisma Schema 文件
+// 定义数据模型结构，不包含业务逻辑
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// 用户模型
+// ==========================================
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  avatar    String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  workspaces         WorkspaceUser[]
+  createdTasks       Task[]           @relation("TaskCreator")
+  assignedTasks      Task[]           @relation("TaskAssignee")
+  taskEvents         TaskEvent[]
+  projectMemberships ProjectMember[]  @relation("ProjectMemberUser")
+  managedMembers     ProjectMember[]  @relation("ProjectMemberManager")
+  notifications      Notification[]
+
+  @@map("users")
+}
+
+// ==========================================
+// 工作区模型
+// ==========================================
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // 关联关系
+  members  WorkspaceUser[]
+  projects Project[]
+  reports  Report[]
+
+  @@map("workspaces")
+}
+
+// ==========================================
+// 工作区用户关联模型（多对多）
+// ==========================================
+model WorkspaceUser {
+  id          String   @id @default(cuid())
+  role        String   @default("member") // owner, admin, member
+  joinedAt    DateTime @default(now()) @map("joined_at")
+
+  // 外键
+  userId      String   @map("user_id")
+  workspaceId String   @map("workspace_id")
+
+  // 关联关系
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@map("workspace_users")
+}
+
+// ==========================================
+// 项目模型
+// ==========================================
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  status      String    @default("active") // active, archived, completed
+  startDate   DateTime? @map("start_date")
+  endDate     DateTime? @map("end_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // 外键
+  workspaceId String    @map("workspace_id")
+
+  // 关联关系
+  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  tasks         Task[]
+  members       ProjectMember[]
+  notifications Notification[]
+
+  @@map("projects")
+}
+
+// ==========================================
+// 项目成员模型（项目级别的角色和汇报关系）
+// ==========================================
+model ProjectMember {
+  id        String   @id @default(cuid())
+  role      String   @default("member") // project_admin, team_lead, member
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 外键
+  projectId String  @map("project_id")
+  userId    String  @map("user_id")
+  managerId String? @map("manager_id") // 直属上级的 userId
+
+  // 关联关系
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation("ProjectMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  manager User?   @relation("ProjectMemberManager", fields: [managerId], references: [id], onDelete: SetNull)
+
+  @@unique([projectId, userId])
+  @@index([projectId])
+  @@index([userId])
+  @@index([managerId])
+  @@map("project_members")
+}
+
+// ==========================================
+// 任务模型
+// ==========================================
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  status      String    @default("todo") // todo, in_progress, review, done
+  priority    String    @default("medium") // low, medium, high, critical
+  dueDate     DateTime? @map("due_date")
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // 外键
+  projectId   String  @map("project_id")
+  creatorId   String  @map("creator_id")
+  assigneeId  String? @map("assignee_id")
+  parentId    String? @map("parent_id") // 支持子任务
+
+  // 关联关系
+  project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  creator       User             @relation("TaskCreator", fields: [creatorId], references: [id])
+  assignee      User?            @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  parent        Task?            @relation("SubTasks", fields: [parentId], references: [id])
+  subTasks      Task[]           @relation("SubTasks")
+  events        TaskEvent[]
+  aiAnalyses    TaskAiAnalysis[]
+  notifications Notification[]
+
+  @@map("tasks")
+}
+
+// ==========================================
+// 任务事件模型（记录任务变更历史）
+// ==========================================
+model TaskEvent {
+  id        String   @id @default(cuid())
+  type      String   // created, status_changed, assigned, commented, etc.
+  data      Json     // 事件相关数据
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 外键
+  taskId String @map("task_id")
+  userId String @map("user_id")
+
+  // 关联关系
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([taskId, createdAt])
+  @@map("task_events")
+}
+
+// ==========================================
+// 任务 AI 分析结果模型
+// ==========================================
+model TaskAiAnalysis {
+  id           String   @id @default(cuid())
+  analysisType String   @map("analysis_type") // task_level, project_level, event_stream
+  result       Json     // 分析结果（遵循 JSON Schema）
+  modelVersion String   @map("model_version")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  // 外键
+  taskId String @map("task_id")
+
+  // 关联关系
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@index([taskId, createdAt])
+  @@map("task_ai_analyses")
+}
+
+// ==========================================
+// 通知模型
+// ==========================================
+model Notification {
+  id        String    @id @default(cuid())
+  type      String    // task_assigned, task_status_changed, task_due_soon, task_overdue, mention, report_ready
+  title     String
+  message   String
+  isRead    Boolean   @default(false) @map("is_read")
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // 外键
+  userId    String  @map("user_id")
+  taskId    String? @map("task_id")
+  projectId String? @map("project_id")
+
+  // 关联关系
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task    Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, isRead])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+// ==========================================
+// 报告模型
+// ==========================================
+model Report {
+  id          String   @id @default(cuid())
+  type        String   // weekly, monthly
+  title       String
+  startDate   DateTime @map("start_date")
+  endDate     DateTime @map("end_date")
+  content     Json     // 报告内容（统计数据）
+  summary     String?  // AI 生成的摘要
+  highlights  Json?    // 亮点
+  concerns    Json?    // 关注点
+  generatedBy String?  @map("generated_by") // 生成者 userId
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // 外键
+  workspaceId String @map("workspace_id")
+
+  // 关联关系
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, type])
+  @@index([workspaceId, startDate])
+  @@map("reports")
+}
+

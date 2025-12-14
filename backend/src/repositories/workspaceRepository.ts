@@ -1,0 +1,151 @@
+/**
+ * 工作区数据访问层
+ */
+import { prisma } from '../infra/database';
+import { Workspace, WorkspaceUser } from '@prisma/client';
+
+// 工作区角色类型（从高到低权限）
+// owner: 创始人/所有者
+// director: 总监
+// manager: 经理
+// member: 成员
+// observer: 协作者/观察者
+export type WorkspaceRole = 'owner' | 'director' | 'manager' | 'member' | 'observer';
+
+// 角色权限层级（数字越小权限越高）
+export const ROLE_HIERARCHY: Record<WorkspaceRole, number> = {
+  owner: 0,
+  director: 1,
+  manager: 2,
+  member: 3,
+  observer: 4,
+};
+
+// 检查角色是否有足够权限（角色层级 <= 要求层级）
+export function hasRolePermission(userRole: string, requiredRole: WorkspaceRole): boolean {
+  const userLevel = ROLE_HIERARCHY[userRole as WorkspaceRole];
+  const requiredLevel = ROLE_HIERARCHY[requiredRole];
+  if (userLevel === undefined || requiredLevel === undefined) return false;
+  return userLevel <= requiredLevel;
+}
+
+export const workspaceRepository = {
+  /**
+   * 创建工作区
+   */
+  async create(data: { name: string; description?: string }): Promise<Workspace> {
+    return prisma.workspace.create({ data });
+  },
+
+  /**
+   * 根据 ID 查找工作区
+   */
+  async findById(id: string): Promise<Workspace | null> {
+    return prisma.workspace.findUnique({ where: { id } });
+  },
+
+  /**
+   * 查找用户所属的所有工作区
+   */
+  async findByUserId(userId: string): Promise<(Workspace & { role: string })[]> {
+    const memberships = await prisma.workspaceUser.findMany({
+      where: { userId },
+      include: { workspace: true },
+    });
+    return memberships.map((m) => ({
+      ...m.workspace,
+      role: m.role,
+    }));
+  },
+
+  /**
+   * 更新工作区
+   */
+  async update(id: string, data: { name?: string; description?: string }): Promise<Workspace> {
+    return prisma.workspace.update({ where: { id }, data });
+  },
+
+  /**
+   * 删除工作区
+   */
+  async delete(id: string): Promise<void> {
+    await prisma.workspace.delete({ where: { id } });
+  },
+
+  /**
+   * 添加成员
+   */
+  async addMember(workspaceId: string, userId: string, role: WorkspaceRole): Promise<WorkspaceUser> {
+    return prisma.workspaceUser.create({
+      data: { workspaceId, userId, role },
+    });
+  },
+
+  /**
+   * 获取成员关系
+   */
+  async getMembership(workspaceId: string, userId: string): Promise<WorkspaceUser | null> {
+    return prisma.workspaceUser.findUnique({
+      where: { userId_workspaceId: { workspaceId, userId } },
+    });
+  },
+
+  /**
+   * 获取工作区所有成员
+   */
+  async getMembers(workspaceId: string) {
+    return prisma.workspaceUser.findMany({
+      where: { workspaceId },
+      include: { user: { select: { id: true, email: true, name: true } } },
+      orderBy: [
+        { role: 'asc' },
+        { joinedAt: 'asc' },
+      ],
+    });
+  },
+
+  /**
+   * 添加成员并返回用户信息
+   */
+  async addMemberWithUser(workspaceId: string, userId: string, role: string) {
+    return prisma.workspaceUser.create({
+      data: { workspaceId, userId, role },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+      },
+    });
+  },
+
+  /**
+   * 更新成员角色并返回用户信息
+   */
+  async updateMemberRoleWithUser(workspaceId: string, userId: string, role: string) {
+    return prisma.workspaceUser.update({
+      where: { userId_workspaceId: { workspaceId, userId } },
+      data: { role },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+      },
+    });
+  },
+
+  /**
+   * 更新成员角色
+   */
+  async updateMemberRole(workspaceId: string, userId: string, role: WorkspaceRole): Promise<WorkspaceUser> {
+    return prisma.workspaceUser.update({
+      where: { userId_workspaceId: { workspaceId, userId } },
+      data: { role },
+    });
+  },
+
+  /**
+   * 移除成员
+   */
+  async removeMember(workspaceId: string, userId: string): Promise<void> {
+    await prisma.workspaceUser.delete({
+      where: { userId_workspaceId: { workspaceId, userId } },
+    });
+  },
+};
+
