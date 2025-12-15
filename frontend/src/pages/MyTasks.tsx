@@ -307,14 +307,7 @@ export default function MyTasks() {
                             {dueInfo.text}
                           </span>
                         )}
-                        <span
-                          className="task-status"
-                          style={{
-                            color: STATUS_CONFIG[task.status]?.color,
-                            backgroundColor: STATUS_CONFIG[task.status]?.bg,
-                            borderColor: STATUS_CONFIG[task.status]?.border,
-                          }}
-                        >
+                        <span className={`task-status status-${task.status}`}>
                           {STATUS_CONFIG[task.status]?.label || task.status}
                         </span>
                       </div>
