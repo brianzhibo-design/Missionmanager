@@ -69,7 +69,7 @@ export const projectRepository = {
    */
   async update(
     id: string,
-    data: { name?: string; description?: string; status?: string }
+    data: { name?: string; description?: string; status?: string; leaderId?: string | null }
   ): Promise<Project> {
     return prisma.project.update({ where: { id }, data });
   },
@@ -89,9 +89,91 @@ export const projectRepository = {
       where: { id },
       include: {
         _count: { select: { tasks: true } },
+        leader: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
       },
     });
     return project;
+  },
+
+  /**
+   * 查找项目成员
+   */
+  async findProjectMember(projectId: string, userId: string) {
+    return prisma.projectMember.findUnique({
+      where: { projectId_userId: { projectId, userId } },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
+      },
+    });
+  },
+
+  /**
+   * 获取项目所有成员
+   */
+  async findProjectMembers(projectId: string) {
+    return prisma.projectMember.findMany({
+      where: { projectId },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+  },
+
+  /**
+   * 添加项目成员
+   */
+  async addProjectMember(projectId: string, userId: string, role: string = 'member') {
+    return prisma.projectMember.create({
+      data: {
+        projectId,
+        userId,
+        role,
+      },
+      include: {
+        user: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
+      },
+    });
+  },
+
+  /**
+   * 移除项目成员
+   */
+  async removeProjectMember(projectId: string, userId: string) {
+    await prisma.projectMember.delete({
+      where: { projectId_userId: { projectId, userId } },
+    });
+  },
+
+  /**
+   * 获取项目详情（包含负责人和团队成员）
+   */
+  async findByIdWithTeam(id: string) {
+    return prisma.project.findUnique({
+      where: { id },
+      include: {
+        leader: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
+        members: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, avatar: true },
+            },
+          },
+          orderBy: { createdAt: 'asc' },
+        },
+        _count: { select: { tasks: true } },
+      },
+    });
   },
 };
 

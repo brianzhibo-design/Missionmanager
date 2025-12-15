@@ -1,20 +1,29 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { projectService } from '../services/project';
+import { projectService, ProjectMember } from '../services/project';
 import { taskService, Task } from '../services/task';
 import { memberService, Member } from '../services/member';
 import { aiService, ProjectOptimizationResult, SuggestedTask } from '../services/ai';
 import { usePermissions } from '../hooks/usePermissions';
 import Modal from '../components/Modal';
 import TaskList from '../components/TaskList';
-import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles } from 'lucide-react';
+import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown } from 'lucide-react';
 import './ProjectDetail.css';
+
+interface ProjectLeader {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string | null;
+}
 
 interface Project {
   id: string;
   name: string;
   description: string | null;
   workspaceId: string;
+  leaderId: string | null;
+  leader?: ProjectLeader | null;
   createdAt: string;
 }
 
@@ -91,6 +100,14 @@ export default function ProjectDetail() {
   const [projectOptimizationLoading, setProjectOptimizationLoading] = useState(false);
   const [applyingProjectOptimization, setApplyingProjectOptimization] = useState(false);
 
+  // 项目团队管理状态
+  const [teamMembers, setTeamMembers] = useState<ProjectMember[]>([]);
+  const [loadingTeam, setLoadingTeam] = useState(false);
+  const [selectedLeaderId, setSelectedLeaderId] = useState<string>('');
+  const [addingMember, setAddingMember] = useState(false);
+  const [selectedNewMemberId, setSelectedNewMemberId] = useState<string>('');
+  const [showTeamModal, setShowTeamModal] = useState(false);
+
   // 权限检查
   const canCreateTask = canWorkspace('createTask');
   const canEditProject = canWorkspace('editProject');
@@ -100,6 +117,7 @@ export default function ProjectDetail() {
     try {
       const data = await projectService.getProject(id!);
       setProject(data);
+      setSelectedLeaderId(data.leaderId || '');
       // 加载工作区成员列表
       if (data.workspaceId) {
         const memberList = await memberService.getMembers(data.workspaceId);
@@ -110,11 +128,66 @@ export default function ProjectDetail() {
     }
   }, [id]);
 
+  const loadTeamMembers = useCallback(async () => {
+    if (!id) return;
+    setLoadingTeam(true);
+    try {
+      const team = await projectService.getTeamMembers(id);
+      setTeamMembers(team);
+    } catch (err) {
+      console.error('加载团队成员失败:', err);
+    } finally {
+      setLoadingTeam(false);
+    }
+  }, [id]);
+
   const openSettings = () => {
     if (project) {
       setEditName(project.name);
       setEditDescription(project.description || '');
+      setSelectedLeaderId(project.leaderId || '');
       setShowSettings(true);
+    }
+  };
+
+  const openTeamModal = () => {
+    loadTeamMembers();
+    setShowTeamModal(true);
+  };
+
+  const handleSetLeader = async (leaderId: string | null) => {
+    try {
+      await projectService.setLeader(id!, leaderId);
+      await loadProject();
+      setSelectedLeaderId(leaderId || '');
+    } catch (err) {
+      alert('设置负责人失败');
+    }
+  };
+
+  const handleAddTeamMember = async () => {
+    if (!selectedNewMemberId) return;
+    setAddingMember(true);
+    try {
+      await projectService.addTeamMember(id!, selectedNewMemberId);
+      await loadTeamMembers();
+      setSelectedNewMemberId('');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '添加失败';
+      alert(errorMessage);
+    } finally {
+      setAddingMember(false);
+    }
+  };
+
+  const handleRemoveTeamMember = async (memberId: string) => {
+    if (!confirm('确定移除该团队成员吗？')) return;
+    try {
+      await projectService.removeTeamMember(id!, memberId);
+      await loadTeamMembers();
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '移除失败';
+      alert(errorMessage);
     }
   };
 
@@ -435,6 +508,10 @@ export default function ProjectDetail() {
               <Wand2 size={14} />
               {projectOptimizationLoading ? '分析中...' : '项目优化'}
             </button>
+            <button className="btn btn-secondary btn-sm" onClick={openTeamModal} title="团队管理">
+              <UserPlus size={14} />
+              团队
+            </button>
             {canEditProject && (
               <button className="btn btn-secondary btn-sm" onClick={openSettings}>
                 ⚙️ 设置
@@ -442,6 +519,15 @@ export default function ProjectDetail() {
             )}
           </div>
         </div>
+        
+        {/* 项目负责人信息 */}
+        {project?.leader && (
+          <div className="project-leader-info">
+            <Crown size={14} className="leader-icon" />
+            <span className="leader-label">负责人：</span>
+            <span className="leader-name">{project.leader.name}</span>
+          </div>
+        )}
       </div>
 
       {/* Stats Bar */}
@@ -886,6 +972,125 @@ export default function ProjectDetail() {
             </div>
           )}
         </form>
+      </Modal>
+
+      {/* Team Management Modal */}
+      <Modal
+        isOpen={showTeamModal}
+        onClose={() => setShowTeamModal(false)}
+        title="👥 项目团队管理"
+      >
+        <div className="team-modal-content">
+          {/* 项目负责人 */}
+          <div className="team-section">
+            <h3 className="team-section-title">
+              <Crown size={16} />
+              项目负责人
+            </h3>
+            <p className="team-section-desc">负责人可以修改项目设置和推进任务</p>
+            <div className="leader-selector">
+              <select
+                className="form-select"
+                value={selectedLeaderId}
+                onChange={(e) => handleSetLeader(e.target.value || null)}
+              >
+                <option value="">-- 未指定 --</option>
+                {members.map((member) => (
+                  <option key={member.userId} value={member.userId}>
+                    {member.user.name} ({member.user.email})
+                  </option>
+                ))}
+              </select>
+            </div>
+            {project?.leader && (
+              <div className="current-leader">
+                <div className="leader-avatar">
+                  {project.leader.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="leader-info">
+                  <span className="leader-name">{project.leader.name}</span>
+                  <span className="leader-email">{project.leader.email}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 团队成员 */}
+          <div className="team-section">
+            <h3 className="team-section-title">
+              <UserPlus size={16} />
+              团队成员
+            </h3>
+            <p className="team-section-desc">团队成员可以创建任务和参与任务</p>
+
+            {/* 添加成员 */}
+            <div className="add-member-form">
+              <select
+                className="form-select"
+                value={selectedNewMemberId}
+                onChange={(e) => setSelectedNewMemberId(e.target.value)}
+              >
+                <option value="">-- 选择成员 --</option>
+                {members
+                  .filter(m => 
+                    m.userId !== project?.leaderId && 
+                    !teamMembers.some(tm => tm.userId === m.userId)
+                  )
+                  .map((member) => (
+                    <option key={member.userId} value={member.userId}>
+                      {member.user.name} ({member.user.email})
+                    </option>
+                  ))}
+              </select>
+              <button
+                className={`btn btn-primary btn-sm ${addingMember ? 'btn-loading' : ''}`}
+                onClick={handleAddTeamMember}
+                disabled={!selectedNewMemberId || addingMember}
+              >
+                <UserPlus size={14} />
+                添加
+              </button>
+            </div>
+
+            {/* 成员列表 */}
+            {loadingTeam ? (
+              <div className="team-loading">加载中...</div>
+            ) : teamMembers.length === 0 ? (
+              <div className="team-empty">暂无团队成员</div>
+            ) : (
+              <div className="team-member-list">
+                {teamMembers.map((member) => (
+                  <div key={member.id} className="team-member-item">
+                    <div className="member-avatar">
+                      {member.user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="member-info">
+                      <span className="member-name">{member.user.name}</span>
+                      <span className="member-email">{member.user.email}</span>
+                    </div>
+                    <span className="member-role">{member.role}</span>
+                    <button
+                      className="btn-icon btn-danger-icon"
+                      onClick={() => handleRemoveTeamMember(member.userId)}
+                      title="移除成员"
+                    >
+                      <UserMinus size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="form-actions">
+            <button 
+              className="btn btn-primary"
+              onClick={() => setShowTeamModal(false)}
+            >
+              完成
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

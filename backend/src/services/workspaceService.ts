@@ -249,4 +249,21 @@ export const workspaceService = {
     const membership = await workspaceRepository.getMembership(workspaceId, userId);
     return (membership?.role as WorkspaceRole) || null;
   },
+
+  /**
+   * 检查用户是否有指定角色（不抛出异常）
+   */
+  async hasRole(workspaceId: string, userId: string, allowedRoles: WorkspaceRole[]): Promise<boolean> {
+    const membership = await workspaceRepository.getMembership(workspaceId, userId);
+    if (!membership) return false;
+    return allowedRoles.includes(membership.role as WorkspaceRole);
+  },
+
+  /**
+   * 检查用户是否是工作区成员
+   */
+  async isMember(workspaceId: string, userId: string): Promise<boolean> {
+    const membership = await workspaceRepository.getMembership(workspaceId, userId);
+    return !!membership;
+  },
 };

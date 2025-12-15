@@ -439,6 +439,24 @@ class AIService {
     
     return { suggestion: suggestions.join('\n') };
   }
+
+  // AI 对话
+  async chatWithTask(
+    taskId: string,
+    message: string,
+    history: { role: 'user' | 'assistant'; content: string }[] = []
+  ): Promise<{ reply: string; suggestions?: string[] }> {
+    // api.post 已经返回 data.data，所以直接返回
+    return api.post<{ reply: string; suggestions?: string[] }>(
+      `/ai/tasks/${taskId}/chat`, 
+      { message, history }
+    );
+  }
+}
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
 }
 
 export const aiService = new AIService();

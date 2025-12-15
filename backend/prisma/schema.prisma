@@ -29,6 +29,7 @@ model User {
   taskEvents         TaskEvent[]
   projectMemberships ProjectMember[]  @relation("ProjectMemberUser")
   managedMembers     ProjectMember[]  @relation("ProjectMemberManager")
+  leadingProjects    Project[]        @relation("ProjectLeader") // 负责的项目
   notifications      Notification[]
 
   @@map("users")
@@ -87,9 +88,11 @@ model Project {
 
   // 外键
   workspaceId String    @map("workspace_id")
+  leaderId    String?   @map("leader_id") // 项目负责人
 
   // 关联关系
   workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  leader        User?           @relation("ProjectLeader", fields: [leaderId], references: [id], onDelete: SetNull)
   tasks         Task[]
   members       ProjectMember[]
   notifications Notification[]

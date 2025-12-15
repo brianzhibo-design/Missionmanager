@@ -1017,9 +1017,16 @@
  * 项目优化弹窗样式
  * ======================================== */
 .project-optimization-modal {
-  min-width: 550px;
-  max-height: 70vh;
+  width: 100%;
+  max-width: 650px;
+  max-height: 80vh;
   overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .project-optimization-modal {
+    max-width: 95vw;
+  }
 }
 
 .project-optimization-content {
@@ -1100,10 +1107,12 @@
   padding: var(--space-3);
   border-radius: var(--radius-md);
   white-space: pre-wrap;
+  word-break: break-word;
   font-family: inherit;
-  max-height: 120px;
+  max-height: 150px;
   overflow-y: auto;
   margin: 0;
+  line-height: 1.6;
 }
 
 .optimization-description .desc-content.highlight {
@@ -1252,4 +1261,231 @@
   gap: var(--space-3);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border-primary);
+}
+
+/* ========================================
+ * 项目负责人信息
+ * ======================================== */
+.project-leader-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(234, 179, 8, 0.1);
+  border-radius: var(--radius-md);
+  width: fit-content;
+}
+
+.leader-icon {
+  color: #eab308;
+}
+
+.leader-label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+.project-leader-info .leader-name {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* ========================================
+ * 团队管理 Modal
+ * ======================================== */
+.team-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.team-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.team-section-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.team-section-desc {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+.leader-selector {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.leader-selector .form-select {
+  flex: 1;
+}
+
+.current-leader {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: rgba(234, 179, 8, 0.1);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.leader-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: var(--text-md);
+}
+
+.leader-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.leader-info .leader-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.leader-info .leader-email {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+.add-member-form {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.add-member-form .form-select {
+  flex: 1;
+}
+
+.team-loading,
+.team-empty {
+  padding: var(--space-4);
+  text-align: center;
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+}
+
+.team-member-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.team-member-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-surface-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+}
+
+.member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-info) 0%, #2563eb 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+}
+
+.member-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.member-name {
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-email {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-role {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  padding: var(--space-1) var(--space-2);
+  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-default);
+  flex-shrink: 0;
+}
+
+.btn-danger-icon {
+  color: var(--text-tertiary);
+}
+
+.btn-danger-icon:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+}
+
+.form-select {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: var(--text-sm);
+  outline: none;
+  transition: border-color var(--duration-fast) var(--ease-default);
+}
+
+.form-select:focus {
+  border-color: var(--color-primary);
 }

@@ -21,10 +21,12 @@ export class AIError extends Error {
 
 export const AIErrorCodes = {
   DISABLED: 'AI_DISABLED',
+  NOT_ENABLED: 'AI_NOT_ENABLED',
   RATE_LIMITED: 'AI_RATE_LIMITED',
   TIMEOUT: 'AI_TIMEOUT',
   PARSE_ERROR: 'AI_PARSE_ERROR',
   API_ERROR: 'AI_API_ERROR',
+  INVALID_INPUT: 'AI_INVALID_INPUT',
   QUOTA_EXCEEDED: 'AI_QUOTA_EXCEEDED',
   NOT_FOUND: 'NOT_FOUND',
 } as const;
@@ -1021,7 +1023,7 @@ interface TaskSummary {
   dueDate: string;
 }
 
-interface NextTaskSuggestionResult {
+interface SimpleNextTaskSuggestion {
   suggestion: string;
 }
 
@@ -1029,7 +1031,7 @@ export async function getNextTaskSuggestion(
   projectId: string,
   userId: string,
   tasks: TaskSummary[]
-): Promise<NextTaskSuggestionResult> {
+): Promise<SimpleNextTaskSuggestion> {
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: { workspace: true },
@@ -1102,6 +1104,107 @@ ${taskListText || '暂无任务'}
   return { suggestion: result };
 }
 
+// ==================== 12. 任务AI对话 ====================
+
+export interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface TaskChatResponse {
+  reply: string;
+  suggestions?: string[];
+}
+
+/**
+ * 基于任务上下文的AI对话
+ */
+export async function chatWithTask(
+  taskId: string,
+  userId: string,
+  message: string,
+  history: ChatMessage[] = []
+): Promise<TaskChatResponse> {
+  if (!isAIEnabled()) {
+    throw new AIError('AI 功能未启用', AIErrorCodes.NOT_ENABLED);
+  }
+
+  // 获取任务详情
+  const task = await prisma.task.findUnique({
+    where: { id: taskId },
+    include: {
+      project: true,
+      assignee: { select: { name: true } },
+      subTasks: { select: { title: true, status: true } },
+    },
+  });
+
+  if (!task) {
+    throw new AIError('任务不存在', AIErrorCodes.INVALID_INPUT);
+  }
+
+  const systemPrompt = `你是一个专业的项目管理助手，正在帮助用户处理一个具体的任务。
+
+## 当前任务上下文
+**任务标题**: ${task.title}
+**任务描述**: ${task.description || '无'}
+**状态**: ${task.status}
+**优先级**: ${task.priority}
+**负责人**: ${task.assignee?.name || '未分配'}
+**截止日期**: ${task.dueDate ? new Date(task.dueDate).toLocaleDateString('zh-CN') : '未设置'}
+**所属项目**: ${task.project.name}
+${task.subTasks.length > 0 ? `**子任务**: 共${task.subTasks.length}个，完成${task.subTasks.filter(s => s.status === 'done').length}个` : ''}
+
+## 你的职责
+1. 基于任务上下文回答用户的问题
+2. 提供具体、可执行的建议
+3. 帮助用户规划任务执行步骤
+4. 识别潜在风险和问题
+5. 在回复末尾，可选地提供2-3个后续问题建议
+
+## 回复格式
+直接用自然语言回复用户的问题。如有必要，在末尾加一个换行，然后用以下格式提供建议问题：
+[建议问题]
+- 问题1
+- 问题2`;
+
+  // 构建对话历史
+  const historyContext = history.length > 0 
+    ? '\n\n## 对话历史\n' + history.map(h => `${h.role === 'user' ? '用户' : 'AI'}: ${h.content}`).join('\n')
+    : '';
+
+  const userPrompt = `${historyContext}
+
+用户当前问题: ${message}`;
+
+  try {
+    const result = await callAI(systemPrompt, userPrompt, 'task_chat', {
+      userId,
+      workspaceId: task.project.workspaceId,
+      maxTokens: 1000,
+    });
+
+    // 解析回复中的建议问题
+    const suggestions: string[] = [];
+    let reply = result;
+
+    const suggestionsMatch = result.match(/\[建议问题\]\s*([\s\S]*?)$/);
+    if (suggestionsMatch) {
+      reply = result.replace(/\[建议问题\][\s\S]*$/, '').trim();
+      const suggestionLines = suggestionsMatch[1].split('\n').filter(line => line.trim().startsWith('-'));
+      suggestionLines.forEach(line => {
+        const text = line.replace(/^-\s*/, '').trim();
+        if (text) suggestions.push(text);
+      });
+    }
+
+    return { reply, suggestions };
+  } catch (error) {
+    log.error('AI 对话失败', { taskId, error: (error as Error).message });
+    throw error;
+  }
+}
+
 // ==================== 导出 ====================
 
 export const aiService = {
@@ -1116,6 +1219,7 @@ export const aiService = {
   generateNextTasks,
   optimizeSingleTask,
   optimizeProject,
+  chatWithTask,
   isEnabled: isAIEnabled,
   AIError,
   AIErrorCodes,

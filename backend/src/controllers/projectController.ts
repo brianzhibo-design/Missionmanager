@@ -111,3 +111,76 @@ projectRouter.delete('/:id', async (req: Request, res: Response, next: NextFunct
   }
 });
 
+/**
+ * PUT /projects/:id/leader - 设置项目负责人
+ */
+projectRouter.put('/:id/leader', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { leaderId } = req.body;
+    const project = await projectService.setLeader(req.user!.userId, req.params.id, leaderId);
+
+    res.json({
+      success: true,
+      data: { project },
+      message: leaderId ? '项目负责人已设置' : '项目负责人已移除',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /projects/:id/team - 获取项目团队成员
+ */
+projectRouter.get('/:id/team', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const members = await projectService.getTeamMembers(req.user!.userId, req.params.id);
+
+    res.json({
+      success: true,
+      data: { members },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /projects/:id/team - 添加团队成员
+ */
+projectRouter.post('/:id/team', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { memberId, role } = req.body;
+
+    if (!memberId) {
+      throw new AppError('请提供 memberId', 400, 'MISSING_MEMBER_ID');
+    }
+
+    const member = await projectService.addTeamMember(req.user!.userId, req.params.id, memberId, role);
+
+    res.status(201).json({
+      success: true,
+      data: { member },
+      message: '团队成员已添加',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * DELETE /projects/:id/team/:memberId - 移除团队成员
+ */
+projectRouter.delete('/:id/team/:memberId', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    await projectService.removeTeamMember(req.user!.userId, req.params.id, req.params.memberId);
+
+    res.json({
+      success: true,
+      message: '团队成员已移除',
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+

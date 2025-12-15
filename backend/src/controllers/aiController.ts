@@ -89,6 +89,24 @@ router.get('/tasks/:id/risk', requireAuth, requireTaskAccess, async (req, res, n
   }
 });
 
+// AI 对话
+router.post('/tasks/:id/chat', requireAuth, requireTaskAccess, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user!.userId;
+    const { message, history } = req.body;
+
+    if (!message) {
+      return res.status(400).json({ success: false, error: { code: 'BAD_REQUEST', message: '请输入消息' } });
+    }
+
+    const result = await aiService.chatWithTask(id, userId, message, history || []);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleAIError(error, req, res, next);
+  }
+});
+
 // 优先级推荐
 router.post('/tasks/recommend-priority', requireAuth, async (req, res, next) => {
   try {

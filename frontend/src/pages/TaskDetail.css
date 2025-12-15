@@ -185,12 +185,69 @@
   margin: 0 0 var(--space-4) 0;
 }
 
+/* 描述展开/收起 */
+.description-section {
+  position: relative;
+}
+
+.description-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-3);
+}
+
+.description-header .section-title {
+  margin: 0;
+}
+
+.expand-toggle {
+  font-size: var(--text-xs);
+  padding: var(--space-1) var(--space-2);
+  color: var(--color-primary);
+  background: transparent;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.expand-toggle:hover {
+  background: var(--color-primary);
+  color: white;
+}
+
+.task-description-wrapper {
+  position: relative;
+  transition: max-height 0.3s ease;
+}
+
+.task-description-wrapper.collapsed {
+  max-height: 120px;
+  overflow: hidden;
+}
+
+.task-description-wrapper.expanded {
+  max-height: none;
+}
+
+.description-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(transparent, var(--bg-surface));
+  cursor: pointer;
+}
+
 .task-description {
   font-size: var(--text-sm);
   color: var(--text-secondary);
   line-height: var(--leading-relaxed);
   margin: 0;
   white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .blocked-reason {
@@ -810,4 +867,471 @@
   gap: var(--space-3);
   padding-top: var(--space-4);
   border-top: 1px solid var(--border-primary);
+}
+
+/* ========================================
+ * 子任务管理区域
+ * ======================================== */
+.subtasks-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.subtasks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.subtasks-header .section-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.subtask-count {
+  font-size: var(--text-sm);
+  font-weight: normal;
+  color: var(--text-secondary);
+}
+
+.subtasks-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* 批量操作工具栏 */
+.subtask-batch-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-3);
+  background: var(--bg-surface-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+}
+
+.select-all-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.select-all-checkbox input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.batch-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* 快速添加子任务表单 */
+.quick-add-subtask {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--bg-surface-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+}
+
+.quick-add-subtask .form-input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+}
+
+/* 子任务为空状态 */
+.no-subtasks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.no-subtasks .empty-icon {
+  font-size: 32px;
+  margin-bottom: var(--space-2);
+}
+
+.no-subtasks p {
+  margin: 0;
+}
+
+.no-subtasks .empty-hint {
+  font-size: var(--text-sm);
+  margin-top: var(--space-2);
+}
+
+/* 子任务列表 */
+.subtasks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.subtask-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-default);
+}
+
+.subtask-item:hover {
+  border-color: var(--color-primary);
+  background: var(--bg-surface-secondary);
+}
+
+.subtask-item.selected {
+  border-color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.05);
+}
+
+.subtask-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.subtask-status-indicator {
+  flex-shrink: 0;
+}
+
+.subtask-status-select {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-xs);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 500;
+  outline: none;
+  min-width: 70px;
+}
+
+.subtask-title {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+.subtask-title:hover {
+  color: var(--color-primary);
+}
+
+.subtask-title.completed {
+  text-decoration: line-through;
+  color: var(--text-tertiary);
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .subtasks-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .subtask-batch-toolbar {
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: flex-start;
+  }
+  
+  .quick-add-subtask {
+    flex-wrap: wrap;
+  }
+  
+  .quick-add-subtask .form-input {
+    width: 100%;
+    flex: none;
+  }
+}
+
+/* ========================================
+ * AI 对话面板样式
+ * ======================================== */
+.ai-chat-panel {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-4);
+  overflow: hidden;
+}
+
+.ai-chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-primary);
+  transition: background 0.2s ease;
+}
+
+.ai-chat-header:hover {
+  background: var(--bg-surface-secondary);
+}
+
+.ai-chat-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ai-chat-content {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  max-height: 50vh;
+}
+
+/* 消息区域 */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.chat-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.welcome-icon {
+  font-size: 32px;
+  margin-bottom: var(--space-3);
+}
+
+.welcome-text {
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.welcome-hint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin: 0 0 var(--space-3) 0;
+}
+
+.welcome-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+}
+
+/* 消息气泡 */
+.chat-message {
+  display: flex;
+  gap: var(--space-2);
+  max-width: 90%;
+}
+
+.chat-message.user {
+  flex-direction: row-reverse;
+  align-self: flex-end;
+}
+
+.chat-message.assistant {
+  align-self: flex-start;
+}
+
+.message-avatar {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 50%;
+  background: var(--bg-surface-secondary);
+}
+
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.message-text {
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.chat-message.user .message-text {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border-bottom-right-radius: var(--radius-sm);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.chat-message.assistant .message-text {
+  background: #f1f5f9;
+  color: #1e293b;
+  border-bottom-left-radius: var(--radius-sm);
+  border: 1px solid #e2e8f0;
+}
+
+[data-theme="dark"] .chat-message.assistant .message-text {
+  background: #334155;
+  color: #f1f5f9;
+  border-color: #475569;
+}
+
+/* 打字动画 */
+.message-text.typing {
+  display: flex;
+  gap: 4px;
+  padding: var(--space-3) var(--space-4);
+}
+
+.message-text.typing .dot {
+  width: 8px;
+  height: 8px;
+  background: var(--text-tertiary);
+  border-radius: 50%;
+  animation: typing 1.4s infinite ease-in-out both;
+}
+
+.message-text.typing .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.message-text.typing .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.message-text.typing .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 建议问题 */
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--border-primary);
+}
+
+.suggestion-chip {
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.suggestion-chip:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--color-primary);
+}
+
+.suggestion-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 输入区域 */
+.chat-input-area {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-top: 1px solid var(--border-primary);
+  background: var(--bg-surface-secondary);
+}
+
+.chat-input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  resize: none;
+  min-height: 40px;
+  max-height: 100px;
+  transition: border-color 0.2s ease;
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.chat-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.chat-send {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 暗色模式优化 */
+[data-theme="dark"] .suggestion-chip {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
 }

@@ -1,21 +1,80 @@
 /**
- * Projects 页面样式
- * 灵感来源: Linear, Notion
+ * Projects 页面样式 - 现代化 UI 优化
+ * 灵感来源: Linear, Notion, Figma
  */
 
 .projects-page {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* ========================================
  * 页面头部
  * ======================================== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.page-header-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
 .page-title-row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+.page-title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 12px;
+}
+
+.badge-primary {
+  background: linear-gradient(135deg, var(--color-brand), #8B5CF6);
+  color: white;
+}
+
+.page-description {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.page-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-shrink: 0;
 }
 
 /* ========================================
@@ -23,46 +82,46 @@
  * ======================================== */
 .projects-toolbar {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
 }
 
 .search-box {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   flex: 1;
   max-width: 400px;
-}
-
-.search-icon {
-  position: absolute;
-  left: var(--space-3);
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-tertiary);
-  pointer-events: none;
-}
-
-.search-input {
-  width: 100%;
-  height: 40px;
-  padding: 0 var(--space-3) 0 var(--space-10);
-  font-size: var(--text-sm);
-  color: var(--text-primary);
-  background-color: var(--bg-surface);
-  border: 1px solid var(--border-primary);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-surface-secondary);
+  border: 1px solid transparent;
   border-radius: var(--radius-lg);
   transition: all var(--duration-fast) var(--ease-default);
 }
 
-.search-input:hover {
-  border-color: var(--border-secondary);
+.search-box:focus-within {
+  border-color: var(--color-brand);
+  background: var(--bg-surface);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-.search-input:focus {
+.search-icon {
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
   outline: none;
-  border-color: var(--color-brand);
-  box-shadow: var(--glow-brand);
 }
 
 .search-input::placeholder {
@@ -71,33 +130,317 @@
 
 .view-switcher {
   display: flex;
-  background-color: var(--bg-surface-secondary);
-  border-radius: var(--radius-lg);
-  padding: var(--space-0-5);
+  gap: 2px;
+  padding: 3px;
+  background: var(--bg-surface-secondary);
+  border-radius: var(--radius-md);
 }
 
 .view-btn {
-  width: 36px;
-  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  width: 36px;
+  height: 32px;
+  font-size: 16px;
+  color: var(--text-tertiary);
   background: transparent;
-  border-radius: var(--radius-md);
+  border: none;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  color: var(--text-secondary);
   transition: all var(--duration-fast) var(--ease-default);
 }
 
 .view-btn:hover {
   color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .view-btn.active {
-  background-color: var(--bg-surface);
-  color: var(--text-primary);
+  color: var(--color-brand);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-sm);
+}
+
+/* ========================================
+ * 项目网格
+ * ======================================== */
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--space-5);
+}
+
+/* ========================================
+ * 项目卡片 - 核心优化
+ * ======================================== */
+.project-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-brand), #8B5CF6, #EC4899);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.project-card:hover {
+  border-color: var(--color-brand);
+  transform: translateY(-4px);
+  box-shadow: 
+    0 12px 24px -8px rgba(99, 102, 241, 0.15),
+    0 4px 8px -2px rgba(0, 0, 0, 0.05);
+}
+
+.project-card:hover::before {
+  opacity: 1;
+}
+
+/* 卡片头部 */
+.project-card-header {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.project-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.15);
+}
+
+.project-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.project-name {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.3;
+  /* 单行截断 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.project-description {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+  /* 两行截断 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 进度条区域 */
+.project-progress-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.project-progress-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-surface-secondary);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.project-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10B981, #059669);
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.project-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.project-progress-text {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: #10B981;
+  min-width: 45px;
+  text-align: right;
+}
+
+/* 统计信息 */
+.project-stats {
+  display: flex;
+  gap: var(--space-4);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border-primary);
+}
+
+.project-stat {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.project-stat .stat-icon {
+  font-size: 14px;
+}
+
+.project-stat .stat-value {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.project-stat .stat-label {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+}
+
+/* ========================================
+ * 项目列表视图
+ * ======================================== */
+.projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.projects-list .project-card {
+  flex-direction: row;
+  align-items: center;
+  padding: var(--space-4);
+  gap: var(--space-6);
+}
+
+.projects-list .project-card-header {
+  flex: 1;
+  min-width: 0;
+}
+
+.projects-list .project-progress-section {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.projects-list .project-stats {
+  border-top: none;
+  padding-top: 0;
+  flex-shrink: 0;
+}
+
+/* ========================================
+ * 空状态
+ * ======================================== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+  background: var(--bg-surface);
+  border: 2px dashed var(--border-primary);
+  border-radius: var(--radius-xl);
+}
+
+.empty-state-icon {
+  font-size: 56px;
+  margin-bottom: var(--space-4);
+  filter: grayscale(0.3);
+}
+
+.empty-state-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.empty-state-description {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-5);
+  max-width: 300px;
+}
+
+/* ========================================
+ * 加载状态
+ * ======================================== */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-12);
+  gap: var(--space-4);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-primary);
+  border-top-color: var(--color-brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
 }
 
 /* ========================================
@@ -108,8 +451,8 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-4);
-  background-color: var(--color-danger-alpha-10);
-  border: 1px solid var(--color-danger);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-lg);
 }
 
@@ -120,204 +463,115 @@
 .error-text {
   flex: 1;
   font-size: var(--text-sm);
-  color: var(--color-danger);
+  color: #ef4444;
 }
 
 /* ========================================
- * 项目网格
+ * 表单样式
  * ======================================== */
-.projects-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--space-5);
+.form-group {
+  margin-bottom: var(--space-4);
 }
 
-.projects-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* ========================================
- * 项目卡片
- * ======================================== */
-.project-card {
-  display: flex;
-  flex-direction: column;
-  text-decoration: none;
-  padding: 0;
-  overflow: hidden;
-}
-
-.project-card-header {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
-  padding: var(--space-5);
-}
-
-.project-icon {
-  width: 48px;
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-xl);
-  font-weight: var(--font-bold);
-  border-radius: var(--radius-lg);
-  flex-shrink: 0;
-}
-
-.project-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.project-name {
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
+.form-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
   color: var(--text-primary);
-  margin: 0;
-  line-height: var(--leading-tight);
+  margin-bottom: var(--space-2);
 }
 
-.project-description {
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: var(--space-3);
   font-size: var(--text-sm);
-  color: var(--text-secondary);
-  margin: var(--space-1) 0 0 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* ========================================
- * 进度条区域
- * ======================================== */
-.project-progress-section {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: 0 var(--space-5) var(--space-4);
-}
-
-.project-progress-bar {
-  flex: 1;
-  height: 8px;
-  background-color: var(--bg-surface-secondary);
-  border-radius: var(--radius-full);
-  overflow: hidden;
-}
-
-.project-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-brand), var(--color-success));
-  border-radius: var(--radius-full);
-  transition: width var(--duration-slow) var(--ease-out);
-  min-width: 0;
-}
-
-.project-progress-text {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--text-secondary);
-  min-width: 40px;
-  text-align: right;
-}
-
-/* ========================================
- * 项目统计
- * ======================================== */
-.project-stats {
-  display: flex;
-  gap: var(--space-5);
-  padding: var(--space-4) var(--space-5);
-  background-color: var(--bg-surface-secondary);
-  border-top: 1px solid var(--border-primary);
-}
-
-.project-stat {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1-5);
-}
-
-.project-stat .stat-icon {
-  font-size: 14px;
-}
-
-.project-stat .stat-value {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
   color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-default);
 }
 
-.project-stat .stat-label {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* ========================================
- * 列表视图
- * ======================================== */
-.projects-list .project-card {
-  flex-direction: row;
-  align-items: center;
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
 }
 
-.projects-list .project-card-header {
-  flex: 1;
-  padding: var(--space-4);
-}
-
-.projects-list .project-progress-section {
-  flex: 0;
-  width: 140px;
-  padding: var(--space-4);
-  border-left: 1px solid var(--border-primary);
-}
-
-.projects-list .project-stats {
-  min-width: 180px;
-  border-top: none;
-  border-left: 1px solid var(--border-primary);
+.form-actions,
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
 }
 
 /* ========================================
  * 响应式
  * ======================================== */
-@media (max-width: 1024px) {
-  .projects-list .project-card {
-    flex-direction: column;
-  }
-
-  .projects-list .project-card-header {
-    width: 100%;
-    border-bottom: 1px solid var(--border-primary);
-  }
-
-  .projects-list .project-card-body {
-    width: 100%;
-    border-left: none;
-    justify-content: space-between;
-  }
-}
-
 @media (max-width: 768px) {
-  .projects-toolbar {
+  .page-header {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .page-actions {
+    flex-direction: column;
+  }
+
+  .page-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .projects-toolbar {
+    flex-direction: column;
+    gap: var(--space-3);
   }
 
   .search-box {
     max-width: none;
   }
 
-  .view-switcher {
-    display: none;
-  }
-
   .projects-grid {
     grid-template-columns: 1fr;
   }
+
+  .projects-list .project-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .projects-list .project-progress-section {
+    width: auto;
+  }
+}
+
+/* ========================================
+ * 暗色模式增强
+ * ======================================== */
+[data-theme="dark"] .project-card {
+  background: linear-gradient(180deg, var(--bg-surface) 0%, rgba(30, 30, 40, 1) 100%);
+}
+
+[data-theme="dark"] .project-card:hover {
+  box-shadow: 
+    0 12px 24px -8px rgba(99, 102, 241, 0.25),
+    0 4px 8px -2px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .project-icon {
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .projects-toolbar {
+  background: linear-gradient(180deg, var(--bg-surface) 0%, rgba(25, 25, 35, 1) 100%);
 }

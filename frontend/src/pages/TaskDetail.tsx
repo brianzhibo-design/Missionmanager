@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { taskService, Task, TaskEvent } from '../services/task';
-import { aiService, AiAnalysisResult, SingleTaskOptimization } from '../services/ai';
+import { aiService, AiAnalysisResult, SingleTaskOptimization, ChatMessage } from '../services/ai';
 import { memberService, Member } from '../services/member';
 import { usePermissions } from '../hooks/usePermissions';
 import Modal from '../components/Modal';
 import { TaskBreakdownModal, RiskPredictionPanel } from '../components/ai';
-import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2 } from 'lucide-react';
+import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle } from 'lucide-react';
 import './TaskDetail.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -75,6 +75,25 @@ export default function TaskDetail() {
   const [optimizing, setOptimizing] = useState(false);
   const [optimizationResult, setOptimizationResult] = useState<SingleTaskOptimization | null>(null);
   const [applyingOptimization, setApplyingOptimization] = useState(false);
+
+  // 子任务管理状态
+  const [subtaskSelectionMode, setSubtaskSelectionMode] = useState(false);
+  const [selectedSubtaskIds, setSelectedSubtaskIds] = useState<Set<string>>(new Set());
+  const [batchProcessing, setBatchProcessing] = useState(false);
+  const [showAddSubtask, setShowAddSubtask] = useState(false);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [creatingSubtask, setCreatingSubtask] = useState(false);
+  
+  // 描述展开/收起
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
+  
+  // AI 对话状态
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [chatSuggestions, setChatSuggestions] = useState<string[]>([]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const loadTask = useCallback(async () => {
     try {
@@ -156,6 +175,112 @@ export default function TaskDetail() {
     }
   };
 
+  // ==================== 子任务管理功能 ====================
+  
+  // 切换子任务选择
+  const toggleSubtaskSelection = (subtaskId: string) => {
+    const newSelection = new Set(selectedSubtaskIds);
+    if (newSelection.has(subtaskId)) {
+      newSelection.delete(subtaskId);
+    } else {
+      newSelection.add(subtaskId);
+    }
+    setSelectedSubtaskIds(newSelection);
+  };
+
+  // 全选/取消全选子任务
+  const toggleSelectAllSubtasks = () => {
+    if (!task?.subTasks) return;
+    if (selectedSubtaskIds.size === task.subTasks.length) {
+      setSelectedSubtaskIds(new Set());
+    } else {
+      setSelectedSubtaskIds(new Set(task.subTasks.map(st => st.id)));
+    }
+  };
+
+  // 批量完成子任务
+  const handleBatchCompleteSubtasks = async () => {
+    if (selectedSubtaskIds.size === 0) return;
+    
+    setBatchProcessing(true);
+    try {
+      await taskService.batchUpdateStatus(Array.from(selectedSubtaskIds), 'done');
+      await loadTask();
+      setSelectedSubtaskIds(new Set());
+      setSubtaskSelectionMode(false);
+    } catch (err) {
+      console.error('批量完成子任务失败:', err);
+      alert('批量完成失败');
+    } finally {
+      setBatchProcessing(false);
+    }
+  };
+
+  // 批量删除子任务
+  const handleBatchDeleteSubtasks = async () => {
+    if (selectedSubtaskIds.size === 0) return;
+    if (!window.confirm(`确定要删除选中的 ${selectedSubtaskIds.size} 个子任务吗？`)) return;
+    
+    setBatchProcessing(true);
+    try {
+      for (const subtaskId of selectedSubtaskIds) {
+        await taskService.deleteTask(subtaskId);
+      }
+      await loadTask();
+      setSelectedSubtaskIds(new Set());
+      setSubtaskSelectionMode(false);
+    } catch (err) {
+      console.error('批量删除子任务失败:', err);
+      alert('批量删除失败');
+    } finally {
+      setBatchProcessing(false);
+    }
+  };
+
+  // 快速创建子任务
+  const handleQuickCreateSubtask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSubtaskTitle.trim() || !task) return;
+    
+    setCreatingSubtask(true);
+    try {
+      await taskService.createTask({
+        projectId: task.projectId,
+        title: newSubtaskTitle.trim(),
+        parentId: task.id,
+        priority: 'medium',
+      });
+      await loadTask();
+      setNewSubtaskTitle('');
+      setShowAddSubtask(false);
+    } catch (err) {
+      console.error('创建子任务失败:', err);
+      alert('创建子任务失败');
+    } finally {
+      setCreatingSubtask(false);
+    }
+  };
+
+  // 快速变更子任务状态
+  const handleSubtaskStatusChange = async (subtaskId: string, newStatus: string) => {
+    try {
+      await taskService.updateTaskStatus(subtaskId, newStatus);
+      // 本地更新子任务状态，避免重新加载整个页面
+      setTask(prevTask => {
+        if (!prevTask) return prevTask;
+        return {
+          ...prevTask,
+          subTasks: prevTask.subTasks?.map(subtask =>
+            subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask
+          ),
+        };
+      });
+    } catch (err) {
+      console.error('更新子任务状态失败:', err);
+      alert('更新状态失败');
+    }
+  };
+
   // 任务优化
   const handleOptimizeTask = async () => {
     setShowOptimizeModal(true);
@@ -198,6 +323,52 @@ export default function TaskDetail() {
       alert('应用优化失败，请重试');
     } finally {
       setApplyingOptimization(false);
+    }
+  };
+
+  // AI 对话处理
+  const handleSendChat = async (message?: string) => {
+    const msgToSend = message || chatInput.trim();
+    if (!msgToSend || chatLoading) return;
+
+    // 添加用户消息
+    const userMessage: ChatMessage = { role: 'user', content: msgToSend };
+    setChatMessages(prev => [...prev, userMessage]);
+    setChatInput('');
+    setChatLoading(true);
+    setChatSuggestions([]);
+
+    try {
+      const response = await aiService.chatWithTask(id!, msgToSend, chatMessages);
+      
+      // 添加AI回复
+      const assistantMessage: ChatMessage = { role: 'assistant', content: response.reply };
+      setChatMessages(prev => [...prev, assistantMessage]);
+      
+      // 设置建议问题
+      if (response.suggestions && response.suggestions.length > 0) {
+        setChatSuggestions(response.suggestions);
+      }
+    } catch (err) {
+      console.error('AI 对话失败:', err);
+      const errorMessage: ChatMessage = { 
+        role: 'assistant', 
+        content: '抱歉，AI 暂时无法响应。请稍后再试。' 
+      };
+      setChatMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setChatLoading(false);
+      // 滚动到底部
+      setTimeout(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  };
+
+  const handleChatKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendChat();
     }
   };
 
@@ -412,9 +583,22 @@ export default function TaskDetail() {
 
           {/* Description */}
           {task.description && (
-            <div className="task-section card">
-              <h3 className="section-title">📝 描述</h3>
-              <p className="task-description">{task.description}</p>
+            <div className="task-section card description-section">
+              <div className="description-header">
+                <h3 className="section-title">📝 描述</h3>
+                <button 
+                  className="btn btn-ghost btn-sm expand-toggle"
+                  onClick={() => setDescriptionExpanded(!descriptionExpanded)}
+                >
+                  {descriptionExpanded ? '收起' : '展开'}
+                </button>
+              </div>
+              <div className={`task-description-wrapper ${descriptionExpanded ? 'expanded' : 'collapsed'}`}>
+                <p className="task-description">{task.description}</p>
+                {!descriptionExpanded && task.description.length > 200 && (
+                  <div className="description-fade" onClick={() => setDescriptionExpanded(true)} />
+                )}
+              </div>
             </div>
           )}
 
@@ -425,6 +609,153 @@ export default function TaskDetail() {
               <p className="blocked-reason">{task.blockedReason}</p>
             </div>
           )}
+
+          {/* Subtasks Section */}
+          <div className="task-section card subtasks-section">
+            <div className="subtasks-header">
+              <h3 className="section-title">
+                📋 子任务 
+                {task.subTasks && task.subTasks.length > 0 && (
+                  <span className="subtask-count">({task.subTasks.length})</span>
+                )}
+              </h3>
+              <div className="subtasks-actions">
+                {task.subTasks && task.subTasks.length > 0 && (
+                  <button
+                    className={`btn btn-sm ${subtaskSelectionMode ? 'btn-primary' : 'btn-secondary'}`}
+                    onClick={() => {
+                      setSubtaskSelectionMode(!subtaskSelectionMode);
+                      setSelectedSubtaskIds(new Set());
+                    }}
+                  >
+                    <CheckSquare size={14} />
+                    {subtaskSelectionMode ? '取消' : '批量操作'}
+                  </button>
+                )}
+                <button
+                  className="btn btn-sm btn-primary"
+                  onClick={() => setShowAddSubtask(true)}
+                >
+                  <Plus size={14} />
+                  添加子任务
+                </button>
+              </div>
+            </div>
+
+            {/* 批量操作工具栏 */}
+            {subtaskSelectionMode && (
+              <div className="subtask-batch-toolbar">
+                <label className="select-all-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={task.subTasks && selectedSubtaskIds.size === task.subTasks.length}
+                    onChange={toggleSelectAllSubtasks}
+                  />
+                  <span>全选 ({selectedSubtaskIds.size}/{task.subTasks?.length || 0})</span>
+                </label>
+                <div className="batch-actions">
+                  <button
+                    className={`btn btn-sm btn-success ${batchProcessing ? 'btn-loading' : ''}`}
+                    onClick={handleBatchCompleteSubtasks}
+                    disabled={selectedSubtaskIds.size === 0 || batchProcessing}
+                  >
+                    ✓ 批量完成
+                  </button>
+                  <button
+                    className={`btn btn-sm btn-danger ${batchProcessing ? 'btn-loading' : ''}`}
+                    onClick={handleBatchDeleteSubtasks}
+                    disabled={selectedSubtaskIds.size === 0 || batchProcessing}
+                  >
+                    <Trash2 size={14} />
+                    批量删除
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* 快速添加子任务表单 */}
+            {showAddSubtask && (
+              <form className="quick-add-subtask" onSubmit={handleQuickCreateSubtask}>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="输入子任务标题..."
+                  value={newSubtaskTitle}
+                  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                  autoFocus
+                />
+                <button
+                  type="submit"
+                  className={`btn btn-sm btn-primary ${creatingSubtask ? 'btn-loading' : ''}`}
+                  disabled={!newSubtaskTitle.trim() || creatingSubtask}
+                >
+                  创建
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-secondary"
+                  onClick={() => {
+                    setShowAddSubtask(false);
+                    setNewSubtaskTitle('');
+                  }}
+                >
+                  <X size={14} />
+                </button>
+              </form>
+            )}
+
+            {/* 子任务列表 */}
+            {!task.subTasks || task.subTasks.length === 0 ? (
+              <div className="no-subtasks">
+                <span className="empty-icon">📦</span>
+                <p>暂无子任务</p>
+                <p className="empty-hint">可以点击上方按钮添加子任务，或使用 AI 任务分解功能</p>
+              </div>
+            ) : (
+              <div className="subtasks-list">
+                {task.subTasks.map((subtask) => {
+                  const statusConfig = STATUS_CONFIG[subtask.status] || STATUS_CONFIG.todo;
+                  return (
+                    <div 
+                      key={subtask.id} 
+                      className={`subtask-item ${selectedSubtaskIds.has(subtask.id) ? 'selected' : ''}`}
+                    >
+                      {subtaskSelectionMode && (
+                        <input
+                          type="checkbox"
+                          className="subtask-checkbox"
+                          checked={selectedSubtaskIds.has(subtask.id)}
+                          onChange={() => toggleSubtaskSelection(subtask.id)}
+                        />
+                      )}
+                      <div className="subtask-status-indicator">
+                        <select
+                          className="subtask-status-select"
+                          value={subtask.status}
+                          onChange={(e) => handleSubtaskStatusChange(subtask.id, e.target.value)}
+                          style={{ 
+                            color: statusConfig.color,
+                            backgroundColor: statusConfig.bg 
+                          }}
+                        >
+                          <option value="todo">待办</option>
+                          <option value="in_progress">进行中</option>
+                          <option value="review">审核中</option>
+                          <option value="done">已完成</option>
+                        </select>
+                      </div>
+                      <Link 
+                        to={`/tasks/${subtask.id}`} 
+                        className={`subtask-title ${subtask.status === 'done' ? 'completed' : ''}`}
+                      >
+                        {subtask.title}
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
           {/* Activity Timeline */}
           <div className="task-section card">
@@ -535,6 +866,119 @@ export default function TaskDetail() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+          </div>
+          
+          {/* AI 对话面板 */}
+          <div className="ai-chat-panel card">
+            <div className="ai-chat-header" onClick={() => setShowChat(!showChat)}>
+              <h3 className="ai-chat-title">
+                <MessageCircle size={16} />
+                AI 对话助手
+              </h3>
+              <button className="btn btn-ghost btn-sm">
+                {showChat ? '收起' : '展开'}
+              </button>
+            </div>
+            
+            {showChat && (
+              <div className="ai-chat-content">
+                {/* 对话消息区域 */}
+                <div className="chat-messages">
+                  {chatMessages.length === 0 ? (
+                    <div className="chat-welcome">
+                      <div className="welcome-icon">💬</div>
+                      <p className="welcome-text">您好！我可以帮助您分析这个任务。</p>
+                      <p className="welcome-hint">您可以问我关于任务的任何问题，例如：</p>
+                      <div className="welcome-suggestions">
+                        <button 
+                          className="suggestion-chip"
+                          onClick={() => handleSendChat('这个任务应该如何开始？')}
+                        >
+                          这个任务应该如何开始？
+                        </button>
+                        <button 
+                          className="suggestion-chip"
+                          onClick={() => handleSendChat('帮我分析这个任务的风险点')}
+                        >
+                          帮我分析风险点
+                        </button>
+                        <button 
+                          className="suggestion-chip"
+                          onClick={() => handleSendChat('给我一些执行建议')}
+                        >
+                          给我执行建议
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {chatMessages.map((msg, index) => (
+                        <div 
+                          key={index} 
+                          className={`chat-message ${msg.role}`}
+                        >
+                          <div className="message-avatar">
+                            {msg.role === 'user' ? '👤' : '🤖'}
+                          </div>
+                          <div className="message-content">
+                            <div className="message-text">{msg.content}</div>
+                          </div>
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div className="chat-message assistant">
+                          <div className="message-avatar">🤖</div>
+                          <div className="message-content">
+                            <div className="message-text typing">
+                              <span className="dot"></span>
+                              <span className="dot"></span>
+                              <span className="dot"></span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      <div ref={chatEndRef} />
+                    </>
+                  )}
+                </div>
+                
+                {/* 建议问题 */}
+                {chatSuggestions.length > 0 && (
+                  <div className="chat-suggestions">
+                    {chatSuggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        className="suggestion-chip"
+                        onClick={() => handleSendChat(suggestion)}
+                        disabled={chatLoading}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
+                {/* 输入区域 */}
+                <div className="chat-input-area">
+                  <textarea
+                    className="chat-input"
+                    placeholder="输入您的问题..."
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={handleChatKeyDown}
+                    disabled={chatLoading}
+                    rows={2}
+                  />
+                  <button
+                    className={`btn btn-primary btn-icon chat-send ${chatLoading ? 'btn-loading' : ''}`}
+                    onClick={() => handleSendChat()}
+                    disabled={!chatInput.trim() || chatLoading}
+                  >
+                    <Send size={16} />
+                  </button>
+                </div>
               </div>
             )}
           </div>
