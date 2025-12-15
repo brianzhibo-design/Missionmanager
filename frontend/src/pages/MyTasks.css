@@ -250,48 +250,51 @@
 .task-card-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 10px;
   flex-shrink: 0;
 }
 
 .task-due {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #374151;
+  background-color: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 100px;
   white-space: nowrap;
-  margin-right: var(--space-1);
 }
 
 .task-due.overdue {
-  color: var(--color-danger);
-  font-weight: var(--font-medium);
+  color: #dc2626;
+  background-color: #fef2f2;
+  border-color: #fecaca;
 }
 
 .task-due.today {
-  color: var(--color-warning);
-  font-weight: var(--font-medium);
+  color: #d97706;
+  background-color: #fffbeb;
+  border-color: #fcd34d;
 }
 
 .task-due.completed {
-  color: var(--text-tertiary);
+  color: #6b7280;
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
 }
 
 .task-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 3px 8px;
-  font-size: 11px;
+  padding: 4px 10px;
+  font-size: 12px;
   font-weight: 500;
-  border-radius: var(--radius-sm);
+  border-radius: 100px;
   white-space: nowrap;
-  border: 1px solid currentColor;
-  background: transparent;
-}
-
-.status-icon {
-  font-size: 9px;
-  line-height: 1;
+  border: 1px solid;
 }
 
 /* 已完成任务卡片样式 */
@@ -427,18 +430,19 @@
   
   .task-card-meta {
     flex-shrink: 0;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--space-1);
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
   }
 
   .task-due {
     font-size: 10px;
+    padding: 3px 8px;
   }
 
   .task-status {
     font-size: 10px;
-    padding: var(--space-0-5) var(--space-2);
+    padding: 3px 8px;
   }
 }
 
