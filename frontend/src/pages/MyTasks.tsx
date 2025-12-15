@@ -78,7 +78,7 @@ export default function MyTasks() {
     loadTasks();
   }, [loadTasks]);
 
-  const formatDueDate = (dateStr: string | null) => {
+  const formatDueDate = (dateStr: string | null, taskStatus: string) => {
     if (!dateStr) return null;
     const date = new Date(dateStr);
     const today = new Date();
@@ -88,6 +88,11 @@ export default function MyTasks() {
     today.setHours(0, 0, 0, 0);
     tomorrow.setHours(0, 0, 0, 0);
     date.setHours(0, 0, 0, 0);
+
+    // 已完成的任务不显示逾期状态
+    if (taskStatus === 'done') {
+      return { text: date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }), className: 'completed' };
+    }
 
     if (date < today) return { text: '已逾期', className: 'overdue' };
     if (date.getTime() === today.getTime()) return { text: '今天', className: 'today' };
@@ -112,12 +117,19 @@ export default function MyTasks() {
       { label: '明天', tasks: [] },
       { label: '本周', tasks: [] },
       { label: '更晚', tasks: [] },
+      { label: '已完成', tasks: [] },
       { label: '未设置日期', tasks: [] },
     ];
 
     tasks.forEach(task => {
-      if (!task.dueDate) {
+      // 已完成的任务单独分组
+      if (task.status === 'done') {
         groups[5].tasks.push(task);
+        return;
+      }
+
+      if (!task.dueDate) {
+        groups[6].tasks.push(task);
         return;
       }
 
@@ -272,14 +284,14 @@ export default function MyTasks() {
               </h3>
               <div className="task-list">
                 {group.tasks.map(task => {
-                  const dueInfo = formatDueDate(task.dueDate);
+                  const dueInfo = formatDueDate(task.dueDate, task.status);
                   const priorityConfig = PRIORITY_CONFIG[task.priority];
                   
                   return (
                     <Link
                       key={task.id}
                       to={`/tasks/${task.id}`}
-                      className="task-card"
+                      className={`task-card ${task.status === 'done' ? 'is-done' : ''}`}
                       style={{ borderLeftColor: priorityConfig?.border }}
                     >
                       <div className="task-card-content">
