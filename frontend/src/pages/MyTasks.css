@@ -334,56 +334,104 @@
   }
 }
 
+/* ========================================
+ * 移动端样式 - 成熟APP风格
+ * ======================================== */
 @media (max-width: 768px) {
   .my-tasks-page {
-    gap: var(--space-4);
+    gap: 0;
+    padding: 0;
+    background: #f2f2f7;
   }
 
+  [data-theme="dark"] .my-tasks-page {
+    background: #000000;
+  }
+
+  /* 页面标题区域 */
   .page-header {
+    padding: 16px 16px 12px;
     margin-bottom: 0;
+    background: transparent;
   }
 
   .page-title {
-    font-size: var(--text-lg);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
   }
 
+  /* 统计卡片 - 横向滚动 */
   .quick-stats {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-2);
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 0 16px 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .quick-stats::-webkit-scrollbar {
+    display: none;
   }
 
   .quick-stat-card {
-    padding: var(--space-3);
-    gap: var(--space-2);
+    flex: 0 0 auto;
+    min-width: 100px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  [data-theme="dark"] .quick-stat-card {
+    background: #1c1c1e;
   }
 
   .quick-stat-icon {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .quick-stat-value {
-    font-size: var(--text-lg);
+    font-size: 20px;
+    font-weight: 600;
   }
 
   .quick-stat-label {
-    font-size: 10px;
+    font-size: 11px;
+    color: #8e8e93;
   }
   
+  /* 标签和筛选器容器 */
   .tabs-container {
     flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-3);
-    padding-bottom: 0;
+    gap: 0;
+    padding: 0;
     border-bottom: none;
+    background: white;
+    border-radius: 12px 12px 0 0;
+    margin: 0 16px;
+    overflow: hidden;
+  }
+
+  [data-theme="dark"] .tabs-container {
+    background: #1c1c1e;
   }
   
+  /* 分段控制器样式 */
   .tabs {
+    display: flex;
     overflow-x: auto;
-    padding-bottom: var(--space-2);
+    padding: 8px;
+    gap: 4px;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 10px;
+    margin: 12px 12px 8px;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    border-bottom: 1px solid var(--divider);
+  }
+
+  [data-theme="dark"] .tabs {
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .tabs::-webkit-scrollbar {
@@ -391,48 +439,137 @@
   }
 
   .tab {
-    padding: var(--space-2) var(--space-3);
-    font-size: var(--text-xs);
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 8px;
+    color: #8e8e93;
+    background: transparent;
+    transition: all 0.2s ease;
+  }
+
+  .tab.active {
+    background: white;
+    color: #000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .tab.active {
+    background: #3a3a3c;
+    color: #fff;
+  }
+
+  .tab-count {
+    min-width: 18px;
+    height: 18px;
+    font-size: 11px;
+    background: #007AFF;
+    color: white;
   }
   
+  /* 筛选器 */
   .filters {
-    flex-direction: row;
-    gap: var(--space-2);
+    display: flex;
+    gap: 8px;
+    padding: 8px 12px 12px;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .filters {
+    border-top-color: rgba(255, 255, 255, 0.1);
   }
   
   .filter-select {
     flex: 1;
-    min-width: 0;
-    font-size: var(--text-xs);
-    padding: 0 var(--space-2);
-    height: 36px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.04);
+    border: none;
+    color: var(--text-primary);
+    -webkit-appearance: none;
+  }
+
+  [data-theme="dark"] .filter-select {
+    background: rgba(255, 255, 255, 0.08);
   }
   
+  /* 任务列表区域 */
   .task-groups {
-    gap: var(--space-4);
+    gap: 0;
+    padding: 0 16px 16px;
+  }
+
+  .task-group {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  [data-theme="dark"] .task-group {
+    background: #1c1c1e;
   }
 
   .group-title {
-    font-size: var(--text-xs);
+    font-size: 13px;
+    font-weight: 600;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 16px 8px;
+    background: transparent;
   }
 
   .task-list {
-    gap: var(--space-2);
+    gap: 0;
   }
   
+  /* 任务卡片 - iOS列表样式 */
   .task-card {
-    padding: var(--space-3);
-    gap: var(--space-2);
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 16px;
+    gap: 12px;
+    border-radius: 0;
+    background: transparent;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+    box-shadow: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  [data-theme="dark"] .task-card {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .task-card:last-child {
+    border-bottom: none;
+  }
+
+  .task-card:active {
+    background: rgba(0, 0, 0, 0.04);
+  }
+
+  [data-theme="dark"] .task-card:active {
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .task-card-content {
     flex: 1;
     min-width: 0;
     display: flex;
-    align-items: flex-start;
-    gap: var(--space-2);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .priority-indicator {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    flex-shrink: 0;
+    border-radius: 10px;
   }
 
   .task-info {
@@ -441,119 +578,116 @@
   }
 
   .task-title {
-    font-size: var(--text-sm);
-    line-height: 1.4;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 1.3;
+    letter-spacing: -0.2px;
+    color: var(--text-primary);
   }
 
   .task-project {
-    font-size: 10px;
+    font-size: 12px;
+    color: #8e8e93;
     margin-top: 2px;
   }
   
-  /* 移动端：日期和状态放在任务卡片底部 */
+  /* 任务卡片右侧元数据 */
   .task-card-meta {
     display: flex;
-    justify-content: flex-end;
-    gap: 8px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
     margin-right: 0;
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--border-secondary);
+    padding: 0;
+    border: none;
+    flex-shrink: 0;
   }
 
   .task-due {
-    padding: 4px 10px;
-    font-size: 11px;
-    border-radius: 4px;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 400;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    color: #8e8e93;
+  }
+
+  .task-due.overdue {
+    color: #ff3b30;
+    background: transparent;
+  }
+
+  .task-due.today {
+    color: #ff9500;
+    background: transparent;
   }
   
   .task-status {
-    padding: 4px 0;
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 0;
+  }
+
+  .task-status.status-done {
+    color: #34c759;
+  }
+
+  .task-status.status-in_progress {
+    color: #007AFF;
   }
 }
 
-@media (max-width: 480px) {
-  .my-tasks-page {
-    gap: var(--space-3);
-    padding: var(--space-3);
-  }
-
+/* ========================================
+ * 小屏手机适配 (iPhone SE, iPhone mini)
+ * ======================================== */
+@media (max-width: 390px) {
   .page-title {
-    font-size: var(--text-base);
-  }
-
-  .quick-stats {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-2);
-  }
-
-  /* 隐藏较少使用的统计卡片 */
-  .quick-stat-card:nth-child(5) {
-    display: none;
+    font-size: 24px;
   }
 
   .quick-stat-card {
-    padding: var(--space-2);
+    min-width: 85px;
+    padding: 10px 12px;
   }
 
   .quick-stat-value {
-    font-size: var(--text-base);
+    font-size: 18px;
   }
 
   .tabs-container {
-    gap: var(--space-2);
+    margin: 0 12px;
   }
 
   .tab {
-    padding: var(--space-2);
-    font-size: 11px;
-  }
-
-  .tab-count {
-    min-width: 16px;
-    height: 16px;
-    font-size: 9px;
-  }
-
-  .filter-select {
-    height: 32px;
-    font-size: 11px;
-  }
-
-  .task-card {
-    padding: var(--space-2) var(--space-3);
-  }
-
-  .priority-indicator {
-    width: 28px;
-    height: 28px;
+    padding: 6px 12px;
     font-size: 12px;
   }
 
+  .task-groups {
+    padding: 0 12px 12px;
+  }
+
+  .task-card {
+    padding: 10px 12px;
+  }
+
+  .priority-indicator {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
   .task-title {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .task-project {
-    font-size: 9px;
-  }
-
-  .task-card-meta {
-    gap: 6px;
-    padding-top: var(--space-2);
-  }
-
-  .task-due {
-    padding: 3px 8px;
-    font-size: 10px;
-  }
-
-  .task-status {
-    font-size: 10px;
-  }
-
-  .group-title {
     font-size: 11px;
-    padding: var(--space-1) var(--space-2);
+  }
+
+  .task-due,
+  .task-status {
+    font-size: 11px;
   }
 }
