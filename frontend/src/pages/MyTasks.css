@@ -250,7 +250,7 @@
 .task-card-meta {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
   flex-shrink: 0;
 }
 
@@ -258,6 +258,7 @@
   font-size: var(--text-xs);
   color: var(--text-secondary);
   white-space: nowrap;
+  margin-right: var(--space-1);
 }
 
 .task-due.overdue {
@@ -278,17 +279,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 4px 10px;
-  font-size: 12px;
+  gap: 4px;
+  padding: 3px 8px;
+  font-size: 11px;
   font-weight: 500;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   white-space: nowrap;
-  transition: all 0.15s ease;
+  border: 1px solid currentColor;
+  background: transparent;
 }
 
 .status-icon {
-  font-size: 8px;
+  font-size: 9px;
   line-height: 1;
 }
 
