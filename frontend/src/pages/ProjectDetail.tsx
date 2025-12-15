@@ -843,11 +843,19 @@ export default function ProjectDetail() {
                     onClick={() => handleUseSuggestion(suggestion)}
                   >
                     <div className="suggestion-item-header">
-                      <span className={`priority-dot priority-${suggestion.priority}`} />
-                      <span className="suggestion-item-title">{suggestion.title}</span>
+                      <span className={`priority-dot priority-${suggestion.priority || 'medium'}`} />
+                      <span className="suggestion-item-title">{suggestion.title || '未命名任务'}</span>
                     </div>
-                    <p className="suggestion-item-desc">{suggestion.description.substring(0, 80)}...</p>
-                    <span className="suggestion-item-hint">点击使用此建议</span>
+                    <p className="suggestion-item-desc">
+                      {suggestion.description ? suggestion.description.substring(0, 100) : '无描述'}
+                      {suggestion.description && suggestion.description.length > 100 ? '...' : ''}
+                    </p>
+                    <div className="suggestion-item-footer">
+                      {suggestion.reason && (
+                        <span className="suggestion-reason">💡 {suggestion.reason}</span>
+                      )}
+                      <span className="suggestion-item-hint">点击使用此建议 →</span>
+                    </div>
                   </div>
                 ))}
               </div>
