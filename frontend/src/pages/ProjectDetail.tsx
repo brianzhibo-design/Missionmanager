@@ -420,9 +420,19 @@ export default function ProjectDetail() {
       }));
 
       const response = await aiService.generateNextTasks(id!, taskData);
-      setNewTaskSuggestions(response.suggestedTasks);
+      // 防御性检查：确保 suggestedTasks 存在且为数组
+      if (response && Array.isArray(response.suggestedTasks)) {
+        setNewTaskSuggestions(response.suggestedTasks);
+      } else if (response && Array.isArray(response)) {
+        // 如果返回的直接是数组（兼容旧格式）
+        setNewTaskSuggestions(response as unknown as typeof newTaskSuggestions);
+      } else {
+        console.warn('AI 返回数据格式不正确:', response);
+        setNewTaskSuggestions([]);
+      }
     } catch (err) {
       console.error('获取 AI 建议失败:', err);
+      setNewTaskSuggestions([]);
     } finally {
       setNewTaskAiLoading(false);
     }
