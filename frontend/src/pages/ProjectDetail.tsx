@@ -860,6 +860,22 @@ export default function ProjectDetail() {
                 ))}
               </div>
             )}
+            {newTaskAiLoading && (
+              <div className="ai-loading-state">
+                <div className="ai-loading-animation">
+                  <div className="ai-loading-spinner"></div>
+                  <div className="ai-loading-text">
+                    <span className="loading-title">🤖 AI 正在分析项目...</span>
+                    <span className="loading-subtitle">正在结合已有任务生成智能建议</span>
+                  </div>
+                </div>
+                <div className="ai-loading-progress">
+                  <div className="progress-bar">
+                    <div className="progress-fill"></div>
+                  </div>
+                </div>
+              </div>
+            )}
             {newTaskSuggestions.length === 0 && !newTaskAiLoading && (
               <p className="ai-panel-hint">点击"获取建议"让 AI 分析项目并推荐下一步任务</p>
             )}
