@@ -23,11 +23,11 @@ interface TaskStats {
   dueToday: number;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  todo: { label: '待办', color: 'var(--text-secondary)', bg: 'var(--bg-surface-secondary)' },
-  in_progress: { label: '进行中', color: 'var(--color-info)', bg: 'var(--color-info-alpha-10)' },
-  review: { label: '审核中', color: 'var(--color-warning)', bg: 'var(--color-warning-alpha-10)' },
-  done: { label: '已完成', color: 'var(--color-success)', bg: 'var(--color-success-alpha-10)' },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
+  todo: { label: '待办', color: '#64748b', bg: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', icon: '○' },
+  in_progress: { label: '进行中', color: '#3b82f6', bg: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', icon: '◐' },
+  review: { label: '审核中', color: '#f59e0b', bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', icon: '◑' },
+  done: { label: '已完成', color: '#10b981', bg: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', icon: '●' },
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; icon: string; color: string; border: string }> = {
@@ -311,9 +311,10 @@ export default function MyTasks() {
                           className="task-status"
                           style={{
                             color: STATUS_CONFIG[task.status]?.color,
-                            backgroundColor: STATUS_CONFIG[task.status]?.bg,
+                            background: STATUS_CONFIG[task.status]?.bg,
                           }}
                         >
+                          <span className="status-icon">{STATUS_CONFIG[task.status]?.icon}</span>
                           {STATUS_CONFIG[task.status]?.label || task.status}
                         </span>
                       </div>
