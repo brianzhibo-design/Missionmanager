@@ -24,10 +24,10 @@ interface TaskStats {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; icon: string }> = {
-  todo: { label: '待办', color: '#64748b', bg: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', icon: '○' },
-  in_progress: { label: '进行中', color: '#3b82f6', bg: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', icon: '◐' },
-  review: { label: '审核中', color: '#f59e0b', bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', icon: '◑' },
-  done: { label: '已完成', color: '#10b981', bg: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', icon: '●' },
+  todo: { label: '待办', color: '#6b7280', bg: '#f3f4f6', icon: '○' },
+  in_progress: { label: '进行中', color: '#2563eb', bg: '#eff6ff', icon: '●' },
+  review: { label: '审核中', color: '#d97706', bg: '#fffbeb', icon: '●' },
+  done: { label: '已完成', color: '#059669', bg: '#ecfdf5', icon: '✓' },
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; icon: string; color: string; border: string }> = {
