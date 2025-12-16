@@ -1,12 +1,13 @@
 /**
  * 成员任务树页面
+ * 只显示当前工作区的项目和成员
  */
 import { useState, useEffect } from 'react';
 import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User } from 'lucide-react';
-import { treeService, MemberNode, MemberTreeResponse, ProjectTeamMember } from '../../services/tree';
-import { workspaceService, Workspace } from '../../services/workspace';
+import { treeService, MemberNode, MemberTreeResponse } from '../../services/tree';
 import { projectService, Project } from '../../services/project';
 import { treeAnalysisService, TeamAnalysisResult } from '../../services/treeAnalysis';
+import { usePermissions } from '../../hooks/usePermissions';
 import { TreeNode } from '../../components/tree/TreeNode';
 import { TaskStatsBadge } from '../../components/tree/TaskStatsBadge';
 import { MemberDetailPanel } from '../../components/tree/MemberDetailPanel';
@@ -16,9 +17,10 @@ import { Avatar } from '../../components/Avatar';
 import './MembersTree.css';
 
 export default function MembersTree() {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  // 使用全局当前工作区，确保工作区隔离
+  const { currentWorkspace } = usePermissions();
+  
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
   const [selectedProject, setSelectedProject] = useState<string>('');
   const [treeData, setTreeData] = useState<MemberTreeResponse | null>(null);
   const [selectedMember, setSelectedMember] = useState<MemberNode | null>(null);
@@ -34,20 +36,16 @@ export default function MembersTree() {
   const [editingMember, setEditingMember] = useState<MemberNode | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // 加载工作区列表
-  useEffect(() => {
-    loadWorkspaces();
-  }, []);
-
   // 当工作区变化时，加载项目列表
   useEffect(() => {
-    if (selectedWorkspace) {
-      loadProjects(selectedWorkspace);
+    if (currentWorkspace?.id) {
+      loadProjects(currentWorkspace.id);
     } else {
       setProjects([]);
       setSelectedProject('');
+      setTreeData(null);
     }
-  }, [selectedWorkspace]);
+  }, [currentWorkspace?.id]);
 
   // 当项目变化时，加载树数据
   useEffect(() => {
@@ -58,25 +56,14 @@ export default function MembersTree() {
     }
   }, [selectedProject]);
 
-  const loadWorkspaces = async () => {
-    try {
-      const data = await workspaceService.getWorkspaces();
-      setWorkspaces(data);
-      if (data.length > 0 && !selectedWorkspace) {
-        setSelectedWorkspace(data[0].id);
-      }
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
   const loadProjects = async (workspaceId: string) => {
     try {
+      setError(null);
       const data = await projectService.getProjects(workspaceId);
       setProjects(data);
-      if (data.length > 0) {
-        setSelectedProject(data[0].id);
-      }
+      // 重置选中的项目
+      setSelectedProject('');
+      setTreeData(null);
     } catch (err: any) {
       setError(err.message);
     }
@@ -208,23 +195,15 @@ export default function MembersTree() {
           <p className="page-description">查看项目成员的任务分布和层级关系</p>
         </div>
         <div className="header-controls">
-          <select
-            value={selectedWorkspace}
-            onChange={(e) => setSelectedWorkspace(e.target.value)}
-            className="select-control"
-          >
-            <option value="">选择工作区</option>
-            {workspaces.map((ws) => (
-              <option key={ws.id} value={ws.id}>
-                {ws.name}
-              </option>
-            ))}
-          </select>
+          {/* 显示当前工作区名称 */}
+          <div className="current-workspace-badge">
+            📁 {currentWorkspace?.name || '未选择工作区'}
+          </div>
           <select
             value={selectedProject}
             onChange={(e) => setSelectedProject(e.target.value)}
             className="select-control"
-            disabled={!selectedWorkspace}
+            disabled={!currentWorkspace}
           >
             <option value="">选择项目</option>
             {projects.map((p) => (

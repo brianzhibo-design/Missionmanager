@@ -1,18 +1,20 @@
 /**
  * 项目工作树页面
+ * 只显示当前工作区的项目
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { treeService, ProjectTreeResponse, ProjectNode, TaskStats } from '../../services/tree';
-import { workspaceService, Workspace } from '../../services/workspace';
 import { treeAnalysisService, ProjectsOverviewResult } from '../../services/treeAnalysis';
+import { usePermissions } from '../../hooks/usePermissions';
 import { TaskStatsBadge } from '../../components/tree/TaskStatsBadge';
 import { ProjectsAnalysisPanel } from '../../components/tree/AiAnalysisPanel';
 import './ProjectsTree.css';
 
 export default function ProjectsTree() {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
+  // 使用全局当前工作区，确保工作区隔离
+  const { currentWorkspace } = usePermissions();
+  
   const [treeData, setTreeData] = useState<ProjectTreeResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,27 +24,14 @@ export default function ProjectsTree() {
   const [analysisResult, setAnalysisResult] = useState<ProjectsOverviewResult | null>(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
 
+  // 当工作区变化时，加载项目树
   useEffect(() => {
-    loadWorkspaces();
-  }, []);
-
-  useEffect(() => {
-    if (selectedWorkspace) {
-      loadProjectTree(selectedWorkspace);
+    if (currentWorkspace?.id) {
+      loadProjectTree(currentWorkspace.id);
+    } else {
+      setTreeData(null);
     }
-  }, [selectedWorkspace]);
-
-  const loadWorkspaces = async () => {
-    try {
-      const data = await workspaceService.getWorkspaces();
-      setWorkspaces(data);
-      if (data.length > 0) {
-        setSelectedWorkspace(data[0].id);
-      }
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
+  }, [currentWorkspace?.id]);
 
   const loadProjectTree = async (workspaceId: string) => {
     setLoading(true);
@@ -61,11 +50,11 @@ export default function ProjectsTree() {
 
   // AI 分析项目全景
   const handleAnalyze = async () => {
-    if (!selectedWorkspace) return;
+    if (!currentWorkspace?.id) return;
     setAnalyzing(true);
     setError(null);
     try {
-      const result = await treeAnalysisService.analyzeProjectsOverview(selectedWorkspace);
+      const result = await treeAnalysisService.analyzeProjectsOverview(currentWorkspace.id);
       setAnalysisResult(result);
       setShowAnalysis(true);
     } catch (err: any) {
@@ -83,22 +72,14 @@ export default function ProjectsTree() {
           <p className="page-description">查看所有项目的工作情况和整体进度</p>
         </div>
         <div className="header-controls">
-          <select
-            value={selectedWorkspace}
-            onChange={(e) => setSelectedWorkspace(e.target.value)}
-            className="select-control"
-          >
-            <option value="">选择工作区</option>
-            {workspaces.map((ws) => (
-              <option key={ws.id} value={ws.id}>
-                {ws.name}
-              </option>
-            ))}
-          </select>
+          {/* 显示当前工作区名称 */}
+          <div className="current-workspace-badge">
+            📁 {currentWorkspace?.name || '未选择工作区'}
+          </div>
           <button
             className="analyze-btn"
             onClick={handleAnalyze}
-            disabled={!selectedWorkspace || analyzing || loading}
+            disabled={!currentWorkspace || analyzing || loading}
           >
             {analyzing ? '🔄 分析中...' : '🤖 AI 分析全局'}
           </button>
@@ -158,7 +139,7 @@ export default function ProjectsTree() {
         </>
       ) : (
         <div className="empty-state">
-          请选择工作区查看项目总览
+          {currentWorkspace ? '当前工作区暂无项目' : '请先选择工作区'}
         </div>
       )}
     </div>

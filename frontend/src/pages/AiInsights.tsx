@@ -1,37 +1,22 @@
-import { useState, useEffect } from 'react';
-import { workspaceService, Workspace } from '../services/workspace';
+import { useState } from 'react';
 import { treeAnalysisService, ProjectsOverviewResult } from '../services/treeAnalysis';
+import { usePermissions } from '../hooks/usePermissions';
 import './AiInsights.css';
 
 export default function AiInsights() {
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [selectedWorkspace, setSelectedWorkspace] = useState<string>('');
+  // 使用全局当前工作区，确保工作区隔离
+  const { currentWorkspace } = usePermissions();
+  
   const [analysis, setAnalysis] = useState<ProjectsOverviewResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadWorkspaces();
-  }, []);
-
-  const loadWorkspaces = async () => {
-    try {
-      const data = await workspaceService.getWorkspaces();
-      setWorkspaces(data);
-      if (data.length > 0) {
-        setSelectedWorkspace(data[0].id);
-      }
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
   const handleAnalyze = async () => {
-    if (!selectedWorkspace) return;
+    if (!currentWorkspace?.id) return;
     setLoading(true);
     setError(null);
     try {
-      const result = await treeAnalysisService.analyzeProjectsOverview(selectedWorkspace);
+      const result = await treeAnalysisService.analyzeProjectsOverview(currentWorkspace.id);
       setAnalysis(result);
     } catch (err: any) {
       setError(err.message);
@@ -73,19 +58,14 @@ export default function AiInsights() {
           </div>
         </div>
         <div className="header-actions">
-          <select
-            value={selectedWorkspace}
-            onChange={(e) => setSelectedWorkspace(e.target.value)}
-            className="select-control"
-          >
-            {workspaces.map((ws) => (
-              <option key={ws.id} value={ws.id}>{ws.name}</option>
-            ))}
-          </select>
+          {/* 显示当前工作区名称 */}
+          <div className="current-workspace-badge">
+            📁 {currentWorkspace?.name || '未选择工作区'}
+          </div>
           <button
             className="btn btn-primary"
             onClick={handleAnalyze}
-            disabled={!selectedWorkspace || loading}
+            disabled={!currentWorkspace || loading}
           >
             {loading ? (
               <>
@@ -109,7 +89,7 @@ export default function AiInsights() {
         <div className="empty-state">
           <div className="empty-icon">🤖</div>
           <h3>AI 全局洞察</h3>
-          <p>选择工作区并点击"开始分析"，AI 将为您生成跨项目的智能分析报告</p>
+          <p>点击"开始分析"，AI 将为当前工作区「{currentWorkspace?.name || '未选择'}」生成跨项目的智能分析报告</p>
           <div className="empty-features">
             <div className="feature-item">
               <span className="feature-icon">📊</span>
