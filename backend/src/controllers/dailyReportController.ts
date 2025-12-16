@@ -4,6 +4,7 @@
 import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/authMiddleware';
 import { dailyReportService } from '../services/dailyReportService';
+import { prisma } from '../infra/database';
 
 const router = Router();
 
@@ -89,6 +90,41 @@ router.get('/today', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('获取今日日报失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取今日日报失败' });
+  }
+});
+
+/**
+ * GET /daily-reports/by-date - 获取指定日期的日报
+ */
+router.get('/by-date', async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const { workspaceId, date } = req.query;
+
+    if (!workspaceId || !date) {
+      return res.status(400).json({ error: 'VALIDATION_ERROR', message: '工作区ID和日期为必填项' });
+    }
+
+    const targetDate = new Date(date as string);
+    targetDate.setHours(0, 0, 0, 0);
+
+    const report = await prisma.dailyReport.findUnique({
+      where: {
+        userId_workspaceId_date: {
+          userId,
+          workspaceId: workspaceId as string,
+          date: targetDate,
+        },
+      },
+      include: {
+        user: { select: { id: true, name: true, avatar: true } },
+      },
+    });
+
+    res.json({ success: true, data: report });
+  } catch (error: any) {
+    console.error('获取日报失败:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取日报失败' });
   }
 });
 

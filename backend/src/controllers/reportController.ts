@@ -119,6 +119,38 @@ reportRouter.get(
   }
 );
 
+// DELETE /reports/:id - 删除报告
+reportRouter.delete(
+  '/:id',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const userId = req.user!.userId;
+
+      await reportService.deleteReport(id, userId);
+
+      res.json({
+        success: true,
+        data: { message: '报告已删除' },
+      });
+    } catch (error: any) {
+      if (error.message === '报告不存在') {
+        return res.status(404).json({
+          success: false,
+          error: { message: error.message },
+        });
+      }
+      if (error.message === '无权删除此报告') {
+        return res.status(403).json({
+          success: false,
+          error: { message: error.message },
+        });
+      }
+      next(error);
+    }
+  }
+);
+
 // GET /reports/:id/export/pdf - 导出 PDF
 reportRouter.get(
   '/:id/export/pdf',

@@ -86,6 +86,13 @@ export const dailyReportService = {
   },
 
   /**
+   * 获取指定日期的日报
+   */
+  async getByDate(workspaceId: string, date: string): Promise<DailyReport | null> {
+    return api.get<DailyReport | null>(`/daily-reports/by-date?workspaceId=${workspaceId}&date=${date}`);
+  },
+
+  /**
    * 获取团队日报
    */
   async getTeamReports(workspaceId: string, date: string): Promise<TeamReportsResult> {

@@ -1,5 +1,6 @@
 /**
  * 报告中心页面 - 集成日报、周报、月报
+ * 优化版：支持日期联动、补填历史日报
  */
 import { useState, useEffect, useCallback } from 'react';
 import { usePermissions } from '../hooks/usePermissions';
@@ -10,7 +11,7 @@ import { config } from '../config';
 import { 
   BarChart3, Calendar, CalendarRange, AlertTriangle, CheckCircle2, Bot, 
   Sparkles, FileText, TrendingUp, FolderOpen, Mail, ChevronLeft, ChevronRight,
-  Users, Clock, Zap, Save, Edit2
+  Users, Clock, Zap, Save, Edit2, Trash2
 } from 'lucide-react';
 import './Reports.css';
 
@@ -40,16 +41,16 @@ export default function Reports() {
   const [myDailyReports, setMyDailyReports] = useState<DailyReport[]>([]);
   const [teamData, setTeamData] = useState<TeamReportsResult | null>(null);
   const [dailyLoading, setDailyLoading] = useState(false);
-  const [showDailyForm, setShowDailyForm] = useState(false);
   const [dailyForm, setDailyForm] = useState({
     completed: '',
     planned: '',
     issues: '',
     workHours: '',
   });
+  const [currentDateReport, setCurrentDateReport] = useState<DailyReport | null>(null);
   const [savingDaily, setSavingDaily] = useState(false);
   const [aiFilling, setAiFilling] = useState(false);
-  const [todayReport, setTodayReport] = useState<DailyReport | null>(null);
+  const [showForm, setShowForm] = useState(false);
 
   const isManager = workspaceRole && ['owner', 'director', 'manager'].includes(workspaceRole);
 
@@ -70,41 +71,56 @@ export default function Reports() {
     }
   }, [currentWorkspace]);
 
-  // 加载日报
-  const loadDailyReports = useCallback(async () => {
+  // 加载指定日期的日报
+  const loadDateReport = useCallback(async (date: Date) => {
     if (!currentWorkspace) return;
-    setDailyLoading(true);
+    
+    const dateStr = date.toISOString().split('T')[0];
+    
     try {
-      // 获取我的日报
-      const myReports = await dailyReportService.getMyReports(currentWorkspace.id, { limit: 30 });
-      setMyDailyReports(myReports);
-
-      // 获取今日日报
-      const today = await dailyReportService.getTodayReport(currentWorkspace.id);
-      setTodayReport(today);
-      if (today) {
+      // 获取指定日期的日报
+      const report = await dailyReportService.getByDate(currentWorkspace.id, dateStr);
+      setCurrentDateReport(report);
+      
+      if (report) {
         setDailyForm({
-          completed: today.completed,
-          planned: today.planned,
-          issues: today.issues || '',
-          workHours: today.workHours?.toString() || '',
+          completed: report.completed,
+          planned: report.planned,
+          issues: report.issues || '',
+          workHours: report.workHours?.toString() || '',
         });
+        setShowForm(true);
+      } else {
+        setDailyForm({ completed: '', planned: '', issues: '', workHours: '' });
+        setShowForm(false);
       }
 
       // 如果是管理者，获取团队日报
       if (isManager) {
-        const team = await dailyReportService.getTeamReports(
-          currentWorkspace.id,
-          selectedDate.toISOString().split('T')[0]
-        );
+        const team = await dailyReportService.getTeamReports(currentWorkspace.id, dateStr);
         setTeamData(team);
       }
+    } catch (err: unknown) {
+      console.error('加载日报失败:', err);
+    }
+  }, [currentWorkspace, isManager]);
+
+  // 加载日报列表
+  const loadDailyReports = useCallback(async () => {
+    if (!currentWorkspace) return;
+    setDailyLoading(true);
+    try {
+      const myReports = await dailyReportService.getMyReports(currentWorkspace.id, { limit: 30 });
+      setMyDailyReports(myReports);
+      
+      // 加载当前选中日期的日报
+      await loadDateReport(selectedDate);
     } catch (err: unknown) {
       console.error('加载日报失败:', err);
     } finally {
       setDailyLoading(false);
     }
-  }, [currentWorkspace, selectedDate, isManager]);
+  }, [currentWorkspace, selectedDate, loadDateReport]);
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -116,10 +132,18 @@ export default function Reports() {
     }
   }, [currentWorkspace, activeTab, loadReports, loadDailyReports]);
 
-  // 日报日期切换
+  // 日期切换时重新加载
+  useEffect(() => {
+    if (activeTab === 'daily' && currentWorkspace) {
+      loadDateReport(selectedDate);
+    }
+  }, [selectedDate, activeTab, currentWorkspace, loadDateReport]);
+
+  // 日期切换
   const changeDate = (delta: number) => {
     const newDate = new Date(selectedDate);
     newDate.setDate(newDate.getDate() + delta);
+    // 限制不能超过今天
     if (newDate <= new Date()) {
       setSelectedDate(newDate);
     }
@@ -130,19 +154,28 @@ export default function Reports() {
     return date.toDateString() === today.toDateString();
   };
 
+  // 检查日期是否可以编辑（7天内）
+  const canEditDate = (date: Date) => {
+    const today = new Date();
+    const diffDays = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays <= 7;
+  };
+
   // AI 自动填充
   const handleAiFill = async () => {
     if (!currentWorkspace) return;
     setAiFilling(true);
+    setError(null);
     try {
-      const result = await dailyReportService.aiFill(currentWorkspace.id);
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      const result = await dailyReportService.aiFill(currentWorkspace.id, dateStr);
       setDailyForm({
         completed: result.completed,
         planned: result.planned,
         issues: result.issues,
         workHours: '',
       });
-      setShowDailyForm(true);
+      setShowForm(true);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'AI填充失败');
     } finally {
@@ -157,23 +190,41 @@ export default function Reports() {
       return;
     }
     setSavingDaily(true);
+    setError(null);
     try {
+      const dateStr = selectedDate.toISOString().split('T')[0];
       await dailyReportService.create({
         workspaceId: currentWorkspace.id,
-        date: new Date().toISOString().split('T')[0],
+        date: dateStr,
         completed: dailyForm.completed,
         planned: dailyForm.planned,
         issues: dailyForm.issues || undefined,
         workHours: dailyForm.workHours ? parseFloat(dailyForm.workHours) : undefined,
       });
-      setSuccessMessage('日报保存成功！');
-      setShowDailyForm(false);
+      setSuccessMessage(currentDateReport ? '日报更新成功！' : '日报保存成功！');
       loadDailyReports();
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '保存日报失败');
     } finally {
       setSavingDaily(false);
+    }
+  };
+
+  // 删除日报
+  const handleDeleteDaily = async () => {
+    if (!currentDateReport || !confirm('确定要删除这份日报吗？')) return;
+    
+    try {
+      await dailyReportService.delete(currentDateReport.id);
+      setSuccessMessage('日报已删除');
+      setCurrentDateReport(null);
+      setDailyForm({ completed: '', planned: '', issues: '', workHours: '' });
+      setShowForm(false);
+      loadDailyReports();
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '删除失败');
     }
   };
 
@@ -186,6 +237,8 @@ export default function Reports() {
       const report = await reportService.generateWeekly(currentWorkspace.id);
       setReports([report, ...reports]);
       setSelectedReport(report);
+      setSuccessMessage('周报生成成功！');
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '生成周报失败');
     } finally {
@@ -201,10 +254,28 @@ export default function Reports() {
       const report = await reportService.generateMonthly(currentWorkspace.id);
       setReports([report, ...reports]);
       setSelectedReport(report);
+      setSuccessMessage('月报生成成功！');
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '生成月报失败');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const handleDeleteReport = async (reportId: string) => {
+    if (!confirm('确定要删除这份报告吗？')) return;
+    
+    try {
+      await reportService.deleteReport(reportId);
+      setReports(reports.filter(r => r.id !== reportId));
+      if (selectedReport?.id === reportId) {
+        setSelectedReport(reports.length > 1 ? reports.find(r => r.id !== reportId) || null : null);
+      }
+      setSuccessMessage('报告已删除');
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '删除失败');
     }
   };
 
@@ -309,6 +380,12 @@ export default function Reports() {
     return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} (${weekdays[date.getDay()]})`;
   };
 
+  // 点击日报列表项
+  const handleReportItemClick = (report: DailyReport) => {
+    const reportDate = new Date(report.date);
+    setSelectedDate(reportDate);
+  };
+
   return (
     <div className="reports-page fade-in">
       <div className="page-header">
@@ -337,7 +414,11 @@ export default function Reports() {
         </div>
       </div>
 
-      {error && <div className="error-card"><AlertTriangle size={16} /> {error}</div>}
+      {error && (
+        <div className="error-card" onClick={() => setError(null)}>
+          <AlertTriangle size={16} /> {error}
+        </div>
+      )}
       {successMessage && <div className="success-toast"><CheckCircle2 size={16} /> {successMessage}</div>}
 
       {/* 日报 Tab */}
@@ -351,6 +432,7 @@ export default function Reports() {
             <span className="current-date">
               📅 {formatDate(selectedDate)}
               {isToday(selectedDate) && <span className="today-badge">今天</span>}
+              {!canEditDate(selectedDate) && <span className="readonly-badge">只读</span>}
             </span>
             <button 
               className="date-nav-btn" 
@@ -366,21 +448,62 @@ export default function Reports() {
             <div className="daily-form-section card-static">
               <div className="section-header">
                 <h3>
-                  {todayReport ? <><Edit2 size={16} /> 编辑今日日报</> : <><FileText size={16} /> 填写今日日报</>}
+                  {currentDateReport ? <><Edit2 size={16} /> 编辑日报</> : <><FileText size={16} /> 填写日报</>}
                 </h3>
-                <button 
-                  className="btn btn-secondary btn-sm"
-                  onClick={handleAiFill}
-                  disabled={aiFilling}
-                >
-                  <Zap size={14} /> {aiFilling ? '填充中...' : 'AI 自动填充'}
-                </button>
+                <div className="header-actions">
+                  {canEditDate(selectedDate) && (
+                    <button 
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleAiFill}
+                      disabled={aiFilling}
+                    >
+                      <Zap size={14} /> {aiFilling ? '填充中...' : 'AI 自动填充'}
+                    </button>
+                  )}
+                  {currentDateReport && canEditDate(selectedDate) && (
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={handleDeleteDaily}
+                      title="删除日报"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {!showDailyForm && !todayReport ? (
+              {!canEditDate(selectedDate) ? (
                 <div className="daily-form-placeholder">
-                  <p>今日日报尚未填写</p>
-                  <button className="btn btn-primary" onClick={() => setShowDailyForm(true)}>
+                  <p>该日期超过7天，已无法编辑</p>
+                  {currentDateReport && (
+                    <div className="readonly-report">
+                      <div className="report-section">
+                        <h4>今日完成</h4>
+                        <p>{currentDateReport.completed}</p>
+                      </div>
+                      <div className="report-section">
+                        <h4>明日计划</h4>
+                        <p>{currentDateReport.planned}</p>
+                      </div>
+                      {currentDateReport.issues && (
+                        <div className="report-section">
+                          <h4>问题/风险</h4>
+                          <p>{currentDateReport.issues}</p>
+                        </div>
+                      )}
+                      {currentDateReport.workHours && (
+                        <div className="report-section">
+                          <h4>工时</h4>
+                          <p>{currentDateReport.workHours} 小时</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : !showForm && !currentDateReport ? (
+                <div className="daily-form-placeholder">
+                  <p>{isToday(selectedDate) ? '今日日报尚未填写' : `${formatDate(selectedDate)} 的日报尚未填写`}</p>
+                  <button className="btn btn-primary" onClick={() => setShowForm(true)}>
                     <FileText size={16} /> 开始填写
                   </button>
                 </div>
@@ -440,9 +563,16 @@ export default function Reports() {
                     <button 
                       className="btn btn-secondary" 
                       onClick={() => {
-                        setShowDailyForm(false);
-                        if (!todayReport) {
+                        setShowForm(false);
+                        if (!currentDateReport) {
                           setDailyForm({ completed: '', planned: '', issues: '', workHours: '' });
+                        } else {
+                          setDailyForm({
+                            completed: currentDateReport.completed,
+                            planned: currentDateReport.planned,
+                            issues: currentDateReport.issues || '',
+                            workHours: currentDateReport.workHours?.toString() || '',
+                          });
                         }
                       }}
                     >
@@ -451,9 +581,9 @@ export default function Reports() {
                     <button 
                       className="btn btn-primary"
                       onClick={handleSaveDaily}
-                      disabled={savingDaily}
+                      disabled={savingDaily || !dailyForm.completed || !dailyForm.planned}
                     >
-                      <Save size={16} /> {savingDaily ? '保存中...' : '保存日报'}
+                      <Save size={16} /> {savingDaily ? '保存中...' : currentDateReport ? '更新日报' : '保存日报'}
                     </button>
                   </div>
                 </div>
@@ -546,17 +676,25 @@ export default function Reports() {
                     <div className="loading-placeholder">加载中...</div>
                   ) : myDailyReports.length > 0 ? (
                     <div className="my-reports-list">
-                      {myDailyReports.slice(0, 10).map(report => (
-                        <div key={report.id} className="my-report-item">
-                          <span className="report-date">
-                            {new Date(report.date).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
-                          </span>
-                          <span className="report-preview">{report.completed.substring(0, 30)}...</span>
-                          {report.workHours && (
-                            <span className="work-hours">{report.workHours}h</span>
-                          )}
-                        </div>
-                      ))}
+                      {myDailyReports.slice(0, 15).map(report => {
+                        const reportDate = new Date(report.date);
+                        const isSelected = reportDate.toDateString() === selectedDate.toDateString();
+                        return (
+                          <div 
+                            key={report.id} 
+                            className={`my-report-item ${isSelected ? 'active' : ''}`}
+                            onClick={() => handleReportItemClick(report)}
+                          >
+                            <span className="report-date">
+                              {reportDate.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                            </span>
+                            <span className="report-preview">{report.completed.substring(0, 30)}...</span>
+                            {report.workHours && (
+                              <span className="work-hours">{report.workHours}h</span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="empty-placeholder">
@@ -655,6 +793,13 @@ export default function Reports() {
                       >
                         <Mail size={14} /> 发送邮件
                       </button>
+                      <button 
+                        className="btn btn-danger btn-sm"
+                        onClick={() => handleDeleteReport(selectedReport.id)}
+                        title="删除报告"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
                   </div>
 
@@ -714,6 +859,27 @@ export default function Reports() {
                             {selectedReport.content.tasksBlocked || 0}
                           </span>
                           <span className="stat-label">阻塞任务</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 日报汇总（周报/月报时显示） */}
+                  {selectedReport.content?.dailySummary && (
+                    <div className="daily-summary-section">
+                      <h4><FileText size={16} /> 日报汇总</h4>
+                      <div className="daily-summary-stats">
+                        <div className="summary-item">
+                          <span className="label">日报数量</span>
+                          <span className="value">{selectedReport.content.dailySummary.reportCount} 份</span>
+                        </div>
+                        <div className="summary-item">
+                          <span className="label">累计工时</span>
+                          <span className="value">{selectedReport.content.dailySummary.totalWorkHours?.toFixed(1) || 0} 小时</span>
+                        </div>
+                        <div className="summary-item">
+                          <span className="label">日均工时</span>
+                          <span className="value">{selectedReport.content.dailySummary.avgWorkHoursPerDay?.toFixed(1) || 0} 小时</span>
                         </div>
                       </div>
                     </div>

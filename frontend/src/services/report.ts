@@ -3,6 +3,20 @@
  */
 import api from './api';
 
+export interface DailySummary {
+  reportCount: number;
+  totalWorkHours: number;
+  avgWorkHoursPerDay: number;
+  memberReports: Record<string, {
+    name: string;
+    avatar: string | null;
+    count: number;
+    hours: number;
+  }>;
+  completedItems: string[];
+  issueItems: string[];
+}
+
 export interface ReportContent {
   totalProjects: number;
   totalTasks: number;
@@ -25,6 +39,7 @@ export interface ReportContent {
     blocked: number;
     completionRate: number;
   }>;
+  dailySummary?: DailySummary;
 }
 
 export interface Report {
@@ -58,5 +73,8 @@ export const reportService = {
   async getReport(reportId: string): Promise<Report> {
     return api.get<Report>(`/reports/${reportId}`);
   },
-};
 
+  async deleteReport(reportId: string): Promise<void> {
+    return api.delete(`/reports/${reportId}`);
+  },
+};
