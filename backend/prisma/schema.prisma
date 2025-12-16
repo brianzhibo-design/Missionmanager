@@ -34,6 +34,7 @@ model User {
   projectMemberships ProjectMember[]             @relation("ProjectMemberUser")
   leadingProjects    Project[]                   @relation("ProjectLeader")
   taskComments       TaskComment[]
+  commentLikes       CommentLike[]
   taskEvents         TaskEvent[]
   assignedTasks      Task[]                      @relation("TaskAssignee")
   createdTasks       Task[]                      @relation("TaskCreator")
@@ -158,11 +159,24 @@ model TaskComment {
   taskId    String           @map("task_id")
   userId    String           @map("user_id")
   mentions  CommentMention[]
+  likes     CommentLike[]
   task      Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([taskId, createdAt])
   @@map("task_comments")
+}
+
+model CommentLike {
+  id        String      @id @default(cuid())
+  createdAt DateTime    @default(now()) @map("created_at")
+  commentId String      @map("comment_id")
+  userId    String      @map("user_id")
+  comment   TaskComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+  @@map("comment_likes")
 }
 
 model CommentMention {

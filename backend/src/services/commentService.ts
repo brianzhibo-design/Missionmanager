@@ -28,6 +28,12 @@ export interface CommentWithUser {
       name: string;
     };
   }[];
+  likes: {
+    userId: string;
+  }[];
+  _count: {
+    likes: number;
+  };
 }
 
 export const commentService = {
@@ -78,6 +84,16 @@ export const commentService = {
                 name: true,
               },
             },
+          },
+        },
+        likes: {
+          select: {
+            userId: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
           },
         },
       },
@@ -151,6 +167,16 @@ export const commentService = {
             },
           },
         },
+        likes: {
+          select: {
+            userId: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
+          },
+        },
       },
     });
   },
@@ -177,9 +203,9 @@ export const commentService = {
   },
 
   /**
-   * 更新评论
+   * 点赞评论（切换状态）
    */
-  async update(commentId: string, userId: string, content: string): Promise<CommentWithUser> {
+  async toggleLike(commentId: string, userId: string): Promise<{ liked: boolean; likeCount: number }> {
     const comment = await prisma.taskComment.findUnique({
       where: { id: commentId },
     });
@@ -188,33 +214,40 @@ export const commentService = {
       throw new Error('COMMENT_NOT_FOUND');
     }
 
-    if (comment.userId !== userId) {
-      throw new Error('FORBIDDEN');
-    }
-
-    return prisma.taskComment.update({
-      where: { id: commentId },
-      data: { content },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            avatar: true,
-          },
-        },
-        mentions: {
-          include: {
-            mentionedUser: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
+    // 检查是否已经点赞
+    const existingLike = await prisma.commentLike.findUnique({
+      where: {
+        commentId_userId: {
+          commentId,
+          userId,
         },
       },
     });
+
+    if (existingLike) {
+      // 已点赞，取消点赞
+      await prisma.commentLike.delete({
+        where: { id: existingLike.id },
+      });
+    } else {
+      // 未点赞，添加点赞
+      await prisma.commentLike.create({
+        data: {
+          commentId,
+          userId,
+        },
+      });
+    }
+
+    // 获取最新点赞数
+    const likeCount = await prisma.commentLike.count({
+      where: { commentId },
+    });
+
+    return {
+      liked: !existingLike,
+      likeCount,
+    };
   },
 };
 

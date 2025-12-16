@@ -13,10 +13,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--border-primary, #e5e7eb);
   flex-shrink: 0;
-  gap: 16px;
 }
 
 .notification-header h3 {
@@ -27,51 +26,22 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  white-space: nowrap;
-}
-
-.notification-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
 .mark-all-btn {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-brand, #6366f1);
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
   transition: all 0.15s ease;
   white-space: nowrap;
 }
 
 .mark-all-btn:hover {
   background-color: rgba(99, 102, 241, 0.1);
-}
-
-.notification-center-panel .close-btn {
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: 4px;
-  color: var(--text-tertiary, #9ca3af);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  padding: 0;
-  margin: 0;
-}
-
-.notification-center-panel .close-btn:hover {
-  background-color: var(--bg-hover, #f3f4f6);
-  color: var(--text-primary, #111827);
 }
 
 .notification-list {

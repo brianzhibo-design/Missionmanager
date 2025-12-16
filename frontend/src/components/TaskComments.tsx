@@ -2,7 +2,7 @@
  * 任务评论组件
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Trash2, Edit2, X, Check, AtSign } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Heart, AtSign } from 'lucide-react';
 import { commentService, Comment } from '../services/comment';
 import { useAuth } from '../hooks/useAuth';
 import './TaskComments.css';
@@ -18,8 +18,6 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editContent, setEditContent] = useState('');
   const [showMentions, setShowMentions] = useState(false);
   const [mentionSearch, setMentionSearch] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -74,16 +72,23 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     }
   };
 
-  const handleEdit = async (commentId: string) => {
-    if (!editContent.trim()) return;
-
+  const handleLike = async (commentId: string) => {
     try {
-      const updated = await commentService.update(commentId, editContent.trim());
-      setComments(comments.map(c => c.id === commentId ? updated : c));
-      setEditingId(null);
-      setEditContent('');
+      const result = await commentService.toggleLike(commentId);
+      setComments(comments.map(c => {
+        if (c.id === commentId) {
+          return {
+            ...c,
+            likes: result.liked 
+              ? [...c.likes, { userId: user?.id || '' }]
+              : c.likes.filter(l => l.userId !== user?.id),
+            _count: { likes: result.likeCount },
+          };
+        }
+        return c;
+      }));
     } catch (error) {
-      console.error('更新评论失败:', error);
+      console.error('点赞失败:', error);
     }
   };
 
@@ -226,79 +231,51 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
               <p>暂无评论，来发表第一条吧</p>
             </div>
           ) : (
-            comments.map((comment) => (
-              <div key={comment.id} className="comment-item">
-                <div className="comment-avatar">
-                  {comment.user.avatar ? (
-                    <img src={comment.user.avatar} alt={comment.user.name} />
-                  ) : (
-                    <span>{getAvatarText(comment.user.name)}</span>
-                  )}
-                </div>
-                <div className="comment-body">
-                  <div className="comment-header">
-                    <span className="comment-author">{comment.user.name}</span>
-                    <span className="comment-time">{formatTime(comment.createdAt)}</span>
-                    {comment.user.id === user?.id && (
-                      <div className="comment-actions">
-                        {editingId !== comment.id && (
-                          <>
-                            <button
-                              className="action-btn"
-                              onClick={() => {
-                                setEditingId(comment.id);
-                                setEditContent(comment.content);
-                              }}
-                              title="编辑"
-                            >
-                              <Edit2 size={14} />
-                            </button>
-                            <button
-                              className="action-btn danger"
-                              onClick={() => handleDelete(comment.id)}
-                              title="删除"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </>
-                        )}
-                      </div>
+            comments.map((comment) => {
+              const isLiked = comment.likes.some(l => l.userId === user?.id);
+              const likeCount = comment._count.likes;
+              
+              return (
+                <div key={comment.id} className="comment-item">
+                  <div className="comment-avatar">
+                    {comment.user.avatar ? (
+                      <img src={comment.user.avatar} alt={comment.user.name} />
+                    ) : (
+                      <span>{getAvatarText(comment.user.name)}</span>
                     )}
                   </div>
-                  {editingId === comment.id ? (
-                    <div className="comment-edit">
-                      <textarea
-                        value={editContent}
-                        onChange={(e) => setEditContent(e.target.value)}
-                        autoFocus
-                      />
-                      <div className="edit-actions">
-                        <button
-                          className="btn btn-sm btn-secondary"
-                          onClick={() => {
-                            setEditingId(null);
-                            setEditContent('');
-                          }}
-                        >
-                          <X size={14} /> 取消
-                        </button>
-                        <button
-                          className="btn btn-sm btn-primary"
-                          onClick={() => handleEdit(comment.id)}
-                        >
-                          <Check size={14} /> 保存
-                        </button>
-                      </div>
+                  <div className="comment-body">
+                    <div className="comment-header">
+                      <span className="comment-author">{comment.user.name}</span>
+                      <span className="comment-time">{formatTime(comment.createdAt)}</span>
                     </div>
-                  ) : (
                     <div
                       className="comment-content"
                       dangerouslySetInnerHTML={{ __html: highlightMentions(comment.content) }}
                     />
-                  )}
+                    <div className="comment-footer">
+                      <button
+                        className={`like-btn ${isLiked ? 'liked' : ''}`}
+                        onClick={() => handleLike(comment.id)}
+                        title={isLiked ? '取消点赞' : '点赞'}
+                      >
+                        <Heart size={14} fill={isLiked ? 'currentColor' : 'none'} />
+                        {likeCount > 0 && <span className="like-count">{likeCount}</span>}
+                      </button>
+                      {comment.user.id === user?.id && (
+                        <button
+                          className="action-btn danger"
+                          onClick={() => handleDelete(comment.id)}
+                          title="删除"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       )}

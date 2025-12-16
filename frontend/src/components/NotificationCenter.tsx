@@ -3,7 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, CheckCircle, Trash2, MessageCircle, ClipboardList, Clock, AlertTriangle, BarChart3, Send, Coffee, X, Check } from 'lucide-react';
+import { Bell, CheckCircle, Trash2, MessageCircle, ClipboardList, Clock, AlertTriangle, BarChart3, Send, Coffee, Check } from 'lucide-react';
 import { notificationService, NotificationResponse } from '../services/notification';
 import './NotificationCenter.css';
 
@@ -84,14 +84,11 @@ function NotificationCenter({ onClose, onUnreadCountChange }: NotificationCenter
     <div className="notification-center-panel">
       <div className="notification-header">
         <h3><Bell size={18} /> 通知</h3>
-        <div className="notification-header-actions">
-          {data && data.unreadCount > 0 && (
-            <button className="mark-all-btn" onClick={handleMarkAllAsRead}>
-              全部已读
-            </button>
-          )}
-          <button className="close-btn" onClick={onClose}><X size={18} /></button>
-        </div>
+        {data && data.unreadCount > 0 && (
+          <button className="mark-all-btn" onClick={handleMarkAllAsRead}>
+            全部已读
+          </button>
+        )}
       </div>
 
       <div className="notification-list">

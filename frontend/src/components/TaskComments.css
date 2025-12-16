@@ -172,34 +172,45 @@
   border-radius: 4px;
 }
 
-.comment-edit {
+/* 评论底部操作区 */
+.comment-footer {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
 }
 
-.comment-edit textarea {
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  border: 1px solid var(--border-primary);
-  border-radius: 8px;
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  resize: vertical;
-  min-height: 60px;
-}
-
-.comment-edit textarea:focus {
-  outline: none;
-  border-color: var(--color-brand);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-.edit-actions {
+.like-btn {
   display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: var(--text-tertiary);
+  font-size: 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.like-btn:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.like-btn.liked {
+  color: #ef4444;
+}
+
+.like-btn .like-count {
+  font-weight: 500;
+}
+
+.comment-footer .action-btn {
+  padding: 4px 8px;
+  width: auto;
+  height: auto;
 }
 
 /* 评论表单 */

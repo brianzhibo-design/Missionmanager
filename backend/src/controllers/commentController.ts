@@ -58,30 +58,22 @@ router.post('/tasks/:taskId', async (req: Request, res: Response) => {
 });
 
 /**
- * 更新评论
- * PATCH /comments/:commentId
+ * 点赞/取消点赞评论
+ * POST /comments/:commentId/like
  */
-router.patch('/:commentId', async (req: Request, res: Response) => {
+router.post('/:commentId/like', async (req: Request, res: Response) => {
   try {
     const { commentId } = req.params;
-    const { content } = req.body;
     const userId = req.user!.userId;
 
-    if (!content || !content.trim()) {
-      return res.status(400).json({ error: 'INVALID_INPUT', message: '评论内容不能为空' });
-    }
-
-    const comment = await commentService.update(commentId, userId, content.trim());
-    res.json({ success: true, data: comment });
+    const result = await commentService.toggleLike(commentId, userId);
+    res.json({ success: true, data: result });
   } catch (error: any) {
-    console.error('更新评论失败:', error);
+    console.error('点赞失败:', error);
     if (error.message === 'COMMENT_NOT_FOUND') {
       return res.status(404).json({ error: 'COMMENT_NOT_FOUND', message: '评论不存在' });
     }
-    if (error.message === 'FORBIDDEN') {
-      return res.status(403).json({ error: 'FORBIDDEN', message: '无权限修改此评论' });
-    }
-    res.status(500).json({ error: 'INTERNAL_ERROR', message: '更新评论失败' });
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '操作失败' });
   }
 });
 
