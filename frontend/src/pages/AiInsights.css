@@ -2,8 +2,7 @@
  * AI Insights 页面样式 - 现代化设计
  */
 .ai-insights-page {
-  max-width: 1400px;
-  margin: 0 auto;
+  width: 100%;
   padding: 0 24px 40px;
 }
 
