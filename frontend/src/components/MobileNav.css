@@ -1,5 +1,5 @@
 /* ========================================
- * 移动端底部导航 - 成熟APP风格
+ * 移动端导航 - 极简模块化设计
  * ======================================== */
 
 .mobile-nav {
@@ -7,27 +7,27 @@
 }
 
 @media (max-width: 768px) {
+  /* ========================================
+   * 底部导航栏 - 极简风格
+   * ======================================== */
   .mobile-nav {
     display: flex;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 56px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+    height: 50px;
+    background: #ffffff;
+    border-top: 1px solid #f0f0f0;
     padding-bottom: env(safe-area-inset-bottom, 0);
     z-index: 1000;
     justify-content: space-around;
     align-items: center;
   }
 
-  /* 深色模式 */
   [data-theme="dark"] .mobile-nav {
-    background: rgba(28, 28, 30, 0.95);
-    border-top-color: rgba(255, 255, 255, 0.1);
+    background: #1c1c1e;
+    border-top-color: #2c2c2e;
   }
 
   .mobile-nav-item {
@@ -36,29 +36,18 @@
     align-items: center;
     justify-content: center;
     gap: 2px;
-    padding: 6px 12px;
+    padding: 4px 16px;
     border: none;
     background: transparent;
-    color: #8e8e93;
+    color: #999;
     text-decoration: none;
-    border-radius: 10px;
-    transition: all 0.2s ease;
+    transition: color 0.15s ease;
     cursor: pointer;
-    min-width: 64px;
-    height: 48px;
     -webkit-tap-highlight-color: transparent;
-  }
-
-  .mobile-nav-item:active {
-    transform: scale(0.92);
   }
 
   .mobile-nav-item.active {
     color: #007AFF;
-  }
-
-  [data-theme="dark"] .mobile-nav-item {
-    color: #8e8e93;
   }
 
   [data-theme="dark"] .mobile-nav-item.active {
@@ -66,19 +55,13 @@
   }
 
   .mobile-nav-icon {
-    font-size: 24px;
+    font-size: 22px;
     line-height: 1;
-    transition: transform 0.2s ease;
-  }
-
-  .mobile-nav-item.active .mobile-nav-icon {
-    transform: scale(1.1);
   }
 
   .mobile-nav-label {
     font-size: 10px;
     font-weight: 500;
-    letter-spacing: -0.2px;
   }
 
   /* ========================================
@@ -87,11 +70,9 @@
   .mobile-menu-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.5);
     z-index: 2000;
-    animation: fadeIn 0.25s ease;
+    animation: fadeIn 0.2s ease;
   }
 
   @keyframes fadeIn {
@@ -100,108 +81,103 @@
   }
 
   /* ========================================
-   * 更多菜单面板 - iOS Action Sheet风格
+   * 更多菜单面板 - 全新模块化设计
    * ======================================== */
   .mobile-menu {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-radius: 16px 16px 0 0;
-    padding: 12px 16px;
-    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
+    background: #f5f5f5;
+    border-radius: 20px 20px 0 0;
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0);
     z-index: 2001;
-    animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-    max-height: 70vh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    max-height: 75vh;
+    overflow: hidden;
   }
 
   [data-theme="dark"] .mobile-menu {
-    background: rgba(44, 44, 46, 0.98);
-  }
-
-  /* 顶部拖拽指示器 */
-  .mobile-menu::before {
-    content: '';
-    display: block;
-    width: 36px;
-    height: 5px;
-    background: rgba(0, 0, 0, 0.15);
-    border-radius: 3px;
-    margin: 0 auto 16px;
-  }
-
-  [data-theme="dark"] .mobile-menu::before {
-    background: rgba(255, 255, 255, 0.2);
+    background: #2c2c2e;
   }
 
   @keyframes slideUp {
     from {
       transform: translateY(100%);
-      opacity: 0.5;
     }
     to {
       transform: translateY(0);
-      opacity: 1;
     }
+  }
+
+  /* 顶部拖拽条 */
+  .mobile-menu::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: #d1d1d6;
+    border-radius: 2px;
+    margin: 8px auto 0;
+  }
+
+  [data-theme="dark"] .mobile-menu::before {
+    background: #48484a;
   }
 
   .mobile-menu-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
-  }
-
-  [data-theme="dark"] .mobile-menu-header {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    padding: 16px 20px 12px;
   }
 
   .mobile-menu-header h3 {
-    font-size: 17px;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+    color: #000;
     margin: 0;
-    letter-spacing: -0.4px;
+  }
+
+  [data-theme="dark"] .mobile-menu-header h3 {
+    color: #fff;
   }
 
   .close-btn {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border: none;
-    background: rgba(0, 0, 0, 0.06);
+    background: #e5e5ea;
     border-radius: 50%;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
-    color: #8e8e93;
-    transition: all 0.15s ease;
+    color: #666;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   [data-theme="dark"] .close-btn {
-    background: rgba(255, 255, 255, 0.1);
-  }
-
-  .close-btn:active {
-    transform: scale(0.9);
-    background: rgba(0, 0, 0, 0.1);
+    background: #48484a;
+    color: #999;
   }
 
   /* ========================================
-   * 菜单项网格
+   * 菜单项网格 - 模块化卡片
    * ======================================== */
   .mobile-menu-items {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    gap: 12px;
+    padding: 8px 16px 24px;
+    background: #fff;
+    margin: 0 12px 12px;
+    border-radius: 16px;
+  }
+
+  [data-theme="dark"] .mobile-menu-items {
+    background: #1c1c1e;
   }
 
   .mobile-menu-item {
@@ -209,67 +185,75 @@
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    padding: 14px 8px;
-    background: rgba(0, 0, 0, 0.03);
+    padding: 16px 8px 12px;
+    background: transparent;
     border-radius: 12px;
     text-decoration: none;
-    color: var(--text-primary);
-    transition: all 0.15s ease;
+    color: #333;
+    transition: background 0.15s ease;
     -webkit-tap-highlight-color: transparent;
   }
 
   [data-theme="dark"] .mobile-menu-item {
-    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
   }
 
   .mobile-menu-item:active {
-    transform: scale(0.95);
-    background: rgba(0, 0, 0, 0.08);
+    background: #f5f5f5;
   }
 
   [data-theme="dark"] .mobile-menu-item:active {
-    background: rgba(255, 255, 255, 0.12);
+    background: #2c2c2e;
   }
 
   .mobile-menu-item.active {
-    background: rgba(0, 122, 255, 0.1);
     color: #007AFF;
   }
 
   [data-theme="dark"] .mobile-menu-item.active {
-    background: rgba(10, 132, 255, 0.15);
     color: #0A84FF;
   }
 
   .menu-icon {
-    font-size: 26px;
-    line-height: 1;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    background: #f5f5f5;
+    border-radius: 12px;
+  }
+
+  [data-theme="dark"] .menu-icon {
+    background: #2c2c2e;
+  }
+
+  .mobile-menu-item.active .menu-icon {
+    background: rgba(0, 122, 255, 0.1);
+  }
+
+  [data-theme="dark"] .mobile-menu-item.active .menu-icon {
+    background: rgba(10, 132, 255, 0.15);
   }
 
   .menu-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     text-align: center;
-    letter-spacing: -0.2px;
   }
 }
 
 /* ========================================
- * 小屏手机适配 (iPhone SE等)
+ * 小屏手机适配
  * ======================================== */
 @media (max-width: 375px) {
   .mobile-nav {
-    height: 52px;
-  }
-
-  .mobile-nav-item {
-    padding: 6px 8px;
-    min-width: 56px;
-    height: 44px;
+    height: 48px;
   }
 
   .mobile-nav-icon {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .mobile-nav-label {
@@ -277,19 +261,23 @@
   }
 
   .mobile-menu-items {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 8px 12px 20px;
+    margin: 0 8px 8px;
   }
 
   .mobile-menu-item {
-    padding: 12px 6px;
+    padding: 12px 4px 10px;
   }
 
   .menu-icon {
-    font-size: 24px;
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
   }
 
   .menu-label {
-    font-size: 10px;
+    font-size: 11px;
   }
 }
