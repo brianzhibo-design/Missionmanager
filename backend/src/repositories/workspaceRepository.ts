@@ -96,7 +96,7 @@ export const workspaceRepository = {
   async getMembers(workspaceId: string) {
     return prisma.workspaceUser.findMany({
       where: { workspaceId },
-      include: { user: { select: { id: true, email: true, name: true } } },
+      include: { user: { select: { id: true, email: true, name: true, avatar: true } } },
       orderBy: [
         { role: 'asc' },
         { joinedAt: 'asc' },

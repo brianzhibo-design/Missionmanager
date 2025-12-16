@@ -144,9 +144,9 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     setMentionSearch('');
   };
 
+  // 允许提及所有成员，包括自己（便于测试和某些特殊场景）
   const filteredMembers = projectMembers.filter(m => 
-    m.name.toLowerCase().includes(mentionSearch.toLowerCase()) &&
-    m.id !== user?.id
+    m.name.toLowerCase().includes(mentionSearch.toLowerCase())
   );
 
   const formatTime = (dateStr: string) => {
@@ -302,6 +302,8 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
             className="mention-btn"
             onClick={() => {
               setNewComment(newComment + '@');
+              setShowMentions(true);
+              setMentionSearch('');
               inputRef.current?.focus();
             }}
             title="提及成员"
