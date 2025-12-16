@@ -207,20 +207,39 @@ export const authService = {
   },
 
   /**
-   * 获取当前用户信息
+   * 获取当前用户信息（包含个人资料）
    */
   async getCurrentUser(userId: string) {
     const user = await userRepository.findById(userId);
     if (!user) {
       throw new AppError('用户不存在', 404, 'USER_NOT_FOUND');
     }
-    return { id: user.id, email: user.email, name: user.name };
+    return { 
+      id: user.id, 
+      email: user.email, 
+      name: user.name,
+      avatar: user.avatar,
+      profession: user.profession,
+      bio: user.bio,
+      phone: user.phone,
+      company: user.company,
+      location: user.location,
+      profileCompleted: user.profileCompleted,
+    };
   },
 
   /**
-   * 更新用户资料（名称和邮箱）
+   * 更新用户资料（名称、邮箱和个人信息）
    */
-  async updateProfile(userId: string, data: { name?: string; email?: string }) {
+  async updateProfile(userId: string, data: { 
+    name?: string; 
+    email?: string;
+    profession?: string;
+    bio?: string;
+    phone?: string;
+    company?: string;
+    location?: string;
+  }) {
     const user = await userRepository.findById(userId);
     if (!user) {
       throw new AppError('用户不存在', 404, 'USER_NOT_FOUND');
@@ -236,11 +255,28 @@ export const authService = {
 
     // 更新用户信息
     const updatedUser = await userRepository.update(userId, {
-      name: data.name || user.name,
-      email: data.email || user.email,
+      name: data.name !== undefined ? data.name : user.name,
+      email: data.email !== undefined ? data.email : user.email,
+      profession: data.profession !== undefined ? data.profession : user.profession,
+      bio: data.bio !== undefined ? data.bio : user.bio,
+      phone: data.phone !== undefined ? data.phone : user.phone,
+      company: data.company !== undefined ? data.company : user.company,
+      location: data.location !== undefined ? data.location : user.location,
+      profileCompleted: true, // 更新资料后标记为已完善
     });
 
-    return { id: updatedUser.id, email: updatedUser.email, name: updatedUser.name };
+    return { 
+      id: updatedUser.id, 
+      email: updatedUser.email, 
+      name: updatedUser.name,
+      avatar: updatedUser.avatar,
+      profession: updatedUser.profession,
+      bio: updatedUser.bio,
+      phone: updatedUser.phone,
+      company: updatedUser.company,
+      location: updatedUser.location,
+      profileCompleted: updatedUser.profileCompleted,
+    };
   },
 
   /**

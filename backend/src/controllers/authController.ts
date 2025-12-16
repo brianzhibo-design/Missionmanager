@@ -79,17 +79,26 @@ authRouter.get('/me', requireAuth, async (req: Request, res: Response, next: Nex
 
 /**
  * PATCH /auth/profile
- * 更新用户资料（名称和邮箱）
+ * 更新用户资料（名称、邮箱和个人信息）
  */
 authRouter.patch('/profile', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, profession, bio, phone, company, location } = req.body;
 
-    if (!name && !email) {
+    // 至少需要提供一个字段
+    if (!name && !email && !profession && bio === undefined && !phone && !company && !location) {
       throw new AppError('请提供要更新的字段', 400, 'MISSING_FIELDS');
     }
 
-    const user = await authService.updateProfile(req.user!.userId, { name, email });
+    const user = await authService.updateProfile(req.user!.userId, { 
+      name, 
+      email,
+      profession,
+      bio,
+      phone,
+      company,
+      location,
+    });
 
     res.json({
       success: true,

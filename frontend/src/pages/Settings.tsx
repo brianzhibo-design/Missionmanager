@@ -1,15 +1,29 @@
 /**
  * 用户设置页面
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { usePermissions } from '../hooks/usePermissions';
 import { authService } from '../services/auth';
 import { workspaceService } from '../services/workspace';
 import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
-import { User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2 } from 'lucide-react';
+import { User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText } from 'lucide-react';
 import './Settings.css';
+
+// 职业选项
+const PROFESSIONS = [
+  { value: 'developer', label: '开发工程师', icon: '💻' },
+  { value: 'designer', label: '设计师', icon: '🎨' },
+  { value: 'pm', label: '产品经理', icon: '📋' },
+  { value: 'marketing', label: '市场营销', icon: '📢' },
+  { value: 'operation', label: '运营', icon: '📈' },
+  { value: 'hr', label: '人力资源', icon: '👥' },
+  { value: 'finance', label: '财务', icon: '💰' },
+  { value: 'sales', label: '销售', icon: '🤝' },
+  { value: 'student', label: '学生', icon: '📚' },
+  { value: 'other', label: '其他', icon: '✨' },
+];
 
 export default function Settings() {
   const { user, refreshUser } = useAuth();
@@ -25,6 +39,11 @@ export default function Settings() {
   // 表单状态
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [profession, setProfession] = useState(user?.profession || '');
+  const [company, setCompany] = useState(user?.company || '');
+  const [location, setLocation] = useState(user?.location || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,10 +53,32 @@ export default function Settings() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // 当用户信息更新时，同步表单状态
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+      setProfession(user.profession || '');
+      setCompany(user.company || '');
+      setLocation(user.location || '');
+      setBio(user.bio || '');
+    }
+  }, [user]);
+
+  // 获取职业标签
+  const getProfessionLabel = (value: string) => {
+    const prof = PROFESSIONS.find(p => p.value === value);
+    return prof ? `${prof.icon} ${prof.label}` : value || '未设置';
+  };
+
   // 重置表单
   const resetProfileForm = () => {
     setName(user?.name || '');
     setEmail(user?.email || '');
+    setProfession(user?.profession || '');
+    setCompany(user?.company || '');
+    setLocation(user?.location || '');
+    setBio(user?.bio || '');
     setIsEditingProfile(false);
     setError(null);
   };
@@ -64,7 +105,14 @@ export default function Settings() {
     try {
       setSaving(true);
       setError(null);
-      await authService.updateProfile({ name: name.trim(), email: email.trim() });
+      await authService.updateProfile({ 
+        name: name.trim(), 
+        email: email.trim(),
+        profession,
+        company: company.trim(),
+        location: location.trim(),
+        bio: bio.trim(),
+      });
       
       // 刷新用户状态
       if (refreshUser) {
@@ -244,9 +292,15 @@ export default function Settings() {
                 <div className="profile-info">
                   <div className="profile-name">{user?.name}</div>
                   <div className="profile-email">{user?.email}</div>
+                  {user?.profession && (
+                    <div className="profile-profession">{getProfessionLabel(user.profession)}</div>
+                  )}
                 </div>
               </div>
 
+              {/* 基本信息 */}
+              <div className="profile-section-title">基本信息</div>
+              
               <div className="form-group">
                 <label className="form-label">显示名称</label>
                 <input
@@ -271,6 +325,87 @@ export default function Settings() {
                 />
                 {isEditingProfile && (
                   <p className="form-hint">修改邮箱后，下次登录需要使用新邮箱</p>
+                )}
+              </div>
+
+              {/* 职业信息 */}
+              <div className="profile-section-title">职业信息</div>
+
+              <div className="form-group">
+                <label className="form-label">职业</label>
+                {isEditingProfile ? (
+                  <div className="profession-select-grid">
+                    {PROFESSIONS.map((prof) => (
+                      <button
+                        key={prof.value}
+                        type="button"
+                        className={`profession-option ${profession === prof.value ? 'active' : ''}`}
+                        onClick={() => setProfession(prof.value)}
+                        disabled={saving}
+                      >
+                        <span className="profession-icon">{prof.icon}</span>
+                        <span className="profession-label">{prof.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="form-value">{getProfessionLabel(profession)}</div>
+                )}
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">
+                    <Building2 size={14} /> 公司/组织
+                  </label>
+                  {isEditingProfile ? (
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={company}
+                      onChange={(e) => setCompany(e.target.value)}
+                      disabled={saving}
+                      placeholder="您所在的公司或组织"
+                    />
+                  ) : (
+                    <div className="form-value">{company || '未设置'}</div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <MapPin size={14} /> 所在地
+                  </label>
+                  {isEditingProfile ? (
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      disabled={saving}
+                      placeholder="城市"
+                    />
+                  ) : (
+                    <div className="form-value">{location || '未设置'}</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <FileText size={14} /> 个人简介
+                </label>
+                {isEditingProfile ? (
+                  <textarea
+                    className="form-textarea"
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    disabled={saving}
+                    placeholder="简单介绍一下自己..."
+                    rows={3}
+                  />
+                ) : (
+                  <div className="form-value bio-value">{bio || '未设置'}</div>
                 )}
               </div>
             </div>

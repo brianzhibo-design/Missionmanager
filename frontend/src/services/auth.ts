@@ -9,11 +9,19 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  avatar?: string;
+  profession?: string;
+  bio?: string;
+  phone?: string;
+  company?: string;
+  location?: string;
   profileCompleted?: boolean;
 }
 
 // 用户个人信息类型
 export interface UserProfile {
+  name?: string;
+  email?: string;
   profession?: string;
   bio?: string;
   phone?: string;
@@ -156,8 +164,8 @@ export const authService = {
     return currentState.user;
   },
 
-  // 更新用户资料
-  async updateProfile(data: { name?: string; email?: string }): Promise<User> {
+  // 更新用户资料（支持完整个人信息）
+  async updateProfile(data: UserProfile): Promise<User> {
     const response = await api.patch<{ user: User }>('/auth/profile', data);
 
     // 更新本地状态
