@@ -18,6 +18,7 @@ import MembersManage from './pages/admin/MembersManage';
 import AiInsights from './pages/AiInsights';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
+import WorkReports from './pages/WorkReports';
 
 /**
  * 应用主组件
@@ -52,6 +53,9 @@ function App() {
           
           {/* 设置页面 */}
           <Route path="/settings" element={<Settings />} />
+          
+          {/* 工作日报 */}
+          <Route path="/work-reports" element={<WorkReports />} />
           
           {/* Admin 页面 - 需要管理员权限 */}
           <Route 
