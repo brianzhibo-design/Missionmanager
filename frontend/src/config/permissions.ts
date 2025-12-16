@@ -40,8 +40,12 @@ export const PERMISSIONS = {
     editTask: ['owner', 'director', 'manager', 'member'],
     // 可以删除任务
     deleteTask: ['owner', 'director', 'manager'],
-    // 可以查看报告
-    viewReports: ['owner', 'director'],
+    // 可以查看统计报告（周报/月报）
+    viewReports: ['owner', 'director', 'manager'],
+    // 可以填写日报（所有成员）
+    writeDailyReport: ['owner', 'director', 'manager', 'member'],
+    // 可以查看团队日报
+    viewTeamReports: ['owner', 'director', 'manager'],
     // 可以查看 AI 洞察
     viewAiInsights: ['owner', 'director', 'manager'],
   },

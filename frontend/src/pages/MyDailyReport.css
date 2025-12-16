@@ -1,0 +1,450 @@
+/* 我的日报页面样式 */
+.my-daily-report-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.my-daily-report-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.my-daily-report-page .header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.my-daily-report-page .header-icon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.5);
+}
+
+.my-daily-report-page .header-text h1 {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--text-primary), #10b981);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 6px 0;
+}
+
+.my-daily-report-page .header-text p {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* 日期选择器 */
+.my-daily-report-page .date-picker-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px 24px;
+  background: linear-gradient(145deg, var(--bg-surface), var(--bg-secondary));
+  border-radius: 20px;
+  margin-bottom: 28px;
+  border: 1px solid var(--border-primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.my-daily-report-page .date-nav-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-primary);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.my-daily-report-page .date-nav-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border-color: transparent;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.my-daily-report-page .date-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.my-daily-report-page .current-date {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 280px;
+  justify-content: center;
+}
+
+.my-daily-report-page .today-badge {
+  font-size: 12px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+.my-daily-report-page .readonly-badge {
+  font-size: 11px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* 布局 */
+.my-daily-report-page .daily-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
+}
+
+.my-daily-report-page .daily-form-section,
+.my-daily-report-page .daily-history {
+  padding: 24px;
+  background: var(--bg-surface);
+  border-radius: 20px;
+  border: 1px solid var(--border-primary);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+}
+
+.my-daily-report-page .section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border-primary);
+}
+
+.my-daily-report-page .section-header h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.my-daily-report-page .section-header h3 svg {
+  color: #10b981;
+}
+
+.my-daily-report-page .header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* 表单 */
+.my-daily-report-page .daily-form-placeholder {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.my-daily-report-page .daily-form-placeholder p {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.my-daily-report-page .daily-form .form-group {
+  margin-bottom: 20px;
+}
+
+.my-daily-report-page .daily-form .form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.my-daily-report-page .daily-form .form-label .required {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.my-daily-report-page .daily-form .form-label .optional {
+  color: var(--text-tertiary);
+  font-weight: 400;
+  font-size: 13px;
+}
+
+.my-daily-report-page .daily-form .form-input,
+.my-daily-report-page .daily-form textarea.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  border: 2px solid var(--border-primary);
+  border-radius: 12px;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.my-daily-report-page .daily-form .form-input:hover {
+  border-color: var(--text-tertiary);
+}
+
+.my-daily-report-page .daily-form .form-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.my-daily-report-page .work-hours-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.my-daily-report-page .work-hours-input input {
+  width: 120px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.my-daily-report-page .work-hours-input .unit {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.my-daily-report-page .form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-primary);
+}
+
+.my-daily-report-page .form-actions .btn-primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.my-daily-report-page .form-actions .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* 只读报告 */
+.my-daily-report-page .readonly-report {
+  padding: 20px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.my-daily-report-page .readonly-report .report-section {
+  margin-bottom: 16px;
+}
+
+.my-daily-report-page .readonly-report .report-section:last-child {
+  margin-bottom: 0;
+}
+
+.my-daily-report-page .readonly-report h4 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 8px 0;
+}
+
+.my-daily-report-page .readonly-report p {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* 历史列表 */
+.my-daily-report-page .my-reports-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.my-daily-report-page .my-report-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.my-daily-report-page .my-report-item:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.03));
+  border-color: rgba(16, 185, 129, 0.1);
+}
+
+.my-daily-report-page .my-report-item.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.06));
+  border-color: rgba(16, 185, 129, 0.2);
+  border-left: 3px solid #10b981;
+}
+
+.my-daily-report-page .my-report-item .report-date {
+  font-size: 14px;
+  font-weight: 700;
+  color: #10b981;
+  min-width: 70px;
+}
+
+.my-daily-report-page .my-report-item .report-preview {
+  flex: 1;
+  font-size: 14px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.my-daily-report-page .my-report-item .work-hours {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 空状态 */
+.my-daily-report-page .empty-placeholder {
+  padding: 60px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.my-daily-report-page .empty-placeholder .hint {
+  font-size: 14px;
+  color: var(--text-tertiary);
+  margin-top: 12px;
+}
+
+.my-daily-report-page .loading-placeholder {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* 消息提示 */
+.my-daily-report-page .error-card {
+  background: linear-gradient(135deg, #fef2f2, #fee2e2);
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  padding: 14px 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.my-daily-report-page .success-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 14px 24px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.5);
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 1000;
+  animation: toastSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@keyframes toastSlide {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 按钮 */
+.my-daily-report-page .btn-danger {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  border: none;
+}
+
+.my-daily-report-page .btn-danger:hover {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+  .my-daily-report-page .daily-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .my-daily-report-page .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .my-daily-report-page .date-picker-bar {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .my-daily-report-page .current-date {
+    font-size: 16px;
+    min-width: auto;
+  }
+}
+

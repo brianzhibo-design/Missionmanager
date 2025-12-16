@@ -18,6 +18,7 @@ import MembersManage from './pages/admin/MembersManage';
 import AiInsights from './pages/AiInsights';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
+import MyDailyReport from './pages/MyDailyReport';
 
 /**
  * 应用主组件
@@ -50,6 +51,9 @@ function App() {
           <Route path="/projects/:id" element={<ProjectDetail />} />
           <Route path="/tasks/:id" element={<TaskDetail />} />
           
+          {/* 我的日报 - 所有成员可访问 */}
+          <Route path="/daily-report" element={<MyDailyReport />} />
+          
           {/* 设置页面 */}
           <Route path="/settings" element={<Settings />} />
           
@@ -81,7 +85,7 @@ function App() {
           <Route 
             path="/reports" 
             element={
-              <AdminRoute permission="adminTree">
+              <AdminRoute permission="viewReports">
                 <Reports />
               </AdminRoute>
             } 

@@ -91,6 +91,7 @@ export default function AppLayout() {
     { path: '/dashboard', icon: LayoutDashboard, label: '仪表盘' },
     { path: '/my-tasks', icon: CheckSquare, label: '我的任务' },
     { path: '/projects', icon: FolderKanban, label: '项目' },
+    { path: '/daily-report', icon: FileText, label: '我的日报' },
   ];
 
   const adminNavItems = [
