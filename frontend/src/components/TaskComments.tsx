@@ -106,9 +106,27 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     const textBefore = newComment.substring(0, cursorPos);
     const textAfter = newComment.substring(cursorPos);
     
-    // 找到@符号的位置
-    const lastAtPos = textBefore.lastIndexOf('@');
-    const newText = textBefore.substring(0, lastAtPos) + `@${member.name} ` + textAfter;
+    // 找到当前正在编辑的@符号位置（从光标位置向前找最近的未完成的@）
+    let atPos = -1;
+    for (let i = textBefore.length - 1; i >= 0; i--) {
+      if (textBefore[i] === '@') {
+        const textAfterThisAt = textBefore.substring(i + 1);
+        if (!textAfterThisAt.includes(' ')) {
+          atPos = i;
+          break;
+        }
+      }
+      if (textBefore[i] === ' ' || textBefore[i] === '\n') {
+        break;
+      }
+    }
+    
+    if (atPos === -1) {
+      // 如果没找到@，直接在光标位置插入
+      atPos = cursorPos;
+    }
+    
+    const newText = newComment.substring(0, atPos) + `@${member.name} ` + textAfter;
     
     setNewComment(newText);
     setShowMentions(false);
@@ -117,7 +135,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     // 聚焦并设置光标位置
     setTimeout(() => {
       textarea.focus();
-      const newCursorPos = lastAtPos + member.name.length + 2;
+      const newCursorPos = atPos + member.name.length + 2;
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
@@ -126,20 +144,41 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     const value = e.target.value;
     setNewComment(value);
 
-    // 检测@符号
+    // 检测@符号 - 从光标位置向前查找最近的未完成的@符号
     const cursorPos = e.target.selectionStart;
     const textBefore = value.substring(0, cursorPos);
-    const lastAtPos = textBefore.lastIndexOf('@');
     
-    if (lastAtPos !== -1) {
-      const textAfterAt = textBefore.substring(lastAtPos + 1);
-      // 如果@后面没有空格，显示提及列表
-      if (!textAfterAt.includes(' ')) {
-        setMentionSearch(textAfterAt);
-        setShowMentions(true);
-        return;
+    // 从光标位置向前找最近的@，并检查它是否是一个未完成的提及
+    let foundAt = -1;
+    
+    for (let i = textBefore.length - 1; i >= 0; i--) {
+      const char = textBefore[i];
+      
+      if (char === '@') {
+        // 找到一个@符号，检查它后面到光标位置之间是否有空格
+        const textAfterThisAt = textBefore.substring(i + 1);
+        if (!textAfterThisAt.includes(' ')) {
+          // 这是一个未完成的提及
+          foundAt = i;
+        }
+        // 找到@后就停止搜索，无论是否完成
+        break;
+      }
+      
+      // 遇到空格或换行时，检查空格后面是否紧跟着@
+      if (char === ' ' || char === '\n') {
+        // 继续向前搜索，看看紧跟着空格后面是否有@
+        continue;
       }
     }
+    
+    if (foundAt !== -1) {
+      const textAfterAt = textBefore.substring(foundAt + 1);
+      setMentionSearch(textAfterAt);
+      setShowMentions(true);
+      return;
+    }
+    
     setShowMentions(false);
     setMentionSearch('');
   };
