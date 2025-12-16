@@ -12,9 +12,11 @@ import './BroadcastPanel.css';
 interface BroadcastPanelProps {
   workspaceId: string;
   onClose: () => void;
+  userRole?: string; // 用户在工作区的角色
 }
 
-export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onClose }) => {
+export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onClose, userRole }) => {
+  const isOwner = userRole === 'owner';
   const [activeTab, setActiveTab] = useState<'send' | 'history' | 'coffee'>('send');
   const [members, setMembers] = useState<SelectableMember[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -31,8 +33,10 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
 
   useEffect(() => {
     loadMembers();
-    loadCoffeeWinner();
-  }, [workspaceId]);
+    if (isOwner) {
+      loadCoffeeWinner();
+    }
+  }, [workspaceId, isOwner]);
 
   useEffect(() => {
     if (activeTab === 'history') {
@@ -190,12 +194,14 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
         >
           <History size={16} /> 历史记录
         </button>
-        <button
-          className={`tab-btn ${activeTab === 'coffee' ? 'active' : ''}`}
-          onClick={() => setActiveTab('coffee')}
-        >
-          <Coffee size={16} /> 咖啡抽奖
-        </button>
+        {isOwner && (
+          <button
+            className={`tab-btn ${activeTab === 'coffee' ? 'active' : ''}`}
+            onClick={() => setActiveTab('coffee')}
+          >
+            <Coffee size={16} /> 咖啡抽奖
+          </button>
+        )}
       </div>
 
       <div className="panel-content">
@@ -317,7 +323,7 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
           </div>
         )}
 
-        {activeTab === 'coffee' && (
+        {activeTab === 'coffee' && isOwner && (
           <div className="coffee-section">
             <div className="coffee-today">
               <div className="coffee-icon">☕</div>

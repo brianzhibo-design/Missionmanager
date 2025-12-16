@@ -329,6 +329,7 @@ export default function MembersManage() {
         <BroadcastPanel
           workspaceId={currentWorkspace.id}
           onClose={() => setShowBroadcast(false)}
+          userRole={workspaceRole}
         />
       )}
     </div>

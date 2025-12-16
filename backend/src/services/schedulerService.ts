@@ -122,8 +122,8 @@ async function checkScheduledTasks(): Promise<void> {
   const currentHour = now.getHours();
   const currentDate = now.toISOString().split('T')[0];
 
-  // 每天早上9点发送提醒（只发送一次）
-  if (currentHour === 9 && lastDailyReminderDate !== currentDate) {
+  // 每天凌晨0点刷新咖啡抽奖和发送提醒（只发送一次）
+  if (currentHour === 0 && lastDailyReminderDate !== currentDate) {
     lastDailyReminderDate = currentDate;
     await sendDailyReminders();
   }

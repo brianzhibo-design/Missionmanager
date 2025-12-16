@@ -7,11 +7,27 @@ import { broadcastService } from '../services/broadcastService';
 import { coffeeService } from '../services/coffeeService';
 import { schedulerService } from '../services/schedulerService';
 import { requireAuth } from '../middleware/authMiddleware';
+import { prisma } from '../infra/database';
 
 const router = Router();
 
 // 所有路由都需要认证
 router.use(requireAuth);
+
+/**
+ * 检查用户是否是工作区创始人
+ */
+async function isWorkspaceOwner(userId: string, workspaceId: string): Promise<boolean> {
+  const membership = await prisma.workspaceUser.findUnique({
+    where: {
+      userId_workspaceId: {
+        userId,
+        workspaceId,
+      },
+    },
+  });
+  return membership?.role === 'owner';
+}
 
 /**
  * 发送群发消息
@@ -68,12 +84,19 @@ router.get('/workspaces/:workspaceId/history', async (req: Request, res: Respons
 });
 
 /**
- * 获取今日咖啡获奖者
+ * 获取今日咖啡获奖者（仅工作区创始人可访问）
  * GET /broadcast/workspaces/:workspaceId/coffee-winner
  */
 router.get('/workspaces/:workspaceId/coffee-winner', async (req: Request, res: Response) => {
   try {
     const { workspaceId } = req.params;
+    const userId = req.user!.userId;
+
+    // 检查是否是工作区创始人
+    if (!(await isWorkspaceOwner(userId, workspaceId))) {
+      return res.status(403).json({ error: 'FORBIDDEN', message: '仅工作区创始人可查看咖啡抽奖' });
+    }
+
     const winner = await coffeeService.getTodayWinner(workspaceId);
     res.json({ success: true, data: { winner } });
   } catch (error: any) {
@@ -83,12 +106,19 @@ router.get('/workspaces/:workspaceId/coffee-winner', async (req: Request, res: R
 });
 
 /**
- * 手动执行咖啡抽奖
+ * 手动执行咖啡抽奖（仅工作区创始人可访问）
  * POST /broadcast/workspaces/:workspaceId/draw-coffee
  */
 router.post('/workspaces/:workspaceId/draw-coffee', async (req: Request, res: Response) => {
   try {
     const { workspaceId } = req.params;
+    const userId = req.user!.userId;
+
+    // 检查是否是工作区创始人
+    if (!(await isWorkspaceOwner(userId, workspaceId))) {
+      return res.status(403).json({ error: 'FORBIDDEN', message: '仅工作区创始人可进行咖啡抽奖' });
+    }
+
     const result = await coffeeService.drawLottery(workspaceId);
     res.json({ success: true, data: result });
   } catch (error: any) {
@@ -101,12 +131,19 @@ router.post('/workspaces/:workspaceId/draw-coffee', async (req: Request, res: Re
 });
 
 /**
- * 获取咖啡抽奖历史
+ * 获取咖啡抽奖历史（仅工作区创始人可访问）
  * GET /broadcast/workspaces/:workspaceId/coffee-history
  */
 router.get('/workspaces/:workspaceId/coffee-history', async (req: Request, res: Response) => {
   try {
     const { workspaceId } = req.params;
+    const userId = req.user!.userId;
+
+    // 检查是否是工作区创始人
+    if (!(await isWorkspaceOwner(userId, workspaceId))) {
+      return res.status(403).json({ error: 'FORBIDDEN', message: '仅工作区创始人可查看咖啡抽奖历史' });
+    }
+
     const limit = parseInt(req.query.limit as string) || 30;
     const history = await coffeeService.getHistory(workspaceId, { limit });
     res.json({ success: true, data: history });
