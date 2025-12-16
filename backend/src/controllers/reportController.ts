@@ -29,7 +29,12 @@ reportRouter.post(
       const report = await reportService.generateWeeklyReport(workspaceId, userId);
 
       // 通知用户
-      await notificationService.notifyReportReady(userId, 'weekly', report.title);
+      await notificationService.create({
+        userId,
+        type: 'report_ready',
+        title: '周报生成完成',
+        message: `${report.title} 已生成完成，点击查看详情`,
+      });
 
       res.json({
         success: true,
@@ -51,7 +56,12 @@ reportRouter.post(
 
       const report = await reportService.generateMonthlyReport(workspaceId, userId);
 
-      await notificationService.notifyReportReady(userId, 'monthly', report.title);
+      await notificationService.create({
+        userId,
+        type: 'report_ready',
+        title: '月报生成完成',
+        message: `${report.title} 已生成完成，点击查看详情`,
+      });
 
       res.json({
         success: true,

@@ -6,12 +6,13 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { memberService, Member } from '../../services/member';
 import { Modal } from '../../components/Modal';
 import { Avatar } from '../../components/Avatar';
-import { Users } from 'lucide-react';
+import { Users, Send } from 'lucide-react';
 import { 
   ROLE_LABELS, 
   WORKSPACE_ROLE_OPTIONS,
   WORKSPACE_ROLE_HIERARCHY 
 } from '../../config/permissions';
+import BroadcastPanel from '../../components/BroadcastPanel';
 import './MembersManage.css';
 
 export default function MembersManage() {
@@ -25,6 +26,7 @@ export default function MembersManage() {
   const [showEditRole, setShowEditRole] = useState(false);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showBroadcast, setShowBroadcast] = useState(false);
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -138,11 +140,18 @@ export default function MembersManage() {
             <p>管理 {currentWorkspace?.name} 的团队成员</p>
           </div>
         </div>
-        {canWorkspace('invite') && (
-          <button className="btn btn-primary" onClick={() => setShowInvite(true)}>
-            + 邀请成员
-          </button>
-        )}
+        <div className="header-actions">
+          {(workspaceRole === 'owner' || workspaceRole === 'director') && (
+            <button className="btn btn-secondary" onClick={() => setShowBroadcast(true)}>
+              <Send size={16} /> 群发消息
+            </button>
+          )}
+          {canWorkspace('invite') && (
+            <button className="btn btn-primary" onClick={() => setShowInvite(true)}>
+              + 邀请成员
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (
@@ -314,6 +323,14 @@ export default function MembersManage() {
           </form>
         )}
       </Modal>
+
+      {/* 群发消息面板 */}
+      {showBroadcast && currentWorkspace && (
+        <BroadcastPanel
+          workspaceId={currentWorkspace.id}
+          onClose={() => setShowBroadcast(false)}
+        />
+      )}
     </div>
   );
 }

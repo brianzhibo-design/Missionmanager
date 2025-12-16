@@ -1,94 +1,97 @@
 /**
  * 通知控制器
+ * 处理通知相关的 HTTP 请求
  */
-import { Router, Request, Response, NextFunction } from 'express';
+import { Router, Request, Response } from 'express';
 import { notificationService } from '../services/notificationService';
 import { requireAuth } from '../middleware/authMiddleware';
 
-export const notificationRouter = Router();
+const router = Router();
 
-notificationRouter.use(requireAuth);
+// 所有路由都需要认证
+router.use(requireAuth);
 
-// GET /notifications - 获取通知列表
-notificationRouter.get(
-  '/',
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user!.userId;
-      const { unreadOnly, limit, offset } = req.query;
+/**
+ * 获取当前用户的通知列表
+ * GET /notifications
+ */
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
+    const unreadOnly = req.query.unreadOnly === 'true';
 
-      const result = await notificationService.getByUser(userId, {
-        unreadOnly: unreadOnly === 'true',
-        limit: limit ? parseInt(limit as string) : undefined,
-        offset: offset ? parseInt(offset as string) : undefined,
-      });
-
-      res.json({
-        success: true,
-        data: result,
-      });
-    } catch (error) {
-      next(error);
-    }
+    const result = await notificationService.getByUserId(userId, { limit, offset, unreadOnly });
+    res.json({ success: true, data: result });
+  } catch (error: any) {
+    console.error('获取通知失败:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取通知失败' });
   }
-);
+});
 
-// POST /notifications/:id/read - 标记为已读
-notificationRouter.post(
-  '/:id/read',
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user!.userId;
-      const { id } = req.params;
+/**
+ * 标记通知为已读
+ * PATCH /notifications/:notificationId/read
+ */
+router.patch('/:notificationId/read', async (req: Request, res: Response) => {
+  try {
+    const { notificationId } = req.params;
+    const userId = req.user!.userId;
 
-      await notificationService.markAsRead(id, userId);
-
-      res.json({
-        success: true,
-        message: '已标记为已读',
-      });
-    } catch (error) {
-      next(error);
-    }
+    await notificationService.markAsRead(notificationId, userId);
+    res.json({ success: true, data: null });
+  } catch (error: any) {
+    console.error('标记已读失败:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '标记已读失败' });
   }
-);
+});
 
-// POST /notifications/read-all - 标记全部已读
-notificationRouter.post(
-  '/read-all',
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user!.userId;
-
-      await notificationService.markAllAsRead(userId);
-
-      res.json({
-        success: true,
-        message: '已全部标记为已读',
-      });
-    } catch (error) {
-      next(error);
-    }
+/**
+ * 标记所有通知为已读
+ * POST /notifications/read-all
+ */
+router.post('/read-all', async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const count = await notificationService.markAllAsRead(userId);
+    res.json({ success: true, data: { count } });
+  } catch (error: any) {
+    console.error('标记全部已读失败:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '标记全部已读失败' });
   }
-);
+});
 
-// DELETE /notifications/:id - 删除通知
-notificationRouter.delete(
-  '/:id',
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user!.userId;
-      const { id } = req.params;
+/**
+ * 删除通知
+ * DELETE /notifications/:notificationId
+ */
+router.delete('/:notificationId', async (req: Request, res: Response) => {
+  try {
+    const { notificationId } = req.params;
+    const userId = req.user!.userId;
 
-      await notificationService.delete(id, userId);
-
-      res.json({
-        success: true,
-        message: '通知已删除',
-      });
-    } catch (error) {
-      next(error);
-    }
+    await notificationService.delete(notificationId, userId);
+    res.status(204).send();
+  } catch (error: any) {
+    console.error('删除通知失败:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '删除通知失败' });
   }
-);
+});
 
+/**
+ * 清空所有已读通知
+ * DELETE /notifications/clear-read
+ */
+router.delete('/clear-read', async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const count = await notificationService.clearRead(userId);
+    res.json({ success: true, data: { count } });
+  } catch (error: any) {
+    console.error('清空已读通知失败:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '清空已读通知失败' });
+  }
+});
+
+export default router;

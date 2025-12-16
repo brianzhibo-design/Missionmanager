@@ -3,7 +3,8 @@
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { notificationService, NotificationsResponse } from '../services/notification';
+import { Bell, CheckCircle, Trash2, MessageCircle, ClipboardList, Clock, AlertTriangle, BarChart3, Send, Coffee, X, Check } from 'lucide-react';
+import { notificationService, NotificationResponse } from '../services/notification';
 import './NotificationCenter.css';
 
 interface NotificationCenterProps {
@@ -11,17 +12,20 @@ interface NotificationCenterProps {
   onUnreadCountChange?: (count: number) => void;
 }
 
-const NOTIFICATION_ICONS: Record<string, string> = {
-  task_assigned: '📋',
-  task_status_changed: '🔄',
-  task_due_soon: '⏰',
-  task_overdue: '⚠️',
-  mention: '💬',
-  report_ready: '📊',
+const NOTIFICATION_ICONS: Record<string, React.ReactNode> = {
+  task_assigned: <ClipboardList size={16} />,
+  task_status_changed: <CheckCircle size={16} />,
+  task_due_soon: <Clock size={16} />,
+  task_overdue: <AlertTriangle size={16} />,
+  mention: <MessageCircle size={16} />,
+  task_comment: <MessageCircle size={16} />,
+  report_ready: <BarChart3 size={16} />,
+  broadcast: <Send size={16} />,
+  coffee_lottery: <Coffee size={16} />,
 };
 
 function NotificationCenter({ onClose, onUnreadCountChange }: NotificationCenterProps) {
-  const [data, setData] = useState<NotificationsResponse | null>(null);
+  const [data, setData] = useState<NotificationResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,7 +41,7 @@ function NotificationCenter({ onClose, onUnreadCountChange }: NotificationCenter
   const loadNotifications = async () => {
     setLoading(true);
     try {
-      const result = await notificationService.getNotifications({ limit: 20 });
+      const result = await notificationService.getAll({ limit: 20 });
       setData(result);
     } catch (err) {
       console.error('Failed to load notifications:', err);
@@ -79,14 +83,14 @@ function NotificationCenter({ onClose, onUnreadCountChange }: NotificationCenter
   return (
     <div className="notification-center-panel">
       <div className="notification-header">
-        <h3>🔔 通知</h3>
+        <h3><Bell size={18} /> 通知</h3>
         <div className="notification-header-actions">
           {data && data.unreadCount > 0 && (
             <button className="mark-all-btn" onClick={handleMarkAllAsRead}>
               全部已读
             </button>
           )}
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <button className="close-btn" onClick={onClose}><X size={18} /></button>
         </div>
       </div>
 
@@ -98,7 +102,7 @@ function NotificationCenter({ onClose, onUnreadCountChange }: NotificationCenter
           </div>
         ) : !data || data.notifications.length === 0 ? (
           <div className="notification-empty">
-            <span className="empty-icon">🔔</span>
+            <Bell size={32} className="empty-icon" />
             <p>暂无通知</p>
           </div>
         ) : (
@@ -108,7 +112,7 @@ function NotificationCenter({ onClose, onUnreadCountChange }: NotificationCenter
               className={`notification-item ${notification.isRead ? 'read' : 'unread'}`}
             >
               <div className="notification-icon">
-                {NOTIFICATION_ICONS[notification.type] || '📢'}
+                {NOTIFICATION_ICONS[notification.type] || <Bell size={16} />}
               </div>
               <div className="notification-content">
                 <div className="notification-title">{notification.title}</div>
@@ -133,7 +137,7 @@ function NotificationCenter({ onClose, onUnreadCountChange }: NotificationCenter
                     onClick={() => handleMarkAsRead(notification.id)}
                     title="标记已读"
                   >
-                    ✓
+                    <Check size={14} />
                   </button>
                 )}
                 <button
@@ -141,7 +145,7 @@ function NotificationCenter({ onClose, onUnreadCountChange }: NotificationCenter
                   onClick={() => handleDelete(notification.id)}
                   title="删除"
                 >
-                  ×
+                  <Trash2 size={14} />
                 </button>
               </div>
             </div>

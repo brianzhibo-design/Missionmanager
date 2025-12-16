@@ -16,8 +16,10 @@ import { adminRouter } from './controllers/adminController';
 import { treeRouter } from './controllers/treeController';
 import { treeAnalysisRouter } from './controllers/treeAnalysisController';
 import { memberRouter } from './controllers/memberController';
-import { notificationRouter } from './controllers/notificationController';
+import notificationRouter from './controllers/notificationController';
 import { reportRouter } from './controllers/reportController';
+import commentRouter from './controllers/commentController';
+import broadcastRouter from './controllers/broadcastController';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { startScheduler } from './lib/scheduler';
 import { verifyEmailConnection } from './lib/emailService';
@@ -48,6 +50,8 @@ app.use('/tree-analysis', treeAnalysisRouter);
 app.use('/members', memberRouter);
 app.use('/notifications', notificationRouter);
 app.use('/reports', reportRouter);
+app.use('/comments', commentRouter);
+app.use('/broadcast', broadcastRouter);
 
 // 测试错误处理的路由（开发用）
 if (config.isDev) {

@@ -7,7 +7,7 @@ import { aiService, ProjectOptimizationResult, SuggestedTask } from '../services
 import { usePermissions } from '../hooks/usePermissions';
 import Modal from '../components/Modal';
 import TaskList from '../components/TaskList';
-import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Circle, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle } from 'lucide-react';
+import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle } from 'lucide-react';
 import './ProjectDetail.css';
 
 interface ProjectLeader {

@@ -363,6 +363,11 @@ export const authService = {
       throw new AppError('用户不存在', 404, 'USER_NOT_FOUND');
     }
 
+    // 如果用户是手机号注册且没有设置密码
+    if (!user.password) {
+      throw new AppError('您是手机号注册用户，请先设置密码', 400, 'NO_PASSWORD_SET');
+    }
+
     // 验证当前密码
     const isValid = await bcrypt.compare(currentPassword, user.password);
     if (!isValid) {

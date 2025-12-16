@@ -4,7 +4,6 @@ import {
   FolderOpen, 
   Search, 
   AlertTriangle, 
-  Bot,
   BarChart3,
   AlertCircle,
   Lightbulb,

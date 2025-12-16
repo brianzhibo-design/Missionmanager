@@ -7,6 +7,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import Modal from '../components/Modal';
 import { TaskBreakdownModal, RiskPredictionPanel } from '../components/ai';
 import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle, Circle, AlertTriangle, FileText, ClipboardList, Activity, Bot, Lightbulb, Package } from 'lucide-react';
+import TaskComments from '../components/TaskComments';
 import './TaskDetail.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -756,6 +757,16 @@ export default function TaskDetail() {
               </div>
             )}
           </div>
+
+          {/* Comments Section */}
+          <TaskComments 
+            taskId={id!} 
+            projectMembers={members.map(m => ({
+              id: m.userId,
+              name: m.user?.name || '',
+              avatar: m.user?.avatar || undefined,
+            }))}
+          />
 
           {/* Activity Timeline */}
           <div className="task-section card">

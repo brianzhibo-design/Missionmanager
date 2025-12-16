@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, Plus, LayoutGrid, List } from 'lucide-react';
+import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, LayoutGrid, List, Crown } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import { projectService } from '../services/project';
 import { workspaceService, WorkspaceMember } from '../services/workspace';
 import Modal from '../components/Modal';
+import MemberSelector from '../components/MemberSelector';
 import './Projects.css';
 
 interface Project {
@@ -148,14 +149,6 @@ export default function Projects() {
     } finally {
       setCreating(false);
     }
-  };
-
-  const handleTeamMemberToggle = (memberId: string) => {
-    setSelectedTeamMembers(prev => 
-      prev.includes(memberId) 
-        ? prev.filter(id => id !== memberId)
-        : [...prev, memberId]
-    );
   };
 
   const filteredProjects = projects.filter(project =>
@@ -487,59 +480,59 @@ export default function Projects() {
           
           {/* 负责人选择 */}
           <div className="form-group">
-            <label className="form-label">项目负责人</label>
-            <select 
-              className="form-select"
-              value={selectedLeader}
-              onChange={(e) => setSelectedLeader(e.target.value)}
-            >
-              <option value="">选择负责人（可选）</option>
+            <label className="form-label"><Crown size={16} /> 项目负责人</label>
+            <div className="leader-selector">
+              <button
+                type="button"
+                className={`leader-option ${selectedLeader === '' ? 'selected' : ''}`}
+                onClick={() => setSelectedLeader('')}
+              >
+                不设置负责人
+              </button>
               {workspaceMembers.map(member => (
-                <option key={member.userId} value={member.userId}>
-                  {member.user.name} ({member.user.email})
-                </option>
+                <button
+                  key={member.userId}
+                  type="button"
+                  className={`leader-option ${selectedLeader === member.userId ? 'selected' : ''}`}
+                  onClick={() => setSelectedLeader(member.userId)}
+                >
+                  <span className="leader-avatar">
+                    {member.user.avatar ? (
+                      <img src={member.user.avatar} alt={member.user.name} />
+                    ) : (
+                      member.user.name.charAt(0).toUpperCase()
+                    )}
+                  </span>
+                  <span className="leader-info">
+                    <span className="leader-name">{member.user.name}</span>
+                    <span className="leader-role">{member.role}</span>
+                  </span>
+                  {selectedLeader === member.userId && <Crown size={16} className="leader-crown" />}
+                </button>
               ))}
-            </select>
+            </div>
             <p className="form-hint">负责人可以管理项目设置和推进任务</p>
           </div>
 
           {/* 团队成员选择 */}
-          <div className="form-group">
-            <label className="form-label">团队成员</label>
-            <div className="team-member-selector">
-              {workspaceMembers.length === 0 ? (
-                <p className="form-hint">暂无可选成员</p>
-              ) : (
-                <div className="member-checkbox-list">
-                  {workspaceMembers.map(member => (
-                    <label key={member.userId} className="member-checkbox-item">
-                      <input
-                        type="checkbox"
-                        checked={selectedTeamMembers.includes(member.userId)}
-                        onChange={() => handleTeamMemberToggle(member.userId)}
-                        disabled={member.userId === selectedLeader}
-                      />
-                      <span className="member-avatar">
-                        {member.user.avatar ? (
-                          <img src={member.user.avatar} alt={member.user.name} />
-                        ) : (
-                          member.user.name.charAt(0).toUpperCase()
-                        )}
-                      </span>
-                      <span className="member-info">
-                        <span className="member-name">{member.user.name}</span>
-                        <span className="member-role">{member.role}</span>
-                      </span>
-                      {member.userId === selectedLeader && (
-                        <span className="member-tag">负责人</span>
-                      )}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
-            <p className="form-hint">团队成员可以创建和参与项目任务</p>
-          </div>
+          <MemberSelector
+            members={workspaceMembers.map(m => ({
+              id: m.userId,
+              name: m.user.name,
+              email: m.user.email,
+              avatar: m.user.avatar,
+              role: m.role,
+              isLeader: m.userId === selectedLeader,
+              disabled: m.userId === selectedLeader,
+              disabledReason: m.userId === selectedLeader ? '已设为负责人' : undefined,
+            }))}
+            selectedIds={selectedTeamMembers}
+            onSelectionChange={setSelectedTeamMembers}
+            title="团队成员"
+            subtitle="选择参与项目的团队成员"
+            maxHeight={240}
+            emptyMessage="暂无可选成员"
+          />
 
           <div className="form-actions">
             <button 

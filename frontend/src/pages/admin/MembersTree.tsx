@@ -287,7 +287,7 @@ export default function MembersTree() {
                     <div className="team-members-list">
                       {treeData.teamMembers.filter(m => !m.isLeader).map(member => (
                         <div key={member.userId} className="team-member-item">
-                          <Avatar name={member.name} size="xs" />
+                          <Avatar name={member.name} size="sm" />
                           <span className="member-name">{member.name}</span>
                           <span className="member-role-tag">{member.role}</span>
                         </div>

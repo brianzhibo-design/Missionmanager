@@ -44,10 +44,15 @@ model User {
   createdTasks       Task[]           @relation("TaskCreator")
   assignedTasks      Task[]           @relation("TaskAssignee")
   taskEvents         TaskEvent[]
+  taskComments       TaskComment[]
+  mentionedIn        CommentMention[] @relation("MentionedUser")
   projectMemberships ProjectMember[]  @relation("ProjectMemberUser")
   managedMembers     ProjectMember[]  @relation("ProjectMemberManager")
   leadingProjects    Project[]        @relation("ProjectLeader") // 负责的项目
   notifications      Notification[]
+  coffeeLotteries    CoffeeLottery[]
+  sentMessages       BroadcastMessage[] @relation("MessageSender")
+  receivedMessages   BroadcastMessageRecipient[] @relation("MessageRecipient")
 
   @@map("users")
 }
@@ -63,9 +68,11 @@ model Workspace {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   // 关联关系
-  members  WorkspaceUser[]
-  projects Project[]
-  reports  Report[]
+  members           WorkspaceUser[]
+  projects          Project[]
+  reports           Report[]
+  coffeeLotteries   CoffeeLottery[]
+  broadcastMessages BroadcastMessage[]
 
   @@map("workspaces")
 }
@@ -170,6 +177,7 @@ model Task {
   parent        Task?            @relation("SubTasks", fields: [parentId], references: [id])
   subTasks      Task[]           @relation("SubTasks")
   events        TaskEvent[]
+  comments      TaskComment[]
   aiAnalyses    TaskAiAnalysis[]
   notifications Notification[]
 
@@ -195,6 +203,111 @@ model TaskEvent {
 
   @@index([taskId, createdAt])
   @@map("task_events")
+}
+
+// ==========================================
+// 任务评论模型
+// ==========================================
+model TaskComment {
+  id        String   @id @default(cuid())
+  content   String   // 评论内容
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 外键
+  taskId String @map("task_id")
+  userId String @map("user_id")
+
+  // 关联关系
+  task     Task          @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mentions CommentMention[]
+
+  @@index([taskId, createdAt])
+  @@map("task_comments")
+}
+
+// ==========================================
+// 评论@提及模型
+// ==========================================
+model CommentMention {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 外键
+  commentId       String @map("comment_id")
+  mentionedUserId String @map("mentioned_user_id")
+
+  // 关联关系
+  comment       TaskComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  mentionedUser User        @relation("MentionedUser", fields: [mentionedUserId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, mentionedUserId])
+  @@map("comment_mentions")
+}
+
+// ==========================================
+// 咖啡抽奖记录模型
+// ==========================================
+model CoffeeLottery {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date // 抽奖日期
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  // 外键
+  workspaceId String @map("workspace_id")
+  winnerId    String @map("winner_id")
+
+  // 关联关系
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  winner    User      @relation(fields: [winnerId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, date]) // 每个工作区每天只能有一个获奖者
+  @@map("coffee_lotteries")
+}
+
+// ==========================================
+// 群发消息模型
+// ==========================================
+model BroadcastMessage {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  sendEmail Boolean  @default(false) @map("send_email") // 是否发送邮件
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // 外键
+  workspaceId String @map("workspace_id")
+  senderId    String @map("sender_id")
+
+  // 关联关系
+  workspace  Workspace                  @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  sender     User                       @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  recipients BroadcastMessageRecipient[]
+
+  @@index([workspaceId, createdAt])
+  @@map("broadcast_messages")
+}
+
+// ==========================================
+// 群发消息接收者模型
+// ==========================================
+model BroadcastMessageRecipient {
+  id        String    @id @default(cuid())
+  isRead    Boolean   @default(false) @map("is_read")
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  // 外键
+  messageId   String @map("message_id")
+  recipientId String @map("recipient_id")
+
+  // 关联关系
+  message   BroadcastMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  recipient User             @relation("MessageRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, recipientId])
+  @@map("broadcast_message_recipients")
 }
 
 // ==========================================
