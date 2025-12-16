@@ -13,6 +13,8 @@ import {
   ProjectNode,
   ProjectTreeResponse,
   TaskStats,
+  ProjectLeaderInfo,
+  ProjectTeamMember,
 } from '../types/tree';
 
 export const treeService = {
@@ -153,7 +155,31 @@ export const treeService = {
     });
     const overallStats = this.calculateTaskStats(allTasks);
 
-    // 6. 构建根节点
+    // 6. 获取工作区信息
+    const workspace = await workspaceRepository.findById(project.workspaceId);
+
+    // 7. 构建负责人信息
+    let leaderInfo: ProjectLeaderInfo | null = null;
+    if (project.leader) {
+      leaderInfo = {
+        id: project.leader.id,
+        name: project.leader.name,
+        email: project.leader.email,
+        avatar: project.leader.avatar,
+      };
+    }
+
+    // 8. 构建团队成员信息
+    const teamMembersInfo: ProjectTeamMember[] = teamMembers.map(m => ({
+      userId: m.userId,
+      name: m.name,
+      email: m.email,
+      avatar: m.avatar,
+      role: m.role,
+      isLeader: m.isLeader,
+    }));
+
+    // 9. 构建根节点
     const tree: MemberNode = {
       userId: 'team-root',
       name: project.name + ' 团队',
@@ -165,8 +191,13 @@ export const treeService = {
     };
 
     return {
+      workspaceId: project.workspaceId,
+      workspaceName: workspace?.name || '未知工作区',
       projectId,
       projectName: project.name,
+      projectDescription: project.description,
+      leader: leaderInfo,
+      teamMembers: teamMembersInfo,
       tree,
     };
   },

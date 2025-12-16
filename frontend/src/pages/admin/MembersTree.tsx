@@ -2,8 +2,8 @@
  * 成员任务树页面
  */
 import { useState, useEffect } from 'react';
-import { Network, Brain, RefreshCw, AlertTriangle, Edit2 } from 'lucide-react';
-import { treeService, MemberNode, MemberTreeResponse } from '../../services/tree';
+import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User } from 'lucide-react';
+import { treeService, MemberNode, MemberTreeResponse, ProjectTeamMember } from '../../services/tree';
 import { workspaceService, Workspace } from '../../services/workspace';
 import { projectService, Project } from '../../services/project';
 import { treeAnalysisService, TeamAnalysisResult } from '../../services/treeAnalysis';
@@ -262,8 +262,76 @@ export default function MembersTree() {
 
       <div className="tree-layout">
         <div className="tree-panel">
+          {/* 工作区和项目信息卡片 */}
+          {treeData && (
+            <div className="project-info-card">
+              <div className="workspace-info">
+                <span className="info-label">工作区</span>
+                <span className="info-value">{treeData.workspaceName}</span>
+              </div>
+              <div className="project-info">
+                <span className="info-label">项目</span>
+                <span className="info-value">{treeData.projectName}</span>
+                {treeData.projectDescription && (
+                  <p className="project-desc">{treeData.projectDescription}</p>
+                )}
+              </div>
+              
+              {/* 项目团队信息 */}
+              <div className="team-info">
+                <h4 className="team-title">
+                  <Users size={16} />
+                  项目团队
+                </h4>
+                
+                {/* 项目负责人 */}
+                {treeData.leader && (
+                  <div className="team-section">
+                    <span className="section-label">
+                      <Crown size={14} />
+                      负责人
+                    </span>
+                    <div className="team-member-item leader">
+                      <Avatar name={treeData.leader.name} size="sm" />
+                      <div className="member-details">
+                        <span className="member-name">{treeData.leader.name}</span>
+                        <span className="member-email">{treeData.leader.email}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {/* 团队成员 */}
+                {treeData.teamMembers.filter(m => !m.isLeader).length > 0 && (
+                  <div className="team-section">
+                    <span className="section-label">
+                      <User size={14} />
+                      成员 ({treeData.teamMembers.filter(m => !m.isLeader).length})
+                    </span>
+                    <div className="team-members-list">
+                      {treeData.teamMembers.filter(m => !m.isLeader).map(member => (
+                        <div key={member.userId} className="team-member-item">
+                          <Avatar name={member.name} size="xs" />
+                          <span className="member-name">{member.name}</span>
+                          <span className="member-role-tag">{member.role}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* 无团队成员提示 */}
+                {!treeData.leader && treeData.teamMembers.length === 0 && (
+                  <div className="no-team-hint">
+                    暂未设置项目团队，显示工作区全体成员
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="tree-panel-header">
-            <h3>{treeData?.projectName || '成员结构'}</h3>
+            <h3>成员任务分布</h3>
           </div>
           <div className="tree-panel-content">
             {loading ? (

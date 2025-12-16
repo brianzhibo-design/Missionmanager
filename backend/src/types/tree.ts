@@ -34,10 +34,33 @@ export interface MemberNode {
   children: MemberNode[]; // 下属成员
 }
 
+// 项目负责人信息
+export interface ProjectLeaderInfo {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string | null;
+}
+
+// 项目团队成员信息
+export interface ProjectTeamMember {
+  userId: string;
+  name: string;
+  email: string;
+  avatar: string | null;
+  role: string;
+  isLeader: boolean;
+}
+
 // 成员任务树响应
 export interface MemberTreeResponse {
+  workspaceId: string;
+  workspaceName: string;
   projectId: string;
   projectName: string;
+  projectDescription: string | null;
+  leader: ProjectLeaderInfo | null;
+  teamMembers: ProjectTeamMember[];
   tree: MemberNode;
 }
 

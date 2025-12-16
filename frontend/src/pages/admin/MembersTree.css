@@ -138,6 +138,140 @@
   box-shadow: var(--shadow-sm);
 }
 
+/* ========================================
+ * 项目信息卡片
+ * ======================================== */
+.project-info-card {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-primary);
+  background: linear-gradient(to bottom, var(--bg-surface), var(--bg-surface-secondary));
+}
+
+.workspace-info,
+.project-info {
+  margin-bottom: 12px;
+}
+
+.workspace-info:last-child,
+.project-info:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.project-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* 团队信息区 */
+.team-info {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-secondary);
+}
+
+.team-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.team-section {
+  margin-bottom: 12px;
+}
+
+.team-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.team-member-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-secondary);
+}
+
+.team-member-item.leader {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05));
+  border-color: rgba(251, 191, 36, 0.3);
+}
+
+.team-member-item .member-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.team-member-item .member-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.team-member-item .member-email {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+.team-member-item .member-role-tag {
+  margin-left: auto;
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--bg-surface-secondary);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full);
+}
+
+.team-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.no-team-hint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  padding: 8px;
+  background: var(--bg-surface-secondary);
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
 .tree-panel-header {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border-primary);

@@ -33,9 +33,30 @@ export interface MemberNode {
   children: MemberNode[];
 }
 
+export interface ProjectLeaderInfo {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string | null;
+}
+
+export interface ProjectTeamMember {
+  userId: string;
+  name: string;
+  email: string;
+  avatar: string | null;
+  role: string;
+  isLeader: boolean;
+}
+
 export interface MemberTreeResponse {
+  workspaceId: string;
+  workspaceName: string;
   projectId: string;
   projectName: string;
+  projectDescription: string | null;
+  leader: ProjectLeaderInfo | null;
+  teamMembers: ProjectTeamMember[];
   tree: MemberNode;
 }
 
