@@ -53,9 +53,6 @@ function App() {
           {/* 设置页面 */}
           <Route path="/settings" element={<Settings />} />
           
-          {/* 工作日报 */}
-          <Route path="/work-reports" element={<WorkReports />} />
-          
           {/* Admin 页面 - 需要管理员权限 */}
           <Route 
             path="/admin/members" 

@@ -16,7 +16,7 @@ import {
   Network,
   BarChart3,
   FileText,
-  ClipboardList,
+
   Brain,
   Settings,
   Bell,
