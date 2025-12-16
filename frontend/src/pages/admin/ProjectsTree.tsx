@@ -68,9 +68,12 @@ export default function ProjectsTree() {
   return (
     <div className="projects-tree-page">
       <div className="page-header">
-        <div className="header-left">
-          <h1><Building2 size={24} /> 项目总览</h1>
-          <p className="page-description">查看所有项目的工作情况和整体进度</p>
+        <div className="header-content">
+          <div className="header-icon icon-blue"><Building2 size={28} /></div>
+          <div className="header-text">
+            <h1>项目总览</h1>
+            <p>查看所有项目的工作情况和整体进度</p>
+          </div>
         </div>
         <div className="header-controls">
           {/* 显示当前工作区名称 */}

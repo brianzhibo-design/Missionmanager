@@ -186,8 +186,12 @@ export default function Projects() {
     return (
       <div className="projects-page">
         <div className="page-header">
-          <div className="page-header-content">
-            <h1 className="page-title"><FolderOpen size={24} /> 项目</h1>
+          <div className="header-content">
+            <div className="header-icon icon-purple"><FolderOpen size={28} /></div>
+            <div className="header-text">
+              <h1>项目</h1>
+              <p>管理您的所有项目</p>
+            </div>
           </div>
           <div className="page-actions">
             <button 
@@ -256,12 +260,12 @@ export default function Projects() {
     <div className="projects-page">
       {/* Page Header */}
       <div className="page-header">
-        <div className="page-header-content">
-          <div className="page-title-row">
-            <h1 className="page-title"><FolderOpen size={24} /> 项目</h1>
-            <span className="badge badge-primary">{projects.length}</span>
+        <div className="header-content">
+          <div className="header-icon icon-purple"><FolderOpen size={28} /></div>
+          <div className="header-text">
+            <h1>项目 <span className="badge badge-primary">{projects.length}</span></h1>
+            <p>管理您的所有项目</p>
           </div>
-          <p className="page-description">管理您的所有项目</p>
         </div>
         <div className="page-actions">
           {canWorkspace('createWorkspace') && (

@@ -185,7 +185,13 @@ export default function MyTasks() {
     <div className="my-tasks-page">
       {/* Header */}
       <div className="page-header">
-        <h1 className="page-title"><CheckCircle2 size={24} /> 我的任务</h1>
+        <div className="header-content">
+          <div className="header-icon icon-green"><CheckCircle2 size={28} /></div>
+          <div className="header-text">
+            <h1>我的任务</h1>
+            <p>管理和跟踪您的所有任务</p>
+          </div>
+        </div>
       </div>
 
       {/* Quick Stats */}

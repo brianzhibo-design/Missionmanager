@@ -6,6 +6,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { memberService, Member } from '../../services/member';
 import { Modal } from '../../components/Modal';
 import { Avatar } from '../../components/Avatar';
+import { Users } from 'lucide-react';
 import { 
   ROLE_LABELS, 
   ROLE_COLORS, 
@@ -134,7 +135,7 @@ export default function MembersManage() {
     <div className="members-manage-page fade-in">
       <div className="page-header">
         <div className="header-content">
-          <div className="header-icon">👤</div>
+          <div className="header-icon icon-orange"><Users size={28} /></div>
           <div className="header-text">
             <h1>成员管理</h1>
             <p>管理 {currentWorkspace?.name} 的团队成员</p>

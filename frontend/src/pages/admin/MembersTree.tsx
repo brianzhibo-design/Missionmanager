@@ -187,12 +187,12 @@ export default function MembersTree() {
   return (
     <div className="members-tree-page">
       <div className="page-header">
-        <div className="header-left">
-          <div className="header-title-row">
-            <Network size={28} className="page-icon" />
+        <div className="header-content">
+          <div className="header-icon icon-purple"><Network size={28} /></div>
+          <div className="header-text">
             <h1>成员任务树</h1>
+            <p>查看项目成员的任务分布和层级关系</p>
           </div>
-          <p className="page-description">查看项目成员的任务分布和层级关系</p>
         </div>
         <div className="header-controls">
           {/* 显示当前工作区名称 */}

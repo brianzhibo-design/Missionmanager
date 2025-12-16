@@ -28,14 +28,36 @@
 }
 
 .header-icon {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
   border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* 页面特定图标颜色 */
+.header-icon.icon-blue {
+  background: linear-gradient(135deg, var(--color-info), #3b82f6);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.header-icon.icon-green {
+  background: linear-gradient(135deg, var(--color-success), #10b981);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.header-icon.icon-purple {
+  background: linear-gradient(135deg, #8b5cf6, #a855f7);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.header-icon.icon-orange {
+  background: linear-gradient(135deg, #f59e0b, #f97316);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
 }
 
 .header-text h1 {

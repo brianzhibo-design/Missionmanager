@@ -212,7 +212,13 @@ export default function Settings() {
   return (
     <div className="settings-page fade-in">
       <div className="page-header">
-        <h1><SettingsIcon size={24} /> 设置</h1>
+        <div className="header-content">
+          <div className="header-icon"><SettingsIcon size={28} /></div>
+          <div className="header-text">
+            <h1>设置</h1>
+            <p>管理您的账户和偏好设置</p>
+          </div>
+        </div>
       </div>
 
       {/* 成功/错误提示 */}

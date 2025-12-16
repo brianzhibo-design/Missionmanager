@@ -69,7 +69,7 @@ export default function AiInsights() {
       {/* 页面标题 */}
       <div className="page-header">
         <div className="header-content">
-          <div className="header-icon"><Brain size={28} /></div>
+          <div className="header-icon icon-purple"><Brain size={28} /></div>
           <div className="header-text">
             <h1>AI 洞察</h1>
             <p>AI 驱动的跨项目分析与风险识别</p>

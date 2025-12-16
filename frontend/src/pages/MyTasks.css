@@ -10,6 +10,35 @@
 }
 
 /* ========================================
+ * 页面头部
+ * ======================================== */
+.my-tasks-page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.my-tasks-page .header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.my-tasks-page .header-text h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+}
+
+.my-tasks-page .header-text p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ========================================
  * 快速统计
  * ======================================== */
 .quick-stats {
