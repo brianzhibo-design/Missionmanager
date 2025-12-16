@@ -2,16 +2,20 @@
  * AI 分析结果展示面板
  * 用于展示团队树分析和项目全景分析结果
  */
+import { 
+  Bot, X, BarChart3, AlertTriangle, Moon, Construction, Lightbulb, Search,
+  Flame, Circle, Package, Target, CheckCircle2, AlertCircle
+} from 'lucide-react';
 import { TeamAnalysisResult, ProjectsOverviewResult } from '../../services/treeAnalysis';
 import './AiAnalysisPanel.css';
 
 // ==================== 健康状态配置 ====================
 
 const STATUS_CONFIG = {
-  healthy: { label: '健康', color: 'var(--color-success)', emoji: '✅' },
-  needs_attention: { label: '需关注', color: 'var(--color-warning)', emoji: '⚠️' },
-  at_risk: { label: '有风险', color: '#f97316', emoji: '🔶' },
-  critical: { label: '严重', color: 'var(--color-danger)', emoji: '🔴' },
+  healthy: { label: '健康', color: 'var(--color-success)' },
+  needs_attention: { label: '需关注', color: 'var(--color-warning)' },
+  at_risk: { label: '有风险', color: '#f97316' },
+  critical: { label: '严重', color: 'var(--color-danger)' },
 };
 
 const PRIORITY_CONFIG = {
@@ -33,8 +37,8 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
   return (
     <div className="ai-analysis-panel">
       <div className="analysis-header">
-        <h3>🤖 AI 团队分析报告</h3>
-        <button className="close-btn" onClick={onClose}>✕</button>
+        <h3><Bot size={18} /> AI 团队分析报告</h3>
+        <button className="close-btn" onClick={onClose}><X size={16} /></button>
       </div>
 
       {/* 健康评分 */}
@@ -52,7 +56,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
               className="health-status"
               style={{ color: healthConfig.color }}
             >
-              {healthConfig.emoji} {healthConfig.label}
+              <CheckCircle2 size={16} /> {healthConfig.label}
             </span>
             <p className="health-summary">{analysis.team_health.summary}</p>
           </div>
@@ -61,7 +65,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
 
       {/* 工作负载分析 */}
       <div className="analysis-section">
-        <h4>📊 工作负载分析</h4>
+        <h4><BarChart3 size={16} /> 工作负载分析</h4>
         <div className="balance-score">
           <span>均衡度：</span>
           <div className="progress-bar">
@@ -82,7 +86,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
 
         {analysis.workload_analysis.overloaded_members.length > 0 && (
           <div className="member-list">
-            <h5>⚠️ 超负荷成员</h5>
+            <h5><AlertTriangle size={14} /> 超负荷成员</h5>
             {analysis.workload_analysis.overloaded_members.map((m, i) => (
               <div key={i} className="member-item overloaded">
                 <div className="member-header">
@@ -97,7 +101,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
 
         {analysis.workload_analysis.idle_members.length > 0 && (
           <div className="member-list">
-            <h5>💤 空闲成员</h5>
+            <h5><Moon size={14} /> 空闲成员</h5>
             {analysis.workload_analysis.idle_members.map((m, i) => (
               <div key={i} className="member-item idle">
                 <div className="member-header">
@@ -114,7 +118,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
       {/* 瓶颈分析 */}
       {analysis.bottlenecks.length > 0 && (
         <div className="analysis-section">
-          <h4>🚧 瓶颈分析</h4>
+          <h4><Construction size={16} /> 瓶颈分析</h4>
           <div className="bottleneck-list">
             {analysis.bottlenecks.map((b, i) => (
               <div key={i} className="bottleneck-item">
@@ -131,7 +135,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
                 <div className="affected-members">
                   影响成员：{b.affected_members.join(', ') || '无'}
                 </div>
-                <p className="bottleneck-suggestion">💡 {b.suggestion}</p>
+                <p className="bottleneck-suggestion"><Lightbulb size={14} /> {b.suggestion}</p>
               </div>
             ))}
           </div>
@@ -141,7 +145,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
       {/* 建议 */}
       {analysis.recommendations.length > 0 && (
         <div className="analysis-section">
-          <h4>💡 改进建议</h4>
+          <h4><Lightbulb size={16} /> 改进建议</h4>
           <div className="recommendation-list">
             {analysis.recommendations.map((r, i) => (
               <div key={i} className="recommendation-item">
@@ -166,7 +170,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
       {/* 洞察 */}
       {analysis.insights && (
         <div className="analysis-section insights">
-          <h4>🔍 其他洞察</h4>
+          <h4><Search size={16} /> 其他洞察</h4>
           <p>{analysis.insights}</p>
         </div>
       )}
@@ -187,8 +191,8 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
   return (
     <div className="ai-analysis-panel">
       <div className="analysis-header">
-        <h3>🤖 AI 组织分析报告</h3>
-        <button className="close-btn" onClick={onClose}>✕</button>
+        <h3><Bot size={18} /> AI 组织分析报告</h3>
+        <button className="close-btn" onClick={onClose}><X size={16} /></button>
       </div>
 
       {/* 组织健康评分 */}
@@ -206,7 +210,7 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
               className="health-status"
               style={{ color: healthConfig.color }}
             >
-              {healthConfig.emoji} {healthConfig.label}
+              <CheckCircle2 size={16} /> {healthConfig.label}
             </span>
             <p className="health-summary">{analysis.organization_health.summary}</p>
           </div>
@@ -215,11 +219,11 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
 
       {/* 风险热图 */}
       <div className="analysis-section">
-        <h4>🔥 风险热图</h4>
+        <h4><Flame size={16} /> 风险热图</h4>
         <div className="risk-heatmap">
           {analysis.risk_heatmap.high_risk_projects.length > 0 && (
             <div className="risk-group high">
-              <span className="risk-label">🔴 高风险</span>
+              <span className="risk-label"><Circle size={12} className="risk-dot-high" /> 高风险</span>
               <div className="risk-projects">
                 {analysis.risk_heatmap.high_risk_projects.map((p, i) => (
                   <span key={i} className="project-tag">{p}</span>
@@ -229,7 +233,7 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
           )}
           {analysis.risk_heatmap.medium_risk_projects.length > 0 && (
             <div className="risk-group medium">
-              <span className="risk-label">🟠 中风险</span>
+              <span className="risk-label"><Circle size={12} className="risk-dot-medium" /> 中风险</span>
               <div className="risk-projects">
                 {analysis.risk_heatmap.medium_risk_projects.map((p, i) => (
                   <span key={i} className="project-tag">{p}</span>
@@ -239,7 +243,7 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
           )}
           {analysis.risk_heatmap.low_risk_projects.length > 0 && (
             <div className="risk-group low">
-              <span className="risk-label">🟢 低风险</span>
+              <span className="risk-label"><Circle size={12} className="risk-dot-low" /> 低风险</span>
               <div className="risk-projects">
                 {analysis.risk_heatmap.low_risk_projects.map((p, i) => (
                   <span key={i} className="project-tag">{p}</span>
@@ -252,7 +256,7 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
 
       {/* 项目对比 */}
       <div className="analysis-section">
-        <h4>📊 项目对比</h4>
+        <h4><BarChart3 size={16} /> 项目对比</h4>
         <div className="project-comparison">
           {analysis.project_comparison.map((p, i) => (
             <div key={i} className="project-compare-item">
@@ -272,9 +276,9 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
                 </span>
               </div>
               {p.key_issue && (
-                <p className="project-issue">⚠️ {p.key_issue}</p>
+                <p className="project-issue"><AlertTriangle size={14} /> {p.key_issue}</p>
               )}
-              <p className="project-recommendation">💡 {p.recommendation}</p>
+              <p className="project-recommendation"><Lightbulb size={14} /> {p.recommendation}</p>
             </div>
           ))}
         </div>
@@ -282,7 +286,7 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
 
       {/* 资源分析 */}
       <div className="analysis-section">
-        <h4>📦 资源分析</h4>
+        <h4><Package size={16} /> 资源分析</h4>
         <div className="resource-score">
           <span>资源利用率：</span>
           <div className="progress-bar">
@@ -309,7 +313,7 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
                 <div className="affected-projects">
                   影响项目：{im.affected_projects.join(', ')}
                 </div>
-                <p className="imbalance-suggestion">💡 {im.suggestion}</p>
+                <p className="imbalance-suggestion"><Lightbulb size={14} /> {im.suggestion}</p>
               </div>
             ))}
           </div>
@@ -319,7 +323,7 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
       {/* 优先行动 */}
       {analysis.top_priorities.length > 0 && (
         <div className="analysis-section">
-          <h4>🎯 优先行动</h4>
+          <h4><Target size={16} /> 优先行动</h4>
           <div className="priority-list">
             {analysis.top_priorities.map((p, i) => (
               <div key={i} className="priority-item">
@@ -340,7 +344,7 @@ export function ProjectsAnalysisPanel({ analysis, onClose }: ProjectsAnalysisPan
       {/* 洞察 */}
       {analysis.insights && (
         <div className="analysis-section insights">
-          <h4>🔍 全局洞察</h4>
+          <h4><Search size={16} /> 全局洞察</h4>
           <p>{analysis.insights}</p>
         </div>
       )}
