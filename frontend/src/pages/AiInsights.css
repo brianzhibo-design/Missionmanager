@@ -70,33 +70,10 @@
 
 /* ==================== 空状态 - 精致设计 ==================== */
 .ai-insights-page .empty-state {
-  padding: 60px 40px;
+  padding: 32px 40px;
   text-align: center;
   background: transparent;
   border: none;
-}
-
-.ai-insights-page .empty-state .empty-icon {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 24px;
-  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
-  border-radius: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  box-shadow: 
-    0 16px 48px rgba(99, 102, 241, 0.25),
-    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-  position: relative;
-  z-index: 1;
-  animation: pulse-glow 2s infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 16px 48px rgba(99, 102, 241, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset; }
-  50% { box-shadow: 0 20px 56px rgba(99, 102, 241, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.2) inset; }
 }
 
 .ai-insights-page .empty-state h3 {
@@ -111,7 +88,7 @@
 .ai-insights-page .empty-state > p {
   font-size: 15px;
   color: var(--text-tertiary);
-  margin: 0 0 40px 0;
+  margin: 0 0 24px 0;
   max-width: 440px;
   margin-left: auto;
   margin-right: auto;
@@ -807,14 +784,7 @@
   }
 
   .ai-insights-page .empty-state {
-    padding: 48px 24px;
-    border-radius: 20px;
-  }
-
-  .ai-insights-page .empty-state .empty-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 22px;
+    padding: 24px 16px;
   }
 
   .ai-insights-page .empty-state h3 {

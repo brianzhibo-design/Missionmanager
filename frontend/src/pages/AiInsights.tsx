@@ -109,7 +109,6 @@ export default function AiInsights() {
 
       {!analysis && !loading && (
         <div className="empty-state">
-          <div className="empty-icon"><Bot size={48} /></div>
           <h3>AI 全局洞察</h3>
           <p>点击"开始分析"，AI 将为当前工作区「{currentWorkspace?.name || '未选择'}」生成跨项目的智能分析报告</p>
           <div className="empty-features">
