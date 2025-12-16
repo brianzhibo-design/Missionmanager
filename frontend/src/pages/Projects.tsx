@@ -203,7 +203,7 @@ export default function Projects() {
           </div>
         </div>
         <div className="empty-state">
-          <span className="empty-state-icon">🏢</span>
+          <FolderOpen size={48} className="empty-state-icon" />
           <h3 className="empty-state-title">您还没有加入任何工作区</h3>
           <p className="empty-state-description">请先创建一个工作区来管理您的项目和任务。</p>
           <button 
@@ -263,7 +263,7 @@ export default function Projects() {
         <div className="header-content">
           <div className="header-icon icon-purple"><FolderOpen size={28} /></div>
           <div className="header-text">
-            <h1>项目 <span className="badge badge-primary">{projects.length}</span></h1>
+            <h1>项目</h1>
             <p>管理您的所有项目</p>
           </div>
         </div>
