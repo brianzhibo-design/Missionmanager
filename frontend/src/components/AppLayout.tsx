@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
@@ -7,6 +7,7 @@ import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
 import { Logo } from './Logo';
 import NotificationCenter from './NotificationCenter';
 import MobileNav from './MobileNav';
+import { notificationService } from '../services/notification';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -41,6 +42,7 @@ export default function AppLayout() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // 检查是否有任何管理菜单权限
   const hasAnyAdminPermission = 
@@ -57,6 +59,24 @@ export default function AppLayout() {
     const ws = workspaces.find(w => w.id === e.target.value);
     if (ws) setCurrentWorkspace(ws);
   };
+
+  // 加载未读通知数量
+  const loadUnreadCount = useCallback(async () => {
+    try {
+      const result = await notificationService.getAll({ limit: 1 });
+      setUnreadCount(result.unreadCount);
+    } catch (err) {
+      console.error('Failed to load unread count:', err);
+    }
+  }, []);
+
+  // 初始加载未读数量
+  useEffect(() => {
+    loadUnreadCount();
+    // 每30秒轮询一次
+    const interval = setInterval(loadUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, [loadUnreadCount]);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -220,11 +240,19 @@ export default function AppLayout() {
                 }}
               >
                 <Bell size={20} />
+                {unreadCount > 0 && (
+                  <span className="notification-badge">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
               </button>
               {showNotifications && (
                 <>
                   <div className="notification-overlay" onClick={() => setShowNotifications(false)} />
-                  <NotificationCenter onClose={() => setShowNotifications(false)} />
+                  <NotificationCenter 
+                    onClose={() => setShowNotifications(false)} 
+                    onUnreadCountChange={setUnreadCount}
+                  />
                 </>
               )}
             </div>
