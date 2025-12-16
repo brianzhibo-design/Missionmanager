@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, Plus } from 'lucide-react';
+import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, Plus, LayoutGrid, List } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import { projectService } from '../services/project';
 import { workspaceService, WorkspaceMember } from '../services/workspace';
@@ -305,14 +305,14 @@ export default function Projects() {
             onClick={() => setViewMode('grid')}
             title="网格视图"
           >
-            ▦
+            <LayoutGrid size={18} />
           </button>
           <button 
             className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
             onClick={() => setViewMode('list')}
             title="列表视图"
           >
-            ☰
+            <List size={18} />
           </button>
         </div>
       </div>

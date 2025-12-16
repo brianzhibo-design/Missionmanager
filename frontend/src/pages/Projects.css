@@ -115,25 +115,25 @@
 
 .view-switcher {
   display: flex;
-  gap: 2px;
-  padding: 3px;
+  gap: 4px;
+  padding: 4px;
   background: var(--bg-surface-secondary);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
 }
 
 .view-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 32px;
-  font-size: 16px;
+  width: 38px;
+  height: 34px;
   color: var(--text-tertiary);
   background: transparent;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-default);
+  transition: all 0.2s ease;
 }
 
 .view-btn:hover {
@@ -142,9 +142,13 @@
 }
 
 .view-btn.active {
-  color: var(--color-brand);
-  background: var(--bg-surface);
-  box-shadow: var(--shadow-sm);
+  color: #fff;
+  background: var(--color-brand);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.view-btn svg {
+  stroke-width: 2;
 }
 
 /* ========================================
@@ -337,30 +341,99 @@
 .projects-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
 }
 
 .projects-list .project-card {
   flex-direction: row;
   align-items: center;
-  padding: var(--space-4);
-  gap: var(--space-6);
+  padding: 16px 20px;
+  gap: 20px;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-primary);
+  box-shadow: none;
+}
+
+.projects-list .project-card:last-child {
+  border-bottom: none;
+}
+
+.projects-list .project-card::before {
+  display: none;
+}
+
+.projects-list .project-card:hover {
+  background: var(--bg-hover);
+  transform: none;
+  box-shadow: none;
 }
 
 .projects-list .project-card-header {
   flex: 1;
   min-width: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.projects-list .project-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 16px;
+}
+
+.projects-list .project-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.projects-list .project-name {
+  font-size: 15px;
+}
+
+.projects-list .project-description {
+  display: none;
 }
 
 .projects-list .project-progress-section {
-  width: 200px;
+  width: 180px;
   flex-shrink: 0;
+  gap: 8px;
+}
+
+.projects-list .project-progress-bar {
+  height: 6px;
 }
 
 .projects-list .project-stats {
+  display: flex;
+  gap: 20px;
   border-top: none;
   padding-top: 0;
+  margin-top: 0;
   flex-shrink: 0;
+}
+
+.projects-list .project-stat {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border-radius: 0;
+}
+
+.projects-list .stat-value {
+  font-size: 14px;
+}
+
+.projects-list .stat-label {
+  font-size: 12px;
 }
 
 /* ========================================
