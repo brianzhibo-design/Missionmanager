@@ -174,7 +174,7 @@ model Task {
   project       Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
   creator       User             @relation("TaskCreator", fields: [creatorId], references: [id])
   assignee      User?            @relation("TaskAssignee", fields: [assigneeId], references: [id])
-  parent        Task?            @relation("SubTasks", fields: [parentId], references: [id])
+  parent        Task?            @relation("SubTasks", fields: [parentId], references: [id], onDelete: SetNull)
   subTasks      Task[]           @relation("SubTasks")
   events        TaskEvent[]
   comments      TaskComment[]

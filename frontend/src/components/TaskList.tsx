@@ -146,11 +146,21 @@ export default function TaskList({
     });
 
     allSubtasks.forEach(sub => {
-      // 如果有明确的 parentId
+      // 如果有明确的 parentId 且父任务存在于当前任务列表中
       if (sub.parentId && subtasksByMain[sub.parentId]) {
         subtasksByMain[sub.parentId].push(sub);
+      } else if (sub.parentId) {
+        // 有 parentId 但父任务不在当前列表中（可能被删除或不属于当前项目）
+        // 将其作为独立任务显示，而不是错误地关联到其他主任务
+        mainTasks.push({
+          ...sub,
+          // 将标题中的 [子任务] 前缀改为 [孤立]，提示用户需要处理
+          title: sub.title.replace('[子任务]', '[孤立任务]')
+        });
+        subtasksByMain[sub.id] = [];
       } else {
-        // 根据名称匹配
+        // 没有 parentId 但标题以 [子任务] 开头的情况（老数据兼容）
+        // 尝试根据名称匹配
         let matched = false;
         for (const main of mainTasks) {
           if (matchSubtaskToMain(sub.title, main.title)) {
@@ -159,9 +169,10 @@ export default function TaskList({
             break;
           }
         }
-        // 如果没匹配到，放到第一个主任务下
-        if (!matched && mainTasks.length > 0) {
-          subtasksByMain[mainTasks[0].id].push(sub);
+        // 如果匹配不到，作为独立任务显示
+        if (!matched) {
+          mainTasks.push(sub);
+          subtasksByMain[sub.id] = [];
         }
       }
     });
