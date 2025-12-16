@@ -12,6 +12,20 @@ export interface Workspace {
   updatedAt: string;
 }
 
+export interface WorkspaceMember {
+  id: string;
+  userId: string;
+  workspaceId: string;
+  role: string;
+  joinedAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string | null;
+  };
+}
+
 interface WorkspacesResponse {
   workspaces: Workspace[];
 }
@@ -21,6 +35,12 @@ export const workspaceService = {
   async getWorkspaces(): Promise<Workspace[]> {
     const response = await api.get<WorkspacesResponse>('/workspaces');
     return response.workspaces;
+  },
+
+  // 获取工作区成员列表
+  async getMembers(workspaceId: string): Promise<WorkspaceMember[]> {
+    const response = await api.get<{ members: WorkspaceMember[] }>(`/workspaces/${workspaceId}/members`);
+    return response.members;
   },
 
   // 创建工作区

@@ -266,4 +266,11 @@ export const workspaceService = {
     const membership = await workspaceRepository.getMembership(workspaceId, userId);
     return !!membership;
   },
+
+  /**
+   * 获取用户在工作区的成员信息
+   */
+  async getMembership(workspaceId: string, userId: string) {
+    return workspaceRepository.getMembership(workspaceId, userId);
+  },
 };

@@ -12,12 +12,14 @@ export const projectRepository = {
     name: string;
     description?: string;
     workspaceId: string;
+    leaderId?: string;
   }): Promise<Project> {
     return prisma.project.create({
       data: {
         name: data.name,
         description: data.description,
         workspaceId: data.workspaceId,
+        leaderId: data.leaderId,
       },
     });
   },
@@ -30,7 +32,7 @@ export const projectRepository = {
   },
 
   /**
-   * 查找工作区下的所有项目（带任务统计）
+   * 查找工作区下的所有项目（带任务统计和团队信息）
    */
   async findByWorkspaceId(workspaceId: string) {
     const projects = await prisma.project.findMany({
@@ -39,6 +41,67 @@ export const projectRepository = {
       include: {
         tasks: {
           select: { status: true },
+        },
+        leader: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
+        members: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, avatar: true },
+            },
+          },
+        },
+      },
+    });
+    
+    // 计算每个项目的任务统计
+    return projects.map(project => {
+      const tasks = project.tasks;
+      const taskStats = {
+        total: tasks.length,
+        todo: tasks.filter(t => t.status === 'todo').length,
+        inProgress: tasks.filter(t => t.status === 'in_progress').length,
+        review: tasks.filter(t => t.status === 'review').length,
+        blocked: tasks.filter(t => t.status === 'blocked').length,
+        done: tasks.filter(t => t.status === 'done').length,
+      };
+      
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { tasks: _, ...projectWithoutTasks } = project;
+      return {
+        ...projectWithoutTasks,
+        taskStats,
+      };
+    });
+  },
+
+  /**
+   * 查找成员参与的项目（作为负责人或团队成员）
+   */
+  async findByWorkspaceIdForMember(workspaceId: string, userId: string) {
+    const projects = await prisma.project.findMany({
+      where: {
+        workspaceId,
+        OR: [
+          { leaderId: userId }, // 是项目负责人
+          { members: { some: { userId } } }, // 是团队成员
+        ],
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        tasks: {
+          select: { status: true },
+        },
+        leader: {
+          select: { id: true, name: true, email: true, avatar: true },
+        },
+        members: {
+          include: {
+            user: {
+              select: { id: true, name: true, email: true, avatar: true },
+            },
+          },
         },
       },
     });

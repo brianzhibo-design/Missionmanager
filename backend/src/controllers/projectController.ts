@@ -13,10 +13,11 @@ projectRouter.use(requireAuth);
 
 /**
  * POST /projects - 创建项目
+ * 支持同时指定负责人和团队成员
  */
 projectRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { workspaceId, name, description } = req.body;
+    const { workspaceId, name, description, leaderId, teamMemberIds } = req.body;
 
     if (!workspaceId || !name) {
       throw new AppError('请提供 workspaceId 和 name', 400, 'MISSING_FIELDS');
@@ -25,6 +26,8 @@ projectRouter.post('/', async (req: Request, res: Response, next: NextFunction) 
     const project = await projectService.create(req.user!.userId, workspaceId, {
       name,
       description,
+      leaderId,
+      teamMemberIds,
     });
 
     res.status(201).json({

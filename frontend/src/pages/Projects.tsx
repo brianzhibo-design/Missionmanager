@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { projectService } from '../services/project';
-import { workspaceService } from '../services/workspace';
+import { workspaceService, WorkspaceMember } from '../services/workspace';
 import Modal from '../components/Modal';
 import './Projects.css';
 
@@ -12,6 +12,23 @@ interface Project {
   description: string | null;
   workspaceId: string;
   createdAt: string;
+  leaderId?: string | null;
+  leader?: {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string | null;
+  } | null;
+  members?: Array<{
+    id: string;
+    role: string;
+    user: {
+      id: string;
+      name: string;
+      email: string;
+      avatar: string | null;
+    };
+  }>;
   taskStats?: {
     total: number;
     done: number;
@@ -48,6 +65,11 @@ export default function Projects() {
   const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
   const [creating, setCreating] = useState(false);
 
+  // 创建项目表单
+  const [workspaceMembers, setWorkspaceMembers] = useState<WorkspaceMember[]>([]);
+  const [selectedLeader, setSelectedLeader] = useState<string>('');
+  const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
+
   const loadProjects = useCallback(async () => {
     if (!currentWorkspace) return;
     try {
@@ -66,6 +88,8 @@ export default function Projects() {
   useEffect(() => {
     if (currentWorkspace) {
       loadProjects();
+      // 加载工作区成员用于创建项目时选择
+      workspaceService.getMembers(currentWorkspace.id).then(setWorkspaceMembers).catch(console.error);
     } else {
       // 没有工作区时，停止加载状态
       setLoading(false);
@@ -105,8 +129,17 @@ export default function Projects() {
 
     try {
       setCreating(true);
-      const newProject = await projectService.createProject(currentWorkspace.id, name, description);
+      const newProject = await projectService.createProject(
+        currentWorkspace.id, 
+        name, 
+        description,
+        selectedLeader || undefined,
+        selectedTeamMembers.length > 0 ? selectedTeamMembers : undefined
+      );
       setShowCreateProject(false);
+      // 重置表单
+      setSelectedLeader('');
+      setSelectedTeamMembers([]);
       navigate(`/projects/${newProject.id}`);
     } catch (err) {
       console.error('Failed to create project:', err);
@@ -114,6 +147,14 @@ export default function Projects() {
     } finally {
       setCreating(false);
     }
+  };
+
+  const handleTeamMemberToggle = (memberId: string) => {
+    setSelectedTeamMembers(prev => 
+      prev.includes(memberId) 
+        ? prev.filter(id => id !== memberId)
+        : [...prev, memberId]
+    );
   };
 
   const filteredProjects = projects.filter(project =>
@@ -410,9 +451,13 @@ export default function Projects() {
       {/* Create Project Modal */}
       <Modal
         isOpen={showCreateProject}
-        onClose={() => setShowCreateProject(false)}
+        onClose={() => {
+          setShowCreateProject(false);
+          setSelectedLeader('');
+          setSelectedTeamMembers([]);
+        }}
         title="新建项目"
-        size="sm"
+        size="md"
       >
         <form onSubmit={handleCreateProject}>
           <div className="form-group">
@@ -434,11 +479,72 @@ export default function Projects() {
               rows={3}
             />
           </div>
+          
+          {/* 负责人选择 */}
+          <div className="form-group">
+            <label className="form-label">项目负责人</label>
+            <select 
+              className="form-select"
+              value={selectedLeader}
+              onChange={(e) => setSelectedLeader(e.target.value)}
+            >
+              <option value="">选择负责人（可选）</option>
+              {workspaceMembers.map(member => (
+                <option key={member.userId} value={member.userId}>
+                  {member.user.name} ({member.user.email})
+                </option>
+              ))}
+            </select>
+            <p className="form-hint">负责人可以管理项目设置和推进任务</p>
+          </div>
+
+          {/* 团队成员选择 */}
+          <div className="form-group">
+            <label className="form-label">团队成员</label>
+            <div className="team-member-selector">
+              {workspaceMembers.length === 0 ? (
+                <p className="form-hint">暂无可选成员</p>
+              ) : (
+                <div className="member-checkbox-list">
+                  {workspaceMembers.map(member => (
+                    <label key={member.userId} className="member-checkbox-item">
+                      <input
+                        type="checkbox"
+                        checked={selectedTeamMembers.includes(member.userId)}
+                        onChange={() => handleTeamMemberToggle(member.userId)}
+                        disabled={member.userId === selectedLeader}
+                      />
+                      <span className="member-avatar">
+                        {member.user.avatar ? (
+                          <img src={member.user.avatar} alt={member.user.name} />
+                        ) : (
+                          member.user.name.charAt(0).toUpperCase()
+                        )}
+                      </span>
+                      <span className="member-info">
+                        <span className="member-name">{member.user.name}</span>
+                        <span className="member-role">{member.role}</span>
+                      </span>
+                      {member.userId === selectedLeader && (
+                        <span className="member-tag">负责人</span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="form-hint">团队成员可以创建和参与项目任务</p>
+          </div>
+
           <div className="form-actions">
             <button 
               type="button" 
               className="btn btn-secondary"
-              onClick={() => setShowCreateProject(false)}
+              onClick={() => {
+                setShowCreateProject(false);
+                setSelectedLeader('');
+                setSelectedTeamMembers([]);
+              }}
             >
               取消
             </button>

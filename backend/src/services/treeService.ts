@@ -20,11 +20,11 @@ export const treeService = {
 
   /**
    * 获取项目的成员任务树
-   * 显示工作区所有成员及其在该项目中的任务
+   * 只显示项目团队成员（负责人 + 团队成员）及其任务
    */
   async getMemberTree(userId: string, projectId: string): Promise<MemberTreeResponse> {
-    // 1. 验证项目存在
-    const project = await projectRepository.findById(projectId);
+    // 1. 获取项目详情（包含负责人和团队成员）
+    const project = await projectRepository.findByIdWithTeam(projectId);
     if (!project) {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
@@ -35,22 +35,72 @@ export const treeService = {
       throw new AppError('无权访问此项目', 403, 'ACCESS_DENIED');
     }
 
-    // 3. 获取工作区所有成员
-    const workspaceMembers = await prisma.workspaceUser.findMany({
-      where: { workspaceId: project.workspaceId },
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-      },
-      orderBy: [
-        { role: 'asc' }, // owner 优先
-        { joinedAt: 'asc' },
-      ],
-    });
+    // 3. 构建项目团队成员列表
+    const teamMembers: Array<{
+      userId: string;
+      name: string;
+      email: string;
+      avatar: string | null;
+      role: string;
+      isLeader: boolean;
+    }> = [];
 
-    // 4. 构建扁平化的成员树（所有成员都作为根节点的子节点）
+    // 添加负责人
+    if (project.leader) {
+      teamMembers.push({
+        userId: project.leader.id,
+        name: project.leader.name,
+        email: project.leader.email,
+        avatar: project.leader.avatar,
+        role: 'leader',
+        isLeader: true,
+      });
+    }
+
+    // 添加团队成员（排除负责人）
+    for (const member of project.members) {
+      if (project.leaderId && member.userId === project.leaderId) {
+        continue; // 跳过负责人，避免重复
+      }
+      teamMembers.push({
+        userId: member.user.id,
+        name: member.user.name,
+        email: member.user.email,
+        avatar: member.user.avatar,
+        role: member.role,
+        isLeader: false,
+      });
+    }
+
+    // 如果项目没有任何团队成员，获取工作区所有成员作为备选
+    if (teamMembers.length === 0) {
+      const workspaceMembers = await prisma.workspaceUser.findMany({
+        where: { workspaceId: project.workspaceId },
+        include: {
+          user: { select: { id: true, name: true, email: true, avatar: true } },
+        },
+        orderBy: [
+          { role: 'asc' },
+          { joinedAt: 'asc' },
+        ],
+      });
+
+      for (const member of workspaceMembers) {
+        teamMembers.push({
+          userId: member.user.id,
+          name: member.user.name,
+          email: member.user.email,
+          avatar: member.user.avatar,
+          role: member.role,
+          isLeader: false,
+        });
+      }
+    }
+
+    // 4. 构建成员节点
     const children: MemberNode[] = [];
     
-    for (const member of workspaceMembers) {
+    for (const member of teamMembers) {
       // 获取该成员在此项目中的任务
       const tasks = await prisma.task.findMany({
         where: { projectId, assigneeId: member.userId },
@@ -67,16 +117,23 @@ export const treeService = {
       // 计算任务统计
       const taskStats = this.calculateTaskStats(tasks);
 
-      // 获取项目成员角色（如果有的话）
-      const projectMember = await projectMemberRepository.findByProjectAndUser(projectId, member.userId);
-      // 优先使用项目角色，如果没有则使用工作区角色
-      const role = projectMember?.role || member.role;
+      // 显示正确的项目角色
+      let displayRole = member.role;
+      if (member.isLeader) {
+        displayRole = '负责人';
+      } else if (member.role === 'project_admin') {
+        displayRole = '项目管理员';
+      } else if (member.role === 'team_lead') {
+        displayRole = '团队负责人';
+      } else if (member.role === 'member') {
+        displayRole = '团队成员';
+      }
 
       children.push({
-        userId: member.user.id,
-        name: member.user.name,
-        email: member.user.email,
-        role, // 使用项目角色（优先）或工作区角色
+        userId: member.userId,
+        name: member.name,
+        email: member.email,
+        role: displayRole,
         taskStats,
         tasks: tasks.map((t) => ({
           id: t.id,
@@ -85,25 +142,18 @@ export const treeService = {
           priority: t.priority,
           dueDate: t.dueDate?.toISOString() || null,
         })),
-        children: [], // 扁平结构，没有嵌套
+        children: [],
       });
     }
 
-    // 5. 返回树结构（使用第一个成员作为根节点，或创建虚拟根节点）
-    const rootMember = workspaceMembers.find(m => m.role === 'owner') || workspaceMembers[0];
-    
-    if (!rootMember) {
-      throw new AppError('工作区没有成员', 404, 'NO_MEMBERS');
-    }
-
-    // 计算整体统计
+    // 5. 计算整体统计
     const allTasks = await prisma.task.findMany({
       where: { projectId },
       select: { status: true },
     });
     const overallStats = this.calculateTaskStats(allTasks);
 
-    // 构建根节点（代表整个项目/团队）
+    // 6. 构建根节点
     const tree: MemberNode = {
       userId: 'team-root',
       name: project.name + ' 团队',

@@ -9,29 +9,85 @@ export const projectService = {
   /**
    * 创建项目
    * 权限：owner, director, manager 可以创建项目
+   * 可同时指定负责人和团队成员
    */
   async create(
     userId: string,
     workspaceId: string,
-    data: { name: string; description?: string }
+    data: { 
+      name: string; 
+      description?: string;
+      leaderId?: string;
+      teamMemberIds?: string[];
+    }
   ) {
     await workspaceService.requireRole(workspaceId, userId, ['owner', 'director', 'manager']);
 
-    return projectRepository.create({
+    // 如果指定了负责人，验证是否是工作区成员
+    if (data.leaderId) {
+      const isLeaderMember = await workspaceService.isMember(workspaceId, data.leaderId);
+      if (!isLeaderMember) {
+        throw new AppError('指定的负责人不是工作区成员', 400, 'LEADER_NOT_MEMBER');
+      }
+    }
+
+    // 验证团队成员是否都是工作区成员
+    if (data.teamMemberIds && data.teamMemberIds.length > 0) {
+      for (const memberId of data.teamMemberIds) {
+        const isMember = await workspaceService.isMember(workspaceId, memberId);
+        if (!isMember) {
+          throw new AppError('部分团队成员不是工作区成员', 400, 'MEMBER_NOT_IN_WORKSPACE');
+        }
+      }
+    }
+
+    // 创建项目
+    const project = await projectRepository.create({
       name: data.name,
       description: data.description,
       workspaceId,
+      leaderId: data.leaderId,
     });
+
+    // 添加团队成员
+    if (data.teamMemberIds && data.teamMemberIds.length > 0) {
+      for (const memberId of data.teamMemberIds) {
+        // 跳过负责人（如果已设置）
+        if (memberId !== data.leaderId) {
+          await projectRepository.addProjectMember(project.id, memberId, 'member');
+        }
+      }
+    }
+
+    // 如果有负责人，也添加为项目成员（角色为 project_admin）
+    if (data.leaderId) {
+      await projectRepository.addProjectMember(project.id, data.leaderId, 'project_admin');
+    }
+
+    return project;
   },
 
   /**
    * 获取工作区下的所有项目
-   * 权限：所有工作区成员都可以查看项目列表
+   * 权限：
+   * - owner, director, manager: 可以查看所有项目
+   * - member: 只能查看自己参与的项目（是负责人或团队成员）
+   * - observer: 只能查看自己参与的项目
    */
   async getByWorkspace(userId: string, workspaceId: string) {
-    // 所有角色都可以查看项目列表
-    await workspaceService.requireRole(workspaceId, userId, ['owner', 'director', 'manager', 'member', 'observer']);
-    return projectRepository.findByWorkspaceId(workspaceId);
+    // 验证用户是工作区成员
+    const membership = await workspaceService.getMembership(workspaceId, userId);
+    if (!membership) {
+      throw new AppError('您不是此工作区的成员', 403, 'NOT_WORKSPACE_MEMBER');
+    }
+
+    // 管理员角色可以查看所有项目
+    if (['owner', 'director', 'manager'].includes(membership.role)) {
+      return projectRepository.findByWorkspaceId(workspaceId);
+    }
+
+    // 普通成员只能查看自己参与的项目
+    return projectRepository.findByWorkspaceIdForMember(workspaceId, userId);
   },
 
   /**

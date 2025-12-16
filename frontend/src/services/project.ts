@@ -60,12 +60,20 @@ export const projectService = {
     return response.project;
   },
 
-  // 创建项目
-  async createProject(workspaceId: string, name: string, description?: string): Promise<Project> {
+  // 创建项目（支持指定负责人和团队成员）
+  async createProject(
+    workspaceId: string, 
+    name: string, 
+    description?: string,
+    leaderId?: string,
+    teamMemberIds?: string[]
+  ): Promise<Project> {
     const response = await api.post<{ project: Project }>('/projects', {
       workspaceId,
       name,
       description,
+      leaderId,
+      teamMemberIds,
     });
     return response.project;
   },
