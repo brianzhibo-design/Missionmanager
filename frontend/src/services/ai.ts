@@ -452,6 +452,26 @@ class AIService {
       { message, history }
     );
   }
+
+  // AI 优化群发消息
+  async optimizeBroadcastMessage(
+    title: string,
+    content: string,
+    context: 'announcement' | 'reminder' | 'notification' | 'general' = 'general'
+  ): Promise<BroadcastOptimizationResult> {
+    return api.post<BroadcastOptimizationResult>('/ai/optimize-broadcast', {
+      title,
+      content,
+      context,
+    });
+  }
+}
+
+// 群发消息优化结果
+export interface BroadcastOptimizationResult {
+  optimizedTitle: string;
+  optimizedContent: string;
+  suggestions: string[];
 }
 
 export interface ChatMessage {

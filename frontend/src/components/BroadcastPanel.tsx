@@ -2,9 +2,10 @@
  * 群发消息面板组件
  */
 import React, { useState, useEffect } from 'react';
-import { Send, Mail, Coffee, History, X, Users } from 'lucide-react';
+import { Send, Mail, Coffee, History, X, Users, Wand2, Loader2 } from 'lucide-react';
 import { broadcastService, BroadcastMessage, CoffeeWinner, CoffeeLottery } from '../services/broadcast';
 import { workspaceService } from '../services/workspace';
+import { aiService } from '../services/ai';
 import MemberSelector, { SelectableMember } from './MemberSelector';
 import './BroadcastPanel.css';
 
@@ -25,6 +26,8 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
   const [coffeeWinner, setCoffeeWinner] = useState<CoffeeWinner | null>(null);
   const [coffeeHistory, setCoffeeHistory] = useState<CoffeeLottery[]>([]);
   const [drawing, setDrawing] = useState(false);
+  const [aiOptimizing, setAiOptimizing] = useState(false);
+  const [messageContext, setMessageContext] = useState<'announcement' | 'reminder' | 'notification' | 'general'>('general');
 
   useEffect(() => {
     loadMembers();
@@ -126,6 +129,33 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
     }
   };
 
+  const handleAiOptimize = async () => {
+    if (!title.trim() && !content.trim()) {
+      alert('请先输入标题或内容');
+      return;
+    }
+
+    try {
+      setAiOptimizing(true);
+      const result = await aiService.optimizeBroadcastMessage(
+        title.trim(),
+        content.trim(),
+        messageContext
+      );
+      setTitle(result.optimizedTitle);
+      setContent(result.optimizedContent);
+      
+      if (result.suggestions && result.suggestions.length > 0) {
+        alert(`✨ 优化完成！\n\n建议：\n${result.suggestions.map(s => `• ${s}`).join('\n')}`);
+      }
+    } catch (error) {
+      console.error('AI 优化失败:', error);
+      alert('AI 优化失败，请重试');
+    } finally {
+      setAiOptimizing(false);
+    }
+  };
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('zh-CN', {
@@ -172,7 +202,37 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
         {activeTab === 'send' && (
           <div className="send-form">
             <div className="form-group">
-              <label>消息标题</label>
+              <label>消息类型</label>
+              <select
+                value={messageContext}
+                onChange={(e) => setMessageContext(e.target.value as any)}
+                className="context-select"
+              >
+                <option value="general">日常沟通</option>
+                <option value="announcement">正式公告</option>
+                <option value="reminder">温馨提醒</option>
+                <option value="notification">事务通知</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <div className="label-with-action">
+                <label>消息标题</label>
+                <button
+                  type="button"
+                  className={`ai-optimize-btn ${aiOptimizing ? 'loading' : ''}`}
+                  onClick={handleAiOptimize}
+                  disabled={aiOptimizing || (!title.trim() && !content.trim())}
+                  title="AI 优化消息"
+                >
+                  {aiOptimizing ? (
+                    <Loader2 size={14} className="spin" />
+                  ) : (
+                    <Wand2 size={14} />
+                  )}
+                  AI 优化
+                </button>
+              </div>
               <input
                 type="text"
                 value={title}

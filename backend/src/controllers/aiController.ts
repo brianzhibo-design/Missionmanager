@@ -242,5 +242,33 @@ router.post('/suggest-project-tasks', requireAuth, async (req, res, next) => {
   }
 });
 
+// AI 优化群发消息
+router.post('/optimize-broadcast', requireAuth, async (req, res, next) => {
+  try {
+    const { title, content, context } = req.body;
+    const userId = req.user!.userId;
+
+    if (!title && !content) {
+      return res.status(400).json({ 
+        success: false, 
+        error: { code: 'BAD_REQUEST', message: '请提供标题或内容' } 
+      });
+    }
+
+    const messageContext = context || 'general';
+    const validContexts = ['announcement', 'reminder', 'notification', 'general'];
+    
+    const result = await aiService.optimizeBroadcastMessage(
+      title?.trim() || '', 
+      content?.trim() || '', 
+      validContexts.includes(messageContext) ? messageContext : 'general',
+      userId
+    );
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleAIError(error, req, res, next);
+  }
+});
+
 export const aiRouter = router;
 export default router;

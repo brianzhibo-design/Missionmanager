@@ -1319,6 +1319,83 @@ export async function suggestProjectTasks(
   }
 }
 
+// ==================== 群发消息优化 ====================
+
+interface BroadcastOptimizationResult {
+  optimizedTitle: string;
+  optimizedContent: string;
+  suggestions: string[];
+}
+
+/**
+ * 优化群发消息的标题和内容
+ * 让消息更专业、友好、有吸引力
+ */
+export async function optimizeBroadcastMessage(
+  title: string,
+  content: string,
+  context: 'announcement' | 'reminder' | 'notification' | 'general',
+  userId: string
+): Promise<BroadcastOptimizationResult> {
+  if (!title && !content) {
+    throw new AIError('请提供标题或内容', AIErrorCodes.INVALID_INPUT);
+  }
+
+  const contextDescriptions: Record<string, string> = {
+    announcement: '正式公告/通知',
+    reminder: '温馨提醒',
+    notification: '事务通知',
+    general: '日常沟通',
+  };
+
+  const systemPrompt = `你是一位专业的企业内部沟通专家。请优化用户提供的群发消息，使其：
+1. **专业清晰**：语言规范、表达精准
+2. **友好温暖**：语气亲切、积极向上
+3. **简洁有力**：重点突出、易于理解
+4. **引人注目**：标题吸引人、内容有吸引力
+
+消息类型：${contextDescriptions[context] || '日常沟通'}
+
+返回纯 JSON 格式（不要 markdown 代码块）：
+{
+  "optimizedTitle": "优化后的标题（简洁有力，15字以内）",
+  "optimizedContent": "优化后的正文（保持原意，语言更精炼、专业）",
+  "suggestions": ["改进建议1", "改进建议2"]
+}
+
+优化原则：
+1. 保留原始信息的核心含义
+2. 使用积极正面的措辞
+3. 适当添加礼貌用语
+4. 如果是提醒类消息，可适当加入鼓励性语句
+5. 避免过于生硬或命令式的语气`;
+
+  const userPrompt = `请优化以下群发消息：
+
+**原标题**：${title || '（未提供）'}
+**原内容**：${content || '（未提供）'}
+
+请优化使其更专业、友好、有吸引力。`;
+
+  try {
+    const result = await callAI(systemPrompt, userPrompt, 'broadcast_optimization', {
+      userId,
+      maxTokens: 1000,
+    });
+
+    return parseJSON<BroadcastOptimizationResult>(result, 'broadcast_optimization');
+  } catch (error) {
+    log.error('AI 消息优化失败', { error: (error as Error).message });
+    
+    // 返回简单优化版本
+    return {
+      optimizedTitle: title || '重要通知',
+      optimizedContent: content ? `${content}\n\n感谢您的关注！` : '',
+      suggestions: ['建议添加具体的时间或行动项', '可以适当添加鼓励性语句'],
+    };
+  }
+}
+
 // ==================== 导出 ====================
 
 export const aiService = {
@@ -1335,6 +1412,7 @@ export const aiService = {
   optimizeProject,
   chatWithTask,
   suggestProjectTasks,
+  optimizeBroadcastMessage,
   isEnabled: isAIEnabled,
   AIError,
   AIErrorCodes,

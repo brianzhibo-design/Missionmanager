@@ -526,6 +526,81 @@
   font-size: 14px;
 }
 
+/* 消息类型选择器 */
+.context-select {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: 1px solid var(--border-primary);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.context-select:focus {
+  outline: none;
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* 标签与操作按钮行 */
+.label-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label-with-action label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* AI 优化按钮 */
+.ai-optimize-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  background: linear-gradient(135deg, #8B5CF6, #6366F1);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-optimize-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7C3AED, #4F46E5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.ai-optimize-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-optimize-btn.loading {
+  pointer-events: none;
+}
+
+.ai-optimize-btn .spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* 响应式 */
 @media (max-width: 768px) {
   .broadcast-panel {
@@ -547,6 +622,11 @@
 
   .panel-content {
     padding: 16px;
+  }
+
+  .label-with-action {
+    flex-wrap: wrap;
+    gap: 8px;
   }
 }
 
