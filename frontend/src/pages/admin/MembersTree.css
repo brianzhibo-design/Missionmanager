@@ -173,13 +173,6 @@
   color: var(--text-primary);
 }
 
-.project-desc {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin-top: 4px;
-  line-height: 1.4;
-}
-
 /* 团队信息区 */
 .team-info {
   margin-top: 16px;

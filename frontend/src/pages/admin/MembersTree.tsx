@@ -272,9 +272,6 @@ export default function MembersTree() {
               <div className="project-info">
                 <span className="info-label">项目</span>
                 <span className="info-value">{treeData.projectName}</span>
-                {treeData.projectDescription && (
-                  <p className="project-desc">{treeData.projectDescription}</p>
-                )}
               </div>
               
               {/* 项目团队信息 */}
