@@ -514,44 +514,154 @@
 }
 
 /* ========================================
- * 响应式
+ * 移动端样式 - 极简模块化
  * ======================================== */
 @media (max-width: 768px) {
+  .projects-page {
+    padding: 0;
+    background: #f5f5f5;
+  }
+
+  [data-theme="dark"] .projects-page {
+    background: #000;
+  }
+
   .page-header {
     flex-direction: column;
     align-items: stretch;
+    padding: 20px 16px 16px;
+    background: #fff;
+    gap: 12px;
+  }
+
+  [data-theme="dark"] .page-header {
+    background: #1c1c1e;
+  }
+
+  .page-title {
+    font-size: 24px;
+    font-weight: 700;
   }
 
   .page-actions {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 8px;
   }
 
   .page-actions .btn {
-    width: 100%;
+    flex: 1;
     justify-content: center;
+    height: 44px;
+    border-radius: 10px;
+    font-size: 15px;
   }
 
   .projects-toolbar {
     flex-direction: column;
-    gap: var(--space-3);
+    gap: 12px;
+    padding: 12px 16px;
+    background: #fff;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  [data-theme="dark"] .projects-toolbar {
+    background: #1c1c1e;
   }
 
   .search-box {
     max-width: none;
+    height: 40px;
+    border-radius: 10px;
+    background: #f5f5f5;
+    border: none;
   }
 
-  .projects-grid {
-    grid-template-columns: 1fr;
+  [data-theme="dark"] .search-box {
+    background: #2c2c2e;
   }
 
-  .projects-list .project-card {
+  .view-switcher {
+    display: none;
+  }
+
+  .projects-grid,
+  .projects-list {
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-4);
+    gap: 0;
+    padding: 12px 0 80px;
   }
 
-  .projects-list .project-progress-section {
-    width: auto;
+  .project-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 14px 16px;
+    margin: 0;
+    border-radius: 0;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    box-shadow: none;
+    gap: 12px;
+  }
+
+  [data-theme="dark"] .project-card {
+    background: #1c1c1e;
+    border-bottom-color: #2c2c2e;
+  }
+
+  .project-card:active {
+    background: #f5f5f5;
+  }
+
+  [data-theme="dark"] .project-card:active {
+    background: #2c2c2e;
+  }
+
+  .project-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  .project-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .project-name {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .project-description {
+    font-size: 13px;
+    color: #999;
+    margin-top: 2px;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .project-meta,
+  .project-stats,
+  .project-progress-section {
+    display: none;
+  }
+
+  /* 显示箭头 */
+  .project-card::after {
+    content: '›';
+    font-size: 20px;
+    color: #ccc;
+    flex-shrink: 0;
+  }
+
+  [data-theme="dark"] .project-card::after {
+    color: #666;
   }
 }
 

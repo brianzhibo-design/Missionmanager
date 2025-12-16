@@ -233,3 +233,96 @@
   }
 }
 
+/* ========================================
+ * 移动端样式 - 极简模块化
+ * ======================================== */
+@media (max-width: 768px) {
+  .members-tree-page {
+    padding: 0;
+    background: #f5f5f5;
+    height: auto;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  [data-theme="dark"] .members-tree-page {
+    background: #000;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px 16px 16px;
+    background: #fff;
+    margin: 0;
+    gap: 12px;
+  }
+
+  [data-theme="dark"] .page-header {
+    background: #1c1c1e;
+  }
+
+  .header-left h1 {
+    font-size: 24px;
+  }
+
+  .page-description {
+    display: none;
+  }
+
+  .header-controls {
+    width: 100%;
+  }
+
+  .select-control {
+    flex: 1;
+    height: 40px;
+    border-radius: 10px;
+  }
+
+  .tree-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px 0;
+  }
+
+  .tree-panel,
+  .detail-panel {
+    background: #fff;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  [data-theme="dark"] .tree-panel,
+  [data-theme="dark"] .detail-panel {
+    background: #1c1c1e;
+  }
+
+  .member-node {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  [data-theme="dark"] .member-node {
+    border-bottom-color: #2c2c2e;
+  }
+
+  .member-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .member-name {
+    font-size: 16px;
+  }
+
+  .detail-panel {
+    height: auto;
+    min-height: 300px;
+    margin-top: 0;
+  }
+}
+

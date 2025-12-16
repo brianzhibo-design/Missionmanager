@@ -313,18 +313,122 @@
   font-size: 14px;
 }
 
-/* 响应式 */
+/* ========================================
+ * 移动端样式 - 极简模块化
+ * ======================================== */
 @media (max-width: 768px) {
   .dashboard {
-    padding: 24px 16px;
+    padding: 0;
+    background: #f5f5f5;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  [data-theme="dark"] .dashboard {
+    background: #000;
   }
   
   .dashboard-header {
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
+    padding: 20px 16px 16px;
+    background: #fff;
+  }
+
+  [data-theme="dark"] .dashboard-header {
+    background: #1c1c1e;
+  }
+
+  .dashboard-title {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .dashboard-subtitle {
+    font-size: 14px;
+    color: #999;
   }
   
+  /* 统计卡片网格 */
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding: 0 16px 16px;
+    background: #fff;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  [data-theme="dark"] .stats-grid {
+    background: #1c1c1e;
+  }
+
+  .stats-grid::-webkit-scrollbar {
+    display: none;
+  }
+
+  .stat-card {
+    flex: 0 0 auto;
+    min-width: 120px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: #f5f5f5;
+    box-shadow: none;
+  }
+
+  [data-theme="dark"] .stat-card {
+    background: #2c2c2e;
+  }
+
+  .stat-value {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: #999;
+  }
+
+  /* 内容区域 */
+  .dashboard-content {
+    padding: 12px 0;
+    gap: 12px;
+  }
+
+  .dashboard-section {
+    background: #fff;
+    border-radius: 0;
+    padding: 16px;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  [data-theme="dark"] .dashboard-section {
+    background: #1c1c1e;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  /* 任务列表项 */
+  .task-item,
+  .activity-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  [data-theme="dark"] .task-item,
+  [data-theme="dark"] .activity-item {
+    border-bottom-color: #2c2c2e;
+  }
+
+  .task-item:last-child,
+  .activity-item:last-child {
+    border-bottom: none;
   }
 }

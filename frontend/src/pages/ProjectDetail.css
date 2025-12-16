@@ -356,50 +356,151 @@
   }
 }
 
+/* ========================================
+ * 移动端样式 - 极简模块化
+ * ======================================== */
 @media (max-width: 768px) {
+  .project-detail-page {
+    padding: 0;
+    background: #f5f5f5;
+  }
+
+  [data-theme="dark"] .project-detail-page {
+    background: #000;
+  }
+
+  .project-header {
+    padding: 16px;
+    background: #fff;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  [data-theme="dark"] .project-header {
+    background: #1c1c1e;
+  }
+
   .project-header-content {
     flex-direction: column;
+    gap: 12px;
+  }
+
+  .project-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    border-radius: 12px;
+  }
+
+  .project-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .project-description {
+    font-size: 14px;
+    color: #999;
   }
   
   .project-actions {
     width: 100%;
+    display: flex;
+    gap: 8px;
   }
   
   .project-actions .btn {
     flex: 1;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 14px;
   }
 
+  /* 工具栏简化 */
   .toolbar {
     flex-direction: column;
     align-items: stretch;
-    gap: var(--space-3);
+    gap: 12px;
+    padding: 12px 16px;
+    background: #fff;
+    margin: 12px 0 0;
+    border-radius: 0;
+  }
+
+  [data-theme="dark"] .toolbar {
+    background: #1c1c1e;
   }
 
   .toolbar-left {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
   }
 
   .view-switcher {
-    justify-content: center;
+    display: none;
   }
 
   .filters {
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 8px;
   }
 
   .filter-select {
-    width: 100%;
+    flex: 1;
+    height: 36px;
+    border-radius: 8px;
+    background: #f5f5f5;
+    border: none;
+    font-size: 13px;
   }
 
+  [data-theme="dark"] .filter-select {
+    background: #2c2c2e;
+  }
+
+  /* 任务列表简化 */
   .task-table {
-    font-size: var(--text-xs);
+    display: none;
   }
 
+  .task-list {
+    background: #fff;
+    margin: 12px 0;
+    padding: 0;
+  }
+
+  [data-theme="dark"] .task-list {
+    background: #1c1c1e;
+  }
+
+  .task-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  [data-theme="dark"] .task-item {
+    border-bottom-color: #2c2c2e;
+  }
+
+  .task-item:active {
+    background: #f5f5f5;
+  }
+
+  [data-theme="dark"] .task-item:active {
+    background: #2c2c2e;
+  }
+
+  /* 隐藏表格列 */
   .th-status,
   .th-due,
   .td-status,
-  .td-due {
+  .td-due,
+  .th-assignee,
+  .td-assignee {
     display: none;
   }
 }

@@ -340,31 +340,144 @@
   to { transform: rotate(360deg); }
 }
 
+/* ========================================
+ * 移动端样式 - 极简模块化
+ * ======================================== */
 @media (max-width: 768px) {
-  .settings-layout {
-    grid-template-columns: 1fr;
+  .settings-page {
+    padding: 0;
+    background: #f5f5f5;
+    min-height: 100vh;
+    padding-bottom: 80px;
   }
 
+  [data-theme="dark"] .settings-page {
+    background: #000;
+  }
+
+  .settings-header {
+    padding: 20px 16px 16px;
+    background: #fff;
+  }
+
+  [data-theme="dark"] .settings-header {
+    background: #1c1c1e;
+  }
+
+  .settings-title {
+    font-size: 24px;
+    font-weight: 700;
+  }
+
+  .settings-layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* 侧边栏变成顶部标签 */
   .settings-sidebar {
     position: static;
     display: flex;
-    gap: 8px;
+    gap: 0;
     overflow-x: auto;
-    padding: 8px;
+    padding: 0;
+    background: #fff;
+    border-bottom: 1px solid #f0f0f0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  [data-theme="dark"] .settings-sidebar {
+    background: #1c1c1e;
+    border-bottom-color: #2c2c2e;
+  }
+
+  .settings-sidebar::-webkit-scrollbar {
+    display: none;
   }
 
   .settings-tab {
     white-space: nowrap;
+    padding: 14px 20px;
+    font-size: 14px;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
   }
 
-  .theme-options {
-    grid-template-columns: 1fr;
+  .settings-tab.active {
+    color: #007AFF;
+    border-bottom-color: #007AFF;
+    background: transparent;
+  }
+
+  [data-theme="dark"] .settings-tab.active {
+    color: #0A84FF;
+    border-bottom-color: #0A84FF;
+  }
+
+  /* 内容区域 */
+  .settings-content {
+    padding: 0;
+  }
+
+  .settings-section {
+    background: #fff;
+    border-radius: 0;
+    padding: 16px;
+    margin: 12px 0 0;
+  }
+
+  [data-theme="dark"] .settings-section {
+    background: #1c1c1e;
+  }
+
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
   }
 
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+
+  /* 主题选项 */
+  .theme-options {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .theme-option {
+    flex: 0 0 auto;
+    min-width: 100px;
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  /* 表单项 */
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-label {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .form-input,
+  .form-select {
+    height: 44px;
+    border-radius: 10px;
+    font-size: 16px;
+  }
+
+  .btn {
+    height: 44px;
+    border-radius: 10px;
   }
 }
 

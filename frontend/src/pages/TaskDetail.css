@@ -600,22 +600,151 @@
   }
 }
 
+/* ========================================
+ * 移动端样式 - 极简模块化
+ * ======================================== */
 @media (max-width: 768px) {
+  .task-detail-page {
+    padding: 0;
+    background: #f5f5f5;
+    padding-bottom: 80px;
+  }
+
+  [data-theme="dark"] .task-detail-page {
+    background: #000;
+  }
+
   .task-header {
     flex-direction: column;
+    padding: 16px;
+    background: #fff;
+    border-radius: 0;
+    margin: 0;
+    gap: 12px;
+  }
+
+  [data-theme="dark"] .task-header {
+    background: #1c1c1e;
+  }
+
+  .task-title {
+    font-size: 20px;
+    font-weight: 700;
   }
 
   .task-actions {
     width: 100%;
+    display: flex;
+    gap: 8px;
   }
 
   .task-actions .btn {
     flex: 1;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 14px;
   }
 
+  /* 任务内容区 */
+  .task-content {
+    padding: 0;
+    gap: 12px;
+  }
+
+  .task-main,
+  .task-sidebar {
+    padding: 0;
+  }
+
+  /* 卡片样式 */
+  .card,
+  .task-description-card,
+  .subtasks-card,
+  .ai-analysis-card,
+  .ai-chat-panel {
+    border-radius: 0;
+    margin: 0;
+    padding: 16px;
+    background: #fff;
+    box-shadow: none;
+    border-bottom: 8px solid #f5f5f5;
+  }
+
+  [data-theme="dark"] .card,
+  [data-theme="dark"] .task-description-card,
+  [data-theme="dark"] .subtasks-card,
+  [data-theme="dark"] .ai-analysis-card,
+  [data-theme="dark"] .ai-chat-panel {
+    background: #1c1c1e;
+    border-bottom-color: #000;
+  }
+
+  .card-title,
+  .section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  /* 属性网格 */
   .task-attributes {
+    display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
+    gap: 12px;
+  }
+
+  .attribute-item {
+    padding: 12px;
+    background: #f5f5f5;
+    border-radius: 10px;
+  }
+
+  [data-theme="dark"] .attribute-item {
+    background: #2c2c2e;
+  }
+
+  .attribute-label {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 4px;
+  }
+
+  .attribute-value {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* 子任务列表 */
+  .subtask-item {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  [data-theme="dark"] .subtask-item {
+    border-bottom-color: #2c2c2e;
+  }
+
+  .subtask-item:last-child {
+    border-bottom: none;
+  }
+
+  /* AI聊天 */
+  .chat-messages {
+    max-height: 300px;
+  }
+
+  .chat-input-area {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .chat-input-area textarea {
+    width: 100%;
+  }
+
+  .chat-input-area .btn {
+    width: 100%;
+    height: 40px;
   }
 }
 
