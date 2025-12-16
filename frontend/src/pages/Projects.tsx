@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, LayoutGrid, List, Crown } from 'lucide-react';
+import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, LayoutGrid, List, Crown, Sparkles, Check, X, Loader2 } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
-import { projectService } from '../services/project';
+import { projectService, SuggestedTask, InitialTask } from '../services/project';
 import { workspaceService, WorkspaceMember } from '../services/workspace';
 import Modal from '../components/Modal';
 import MemberSelector from '../components/MemberSelector';
@@ -71,6 +71,16 @@ export default function Projects() {
   const [workspaceMembers, setWorkspaceMembers] = useState<WorkspaceMember[]>([]);
   const [selectedLeader, setSelectedLeader] = useState<string>('');
   const [selectedTeamMembers, setSelectedTeamMembers] = useState<string[]>([]);
+  
+  // AI 推荐任务
+  const [projectName, setProjectName] = useState('');
+  const [projectDescription, setProjectDescription] = useState('');
+  const [aiOptimizing, setAiOptimizing] = useState(false);
+  const [suggestedTasks, setSuggestedTasks] = useState<SuggestedTask[]>([]);
+  const [selectedTaskIndices, setSelectedTaskIndices] = useState<number[]>([]);
+  const [aiReasoning, setAiReasoning] = useState('');
+  const [showAiSuggestions, setShowAiSuggestions] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const loadProjects = useCallback(async () => {
     if (!currentWorkspace) return;
@@ -119,15 +129,70 @@ export default function Projects() {
     }
   };
 
+  // AI 优化项目并推荐任务
+  const handleAiOptimize = async () => {
+    if (!projectName.trim()) {
+      alert('请先输入项目名称');
+      return;
+    }
+
+    try {
+      setAiOptimizing(true);
+      const result = await projectService.suggestProjectTasks(projectName, projectDescription);
+      
+      // 更新优化后的标题和描述
+      setProjectName(result.optimizedTitle);
+      setProjectDescription(result.optimizedDescription);
+      
+      // 设置推荐的任务
+      setSuggestedTasks(result.suggestedTasks);
+      setSelectedTaskIndices(result.suggestedTasks.map((_, i) => i)); // 默认全选
+      setAiReasoning(result.reasoning);
+      setShowAiSuggestions(true);
+    } catch (err) {
+      console.error('AI 优化失败:', err);
+      alert('AI 优化失败，请稍后重试');
+    } finally {
+      setAiOptimizing(false);
+    }
+  };
+
+  // 切换任务选择
+  const toggleTaskSelection = (index: number) => {
+    setSelectedTaskIndices(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
+  // 全选/取消全选任务
+  const toggleAllTasks = () => {
+    if (selectedTaskIndices.length === suggestedTasks.length) {
+      setSelectedTaskIndices([]);
+    } else {
+      setSelectedTaskIndices(suggestedTasks.map((_, i) => i));
+    }
+  };
+
   const handleCreateProject = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!currentWorkspace) return;
 
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
+    const name = projectName.trim();
+    const description = projectDescription.trim();
 
-    if (!name?.trim()) return;
+    if (!name) return;
+
+    // 收集选中的任务
+    const initialTasks: InitialTask[] = selectedTaskIndices
+      .sort((a, b) => a - b)
+      .map((index, order) => ({
+        title: suggestedTasks[index].title,
+        description: suggestedTasks[index].description,
+        priority: suggestedTasks[index].priority,
+        order: order + 1,
+      }));
 
     try {
       setCreating(true);
@@ -136,12 +201,12 @@ export default function Projects() {
         name, 
         description,
         selectedLeader || undefined,
-        selectedTeamMembers.length > 0 ? selectedTeamMembers : undefined
+        selectedTeamMembers.length > 0 ? selectedTeamMembers : undefined,
+        initialTasks.length > 0 ? initialTasks : undefined
       );
       setShowCreateProject(false);
       // 重置表单
-      setSelectedLeader('');
-      setSelectedTeamMembers([]);
+      resetCreateProjectForm();
       navigate(`/projects/${newProject.id}`);
     } catch (err) {
       console.error('Failed to create project:', err);
@@ -149,6 +214,18 @@ export default function Projects() {
     } finally {
       setCreating(false);
     }
+  };
+
+  // 重置创建项目表单
+  const resetCreateProjectForm = () => {
+    setProjectName('');
+    setProjectDescription('');
+    setSelectedLeader('');
+    setSelectedTeamMembers([]);
+    setSuggestedTasks([]);
+    setSelectedTaskIndices([]);
+    setAiReasoning('');
+    setShowAiSuggestions(false);
   };
 
   const filteredProjects = projects.filter(project =>
@@ -451,22 +528,40 @@ export default function Projects() {
         isOpen={showCreateProject}
         onClose={() => {
           setShowCreateProject(false);
-          setSelectedLeader('');
-          setSelectedTeamMembers([]);
+          resetCreateProjectForm();
         }}
         title="新建项目"
-        size="md"
+        size="lg"
       >
-        <form onSubmit={handleCreateProject}>
+        <form ref={formRef} onSubmit={handleCreateProject}>
+          {/* 项目基本信息 */}
           <div className="form-group">
             <label className="form-label">项目名称 *</label>
-            <input 
-              name="name"
-              type="text" 
-              className="form-input" 
-              placeholder="输入项目名称"
-              required
-            />
+            <div className="input-with-ai">
+              <input 
+                name="name"
+                type="text" 
+                className="form-input" 
+                placeholder="输入项目名称"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className={`btn btn-ai ${aiOptimizing ? 'btn-loading' : ''}`}
+                onClick={handleAiOptimize}
+                disabled={aiOptimizing || !projectName.trim()}
+                title="AI 优化项目信息并推荐任务"
+              >
+                {aiOptimizing ? (
+                  <Loader2 size={16} className="spin" />
+                ) : (
+                  <Sparkles size={16} />
+                )}
+                <span>{aiOptimizing ? 'AI 分析中...' : 'AI 优化'}</span>
+              </button>
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">描述</label>
@@ -475,8 +570,74 @@ export default function Projects() {
               className="form-textarea" 
               placeholder="可选：添加项目描述"
               rows={3}
+              value={projectDescription}
+              onChange={(e) => setProjectDescription(e.target.value)}
             />
           </div>
+
+          {/* AI 推荐任务 */}
+          {showAiSuggestions && suggestedTasks.length > 0 && (
+            <div className="ai-suggestions-section">
+              <div className="ai-suggestions-header">
+                <div className="ai-suggestions-title">
+                  <Sparkles size={18} className="ai-icon" />
+                  <span>AI 推荐任务</span>
+                  <span className="task-count">({selectedTaskIndices.length}/{suggestedTasks.length})</span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-text btn-sm"
+                  onClick={toggleAllTasks}
+                >
+                  {selectedTaskIndices.length === suggestedTasks.length ? '取消全选' : '全选'}
+                </button>
+              </div>
+              {aiReasoning && (
+                <p className="ai-reasoning">{aiReasoning}</p>
+              )}
+              <div className="suggested-tasks-list">
+                {suggestedTasks.map((task, index) => (
+                  <div 
+                    key={index}
+                    className={`suggested-task-item ${selectedTaskIndices.includes(index) ? 'selected' : ''}`}
+                    onClick={() => toggleTaskSelection(index)}
+                  >
+                    <div className="task-checkbox">
+                      {selectedTaskIndices.includes(index) ? (
+                        <Check size={14} />
+                      ) : null}
+                    </div>
+                    <div className="task-content">
+                      <div className="task-header">
+                        <span className="task-title">{task.title}</span>
+                        <span className={`priority-badge priority-${task.priority.toLowerCase()}`}>
+                          {task.priority === 'URGENT' ? '紧急' : 
+                           task.priority === 'HIGH' ? '高' : 
+                           task.priority === 'MEDIUM' ? '中' : '低'}
+                        </span>
+                      </div>
+                      <p className="task-description">{task.description}</p>
+                      {task.estimatedDays && (
+                        <span className="task-estimate">预计 {task.estimatedDays} 天</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="btn btn-text btn-sm clear-suggestions"
+                onClick={() => {
+                  setShowAiSuggestions(false);
+                  setSuggestedTasks([]);
+                  setSelectedTaskIndices([]);
+                }}
+              >
+                <X size={14} />
+                清除推荐
+              </button>
+            </div>
+          )}
           
           {/* 负责人选择 */}
           <div className="form-group">
@@ -540,8 +701,7 @@ export default function Projects() {
               className="btn btn-secondary"
               onClick={() => {
                 setShowCreateProject(false);
-                setSelectedLeader('');
-                setSelectedTeamMembers([]);
+                resetCreateProjectForm();
               }}
             >
               取消
@@ -551,7 +711,9 @@ export default function Projects() {
               className={`btn btn-primary ${creating ? 'btn-loading' : ''}`}
               disabled={creating}
             >
-              创建项目
+              {selectedTaskIndices.length > 0 
+                ? `创建项目 (含 ${selectedTaskIndices.length} 个任务)`
+                : '创建项目'}
             </button>
           </div>
         </form>

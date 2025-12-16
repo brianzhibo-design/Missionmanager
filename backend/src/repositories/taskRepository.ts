@@ -14,6 +14,7 @@ export interface CreateTaskInput {
   assigneeId?: string;
   parentId?: string;
   dueDate?: Date;
+  order?: number;
 }
 
 export interface UpdateTaskInput {

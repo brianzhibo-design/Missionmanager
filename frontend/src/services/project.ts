@@ -39,6 +39,31 @@ export interface Project {
   };
 }
 
+// AI 推荐的任务类型
+export interface SuggestedTask {
+  title: string;
+  description: string;
+  priority: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  estimatedDays?: number;
+  order: number;
+}
+
+// 创建项目时的初始任务类型
+export interface InitialTask {
+  title: string;
+  description?: string;
+  priority?: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  order?: number;
+}
+
+// AI 推荐任务的响应类型
+export interface ProjectTaskSuggestionResult {
+  optimizedTitle: string;
+  optimizedDescription: string;
+  suggestedTasks: SuggestedTask[];
+  reasoning: string;
+}
+
 interface ProjectsResponse {
   projects: Project[];
 }
@@ -60,13 +85,14 @@ export const projectService = {
     return response.project;
   },
 
-  // 创建项目（支持指定负责人和团队成员）
+  // 创建项目（支持指定负责人、团队成员和初始任务）
   async createProject(
     workspaceId: string, 
     name: string, 
     description?: string,
     leaderId?: string,
-    teamMemberIds?: string[]
+    teamMemberIds?: string[],
+    initialTasks?: InitialTask[]
   ): Promise<Project> {
     const response = await api.post<{ project: Project }>('/projects', {
       workspaceId,
@@ -74,8 +100,17 @@ export const projectService = {
       description,
       leaderId,
       teamMemberIds,
+      initialTasks,
     });
     return response.project;
+  },
+
+  // AI 推荐项目任务
+  async suggestProjectTasks(title: string, description?: string): Promise<ProjectTaskSuggestionResult> {
+    return api.post<ProjectTaskSuggestionResult>('/ai/suggest-project-tasks', {
+      title,
+      description,
+    });
   },
 
   // 更新项目

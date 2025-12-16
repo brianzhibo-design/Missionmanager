@@ -2,14 +2,23 @@
  * 项目服务
  */
 import { projectRepository } from '../repositories/projectRepository';
+import { taskRepository } from '../repositories/taskRepository';
 import { workspaceService } from './workspaceService';
 import { AppError } from '../middleware/errorHandler';
+
+// 初始任务类型定义
+interface InitialTask {
+  title: string;
+  description?: string;
+  priority?: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  order?: number;
+}
 
 export const projectService = {
   /**
    * 创建项目
    * 权限：owner, director, manager 可以创建项目
-   * 可同时指定负责人和团队成员
+   * 可同时指定负责人、团队成员和初始任务
    */
   async create(
     userId: string,
@@ -19,6 +28,7 @@ export const projectService = {
       description?: string;
       leaderId?: string;
       teamMemberIds?: string[];
+      initialTasks?: InitialTask[];
     }
   ) {
     await workspaceService.requireRole(workspaceId, userId, ['owner', 'director', 'manager']);
@@ -62,6 +72,21 @@ export const projectService = {
     // 如果有负责人，也添加为项目成员（角色为 project_admin）
     if (data.leaderId) {
       await projectRepository.addProjectMember(project.id, data.leaderId, 'project_admin');
+    }
+
+    // 创建初始任务
+    if (data.initialTasks && data.initialTasks.length > 0) {
+      for (const task of data.initialTasks) {
+        await taskRepository.create({
+          title: task.title,
+          description: task.description || '',
+          priority: task.priority || 'MEDIUM',
+          status: 'TODO',
+          projectId: project.id,
+          creatorId: userId,
+          order: task.order || 0,
+        });
+      }
     }
 
     return project;

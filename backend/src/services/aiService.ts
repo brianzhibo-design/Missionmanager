@@ -1205,6 +1205,120 @@ ${task.subTasks.length > 0 ? `**子任务**: 共${task.subTasks.length}个，完
   }
 }
 
+// ==================== 13. 项目创建时 AI 推荐任务 ====================
+
+export interface SuggestedProjectTask {
+  title: string;
+  description: string;
+  priority: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  estimatedDays?: number;
+  order: number;
+}
+
+export interface ProjectTaskSuggestionResult {
+  optimizedTitle: string;
+  optimizedDescription: string;
+  suggestedTasks: SuggestedProjectTask[];
+  reasoning: string;
+}
+
+/**
+ * 根据项目标题和描述推荐任务
+ * 用于创建项目时的 AI 辅助功能
+ */
+export async function suggestProjectTasks(
+  title: string,
+  description: string,
+  userId: string
+): Promise<ProjectTaskSuggestionResult> {
+  if (!title || title.trim().length < 2) {
+    throw new AIError('请提供有效的项目标题', AIErrorCodes.INVALID_INPUT);
+  }
+
+  const systemPrompt = `你是一位资深的项目管理专家。根据用户提供的项目标题和描述，进行以下工作：
+
+1. **优化项目信息**：优化项目标题（使其更专业、清晰），优化项目描述（使其更完整，包含背景、目标、范围）
+2. **推荐初始任务**：基于项目内容，推荐 3-6 个具体、可执行的初始任务
+
+返回纯 JSON 格式（不要 markdown 代码块）：
+{
+  "optimizedTitle": "优化后的项目标题（简洁专业，不超过30字）",
+  "optimizedDescription": "优化后的项目描述（100-200字，包含项目背景和目标）",
+  "suggestedTasks": [
+    {
+      "title": "具体任务标题（动词开头，如：完成、设计、开发、测试）",
+      "description": "任务详细描述（包含目标、步骤提示、验收标准）",
+      "priority": "HIGH|MEDIUM|LOW",
+      "estimatedDays": 2,
+      "order": 1
+    }
+  ],
+  "reasoning": "推荐这些任务的理由（一句话说明任务设计思路）"
+}
+
+任务设计原则：
+1. 任务要具体可执行，避免过于宽泛
+2. 按照项目启动的逻辑顺序排列（从规划到实施到验收）
+3. 第一个任务通常是"项目启动/需求分析"相关
+4. 最后一个任务通常是"测试验收/项目总结"相关
+5. 优先级根据任务的紧急性和依赖关系设置`;
+
+  const userPrompt = `请为以下项目推荐初始任务：
+
+**项目标题**：${title}
+**项目描述**：${description || '（未提供描述）'}
+
+请优化项目信息，并推荐 3-6 个合理的初始任务。`;
+
+  try {
+    const result = await callAI(systemPrompt, userPrompt, 'project_task_suggestion', {
+      userId,
+      maxTokens: 2000,
+    });
+
+    return parseJSON<ProjectTaskSuggestionResult>(result, 'project_task_suggestion');
+  } catch (error) {
+    log.error('AI 项目任务推荐失败', { error: (error as Error).message });
+    
+    // 返回基于规则的默认建议
+    return {
+      optimizedTitle: title,
+      optimizedDescription: description || `${title} 项目的详细描述待补充。`,
+      suggestedTasks: [
+        {
+          title: '项目启动与需求确认',
+          description: '明确项目目标、范围和关键需求，制定初步计划',
+          priority: 'HIGH',
+          estimatedDays: 2,
+          order: 1,
+        },
+        {
+          title: '方案设计与评审',
+          description: '设计技术方案或业务方案，组织团队评审',
+          priority: 'HIGH',
+          estimatedDays: 3,
+          order: 2,
+        },
+        {
+          title: '核心功能开发/实施',
+          description: '根据方案执行核心任务的开发或实施工作',
+          priority: 'MEDIUM',
+          estimatedDays: 5,
+          order: 3,
+        },
+        {
+          title: '测试与验收',
+          description: '进行功能测试，确保达到验收标准',
+          priority: 'MEDIUM',
+          estimatedDays: 2,
+          order: 4,
+        },
+      ],
+      reasoning: 'AI 分析暂时不可用，已生成通用项目任务模板',
+    };
+  }
+}
+
 // ==================== 导出 ====================
 
 export const aiService = {
@@ -1220,6 +1334,7 @@ export const aiService = {
   optimizeSingleTask,
   optimizeProject,
   chatWithTask,
+  suggestProjectTasks,
   isEnabled: isAIEnabled,
   AIError,
   AIErrorCodes,

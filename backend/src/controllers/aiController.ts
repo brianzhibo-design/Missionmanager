@@ -218,5 +218,29 @@ router.post('/next-task-suggestion', requireAuth, async (req, res, next) => {
   }
 });
 
+// AI 推荐项目任务（创建项目时使用）
+router.post('/suggest-project-tasks', requireAuth, async (req, res, next) => {
+  try {
+    const { title, description } = req.body;
+    const userId = req.user!.userId;
+
+    if (!title || typeof title !== 'string' || title.trim().length < 2) {
+      return res.status(400).json({ 
+        success: false, 
+        error: { code: 'BAD_REQUEST', message: '请提供有效的项目标题' } 
+      });
+    }
+
+    const result = await aiService.suggestProjectTasks(
+      title.trim(), 
+      description?.trim() || '', 
+      userId
+    );
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleAIError(error, req, res, next);
+  }
+});
+
 export const aiRouter = router;
 export default router;
