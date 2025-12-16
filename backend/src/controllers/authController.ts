@@ -39,17 +39,63 @@ authRouter.post('/register', async (req: Request, res: Response, next: NextFunct
 
 /**
  * POST /auth/login
- * 用户登录
+ * 用户登录（支持邮箱或手机号）
  */
 authRouter.post('/login', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      throw new AppError('请提供 email 和 password', 400, 'MISSING_FIELDS');
+      throw new AppError('请提供账号和密码', 400, 'MISSING_FIELDS');
     }
 
     const result = await authService.login(email, password);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /auth/send-code
+ * 发送手机验证码
+ */
+authRouter.post('/send-code', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { phone } = req.body;
+
+    if (!phone) {
+      throw new AppError('请提供手机号', 400, 'MISSING_FIELDS');
+    }
+
+    const result = await authService.sendPhoneCode(phone);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /auth/login-phone
+ * 手机号+验证码登录（自动注册新用户）
+ */
+authRouter.post('/login-phone', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { phone, code } = req.body;
+
+    if (!phone || !code) {
+      throw new AppError('请提供手机号和验证码', 400, 'MISSING_FIELDS');
+    }
+
+    const result = await authService.loginByPhone(phone, code);
 
     res.json({
       success: true,

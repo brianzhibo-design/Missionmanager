@@ -231,5 +231,54 @@ export const authService = {
 
     return response.user;
   },
+
+  // 发送手机验证码
+  async sendPhoneCode(phone: string): Promise<{ success: boolean; message: string; code?: string }> {
+    const response = await api.post<{ success: boolean; message: string; code?: string }>('/auth/send-code', {
+      phone,
+    });
+    return response;
+  },
+
+  // 手机号+验证码登录
+  async loginByPhone(phone: string, code: string): Promise<User> {
+    const response = await api.post<LoginResponse>('/auth/login-phone', {
+      phone,
+      code,
+    });
+
+    // 保存到 localStorage
+    localStorage.setItem(config.storageKeys.token, response.token);
+    localStorage.setItem(config.storageKeys.user, JSON.stringify(response.user));
+
+    // 更新状态
+    currentState = {
+      user: response.user,
+      token: response.token,
+      isAuthenticated: true,
+    };
+
+    notifyListeners();
+    return response.user;
+  },
+
+  // 刷新用户信息
+  async refreshUser(): Promise<User | null> {
+    try {
+      const response = await api.get<{ user: User }>('/auth/me');
+      if (response.user) {
+        currentState = {
+          ...currentState,
+          user: response.user,
+        };
+        localStorage.setItem(config.storageKeys.user, JSON.stringify(response.user));
+        notifyListeners();
+        return response.user;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  },
 };
 

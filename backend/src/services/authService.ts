@@ -1,6 +1,6 @@
 /**
  * 认证服务
- * 处理用户注册、登录、JWT 签发与验证、密码重置
+ * 处理用户注册、登录、JWT 签发与验证、密码重置、手机号登录
  */
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { userRepository } from '../repositories/userRepository';
 import { config } from '../infra/config';
 import { AppError } from '../middleware/errorHandler';
+import { smsService, isValidPhone } from './smsService';
 
 /**
  * JWT Payload 类型
@@ -25,6 +26,7 @@ export interface AuthResponse {
     id: string;
     email: string;
     name: string;
+    phone?: string | null;
     profileCompleted: boolean;
   };
   token: string;
@@ -72,26 +74,91 @@ export const authService = {
   },
 
   /**
-   * 用户登录
+   * 用户登录（邮箱/手机号 + 密码）
    */
-  async login(email: string, password: string): Promise<AuthResponse> {
-    // 1. 查找用户
-    const user = await userRepository.findByEmail(email);
+  async login(emailOrPhone: string, password: string): Promise<AuthResponse> {
+    // 1. 查找用户（支持邮箱或手机号）
+    const user = await userRepository.findByEmailOrPhone(emailOrPhone);
     if (!user) {
-      throw new AppError('邮箱或密码错误', 401, 'INVALID_CREDENTIALS');
+      throw new AppError('账号或密码错误', 401, 'INVALID_CREDENTIALS');
     }
 
-    // 2. 验证密码
+    // 2. 验证密码（手机号用户可能没有密码）
+    if (!user.password) {
+      throw new AppError('该账号未设置密码，请使用验证码登录', 401, 'NO_PASSWORD');
+    }
+    
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      throw new AppError('邮箱或密码错误', 401, 'INVALID_CREDENTIALS');
+      throw new AppError('账号或密码错误', 401, 'INVALID_CREDENTIALS');
     }
 
     // 3. 生成 JWT
     const token = this.generateToken({ userId: user.id, email: user.email });
 
     return {
-      user: { id: user.id, email: user.email, name: user.name, profileCompleted: user.profileCompleted },
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        name: user.name, 
+        phone: user.phone,
+        profileCompleted: user.profileCompleted 
+      },
+      token,
+    };
+  },
+
+  /**
+   * 发送手机验证码
+   */
+  async sendPhoneCode(phone: string): Promise<{ success: boolean; message: string; code?: string }> {
+    if (!isValidPhone(phone)) {
+      throw new AppError('手机号格式不正确', 400, 'INVALID_PHONE');
+    }
+
+    const result = await smsService.sendCode(phone);
+    return result;
+  },
+
+  /**
+   * 手机号+验证码登录（自动注册新用户）
+   */
+  async loginByPhone(phone: string, code: string): Promise<AuthResponse> {
+    // 1. 验证手机号格式
+    if (!isValidPhone(phone)) {
+      throw new AppError('手机号格式不正确', 400, 'INVALID_PHONE');
+    }
+
+    // 2. 验证验证码
+    const verification = smsService.verifyCode(phone, code);
+    if (!verification.valid) {
+      throw new AppError(verification.message, 400, 'INVALID_CODE');
+    }
+
+    // 3. 查找或创建用户
+    let user = await userRepository.findByPhone(phone);
+    let isNewUser = false;
+
+    if (!user) {
+      // 新用户自动注册
+      isNewUser = true;
+      user = await userRepository.createByPhone({
+        phone,
+        name: `用户${phone.slice(-4)}`, // 默认昵称
+      });
+    }
+
+    // 4. 生成 JWT
+    const token = this.generateToken({ userId: user.id, email: user.email });
+
+    return {
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        name: user.name, 
+        phone: user.phone,
+        profileCompleted: isNewUser ? false : user.profileCompleted // 新用户未完善资料
+      },
       token,
     };
   },

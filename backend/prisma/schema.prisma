@@ -17,13 +17,13 @@ model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String
-  password  String
+  password  String?  // 手机号注册时可以没有密码
   avatar    String?
   
   // 个人信息
   profession    String?   // 职业：designer, developer, pm, marketing, hr, finance, operation, other
   bio           String?   // 个人简介
-  phone         String?   // 手机号（可选）
+  phone         String?   @unique // 手机号（唯一）
   company       String?   // 公司/组织（可选）
   location      String?   // 所在地（可选）
   profileCompleted Boolean @default(false) @map("profile_completed") // 是否完成个人信息填写
@@ -31,6 +31,10 @@ model User {
   // 密码重置
   resetToken       String?   @map("reset_token")
   resetTokenExpiry DateTime? @map("reset_token_expiry")
+  
+  // 手机验证码
+  phoneCode       String?   @map("phone_code")       // 验证码
+  phoneCodeExpiry DateTime? @map("phone_code_expiry") // 验证码过期时间
   
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

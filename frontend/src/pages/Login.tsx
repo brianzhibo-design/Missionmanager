@@ -1,8 +1,9 @@
 /**
  * 登录注册页面
  * 包含登录、注册、忘记密码、个人信息完善流程
+ * 支持邮箱密码登录和手机验证码登录
  */
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { authService, UserProfile } from '../services/auth';
@@ -23,14 +24,22 @@ const PROFESSIONS = [
 ];
 
 type ViewMode = 'login' | 'register' | 'forgot' | 'reset' | 'profile';
+type LoginType = 'email' | 'phone';
 
 function Login() {
   const [viewMode, setViewMode] = useState<ViewMode>('login');
+  const [loginType, setLoginType] = useState<LoginType>('email');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [resetToken, setResetToken] = useState('');
   const [showProfileStep, setShowProfileStep] = useState(false);
+  
+  // 手机验证码相关
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const [devCode, setDevCode] = useState(''); // 开发环境显示验证码
   
   // 表单引用
   const emailRef = useRef<HTMLInputElement>(null);
@@ -49,6 +58,14 @@ function Login() {
   const { login, register, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  
+  // 验证码倒计时
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
 
   // 如果已登录且已完善信息，重定向
   useEffect(() => {
@@ -71,7 +88,7 @@ function Login() {
     setSuccess('');
   };
 
-  // 登录
+  // 邮箱密码登录
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
@@ -81,6 +98,64 @@ function Login() {
       const email = emailRef.current?.value || '';
       const password = passwordRef.current?.value || '';
       await login(email, password);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '登录失败');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 发送手机验证码
+  const handleSendCode = useCallback(async () => {
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+      setError('请输入正确的手机号');
+      return;
+    }
+    
+    if (countdown > 0) return;
+    
+    clearMessages();
+    setIsLoading(true);
+    
+    try {
+      const result = await authService.sendPhoneCode(phone);
+      if (result.success) {
+        setCountdown(60);
+        setSuccess('验证码已发送');
+        // 开发环境显示验证码
+        if (result.code) {
+          setDevCode(result.code);
+        }
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '发送失败');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [phone, countdown]);
+
+  // 手机验证码登录
+  const handlePhoneLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearMessages();
+    
+    if (!phone || !/^1[3-9]\d{9}$/.test(phone)) {
+      setError('请输入正确的手机号');
+      return;
+    }
+    
+    if (!code || code.length !== 6) {
+      setError('请输入6位验证码');
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    try {
+      await authService.loginByPhone(phone, code);
+      // 登录成功后会触发 useAuth 更新
     } catch (err) {
       setError(err instanceof Error ? err.message : '登录失败');
     } finally {
@@ -204,59 +279,139 @@ function Login() {
 
   // 渲染登录表单
   const renderLoginForm = () => (
-    <form className="auth-form" onSubmit={handleLogin}>
+    <div className="auth-form">
       <h2 className="form-title">欢迎回来</h2>
       <p className="form-subtitle">登录您的账号继续使用</p>
 
-      {error && <div className="error-message">{error}</div>}
-
-      <div className="form-group">
-        <label htmlFor="email">邮箱地址</label>
-        <div className="input-wrapper">
-          <span className="input-icon">📧</span>
-          <input
-            id="email"
-            type="email"
-            ref={emailRef}
-            placeholder="your@email.com"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="form-group">
-        <label htmlFor="password">密码</label>
-        <div className="input-wrapper">
-          <span className="input-icon">🔒</span>
-          <input
-            id="password"
-            type="password"
-            ref={passwordRef}
-            placeholder="输入密码"
-            required
-            minLength={6}
-          />
-        </div>
-      </div>
-
-      <button type="submit" className="submit-btn" disabled={isLoading}>
-        {isLoading ? '登录中...' : '登录'}
-      </button>
-
-      <div className="form-links">
-        <button type="button" className="link-btn" onClick={() => switchView('forgot')}>
-          忘记密码？
+      {/* 登录方式切换 */}
+      <div className="login-type-switch">
+        <button 
+          type="button" 
+          className={`switch-btn ${loginType === 'email' ? 'active' : ''}`}
+          onClick={() => { setLoginType('email'); clearMessages(); }}
+        >
+          📧 邮箱登录
+        </button>
+        <button 
+          type="button" 
+          className={`switch-btn ${loginType === 'phone' ? 'active' : ''}`}
+          onClick={() => { setLoginType('phone'); clearMessages(); }}
+        >
+          📱 验证码登录
         </button>
       </div>
+
+      {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
+
+      {loginType === 'email' ? (
+        /* 邮箱密码登录 */
+        <form onSubmit={handleLogin}>
+          <div className="form-group">
+            <label htmlFor="email">邮箱地址</label>
+            <div className="input-wrapper">
+              <span className="input-icon">📧</span>
+              <input
+                id="email"
+                type="email"
+                ref={emailRef}
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">密码</label>
+            <div className="input-wrapper">
+              <span className="input-icon">🔒</span>
+              <input
+                id="password"
+                type="password"
+                ref={passwordRef}
+                placeholder="输入密码"
+                required
+                minLength={6}
+              />
+            </div>
+          </div>
+
+          <button type="submit" className="submit-btn" disabled={isLoading}>
+            {isLoading ? '登录中...' : '登录'}
+          </button>
+
+          <div className="form-links">
+            <button type="button" className="link-btn" onClick={() => switchView('forgot')}>
+              忘记密码？
+            </button>
+          </div>
+        </form>
+      ) : (
+        /* 手机验证码登录 */
+        <form onSubmit={handlePhoneLogin}>
+          <div className="form-group">
+            <label htmlFor="phone">手机号</label>
+            <div className="input-wrapper">
+              <span className="input-icon">📱</span>
+              <input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+                placeholder="请输入手机号"
+                required
+                maxLength={11}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="code">验证码</label>
+            <div className="input-wrapper code-input-wrapper">
+              <span className="input-icon">🔢</span>
+              <input
+                id="code"
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="6位验证码"
+                required
+                maxLength={6}
+              />
+              <button 
+                type="button" 
+                className="send-code-btn"
+                onClick={handleSendCode}
+                disabled={countdown > 0 || isLoading}
+              >
+                {countdown > 0 ? `${countdown}s` : '获取验证码'}
+              </button>
+            </div>
+            {devCode && (
+              <p className="dev-code-hint">
+                开发模式验证码: <strong>{devCode}</strong>
+              </p>
+            )}
+          </div>
+
+          <button type="submit" className="submit-btn" disabled={isLoading}>
+            {isLoading ? '登录中...' : '登录 / 注册'}
+          </button>
+          
+          <p className="phone-login-hint">
+            未注册的手机号将自动创建账号
+          </p>
+        </form>
+      )}
 
       <div className="form-divider">
         <span>还没有账号？</span>
       </div>
 
       <button type="button" className="secondary-btn" onClick={() => switchView('register')}>
-        创建新账号
+        邮箱注册
       </button>
-    </form>
+    </div>
   );
 
   // 渲染注册表单
