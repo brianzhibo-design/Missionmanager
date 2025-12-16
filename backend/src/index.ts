@@ -20,7 +20,7 @@ import notificationRouter from './controllers/notificationController';
 import { reportRouter } from './controllers/reportController';
 import commentRouter from './controllers/commentController';
 import broadcastRouter from './controllers/broadcastController';
-import workReportRouter from './controllers/workReportController';
+import dailyReportRouter from './controllers/dailyReportController';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { startScheduler } from './lib/scheduler';
 import { verifyEmailConnection } from './lib/emailService';
@@ -53,7 +53,7 @@ app.use('/notifications', notificationRouter);
 app.use('/reports', reportRouter);
 app.use('/comments', commentRouter);
 app.use('/broadcast', broadcastRouter);
-app.use('/work-reports', workReportRouter);
+app.use('/daily-reports', dailyReportRouter);
 
 // 测试错误处理的路由（开发用）
 if (config.isDev) {

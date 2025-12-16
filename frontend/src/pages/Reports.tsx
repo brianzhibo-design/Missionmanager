@@ -1,16 +1,26 @@
 /**
- * 报告中心页面
+ * 报告中心页面 - 集成日报、周报、月报
  */
 import { useState, useEffect, useCallback } from 'react';
 import { usePermissions } from '../hooks/usePermissions';
 import { reportService, Report } from '../services/report';
+import { dailyReportService, DailyReport, TeamReportsResult } from '../services/dailyReport';
 import { Modal } from '../components/Modal';
 import { config } from '../config';
-import { BarChart3, Calendar, CalendarRange, AlertTriangle, CheckCircle2, Bot, Sparkles, FileText, TrendingUp, FolderOpen, Mail } from 'lucide-react';
+import { 
+  BarChart3, Calendar, CalendarRange, AlertTriangle, CheckCircle2, Bot, 
+  Sparkles, FileText, TrendingUp, FolderOpen, Mail, ChevronLeft, ChevronRight,
+  Users, Clock, Zap, Save, Edit2
+} from 'lucide-react';
 import './Reports.css';
 
+type TabType = 'daily' | 'weekly';
+
 export default function Reports() {
-  const { currentWorkspace } = usePermissions();
+  const { currentWorkspace, workspaceRole } = usePermissions();
+  const [activeTab, setActiveTab] = useState<TabType>('daily');
+  
+  // 周报相关状态
   const [reports, setReports] = useState<Report[]>([]);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
@@ -25,6 +35,25 @@ export default function Reports() {
   const [sending, setSending] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
+  // 日报相关状态
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [myDailyReports, setMyDailyReports] = useState<DailyReport[]>([]);
+  const [teamData, setTeamData] = useState<TeamReportsResult | null>(null);
+  const [dailyLoading, setDailyLoading] = useState(false);
+  const [showDailyForm, setShowDailyForm] = useState(false);
+  const [dailyForm, setDailyForm] = useState({
+    completed: '',
+    planned: '',
+    issues: '',
+    workHours: '',
+  });
+  const [savingDaily, setSavingDaily] = useState(false);
+  const [aiFilling, setAiFilling] = useState(false);
+  const [todayReport, setTodayReport] = useState<DailyReport | null>(null);
+
+  const isManager = workspaceRole && ['owner', 'director', 'manager'].includes(workspaceRole);
+
+  // 加载周报
   const loadReports = useCallback(async () => {
     if (!currentWorkspace) return;
     setLoading(true);
@@ -41,12 +70,114 @@ export default function Reports() {
     }
   }, [currentWorkspace]);
 
+  // 加载日报
+  const loadDailyReports = useCallback(async () => {
+    if (!currentWorkspace) return;
+    setDailyLoading(true);
+    try {
+      // 获取我的日报
+      const myReports = await dailyReportService.getMyReports(currentWorkspace.id, { limit: 30 });
+      setMyDailyReports(myReports);
+
+      // 获取今日日报
+      const today = await dailyReportService.getTodayReport(currentWorkspace.id);
+      setTodayReport(today);
+      if (today) {
+        setDailyForm({
+          completed: today.completed,
+          planned: today.planned,
+          issues: today.issues || '',
+          workHours: today.workHours?.toString() || '',
+        });
+      }
+
+      // 如果是管理者，获取团队日报
+      if (isManager) {
+        const team = await dailyReportService.getTeamReports(
+          currentWorkspace.id,
+          selectedDate.toISOString().split('T')[0]
+        );
+        setTeamData(team);
+      }
+    } catch (err: unknown) {
+      console.error('加载日报失败:', err);
+    } finally {
+      setDailyLoading(false);
+    }
+  }, [currentWorkspace, selectedDate, isManager]);
+
   useEffect(() => {
     if (currentWorkspace) {
-      loadReports();
+      if (activeTab === 'weekly') {
+        loadReports();
+      } else {
+        loadDailyReports();
+      }
     }
-  }, [currentWorkspace, loadReports]);
+  }, [currentWorkspace, activeTab, loadReports, loadDailyReports]);
 
+  // 日报日期切换
+  const changeDate = (delta: number) => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + delta);
+    if (newDate <= new Date()) {
+      setSelectedDate(newDate);
+    }
+  };
+
+  const isToday = (date: Date) => {
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  // AI 自动填充
+  const handleAiFill = async () => {
+    if (!currentWorkspace) return;
+    setAiFilling(true);
+    try {
+      const result = await dailyReportService.aiFill(currentWorkspace.id);
+      setDailyForm({
+        completed: result.completed,
+        planned: result.planned,
+        issues: result.issues,
+        workHours: '',
+      });
+      setShowDailyForm(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'AI填充失败');
+    } finally {
+      setAiFilling(false);
+    }
+  };
+
+  // 保存日报
+  const handleSaveDaily = async () => {
+    if (!currentWorkspace || !dailyForm.completed || !dailyForm.planned) {
+      setError('请填写今日完成和明日计划');
+      return;
+    }
+    setSavingDaily(true);
+    try {
+      await dailyReportService.create({
+        workspaceId: currentWorkspace.id,
+        date: new Date().toISOString().split('T')[0],
+        completed: dailyForm.completed,
+        planned: dailyForm.planned,
+        issues: dailyForm.issues || undefined,
+        workHours: dailyForm.workHours ? parseFloat(dailyForm.workHours) : undefined,
+      });
+      setSuccessMessage('日报保存成功！');
+      setShowDailyForm(false);
+      loadDailyReports();
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '保存日报失败');
+    } finally {
+      setSavingDaily(false);
+    }
+  };
+
+  // 周报相关方法
   const handleGenerateWeekly = async () => {
     if (!currentWorkspace) return;
     setGenerating(true);
@@ -77,7 +208,6 @@ export default function Reports() {
     }
   };
 
-  // 导出 PDF
   const handleExportPDF = async () => {
     if (!selectedReport) return;
     try {
@@ -85,14 +215,10 @@ export default function Reports() {
       setError(null);
       const token = localStorage.getItem(config.storageKeys.token);
       const response = await fetch(`${config.apiBaseUrl}/reports/${selectedReport.id}/export/pdf`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
       
-      if (!response.ok) {
-        throw new Error('导出失败');
-      }
+      if (!response.ok) throw new Error('导出失败');
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -112,7 +238,6 @@ export default function Reports() {
     }
   };
 
-  // 导出 Excel
   const handleExportExcel = async () => {
     if (!selectedReport) return;
     try {
@@ -120,14 +245,10 @@ export default function Reports() {
       setError(null);
       const token = localStorage.getItem(config.storageKeys.token);
       const response = await fetch(`${config.apiBaseUrl}/reports/${selectedReport.id}/export/excel`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
       
-      if (!response.ok) {
-        throw new Error('导出失败');
-      }
+      if (!response.ok) throw new Error('导出失败');
       
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -147,7 +268,6 @@ export default function Reports() {
     }
   };
 
-  // 发送邮件
   const handleSendEmail = async () => {
     if (!selectedReport || !emailAddress) return;
     try {
@@ -183,6 +303,12 @@ export default function Reports() {
     }
   };
 
+  // 格式化日期显示
+  const formatDate = (date: Date) => {
+    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+    return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} (${weekdays[date.getDay()]})`;
+  };
+
   return (
     <div className="reports-page fade-in">
       <div className="page-header">
@@ -190,23 +316,23 @@ export default function Reports() {
           <div className="header-icon"><BarChart3 size={28} /></div>
           <div className="header-text">
             <h1>报告中心</h1>
-            <p>自动生成周报和月报</p>
+            <p>日报填写与统计报告生成</p>
           </div>
         </div>
-        <div className="header-actions">
-          <button
-            className="btn btn-secondary"
-            onClick={handleGenerateWeekly}
-            disabled={generating || !currentWorkspace}
+        
+        {/* 标签切换 */}
+        <div className="report-tabs">
+          <button 
+            className={`tab-btn ${activeTab === 'daily' ? 'active' : ''}`}
+            onClick={() => setActiveTab('daily')}
           >
-            {generating ? '生成中...' : <><Calendar size={16} /> 生成周报</>}
+            <Calendar size={16} /> 日报
           </button>
-          <button
-            className="btn btn-primary"
-            onClick={handleGenerateMonthly}
-            disabled={generating || !currentWorkspace}
+          <button 
+            className={`tab-btn ${activeTab === 'weekly' ? 'active' : ''}`}
+            onClick={() => setActiveTab('weekly')}
           >
-            {generating ? '生成中...' : <><CalendarRange size={16} /> 生成月报</>}
+            <CalendarRange size={16} /> 统计报告
           </button>
         </div>
       </div>
@@ -214,168 +340,421 @@ export default function Reports() {
       {error && <div className="error-card"><AlertTriangle size={16} /> {error}</div>}
       {successMessage && <div className="success-toast"><CheckCircle2 size={16} /> {successMessage}</div>}
 
-      <div className="reports-layout">
-        {/* 报告列表 */}
-        <div className="reports-list card-static">
-          <h3>历史报告</h3>
-          {loading ? (
-            <div className="loading-placeholder">加载中...</div>
-          ) : reports.length === 0 ? (
-            <div className="empty-placeholder">
-              <p>暂无报告</p>
-              <p className="hint">点击上方按钮生成第一份报告</p>
-            </div>
-          ) : (
-            <div className="report-items">
-              {reports.map((report) => (
-                <div
-                  key={report.id}
-                  className={`report-item ${selectedReport?.id === report.id ? 'active' : ''}`}
-                  onClick={() => setSelectedReport(report)}
+      {/* 日报 Tab */}
+      {activeTab === 'daily' && (
+        <div className="daily-section">
+          {/* 日期选择器 */}
+          <div className="date-picker-bar">
+            <button className="date-nav-btn" onClick={() => changeDate(-1)}>
+              <ChevronLeft size={20} />
+            </button>
+            <span className="current-date">
+              📅 {formatDate(selectedDate)}
+              {isToday(selectedDate) && <span className="today-badge">今天</span>}
+            </span>
+            <button 
+              className="date-nav-btn" 
+              onClick={() => changeDate(1)}
+              disabled={isToday(selectedDate)}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+
+          <div className="daily-layout">
+            {/* 左侧：填写日报 */}
+            <div className="daily-form-section card-static">
+              <div className="section-header">
+                <h3>
+                  {todayReport ? <><Edit2 size={16} /> 编辑今日日报</> : <><FileText size={16} /> 填写今日日报</>}
+                </h3>
+                <button 
+                  className="btn btn-secondary btn-sm"
+                  onClick={handleAiFill}
+                  disabled={aiFilling}
                 >
-                  <span className="report-type">
-                    {report.type === 'weekly' ? <><Calendar size={14} /> 周报</> : <><CalendarRange size={14} /> 月报</>}
-                  </span>
-                  <span className="report-date">
-                    {new Date(report.createdAt).toLocaleDateString()}
-                  </span>
+                  <Zap size={14} /> {aiFilling ? '填充中...' : 'AI 自动填充'}
+                </button>
+              </div>
+
+              {!showDailyForm && !todayReport ? (
+                <div className="daily-form-placeholder">
+                  <p>今日日报尚未填写</p>
+                  <button className="btn btn-primary" onClick={() => setShowDailyForm(true)}>
+                    <FileText size={16} /> 开始填写
+                  </button>
                 </div>
-              ))}
+              ) : (
+                <div className="daily-form">
+                  <div className="form-group">
+                    <label className="form-label">
+                      今日完成 <span className="required">*</span>
+                    </label>
+                    <textarea
+                      className="form-input"
+                      rows={4}
+                      placeholder="• 完成任务A的前端开发&#10;• 修复3个Bug"
+                      value={dailyForm.completed}
+                      onChange={(e) => setDailyForm({ ...dailyForm, completed: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">
+                      明日计划 <span className="required">*</span>
+                    </label>
+                    <textarea
+                      className="form-input"
+                      rows={4}
+                      placeholder="• 继续任务B的API对接&#10;• 参加项目评审会议"
+                      value={dailyForm.planned}
+                      onChange={(e) => setDailyForm({ ...dailyForm, planned: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">问题/风险 <span className="optional">(可选)</span></label>
+                    <textarea
+                      className="form-input"
+                      rows={2}
+                      placeholder="接口文档不完整，需协调后端"
+                      value={dailyForm.issues}
+                      onChange={(e) => setDailyForm({ ...dailyForm, issues: e.target.value })}
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">工时 <span className="optional">(可选)</span></label>
+                    <div className="work-hours-input">
+                      <input
+                        type="number"
+                        className="form-input"
+                        placeholder="8"
+                        min="0"
+                        max="24"
+                        step="0.5"
+                        value={dailyForm.workHours}
+                        onChange={(e) => setDailyForm({ ...dailyForm, workHours: e.target.value })}
+                      />
+                      <span className="unit">小时</span>
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <button 
+                      className="btn btn-secondary" 
+                      onClick={() => {
+                        setShowDailyForm(false);
+                        if (!todayReport) {
+                          setDailyForm({ completed: '', planned: '', issues: '', workHours: '' });
+                        }
+                      }}
+                    >
+                      取消
+                    </button>
+                    <button 
+                      className="btn btn-primary"
+                      onClick={handleSaveDaily}
+                      disabled={savingDaily}
+                    >
+                      <Save size={16} /> {savingDaily ? '保存中...' : '保存日报'}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {/* 报告详情 */}
-        <div className="report-detail card-static">
-          {selectedReport ? (
-            <>
-              <div className="report-detail-header">
-                <div className="report-title-section">
-                  <h2>{selectedReport.title}</h2>
-                  <span className="report-period">
-                    {new Date(selectedReport.startDate).toLocaleDateString()} ~ 
-                    {new Date(selectedReport.endDate).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="report-actions">
-                  <button 
-                    className="btn btn-secondary btn-sm"
-                    onClick={handleExportPDF}
-                    disabled={exporting}
-                  >
-                    <FileText size={14} /> {exporting ? '导出中...' : '导出 PDF'}
-                  </button>
-                  <button 
-                    className="btn btn-secondary btn-sm"
-                    onClick={handleExportExcel}
-                    disabled={exporting}
-                  >
-                    <BarChart3 size={14} /> {exporting ? '导出中...' : '导出 Excel'}
-                  </button>
-                  <button 
-                    className="btn btn-primary btn-sm"
-                    onClick={() => setSendEmailModalOpen(true)}
-                  >
-                    <Mail size={14} /> 发送邮件
-                  </button>
-                </div>
-              </div>
-
-              {/* AI 摘要 */}
-              {selectedReport.summary && (
-                <div className="report-summary">
-                  <h4><Bot size={16} /> AI 摘要</h4>
-                  <p>{selectedReport.summary}</p>
-                </div>
-              )}
-
-              {/* 亮点和关注点 */}
-              <div className="report-insights">
-                {Array.isArray(selectedReport.highlights) && selectedReport.highlights.length > 0 && (
-                  <div className="insight-section highlights">
-                    <h4><Sparkles size={16} /> 亮点</h4>
-                    <ul>
-                      {selectedReport.highlights.map((h, i) => (
-                        <li key={i}>{h}</li>
-                      ))}
-                    </ul>
+            {/* 右侧：团队概览或历史日报 */}
+            <div className="daily-overview card-static">
+              {isManager ? (
+                <>
+                  <div className="section-header">
+                    <h3><Users size={16} /> 团队日报概览</h3>
+                    <span className="date-info">{formatDate(selectedDate)}</span>
                   </div>
-                )}
-                {Array.isArray(selectedReport.concerns) && selectedReport.concerns.length > 0 && (
-                  <div className="insight-section concerns">
-                    <h4><AlertTriangle size={16} /> 关注点</h4>
-                    <ul>
-                      {selectedReport.concerns.map((c, i) => (
-                        <li key={i}>{c}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/* 统计数据 */}
-              {selectedReport.content && (
-                <div className="report-stats">
-                  <h4><TrendingUp size={16} /> 数据统计</h4>
-                  <div className="stats-grid">
-                    <div className="stat-item">
-                      <span className="stat-value">{selectedReport.content.totalProjects || 0}</span>
-                      <span className="stat-label">项目总数</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-value">{selectedReport.content.tasksCreated || 0}</span>
-                      <span className="stat-label">新建任务</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-value" style={{ color: 'var(--color-success)' }}>
-                        {selectedReport.content.tasksCompleted || 0}
-                      </span>
-                      <span className="stat-label">完成任务</span>
-                    </div>
-                    <div className="stat-item">
-                      <span className="stat-value" style={{ color: 'var(--color-danger)' }}>
-                        {selectedReport.content.tasksBlocked || 0}
-                      </span>
-                      <span className="stat-label">阻塞任务</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* 项目详情 */}
-              {selectedReport.content?.projectStats && selectedReport.content.projectStats.length > 0 && (
-                <div className="report-projects">
-                  <h4><FolderOpen size={16} /> 各项目情况</h4>
-                  <div className="project-stats-list">
-                    {selectedReport.content.projectStats.map((project, i) => (
-                      <div key={i} className="project-stat-item">
-                        <div className="project-info">
-                          <span className="project-name">{project.name}</span>
-                          <span className="project-rate">{project.completionRate}% 完成</span>
+                  
+                  {dailyLoading ? (
+                    <div className="loading-placeholder">加载中...</div>
+                  ) : teamData ? (
+                    <div className="team-overview">
+                      <div className="team-stats">
+                        <div className="stat-card submitted">
+                          <span className="stat-value">{teamData.reports.length}</span>
+                          <span className="stat-label">已提交</span>
                         </div>
-                        <div className="project-bar">
-                          <div
-                            className="project-bar-fill"
-                            style={{ width: `${project.completionRate}%` }}
-                          />
-                        </div>
-                        <div className="project-numbers">
-                          <span>完成 {project.completed}</span>
-                          <span>总计 {project.total}</span>
+                        <div className="stat-card pending">
+                          <span className="stat-value">{teamData.notSubmitted.length}</span>
+                          <span className="stat-label">未提交</span>
                         </div>
                       </div>
-                    ))}
+                      
+                      {teamData.notSubmitted.length > 0 && (
+                        <div className="not-submitted-list">
+                          <h4>未提交成员</h4>
+                          <div className="member-list">
+                            {teamData.notSubmitted.map(member => (
+                              <div key={member.id} className="member-item">
+                                <div className="member-avatar">
+                                  {member.avatar ? (
+                                    <img src={member.avatar} alt={member.name} />
+                                  ) : (
+                                    member.name.charAt(0)
+                                  )}
+                                </div>
+                                <span className="member-name">{member.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {teamData.reports.length > 0 && (
+                        <div className="submitted-list">
+                          <h4>已提交日报</h4>
+                          {teamData.reports.map(report => (
+                            <div key={report.id} className="team-report-item">
+                              <div className="report-user">
+                                <div className="member-avatar">
+                                  {report.user.avatar ? (
+                                    <img src={report.user.avatar} alt={report.user.name} />
+                                  ) : (
+                                    report.user.name.charAt(0)
+                                  )}
+                                </div>
+                                <span className="member-name">{report.user.name}</span>
+                                {report.workHours && (
+                                  <span className="work-hours">
+                                    <Clock size={12} /> {report.workHours}h
+                                  </span>
+                                )}
+                              </div>
+                              <div className="report-preview">
+                                <p><strong>完成：</strong>{report.completed.substring(0, 50)}...</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="empty-placeholder">暂无数据</div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="section-header">
+                    <h3><Calendar size={16} /> 我的日报记录</h3>
                   </div>
+                  
+                  {dailyLoading ? (
+                    <div className="loading-placeholder">加载中...</div>
+                  ) : myDailyReports.length > 0 ? (
+                    <div className="my-reports-list">
+                      {myDailyReports.slice(0, 10).map(report => (
+                        <div key={report.id} className="my-report-item">
+                          <span className="report-date">
+                            {new Date(report.date).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })}
+                          </span>
+                          <span className="report-preview">{report.completed.substring(0, 30)}...</span>
+                          {report.workHours && (
+                            <span className="work-hours">{report.workHours}h</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="empty-placeholder">
+                      <p>暂无日报记录</p>
+                      <p className="hint">开始填写你的第一份日报吧</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 统计报告 Tab */}
+      {activeTab === 'weekly' && (
+        <>
+          <div className="report-actions-bar">
+            <button
+              className="btn btn-secondary"
+              onClick={handleGenerateWeekly}
+              disabled={generating || !currentWorkspace}
+            >
+              {generating ? '生成中...' : <><Calendar size={16} /> 生成周报</>}
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleGenerateMonthly}
+              disabled={generating || !currentWorkspace}
+            >
+              {generating ? '生成中...' : <><CalendarRange size={16} /> 生成月报</>}
+            </button>
+          </div>
+
+          <div className="reports-layout">
+            {/* 报告列表 */}
+            <div className="reports-list card-static">
+              <h3>历史报告</h3>
+              {loading ? (
+                <div className="loading-placeholder">加载中...</div>
+              ) : reports.length === 0 ? (
+                <div className="empty-placeholder">
+                  <p>暂无报告</p>
+                  <p className="hint">点击上方按钮生成第一份报告</p>
+                </div>
+              ) : (
+                <div className="report-items">
+                  {reports.map((report) => (
+                    <div
+                      key={report.id}
+                      className={`report-item ${selectedReport?.id === report.id ? 'active' : ''}`}
+                      onClick={() => setSelectedReport(report)}
+                    >
+                      <span className="report-type">
+                        {report.type === 'weekly' ? <><Calendar size={14} /> 周报</> : <><CalendarRange size={14} /> 月报</>}
+                      </span>
+                      <span className="report-date">
+                        {new Date(report.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
-            </>
-          ) : (
-            <div className="no-report-selected">
-              <p>选择一份报告查看详情</p>
             </div>
-          )}
-        </div>
-      </div>
+
+            {/* 报告详情 */}
+            <div className="report-detail card-static">
+              {selectedReport ? (
+                <>
+                  <div className="report-detail-header">
+                    <div className="report-title-section">
+                      <h2>{selectedReport.title}</h2>
+                      <span className="report-period">
+                        {new Date(selectedReport.startDate).toLocaleDateString()} ~ 
+                        {new Date(selectedReport.endDate).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="report-actions">
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        onClick={handleExportPDF}
+                        disabled={exporting}
+                      >
+                        <FileText size={14} /> {exporting ? '导出中...' : '导出 PDF'}
+                      </button>
+                      <button 
+                        className="btn btn-secondary btn-sm"
+                        onClick={handleExportExcel}
+                        disabled={exporting}
+                      >
+                        <BarChart3 size={14} /> {exporting ? '导出中...' : '导出 Excel'}
+                      </button>
+                      <button 
+                        className="btn btn-primary btn-sm"
+                        onClick={() => setSendEmailModalOpen(true)}
+                      >
+                        <Mail size={14} /> 发送邮件
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* AI 摘要 */}
+                  {selectedReport.summary && (
+                    <div className="report-summary">
+                      <h4><Bot size={16} /> AI 摘要</h4>
+                      <p>{selectedReport.summary}</p>
+                    </div>
+                  )}
+
+                  {/* 亮点和关注点 */}
+                  <div className="report-insights">
+                    {Array.isArray(selectedReport.highlights) && selectedReport.highlights.length > 0 && (
+                      <div className="insight-section highlights">
+                        <h4><Sparkles size={16} /> 亮点</h4>
+                        <ul>
+                          {selectedReport.highlights.map((h, i) => (
+                            <li key={i}>{h}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {Array.isArray(selectedReport.concerns) && selectedReport.concerns.length > 0 && (
+                      <div className="insight-section concerns">
+                        <h4><AlertTriangle size={16} /> 关注点</h4>
+                        <ul>
+                          {selectedReport.concerns.map((c, i) => (
+                            <li key={i}>{c}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 统计数据 */}
+                  {selectedReport.content && (
+                    <div className="report-stats">
+                      <h4><TrendingUp size={16} /> 数据统计</h4>
+                      <div className="stats-grid">
+                        <div className="stat-item">
+                          <span className="stat-value">{selectedReport.content.totalProjects || 0}</span>
+                          <span className="stat-label">项目总数</span>
+                        </div>
+                        <div className="stat-item">
+                          <span className="stat-value">{selectedReport.content.tasksCreated || 0}</span>
+                          <span className="stat-label">新建任务</span>
+                        </div>
+                        <div className="stat-item">
+                          <span className="stat-value" style={{ color: 'var(--color-success)' }}>
+                            {selectedReport.content.tasksCompleted || 0}
+                          </span>
+                          <span className="stat-label">完成任务</span>
+                        </div>
+                        <div className="stat-item">
+                          <span className="stat-value" style={{ color: 'var(--color-danger)' }}>
+                            {selectedReport.content.tasksBlocked || 0}
+                          </span>
+                          <span className="stat-label">阻塞任务</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 项目详情 */}
+                  {selectedReport.content?.projectStats && selectedReport.content.projectStats.length > 0 && (
+                    <div className="report-projects">
+                      <h4><FolderOpen size={16} /> 各项目情况</h4>
+                      <div className="project-stats-list">
+                        {selectedReport.content.projectStats.map((project, i) => (
+                          <div key={i} className="project-stat-item">
+                            <div className="project-info">
+                              <span className="project-name">{project.name}</span>
+                              <span className="project-rate">{project.completionRate}% 完成</span>
+                            </div>
+                            <div className="project-bar">
+                              <div
+                                className="project-bar-fill"
+                                style={{ width: `${project.completionRate}%` }}
+                              />
+                            </div>
+                            <div className="project-numbers">
+                              <span>完成 {project.completed}</span>
+                              <span>总计 {project.total}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-report-selected">
+                  <p>选择一份报告查看详情</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* 发送邮件弹窗 */}
       <Modal
@@ -430,4 +809,3 @@ export default function Reports() {
     </div>
   );
 }
-

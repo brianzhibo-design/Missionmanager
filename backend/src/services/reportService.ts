@@ -7,7 +7,7 @@ import { logger } from '../infra/logger';
 
 export const reportService = {
   /**
-   * 生成周报
+   * 生成周报（自动汇总日报）
    */
   async generateWeeklyReport(workspaceId: string, userId: string) {
     const now = new Date();
@@ -18,7 +18,19 @@ export const reportService = {
     const endDate = new Date(now);
     endDate.setHours(23, 59, 59, 999);
 
-    return this.generateReport(workspaceId, userId, 'weekly', startDate, endDate);
+    // 获取本周所有日报
+    const dailyReports = await prisma.dailyReport.findMany({
+      where: {
+        workspaceId,
+        date: { gte: startDate, lte: endDate },
+      },
+      include: {
+        user: { select: { id: true, name: true } },
+      },
+      orderBy: { date: 'asc' },
+    });
+
+    return this.generateReport(workspaceId, userId, 'weekly', startDate, endDate, dailyReports);
   },
 
   /**
@@ -33,14 +45,15 @@ export const reportService = {
   },
 
   /**
-   * 生成报告
+   * 生成报告（支持汇总日报）
    */
   async generateReport(
     workspaceId: string,
     userId: string,
     type: 'weekly' | 'monthly',
     startDate: Date,
-    endDate: Date
+    endDate: Date,
+    dailyReports?: any[]
   ) {
     // 获取工作区信息
     const workspace = await prisma.workspace.findUnique({
@@ -66,7 +79,7 @@ export const reportService = {
     }
 
     // 收集统计数据
-    const stats = {
+    const stats: any = {
       totalProjects: workspace.projects.length,
       totalTasks: 0,
       tasksCreated: 0,
@@ -114,13 +127,48 @@ export const reportService = {
       });
     }
 
+    // 汇总日报内容（用于周报）
+    if (dailyReports && dailyReports.length > 0) {
+      const dailySummary = {
+        reportCount: dailyReports.length,
+        totalWorkHours: dailyReports.reduce((sum, r) => sum + (r.workHours || 0), 0),
+        memberReports: {} as Record<string, { name: string; count: number; hours: number }>,
+        allCompleted: [] as string[],
+        allIssues: [] as string[],
+      };
+
+      dailyReports.forEach(report => {
+        // 按成员统计
+        if (!dailySummary.memberReports[report.userId]) {
+          dailySummary.memberReports[report.userId] = {
+            name: report.user.name,
+            count: 0,
+            hours: 0,
+          };
+        }
+        dailySummary.memberReports[report.userId].count++;
+        dailySummary.memberReports[report.userId].hours += report.workHours || 0;
+
+        // 汇总完成内容
+        if (report.completed) {
+          dailySummary.allCompleted.push(`[${report.user.name}] ${report.completed.substring(0, 100)}`);
+        }
+        // 汇总问题
+        if (report.issues) {
+          dailySummary.allIssues.push(`[${report.user.name}] ${report.issues}`);
+        }
+      });
+
+      stats.dailySummary = dailySummary;
+    }
+
     // 生成 AI 摘要
     let summary = '';
     let highlights: string[] = [];
     let concerns: string[] = [];
 
     try {
-      const aiResult = await this.generateAISummary(workspace.name, type, stats);
+      const aiResult = await this.generateAISummary(workspace.name, type, stats, dailyReports);
       summary = aiResult.summary;
       highlights = aiResult.highlights;
       concerns = aiResult.concerns;
@@ -149,13 +197,27 @@ export const reportService = {
   },
 
   /**
-   * AI 生成摘要
+   * AI 生成摘要（支持日报汇总）
    */
   async generateAISummary(
     workspaceName: string,
     type: 'weekly' | 'monthly',
-    stats: any
+    stats: any,
+    dailyReports?: any[]
   ) {
+    let dailySection = '';
+    if (dailyReports && dailyReports.length > 0 && stats.dailySummary) {
+      const ds = stats.dailySummary;
+      dailySection = `
+
+日报汇总：
+- 本周共收到 ${ds.reportCount} 份日报
+- 累计工时：${ds.totalWorkHours.toFixed(1)} 小时
+- 成员提交情况：${Object.values(ds.memberReports).map((m: any) => `${m.name}(${m.count}份)`).join('、')}
+- 主要完成工作：${ds.allCompleted.slice(0, 5).join('；')}
+${ds.allIssues.length > 0 ? `- 反馈的问题：${ds.allIssues.slice(0, 3).join('；')}` : ''}`;
+    }
+
     const prompt = `你是一个项目管理助手，请根据以下统计数据生成一份简洁的${type === 'weekly' ? '周报' : '月报'}摘要。
 
 工作区：${workspaceName}
@@ -169,7 +231,7 @@ export const reportService = {
 - 阻塞任务：${stats.tasksBlocked}
 
 各项目情况：
-${stats.projectStats.map((p: any) => `- ${p.name}：完成率 ${p.completionRate}%，完成 ${p.completed} 个，阻塞 ${p.blocked} 个`).join('\n')}
+${stats.projectStats.map((p: any) => `- ${p.name}：完成率 ${p.completionRate}%，完成 ${p.completed} 个，阻塞 ${p.blocked} 个`).join('\n')}${dailySection}
 
 请以 JSON 格式返回，包含以下字段：
 {

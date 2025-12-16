@@ -39,7 +39,7 @@ model User {
   assignedTasks      Task[]                      @relation("TaskAssignee")
   createdTasks       Task[]                      @relation("TaskCreator")
   workspaces         WorkspaceUser[]
-  workReports        WorkReport[]
+  dailyReports       DailyReport[]
 
   @@map("users")
 }
@@ -52,6 +52,7 @@ model Workspace {
   updatedAt         DateTime           @updatedAt @map("updated_at")
   broadcastMessages BroadcastMessage[]
   coffeeLotteries   CoffeeLottery[]
+  dailyReports      DailyReport[]
   projects          Project[]
   reports           Report[]
   members           WorkspaceUser[]
@@ -288,45 +289,30 @@ model Report {
   @@map("reports")
 }
 
-// 工作日报/周报/月报
-model WorkReport {
-  id              String   @id @default(cuid())
-  type            String   // daily, weekly, monthly
-  reportDate      DateTime @map("report_date") @db.Date // 日报日期/周报开始日期/月报月份
+// 日报（极简版）
+model DailyReport {
+  id          String    @id @default(cuid())
+  date        DateTime  @db.Date // 报告日期
+  completed   String    // 今日完成
+  planned     String    // 明日计划
+  issues      String?   // 问题/风险（可选）
+  workHours   Float?    @map("work_hours") // 工时（可选）
   
-  // 工作内容
-  todayWork       String?  @map("today_work") // 今日/本周/本月完成的工作
-  tomorrowPlan    String?  @map("tomorrow_plan") // 明日/下周/下月计划
-  issues          String?  // 遇到的问题和困难
-  needSupport     String?  @map("need_support") // 需要的支持和协助
-  summary         String?  // 工作总结
+  // 自动统计的任务数据
+  taskStats   Json?     @map("task_stats") // { completed: [], inProgress: [], completedCount, inProgressCount }
   
-  // 关联的任务数据（自动统计）
-  completedTaskIds Json?   @map("completed_task_ids") // 已完成任务ID列表
-  inProgressTaskIds Json?  @map("in_progress_task_ids") // 进行中任务ID列表
-  
-  // 统计数据
-  completedCount  Int      @default(0) @map("completed_count") // 完成任务数
-  inProgressCount Int      @default(0) @map("in_progress_count") // 进行中任务数
-  totalHours      Float?   @map("total_hours") // 工作时长（可选）
-  
-  // 心情和状态（可选）
-  mood            String?  // happy, normal, tired, stressed
-  workload        String?  // light, normal, heavy, overload
-  
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
   
   // 关联
-  userId          String   @map("user_id")
-  workspaceId     String   @map("workspace_id")
-  projectId       String?  @map("project_id") // 可选：针对特定项目的日报
+  userId      String    @map("user_id")
+  workspaceId String    @map("workspace_id")
   
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   
-  @@unique([userId, workspaceId, type, reportDate]) // 每人每天/周/月只能提交一份
-  @@index([workspaceId, type, reportDate])
-  @@index([userId, reportDate])
-  @@index([projectId, reportDate])
-  @@map("work_reports")
+  @@unique([userId, workspaceId, date]) // 每人每天只能提交一份
+  @@index([workspaceId, date])
+  @@index([userId, date])
+  @@map("daily_reports")
 }

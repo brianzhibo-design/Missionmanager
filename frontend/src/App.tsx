@@ -18,7 +18,6 @@ import MembersManage from './pages/admin/MembersManage';
 import AiInsights from './pages/AiInsights';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
-import WorkReports from './pages/WorkReports';
 
 /**
  * 应用主组件
