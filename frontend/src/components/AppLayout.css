@@ -360,16 +360,34 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
+  color: var(--text-secondary);
   transition: all var(--duration-fast) var(--ease-default);
 }
 
 .theme-btn:hover {
   background-color: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .theme-btn.active {
   background-color: var(--bg-surface);
   box-shadow: var(--shadow-sm);
+  color: var(--accent-primary);
+}
+
+/* 深色模式下主题按钮增强对比度 */
+[data-theme="dark"] .theme-btn {
+  color: #9CA3AF;
+}
+
+[data-theme="dark"] .theme-btn:hover {
+  color: #F0F6FC;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .theme-btn.active {
+  color: #A78BFA;
+  background-color: rgba(167, 139, 250, 0.15);
 }
 
 /* ========================================
