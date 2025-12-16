@@ -101,6 +101,12 @@
   margin-top: 4px;
 }
 
+.profile-phone {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+}
+
 .profile-profession {
   font-size: 13px;
   color: var(--text-tertiary);

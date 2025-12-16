@@ -320,6 +320,14 @@ export const authService = {
       }
     }
 
+    // 如果要更新手机号，检查是否已被使用
+    if (data.phone && data.phone !== user.phone) {
+      const existingUser = await userRepository.findByPhone(data.phone);
+      if (existingUser) {
+        throw new AppError('该手机号已被绑定', 409, 'PHONE_EXISTS');
+      }
+    }
+
     // 更新用户信息
     const updatedUser = await userRepository.update(userId, {
       name: data.name !== undefined ? data.name : user.name,

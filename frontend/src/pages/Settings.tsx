@@ -8,7 +8,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { authService } from '../services/auth';
 import { workspaceService } from '../services/workspace';
 import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
-import { User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText } from 'lucide-react';
+import { User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText, Phone } from 'lucide-react';
 import './Settings.css';
 
 // 职业选项
@@ -39,6 +39,7 @@ export default function Settings() {
   // 表单状态
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [profession, setProfession] = useState(user?.profession || '');
   const [company, setCompany] = useState(user?.company || '');
   const [location, setLocation] = useState(user?.location || '');
@@ -58,6 +59,7 @@ export default function Settings() {
     if (user) {
       setName(user.name || '');
       setEmail(user.email || '');
+      setPhone(user.phone || '');
       setProfession(user.profession || '');
       setCompany(user.company || '');
       setLocation(user.location || '');
@@ -75,6 +77,7 @@ export default function Settings() {
   const resetProfileForm = () => {
     setName(user?.name || '');
     setEmail(user?.email || '');
+    setPhone(user?.phone || '');
     setProfession(user?.profession || '');
     setCompany(user?.company || '');
     setLocation(user?.location || '');
@@ -108,6 +111,7 @@ export default function Settings() {
       await authService.updateProfile({ 
         name: name.trim(), 
         email: email.trim(),
+        phone: phone.trim() || undefined,
         profession,
         company: company.trim(),
         location: location.trim(),
@@ -292,6 +296,9 @@ export default function Settings() {
                 <div className="profile-info">
                   <div className="profile-name">{user?.name}</div>
                   <div className="profile-email">{user?.email}</div>
+                  {user?.phone && (
+                    <div className="profile-phone">📱 {user.phone}</div>
+                  )}
                   {user?.profession && (
                     <div className="profile-profession">{getProfessionLabel(user.profession)}</div>
                   )}
@@ -325,6 +332,28 @@ export default function Settings() {
                 />
                 {isEditingProfile && (
                   <p className="form-hint">修改邮箱后，下次登录需要使用新邮箱</p>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  <Phone size={14} /> 手机号
+                </label>
+                {isEditingProfile ? (
+                  <input
+                    type="tel"
+                    className="form-input"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 11))}
+                    disabled={saving}
+                    placeholder="请输入手机号"
+                    maxLength={11}
+                  />
+                ) : (
+                  <div className="form-value">{phone || '未绑定'}</div>
+                )}
+                {isEditingProfile && (
+                  <p className="form-hint">绑定手机号后可使用验证码登录</p>
                 )}
               </div>
 
