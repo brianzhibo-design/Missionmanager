@@ -526,65 +526,218 @@
   }
 }
 
+/* ========================================
+ * 移动端布局 - 专业级iOS风格
+ * ======================================== */
 @media (max-width: 768px) {
   .app-layout {
     grid-template-columns: 1fr;
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* iOS Safari 适配 */
   }
 
   .sidebar {
     display: none;
   }
 
-  /* 移动端顶部栏 - iOS风格 */
+  /* ===== 导航栏 - iOS Navigation Bar ===== */
   .topbar {
     height: 44px;
     padding: 0 16px;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+    padding-top: env(safe-area-inset-top, 0);
+    background: var(--mobile-glass-bg, rgba(255, 255, 255, 0.72));
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 0.5px solid var(--mobile-separator, rgba(60, 60, 67, 0.12));
     position: sticky;
     top: 0;
     z-index: 100;
   }
 
   [data-theme="dark"] .topbar {
-    background: rgba(28, 28, 30, 0.92);
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    background: var(--mobile-glass-bg, rgba(30, 30, 30, 0.72));
+    border-bottom-color: var(--mobile-separator, rgba(84, 84, 88, 0.65));
   }
 
   .topbar-left {
-    gap: 12px;
+    gap: 8px;
   }
 
+  .topbar-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+    color: var(--mobile-label, #000);
+  }
+
+  [data-theme="dark"] .topbar-title {
+    color: var(--mobile-label, #fff);
+  }
+
+  .topbar-right {
+    gap: 4px;
+  }
+
+  /* 导航按钮 - iOS风格 */
   .topbar-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--mobile-blue, #007AFF);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.1s ease-out;
+  }
+
+  .topbar-btn:active {
+    opacity: 0.5;
+  }
+
+  [data-theme="dark"] .topbar-btn {
+    color: var(--mobile-blue, #0A84FF);
+  }
+
+  .topbar-btn svg,
+  .topbar-btn .icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* 用户头像 */
+  .topbar-avatar {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: 50%;
   }
 
-  /* 移动端主内容区 */
+  /* 隐藏桌面端元素 */
+  .topbar-search,
+  .topbar-workspace-selector,
+  .topbar-breadcrumb,
+  .theme-switcher {
+    display: none !important;
+  }
+
+  /* ===== 主内容区域 ===== */
   .main-content {
     padding: 0;
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0) + 16px);
-    min-height: calc(100vh - 44px);
-    background: var(--bg-base);
+    padding-bottom: calc(49px + env(safe-area-inset-bottom, 0));
+    min-height: calc(100vh - 44px - env(safe-area-inset-top, 0));
+    min-height: calc(100dvh - 44px - env(safe-area-inset-top, 0)); /* 动态视口高度 */
+    background: var(--mobile-bg-grouped, #F2F2F7);
+    overflow-x: hidden;
   }
 
-  .theme-switcher {
-    display: none;
+  [data-theme="dark"] .main-content {
+    background: var(--mobile-bg-primary, #000);
   }
 
-  /* 通知下拉框移动端适配 */
+  /* ===== 通知面板 - iOS风格 ===== */
   .notifications-dropdown {
     position: fixed;
-    top: 44px;
+    top: calc(44px + env(safe-area-inset-top, 0));
     left: 8px;
     right: 8px;
     width: auto;
-    max-height: 60vh;
+    max-height: calc(70vh - 44px);
+    border-radius: 14px;
+    background: var(--mobile-glass-bg, rgba(255, 255, 255, 0.92));
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 
+      0 0 0 0.5px rgba(0, 0, 0, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.16);
+    overflow: hidden;
+  }
+
+  [data-theme="dark"] .notifications-dropdown {
+    background: var(--mobile-glass-bg, rgba(44, 44, 46, 0.92));
+    box-shadow: 
+      0 0 0 0.5px rgba(255, 255, 255, 0.08),
+      0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .notification-item {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--mobile-separator, rgba(60, 60, 67, 0.12));
+  }
+
+  [data-theme="dark"] .notification-item {
+    border-bottom-color: var(--mobile-separator, rgba(84, 84, 88, 0.65));
+  }
+
+  .notification-item:active {
+    background: var(--mobile-fill-tertiary, rgba(118, 118, 128, 0.12));
+  }
+
+  /* ===== 模态框基础样式 ===== */
+  .modal-overlay {
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .modal-content {
+    margin: 0;
+    border-radius: 14px 14px 0 0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: calc(90vh - env(safe-area-inset-bottom, 0));
+    animation: modalSlideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  @keyframes modalSlideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  /* 模态框顶部拖拽指示条 */
+  .modal-content::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 5px;
+    background: var(--mobile-fill, rgba(120, 120, 128, 0.2));
+    border-radius: 2.5px;
+    margin: 6px auto 0;
+  }
+
+  .modal-header {
+    padding: 12px 16px;
+    border-bottom: 0.5px solid var(--mobile-separator, rgba(60, 60, 67, 0.12));
+  }
+
+  .modal-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+  }
+
+  .modal-body {
+    padding: 16px;
+    max-height: calc(70vh - 60px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0));
+    border-top: 0.5px solid var(--mobile-separator, rgba(60, 60, 67, 0.12));
+  }
+
+  .modal-footer .btn {
+    height: 50px;
     border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    font-size: 17px;
+    font-weight: 600;
   }
 }
 

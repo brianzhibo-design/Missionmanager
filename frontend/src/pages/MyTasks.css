@@ -335,49 +335,58 @@
 }
 
 /* ========================================
- * 移动端样式 - 极简模块化设计
+ * 移动端样式 - 专业级iOS风格设计
+ * 参考: Things 3, Reminders, Notion
  * ======================================== */
 @media (max-width: 768px) {
   .my-tasks-page {
     gap: 0;
     padding: 0;
-    background: #f5f5f5;
+    background: var(--mobile-bg-grouped, #F2F2F7);
     min-height: 100vh;
+    padding-bottom: calc(80px + var(--safe-area-bottom, 0px));
   }
 
   [data-theme="dark"] .my-tasks-page {
-    background: #000;
+    background: var(--mobile-bg-primary, #000);
   }
 
-  /* 页面标题 - 简洁大标题 */
+  /* ===== 大标题区域 (iOS Large Title) ===== */
   .page-header {
-    padding: 20px 16px 16px;
+    padding: 0 16px 8px;
     margin-bottom: 0;
-    background: #fff;
+    background: var(--mobile-bg-secondary, #fff);
   }
 
   [data-theme="dark"] .page-header {
-    background: #1c1c1e;
+    background: var(--mobile-bg-secondary, #1C1C1E);
   }
 
   .page-title {
-    font-size: 24px;
+    font-size: 34px;
     font-weight: 700;
+    letter-spacing: 0.35px;
+    line-height: 1.1;
+    color: var(--mobile-label, #000);
   }
 
-  /* 统计卡片 - 紧凑横向滚动 */
+  [data-theme="dark"] .page-title {
+    color: var(--mobile-label, #fff);
+  }
+
+  /* ===== 统计卡片 - 横向滚动条 ===== */
   .quick-stats {
     display: flex;
     overflow-x: auto;
-    gap: 8px;
-    padding: 0 16px 16px;
-    background: #fff;
+    gap: 10px;
+    padding: 12px 16px 16px;
+    background: var(--mobile-bg-secondary, #fff);
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
 
   [data-theme="dark"] .quick-stats {
-    background: #1c1c1e;
+    background: var(--mobile-bg-secondary, #1C1C1E);
   }
 
   .quick-stats::-webkit-scrollbar {
@@ -386,61 +395,78 @@
 
   .quick-stat-card {
     flex: 0 0 auto;
-    min-width: 80px;
-    padding: 10px 14px;
-    border-radius: 10px;
-    background: #f5f5f5;
+    min-width: 100px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--mobile-fill-tertiary, rgba(118, 118, 128, 0.12));
     box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
 
   [data-theme="dark"] .quick-stat-card {
-    background: #2c2c2e;
+    background: var(--mobile-fill-tertiary, rgba(118, 118, 128, 0.24));
   }
 
   .quick-stat-icon {
-    font-size: 16px;
+    display: none;
   }
 
   .quick-stat-value {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--mobile-label, #000);
+  }
+
+  [data-theme="dark"] .quick-stat-value {
+    color: var(--mobile-label, #fff);
   }
 
   .quick-stat-label {
-    font-size: 10px;
-    color: #999;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--mobile-label-secondary, rgba(60, 60, 67, 0.6));
+    letter-spacing: -0.08px;
   }
-  
-  /* 标签和筛选器 - 简洁容器 */
+
+  [data-theme="dark"] .quick-stat-label {
+    color: var(--mobile-label-secondary, rgba(235, 235, 245, 0.6));
+  }
+
+  /* ===== 分段控制器 + 筛选器区域 ===== */
   .tabs-container {
     flex-direction: column;
     gap: 0;
     padding: 0;
     border-bottom: none;
-    background: #fff;
+    background: var(--mobile-bg-secondary, #fff);
     margin: 0;
     border-radius: 0;
   }
 
   [data-theme="dark"] .tabs-container {
-    background: #1c1c1e;
+    background: var(--mobile-bg-secondary, #1C1C1E);
   }
-  
-  /* 标签栏 - 下划线指示器 */
+
+  /* iOS风格分段控制器 */
   .tabs {
     display: flex;
-    overflow-x: auto;
+    overflow-x: visible;
     padding: 0 16px;
     gap: 0;
-    background: transparent;
-    border-radius: 0;
-    margin: 0;
-    border-bottom: 1px solid #f0f0f0;
+    background: var(--mobile-fill-secondary, rgba(120, 120, 128, 0.16));
+    border-radius: 8px;
+    margin: 0 16px 12px;
+    height: 32px;
     -webkit-overflow-scrolling: touch;
+    border-bottom: none;
   }
 
   [data-theme="dark"] .tabs {
-    border-bottom-color: #2c2c2e;
+    background: var(--mobile-fill-secondary, rgba(120, 120, 128, 0.32));
   }
 
   .tabs::-webkit-scrollbar {
@@ -448,133 +474,166 @@
   }
 
   .tab {
-    flex: 0 0 auto;
-    padding: 12px 16px;
-    font-size: 14px;
+    flex: 1;
+    padding: 0 12px;
+    font-size: 13px;
     font-weight: 500;
-    border-radius: 0;
-    color: #999;
+    border-radius: 7px;
+    color: var(--mobile-label, #000);
     background: transparent;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
+    border-bottom: none;
+    margin: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  [data-theme="dark"] .tab {
+    color: var(--mobile-label, #fff);
   }
 
   .tab.active {
-    color: #007AFF;
-    background: transparent;
-    box-shadow: none;
-    border-bottom-color: #007AFF;
+    color: var(--mobile-label, #000);
+    background: var(--mobile-bg-secondary, #fff);
+    box-shadow: 
+      0 3px 8px rgba(0, 0, 0, 0.12),
+      0 1px 1px rgba(0, 0, 0, 0.04);
+    border-bottom: none;
   }
 
   [data-theme="dark"] .tab.active {
-    color: #0A84FF;
-    border-bottom-color: #0A84FF;
+    color: var(--mobile-label, #fff);
+    background: var(--mobile-bg-tertiary, #2C2C2E);
+    box-shadow: 
+      0 3px 8px rgba(0, 0, 0, 0.24),
+      0 1px 1px rgba(0, 0, 0, 0.12);
   }
 
   .tab-count {
     min-width: 18px;
     height: 18px;
     font-size: 11px;
-    background: #007AFF;
+    font-weight: 600;
+    background: var(--mobile-blue, #007AFF);
     color: white;
     border-radius: 9px;
+    margin-left: 6px;
+    font-variant-numeric: tabular-nums;
   }
-  
-  /* 筛选器 - 横向排列 */
+
+  /* 筛选器 - 紧凑水平排列 */
   .filters {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: nowrap !important;
     gap: 8px;
-    padding: 8px 12px 12px;
-    border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+    padding: 0 16px 12px;
   }
 
-  [data-theme="dark"] .filters {
-    border-top-color: rgba(255, 255, 255, 0.1);
-  }
-  
   .filter-select {
     flex: 1 1 0 !important;
     min-width: 0 !important;
-    max-width: 50% !important;
-    height: 36px;
-    padding: 0 10px;
+    max-width: none !important;
+    height: 34px;
+    padding: 0 28px 0 12px;
     font-size: 13px;
+    font-weight: 400;
     border-radius: 8px;
-    background: #f5f5f5;
+    background: var(--mobile-fill-tertiary, rgba(118, 118, 128, 0.12));
     border: none;
-    color: #333;
+    color: var(--mobile-label, #000);
     -webkit-appearance: none;
     appearance: none;
-    text-align: center;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px 6px;
   }
 
   [data-theme="dark"] .filter-select {
-    background: #3a3a3c;
-    color: #fff;
+    background-color: var(--mobile-fill-tertiary, rgba(118, 118, 128, 0.24));
+    color: var(--mobile-label, #fff);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23666' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
   }
-  
-  /* 任务列表区域 */
+
+  /* ===== 任务分组区域 ===== */
   .task-groups {
     gap: 0;
-    padding: 12px 0 80px;
+    padding: 12px 16px calc(80px + var(--safe-area-bottom, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
   .task-group {
-    background: #fff;
-    border-radius: 0;
+    background: var(--mobile-bg-secondary, #fff);
+    border-radius: 14px;
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 0;
+    box-shadow: 0 0 0 0.5px var(--mobile-separator, rgba(60, 60, 67, 0.12));
   }
 
   [data-theme="dark"] .task-group {
-    background: #1c1c1e;
+    background: var(--mobile-bg-secondary, #1C1C1E);
+    box-shadow: 0 0 0 0.5px var(--mobile-separator, rgba(84, 84, 88, 0.65));
   }
 
   .group-title {
     font-size: 13px;
-    font-weight: 600;
-    color: #999;
-    padding: 12px 16px 8px;
-    background: #f5f5f5;
+    font-weight: 400;
+    color: var(--mobile-label-secondary, rgba(60, 60, 67, 0.6));
+    text-transform: uppercase;
+    letter-spacing: -0.08px;
+    padding: 6px 16px 8px;
+    background: transparent;
   }
 
   [data-theme="dark"] .group-title {
-    background: #000;
+    color: var(--mobile-label-secondary, rgba(235, 235, 245, 0.6));
   }
 
   .task-list {
     gap: 0;
   }
-  
-  /* 任务卡片 - 简洁列表项 */
+
+  /* ===== 任务卡片 - iOS列表项风格 ===== */
   .task-card {
+    display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 14px 16px;
+    min-height: 44px;
+    padding: 11px 16px;
     gap: 12px;
     border-radius: 0;
     background: transparent;
-    border-bottom: 1px solid #f0f0f0;
     box-shadow: none;
     -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.1s ease-out;
+    position: relative;
   }
 
-  [data-theme="dark"] .task-card {
-    border-bottom-color: #2c2c2e;
+  /* iOS风格分隔线 - 左侧缩进 */
+  .task-card:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 60px;
+    right: 0;
+    bottom: 0;
+    height: 0.5px;
+    background: var(--mobile-separator, rgba(60, 60, 67, 0.12));
   }
 
-  .task-card:last-child {
-    border-bottom: none;
+  [data-theme="dark"] .task-card:not(:last-child)::after {
+    background: var(--mobile-separator, rgba(84, 84, 88, 0.65));
   }
 
   .task-card:active {
-    background: #f5f5f5;
+    background: var(--mobile-fill-tertiary, rgba(118, 118, 128, 0.12));
   }
 
   [data-theme="dark"] .task-card:active {
-    background: #2c2c2e;
+    background: var(--mobile-fill-tertiary, rgba(118, 118, 128, 0.24));
   }
 
   .task-card-content {
@@ -585,12 +644,16 @@
     gap: 12px;
   }
 
+  /* 优先级指示器 - 圆角方形图标 */
   .priority-indicator {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
     flex-shrink: 0;
-    border-radius: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .task-info {
@@ -599,127 +662,195 @@
   }
 
   .task-title {
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1.3;
-    color: #333;
+    font-size: 17px;
+    font-weight: 400;
+    line-height: 1.29412;
+    letter-spacing: -0.4px;
+    color: var(--mobile-label, #000);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   [data-theme="dark"] .task-title {
-    color: #fff;
+    color: var(--mobile-label, #fff);
   }
 
   .task-project {
     font-size: 13px;
-    color: #999;
-    margin-top: 4px;
+    font-weight: 400;
+    color: var(--mobile-label-secondary, rgba(60, 60, 67, 0.6));
+    margin-top: 2px;
+    letter-spacing: -0.08px;
   }
-  
-  /* 任务卡片右侧 - 箭头指示器 */
+
+  [data-theme="dark"] .task-project {
+    color: var(--mobile-label-secondary, rgba(235, 235, 245, 0.6));
+  }
+
+  /* ===== 任务元信息区域 ===== */
   .task-card-meta {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 4px;
+    gap: 2px;
     margin-right: 0;
     padding: 0;
     border: none;
     flex-shrink: 0;
   }
 
+  /* 右侧箭头指示器 */
   .task-card-meta::after {
     content: '›';
-    font-size: 20px;
-    color: #ccc;
-    margin-left: 8px;
+    font-size: 22px;
+    font-weight: 300;
+    color: var(--mobile-label-quaternary, rgba(60, 60, 67, 0.18));
+    line-height: 1;
+    margin-left: 4px;
   }
 
   [data-theme="dark"] .task-card-meta::after {
-    color: #666;
+    color: var(--mobile-label-quaternary, rgba(235, 235, 245, 0.18));
   }
 
   .task-due {
     padding: 0;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 400;
     background: transparent;
     border: none;
     box-shadow: none;
-    color: #999;
+    color: var(--mobile-label-secondary, rgba(60, 60, 67, 0.6));
+    height: auto;
+    line-height: 1.33;
+    letter-spacing: -0.24px;
+  }
+
+  [data-theme="dark"] .task-due {
+    color: var(--mobile-label-secondary, rgba(235, 235, 245, 0.6));
   }
 
   .task-due.overdue {
-    color: #ff3b30;
+    color: var(--mobile-red, #FF3B30);
+    font-weight: 500;
   }
 
   .task-due.today {
-    color: #ff9500;
+    color: var(--mobile-orange, #FF9500);
+    font-weight: 500;
   }
-  
+
+  .task-due.completed {
+    color: var(--mobile-label-tertiary, rgba(60, 60, 67, 0.3));
+  }
+
   .task-status {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 500;
     padding: 0;
+    letter-spacing: -0.08px;
+    background: transparent;
+    border: none;
   }
 
   .task-status.status-done {
-    color: #34c759;
+    color: var(--mobile-green, #34C759);
   }
 
   .task-status.status-in_progress {
-    color: #007AFF;
+    color: var(--mobile-blue, #007AFF);
+  }
+
+  .task-status.status-review {
+    color: var(--mobile-orange, #FF9500);
+  }
+
+  .task-status.status-todo {
+    color: var(--mobile-label-tertiary, rgba(60, 60, 67, 0.3));
+  }
+
+  /* 已完成任务样式 */
+  .task-card.is-done .task-title {
+    text-decoration: line-through;
+    color: var(--mobile-label-tertiary, rgba(60, 60, 67, 0.3));
+  }
+
+  [data-theme="dark"] .task-card.is-done .task-title {
+    color: var(--mobile-label-tertiary, rgba(235, 235, 245, 0.3));
   }
 }
 
 /* ========================================
- * 小屏手机适配 (iPhone SE, iPhone mini)
+ * 小屏手机适配 (iPhone SE, iPhone mini, 375px以下)
  * ======================================== */
-@media (max-width: 390px) {
+@media (max-width: 375px) {
   .page-title {
-    font-size: 24px;
+    font-size: 30px;
   }
 
   .quick-stat-card {
-    min-width: 85px;
-    padding: 10px 12px;
+    min-width: 90px;
+    padding: 12px 14px;
   }
 
   .quick-stat-value {
-    font-size: 18px;
+    font-size: 22px;
   }
 
-  .tabs-container {
-    margin: 0 12px;
+  .quick-stat-label {
+    font-size: 11px;
+  }
+
+  .tabs {
+    margin: 0 12px 12px;
   }
 
   .tab {
-    padding: 6px 12px;
     font-size: 12px;
+    padding: 0 10px;
+  }
+
+  .filters {
+    padding: 0 12px 12px;
+    gap: 6px;
+  }
+
+  .filter-select {
+    height: 32px;
+    font-size: 12px;
+    padding: 0 24px 0 10px;
   }
 
   .task-groups {
-    padding: 0 12px 12px;
+    padding: 12px 12px calc(80px + var(--safe-area-bottom, 0px));
+    gap: 10px;
   }
 
   .task-card {
-    padding: 10px 12px;
+    padding: 10px 14px;
+    gap: 10px;
   }
 
   .priority-indicator {
     width: 32px;
     height: 32px;
     font-size: 14px;
+    border-radius: 6px;
   }
 
   .task-title {
-    font-size: 14px;
+    font-size: 15px;
   }
 
   .task-project {
-    font-size: 11px;
+    font-size: 12px;
   }
 
-  .task-due,
+  .task-due {
+    font-size: 13px;
+  }
+
   .task-status {
     font-size: 11px;
   }
