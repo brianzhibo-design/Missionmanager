@@ -8,21 +8,25 @@ import { usePermissions } from '../hooks/usePermissions';
 import { authService } from '../services/auth';
 import { workspaceService } from '../services/workspace';
 import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
-import { User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText, Phone } from 'lucide-react';
+import { 
+  User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText, Phone,
+  Settings as SettingsIcon, Sun, Moon, Monitor, FolderOpen,
+  Code, PaintBucket, ClipboardList, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
+} from 'lucide-react';
 import './Settings.css';
 
-// 职业选项
+// 职业选项 - 使用Lucide图标组件
 const PROFESSIONS = [
-  { value: 'developer', label: '开发工程师', icon: '💻' },
-  { value: 'designer', label: '设计师', icon: '🎨' },
-  { value: 'pm', label: '产品经理', icon: '📋' },
-  { value: 'marketing', label: '市场营销', icon: '📢' },
-  { value: 'operation', label: '运营', icon: '📈' },
-  { value: 'hr', label: '人力资源', icon: '👥' },
-  { value: 'finance', label: '财务', icon: '💰' },
-  { value: 'sales', label: '销售', icon: '🤝' },
-  { value: 'student', label: '学生', icon: '📚' },
-  { value: 'other', label: '其他', icon: '✨' },
+  { value: 'developer', label: '开发工程师', Icon: Code },
+  { value: 'designer', label: '设计师', Icon: PaintBucket },
+  { value: 'pm', label: '产品经理', Icon: ClipboardList },
+  { value: 'marketing', label: '市场营销', Icon: Megaphone },
+  { value: 'operation', label: '运营', Icon: TrendingUp },
+  { value: 'hr', label: '人力资源', Icon: Users },
+  { value: 'finance', label: '财务', Icon: Wallet },
+  { value: 'sales', label: '销售', Icon: Handshake },
+  { value: 'student', label: '学生', Icon: BookOpen },
+  { value: 'other', label: '其他', Icon: Sparkles },
 ];
 
 export default function Settings() {
@@ -70,7 +74,7 @@ export default function Settings() {
   // 获取职业标签
   const getProfessionLabel = (value: string) => {
     const prof = PROFESSIONS.find(p => p.value === value);
-    return prof ? `${prof.icon} ${prof.label}` : value || '未设置';
+    return prof ? prof.label : value || '未设置';
   };
 
   // 重置表单
@@ -208,7 +212,7 @@ export default function Settings() {
   return (
     <div className="settings-page fade-in">
       <div className="page-header">
-        <h1>⚙️ 设置</h1>
+        <h1><SettingsIcon size={24} /> 设置</h1>
       </div>
 
       {/* 成功/错误提示 */}
@@ -372,7 +376,7 @@ export default function Settings() {
                         onClick={() => setProfession(prof.value)}
                         disabled={saving}
                       >
-                        <span className="profession-icon">{prof.icon}</span>
+                        <span className="profession-icon"><prof.Icon size={18} /></span>
                         <span className="profession-label">{prof.label}</span>
                       </button>
                     ))}
@@ -531,21 +535,21 @@ export default function Settings() {
                     className={`theme-option ${theme === 'light' ? 'active' : ''}`}
                     onClick={() => setTheme('light')}
                   >
-                    <span className="theme-icon">☀️</span>
+                    <span className="theme-icon"><Sun size={20} /></span>
                     <span className="theme-name">浅色</span>
                   </button>
                   <button
                     className={`theme-option ${theme === 'dark' ? 'active' : ''}`}
                     onClick={() => setTheme('dark')}
                   >
-                    <span className="theme-icon">🌙</span>
+                    <span className="theme-icon"><Moon size={20} /></span>
                     <span className="theme-name">深色</span>
                   </button>
                   <button
                     className={`theme-option ${theme === 'system' ? 'active' : ''}`}
                     onClick={() => setTheme('system')}
                   >
-                    <span className="theme-icon">💻</span>
+                    <span className="theme-icon"><Monitor size={20} /></span>
                     <span className="theme-name">跟随系统</span>
                   </button>
                 </div>
@@ -569,7 +573,7 @@ export default function Settings() {
                       key={ws.id} 
                       className={`workspace-item ${isCurrent ? 'current' : ''}`}
                     >
-                      <div className="workspace-icon">📁</div>
+                      <div className="workspace-icon"><FolderOpen size={20} /></div>
                       <div className="workspace-info">
                         <div className="workspace-name">
                           {ws.name}

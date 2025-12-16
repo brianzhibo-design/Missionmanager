@@ -7,20 +7,24 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { authService, UserProfile } from '../services/auth';
+import { 
+  Mail, Lock, Phone, ClipboardList,
+  Code, PaintBucket, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
+} from 'lucide-react';
 import './Login.css';
 
-// 职业选项
+// 职业选项 - 使用Lucide图标组件
 const PROFESSIONS = [
-  { value: 'developer', label: '开发工程师', icon: '💻' },
-  { value: 'designer', label: '设计师', icon: '🎨' },
-  { value: 'pm', label: '产品经理', icon: '📋' },
-  { value: 'marketing', label: '市场营销', icon: '📢' },
-  { value: 'operation', label: '运营', icon: '📈' },
-  { value: 'hr', label: '人力资源', icon: '👥' },
-  { value: 'finance', label: '财务', icon: '💰' },
-  { value: 'sales', label: '销售', icon: '🤝' },
-  { value: 'student', label: '学生', icon: '📚' },
-  { value: 'other', label: '其他', icon: '✨' },
+  { value: 'developer', label: '开发工程师', Icon: Code },
+  { value: 'designer', label: '设计师', Icon: PaintBucket },
+  { value: 'pm', label: '产品经理', Icon: ClipboardList },
+  { value: 'marketing', label: '市场营销', Icon: Megaphone },
+  { value: 'operation', label: '运营', Icon: TrendingUp },
+  { value: 'hr', label: '人力资源', Icon: Users },
+  { value: 'finance', label: '财务', Icon: Wallet },
+  { value: 'sales', label: '销售', Icon: Handshake },
+  { value: 'student', label: '学生', Icon: BookOpen },
+  { value: 'other', label: '其他', Icon: Sparkles },
 ];
 
 type ViewMode = 'login' | 'register' | 'forgot' | 'reset' | 'profile';
@@ -290,14 +294,14 @@ function Login() {
           className={`switch-btn ${loginType === 'email' ? 'active' : ''}`}
           onClick={() => { setLoginType('email'); clearMessages(); }}
         >
-          📧 邮箱登录
+          <Mail size={16} /> 邮箱登录
         </button>
         <button 
           type="button" 
           className={`switch-btn ${loginType === 'phone' ? 'active' : ''}`}
           onClick={() => { setLoginType('phone'); clearMessages(); }}
         >
-          📱 验证码登录
+          <Phone size={16} /> 验证码登录
         </button>
       </div>
 
@@ -310,7 +314,7 @@ function Login() {
           <div className="form-group">
             <label htmlFor="email">邮箱地址</label>
             <div className="input-wrapper">
-              <span className="input-icon">📧</span>
+              <span className="input-icon"><Mail size={18} /></span>
               <input
                 id="email"
                 type="email"
@@ -324,7 +328,7 @@ function Login() {
           <div className="form-group">
             <label htmlFor="password">密码</label>
             <div className="input-wrapper">
-              <span className="input-icon">🔒</span>
+              <span className="input-icon"><Lock size={18} /></span>
               <input
                 id="password"
                 type="password"
@@ -439,7 +443,7 @@ function Login() {
       <div className="form-group">
         <label htmlFor="email">邮箱地址</label>
         <div className="input-wrapper">
-          <span className="input-icon">📧</span>
+          <span className="input-icon"><Mail size={18} /></span>
           <input
             id="email"
             type="email"
@@ -453,7 +457,7 @@ function Login() {
       <div className="form-group">
         <label htmlFor="password">设置密码</label>
         <div className="input-wrapper">
-          <span className="input-icon">🔒</span>
+          <span className="input-icon"><Lock size={18} /></span>
           <input
             id="password"
             type="password"
@@ -468,7 +472,7 @@ function Login() {
       <div className="form-group">
         <label htmlFor="confirmPassword">确认密码</label>
         <div className="input-wrapper">
-          <span className="input-icon">🔒</span>
+          <span className="input-icon"><Lock size={18} /></span>
           <input
             id="confirmPassword"
             type="password"
@@ -506,7 +510,7 @@ function Login() {
       <div className="form-group">
         <label htmlFor="email">邮箱地址</label>
         <div className="input-wrapper">
-          <span className="input-icon">📧</span>
+          <span className="input-icon"><Mail size={18} /></span>
           <input
             id="email"
             type="email"
@@ -539,7 +543,7 @@ function Login() {
       <div className="form-group">
         <label htmlFor="password">新密码</label>
         <div className="input-wrapper">
-          <span className="input-icon">🔒</span>
+          <span className="input-icon"><Lock size={18} /></span>
           <input
             id="password"
             type="password"
@@ -554,7 +558,7 @@ function Login() {
       <div className="form-group">
         <label htmlFor="confirmPassword">确认新密码</label>
         <div className="input-wrapper">
-          <span className="input-icon">🔒</span>
+          <span className="input-icon"><Lock size={18} /></span>
           <input
             id="confirmPassword"
             type="password"
@@ -590,7 +594,7 @@ function Login() {
               className={`profession-item ${profileData.profession === prof.value ? 'active' : ''}`}
               onClick={() => setProfileData({ ...profileData, profession: prof.value })}
             >
-              <span className="profession-icon">{prof.icon}</span>
+              <span className="profession-icon"><prof.Icon size={20} /></span>
               <span className="profession-label">{prof.label}</span>
             </button>
           ))}
@@ -677,7 +681,7 @@ function Login() {
       
       <div className="login-container">
         <div className="login-header">
-          <div className="logo-icon">📋</div>
+          <div className="logo-icon"><ClipboardList size={32} /></div>
           <h1 className="login-logo">TaskFlow</h1>
           <p className="login-subtitle">AI 驱动的智能任务管理平台</p>
         </div>

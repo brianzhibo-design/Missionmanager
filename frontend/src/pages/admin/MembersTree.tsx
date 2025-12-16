@@ -3,7 +3,7 @@
  * 只显示当前工作区的项目和成员
  */
 import { useState, useEffect } from 'react';
-import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User } from 'lucide-react';
+import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User, FolderOpen } from 'lucide-react';
 import { treeService, MemberNode, MemberTreeResponse } from '../../services/tree';
 import { projectService, Project } from '../../services/project';
 import { treeAnalysisService, TeamAnalysisResult } from '../../services/treeAnalysis';
@@ -197,7 +197,7 @@ export default function MembersTree() {
         <div className="header-controls">
           {/* 显示当前工作区名称 */}
           <div className="current-workspace-badge">
-            📁 {currentWorkspace?.name || '未选择工作区'}
+            <FolderOpen size={14} /> {currentWorkspace?.name || '未选择工作区'}
           </div>
           <select
             value={selectedProject}

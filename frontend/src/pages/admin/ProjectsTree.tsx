@@ -4,6 +4,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Building2, FolderOpen, RefreshCw, Bot } from 'lucide-react';
 import { treeService, ProjectTreeResponse, ProjectNode, TaskStats } from '../../services/tree';
 import { treeAnalysisService, ProjectsOverviewResult } from '../../services/treeAnalysis';
 import { usePermissions } from '../../hooks/usePermissions';
@@ -68,20 +69,20 @@ export default function ProjectsTree() {
     <div className="projects-tree-page">
       <div className="page-header">
         <div className="header-left">
-          <h1>🏢 项目总览</h1>
+          <h1><Building2 size={24} /> 项目总览</h1>
           <p className="page-description">查看所有项目的工作情况和整体进度</p>
         </div>
         <div className="header-controls">
           {/* 显示当前工作区名称 */}
           <div className="current-workspace-badge">
-            📁 {currentWorkspace?.name || '未选择工作区'}
+            <FolderOpen size={14} /> {currentWorkspace?.name || '未选择工作区'}
           </div>
           <button
             className="analyze-btn"
             onClick={handleAnalyze}
             disabled={!currentWorkspace || analyzing || loading}
           >
-            {analyzing ? '🔄 分析中...' : '🤖 AI 分析全局'}
+            {analyzing ? <><RefreshCw size={16} className="spin" /> 分析中...</> : <><Bot size={16} /> AI 分析全局</>}
           </button>
         </div>
       </div>

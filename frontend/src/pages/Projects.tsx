@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, Plus } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import { projectService } from '../services/project';
 import { workspaceService, WorkspaceMember } from '../services/workspace';
@@ -186,7 +187,7 @@ export default function Projects() {
       <div className="projects-page">
         <div className="page-header">
           <div className="page-header-content">
-            <h1 className="page-title">📁 项目</h1>
+            <h1 className="page-title"><FolderOpen size={24} /> 项目</h1>
           </div>
           <div className="page-actions">
             <button 
@@ -257,7 +258,7 @@ export default function Projects() {
       <div className="page-header">
         <div className="page-header-content">
           <div className="page-title-row">
-            <h1 className="page-title">📁 项目</h1>
+            <h1 className="page-title"><FolderOpen size={24} /> 项目</h1>
             <span className="badge badge-primary">{projects.length}</span>
           </div>
           <p className="page-description">管理您的所有项目</p>
@@ -285,7 +286,7 @@ export default function Projects() {
       {/* Toolbar */}
       <div className="projects-toolbar">
         <div className="search-box">
-          <span className="search-icon">🔍</span>
+          <span className="search-icon"><Search size={18} /></span>
           <input
             type="text"
             className="search-input"
@@ -315,7 +316,7 @@ export default function Projects() {
       {/* Error State */}
       {error && (
         <div className="error-card">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon"><AlertTriangle size={18} /></span>
           <span className="error-text">{error}</span>
           <button className="btn btn-sm btn-secondary" onClick={loadProjects}>
             重试
@@ -326,7 +327,7 @@ export default function Projects() {
       {/* Projects Grid/List */}
       {filteredProjects.length === 0 ? (
         <div className="empty-state">
-          <span className="empty-state-icon">📁</span>
+          <span className="empty-state-icon"><FolderOpen size={48} /></span>
           <h3 className="empty-state-title">
             {searchQuery ? '未找到匹配的项目' : '暂无项目'}
           </h3>
@@ -386,12 +387,12 @@ export default function Projects() {
                 {/* 统计信息 */}
                 <div className="project-stats">
                   <div className="project-stat">
-                    <span className="stat-icon">📋</span>
+                    <span className="stat-icon"><ClipboardList size={14} /></span>
                     <span className="stat-value">{project.taskStats?.total || 0}</span>
                     <span className="stat-label">任务</span>
                   </div>
                   <div className="project-stat">
-                    <span className="stat-icon">✅</span>
+                    <span className="stat-icon"><CheckCircle2 size={14} /></span>
                     <span className="stat-value">{project.taskStats?.done || 0}</span>
                     <span className="stat-label">完成</span>
                   </div>

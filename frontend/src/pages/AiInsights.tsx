@@ -1,4 +1,22 @@
 import { useState } from 'react';
+import { 
+  Brain, 
+  FolderOpen, 
+  Search, 
+  AlertTriangle, 
+  Bot,
+  BarChart3,
+  AlertCircle,
+  Lightbulb,
+  Building2,
+  Flame,
+  TrendingUp,
+  Target,
+  Scale,
+  MessageSquare,
+  CheckCircle2,
+  Circle
+} from 'lucide-react';
 import { treeAnalysisService, ProjectsOverviewResult } from '../services/treeAnalysis';
 import { usePermissions } from '../hooks/usePermissions';
 import './AiInsights.css';
@@ -51,7 +69,7 @@ export default function AiInsights() {
       {/* 页面标题 */}
       <div className="page-header">
         <div className="header-content">
-          <div className="header-icon">🧠</div>
+          <div className="header-icon"><Brain size={28} /></div>
           <div className="header-text">
             <h1>AI 洞察</h1>
             <p>AI 驱动的跨项目分析与风险识别</p>
@@ -60,7 +78,8 @@ export default function AiInsights() {
         <div className="header-actions">
           {/* 显示当前工作区名称 */}
           <div className="current-workspace-badge">
-            📁 {currentWorkspace?.name || '未选择工作区'}
+            <FolderOpen size={14} />
+            {currentWorkspace?.name || '未选择工作区'}
           </div>
           <button
             className="btn btn-primary"
@@ -73,7 +92,10 @@ export default function AiInsights() {
                 分析中...
               </>
             ) : (
-              <>🔍 开始分析</>
+              <>
+                <Search size={16} />
+                开始分析
+              </>
             )}
           </button>
         </div>
@@ -81,26 +103,26 @@ export default function AiInsights() {
 
       {error && (
         <div className="error-card card-static">
-          ⚠️ {error}
+          <AlertTriangle size={16} /> {error}
         </div>
       )}
 
       {!analysis && !loading && (
         <div className="empty-state">
-          <div className="empty-icon">🤖</div>
+          <div className="empty-icon"><Bot size={48} /></div>
           <h3>AI 全局洞察</h3>
           <p>点击"开始分析"，AI 将为当前工作区「{currentWorkspace?.name || '未选择'}」生成跨项目的智能分析报告</p>
           <div className="empty-features">
             <div className="feature-item">
-              <span className="feature-icon">📊</span>
+              <span className="feature-icon"><BarChart3 size={18} /></span>
               <span>组织健康度评估</span>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">⚠️</span>
+              <span className="feature-icon"><AlertCircle size={18} /></span>
               <span>风险热力图</span>
             </div>
             <div className="feature-item">
-              <span className="feature-icon">💡</span>
+              <span className="feature-icon"><Lightbulb size={18} /></span>
               <span>智能行动建议</span>
             </div>
           </div>
@@ -119,7 +141,7 @@ export default function AiInsights() {
           {/* 组织健康度 */}
           <div className="card insight-card health-card">
             <div className="card-header">
-              <h3>🏢 组织健康度</h3>
+              <h3><Building2 size={18} /> 组织健康度</h3>
               {getStatusBadge(analysis.organization_health.status)}
             </div>
             <div className="health-score">
@@ -153,7 +175,7 @@ export default function AiInsights() {
           {/* 风险热力图 */}
           <div className="card insight-card risk-card">
             <div className="card-header">
-              <h3>🔥 风险热力图</h3>
+              <h3><Flame size={18} /> 风险热力图</h3>
             </div>
             <div className="risk-grid">
               <div className="risk-level high">
@@ -189,7 +211,7 @@ export default function AiInsights() {
           {/* 项目对比 */}
           <div className="card insight-card comparison-card">
             <div className="card-header">
-              <h3>📈 项目对比</h3>
+              <h3><TrendingUp size={18} /> 项目对比</h3>
             </div>
             <div className="comparison-list">
               {analysis.project_comparison.map((project, i) => (
@@ -208,9 +230,9 @@ export default function AiInsights() {
                     <span className="score-text">{project.health_score}分</span>
                   </div>
                   {project.key_issue && (
-                    <p className="project-issue">⚠️ {project.key_issue}</p>
+                    <p className="project-issue"><AlertTriangle size={14} /> {project.key_issue}</p>
                   )}
-                  <p className="project-recommendation">💡 {project.recommendation}</p>
+                  <p className="project-recommendation"><Lightbulb size={14} /> {project.recommendation}</p>
                 </div>
               ))}
             </div>
@@ -219,13 +241,13 @@ export default function AiInsights() {
           {/* 优先行动 */}
           <div className="card insight-card priorities-card">
             <div className="card-header">
-              <h3>🎯 优先行动</h3>
+              <h3><Target size={18} /> 优先行动</h3>
             </div>
             <div className="priorities-list">
               {analysis.top_priorities.map((priority, i) => (
                 <div key={i} className={`priority-item urgency-${priority.urgency}`}>
                   <div className="priority-urgency">
-                    {priority.urgency === 'high' ? '🔴' : priority.urgency === 'medium' ? '🟡' : '🟢'}
+                    <Circle size={12} className={`urgency-dot urgency-${priority.urgency}`} />
                   </div>
                   <div className="priority-content">
                     <span className="priority-action">{priority.action}</span>
@@ -239,7 +261,7 @@ export default function AiInsights() {
           {/* 资源分析 */}
           <div className="card insight-card resource-card">
             <div className="card-header">
-              <h3>⚖️ 资源分析</h3>
+              <h3><Scale size={18} /> 资源分析</h3>
               <span className="utilization-score">
                 利用率 {analysis.resource_analysis.utilization_score}%
               </span>
@@ -249,12 +271,12 @@ export default function AiInsights() {
                 {analysis.resource_analysis.imbalances.map((imbalance, i) => (
                   <div key={i} className="imbalance-item">
                     <p className="imbalance-desc">{imbalance.description}</p>
-                    <p className="imbalance-suggestion">💡 {imbalance.suggestion}</p>
+                    <p className="imbalance-suggestion"><Lightbulb size={14} /> {imbalance.suggestion}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="no-imbalances">✅ 资源分配均衡</p>
+              <p className="no-imbalances"><CheckCircle2 size={16} /> 资源分配均衡</p>
             )}
           </div>
 
@@ -262,7 +284,7 @@ export default function AiInsights() {
           {analysis.insights && (
             <div className="card insight-card insights-card">
               <div className="card-header">
-                <h3>💭 AI 洞察</h3>
+                <h3><MessageSquare size={18} /> AI 洞察</h3>
               </div>
               <p className="insights-text">{analysis.insights}</p>
             </div>
