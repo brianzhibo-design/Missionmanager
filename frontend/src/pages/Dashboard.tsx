@@ -49,6 +49,7 @@ export default function Dashboard() {
   const [recentTasks, setRecentTasks] = useState<RecentTask[]>([]);
   const [aiSuggestions, setAiSuggestions] = useState<DailySuggestions | null>(null);
   const [loading, setLoading] = useState(true);
+  const [aiLoading, setAiLoading] = useState(false); // AI建议单独加载状态
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
@@ -59,6 +60,7 @@ export default function Dashboard() {
     weekday: 'long'
   });
 
+  // 加载基础数据（项目和任务）
   const loadDashboard = useCallback(async () => {
     if (!currentWorkspace) return;
     
@@ -99,14 +101,6 @@ export default function Dashboard() {
 
       // 最近 5 个我的任务
       setRecentTasks(myTasks.slice(0, 5));
-
-      // 尝试加载 AI 建议
-      try {
-        const suggestions = await aiService.getDailySuggestions();
-        setAiSuggestions(suggestions);
-      } catch (e) {
-        console.log('AI suggestions not available');
-      }
     } catch (error) {
       console.error('Failed to load dashboard:', error);
     } finally {
@@ -114,14 +108,34 @@ export default function Dashboard() {
     }
   }, [currentWorkspace]);
 
+  // 单独加载AI建议（非阻塞）
+  const loadAiSuggestions = useCallback(async () => {
+    try {
+      setAiLoading(true);
+      const suggestions = await aiService.getDailySuggestions();
+      setAiSuggestions(suggestions);
+    } catch (e) {
+      console.log('AI suggestions not available');
+    } finally {
+      setAiLoading(false);
+    }
+  }, []);
+
+  // 加载基础数据
   useEffect(() => {
     if (currentWorkspace) {
       loadDashboard();
     } else {
-      // 没有工作区时，停止加载状态
       setLoading(false);
     }
   }, [currentWorkspace, loadDashboard]);
+
+  // 延迟加载AI建议（不阻塞主界面）
+  useEffect(() => {
+    if (currentWorkspace && !loading) {
+      loadAiSuggestions();
+    }
+  }, [currentWorkspace, loading, loadAiSuggestions]);
 
   const completionRate = stats && stats.totalTasks > 0 
     ? Math.round((stats.completedTasks / stats.totalTasks) * 100) 
@@ -206,13 +220,19 @@ export default function Dashboard() {
       </section>
 
       {/* AI 建议区 */}
-      {aiSuggestions && (
-        <section className="ai-section">
-          <div className="section-header">
-            <Sparkles size={16} className="section-icon" />
-            <h2 className="section-title">AI 智能建议</h2>
+      <section className="ai-section">
+        <div className="section-header">
+          <Sparkles size={16} className="section-icon" />
+          <h2 className="section-title">AI 智能建议</h2>
+          {aiLoading && <Loader2 size={14} className="spin ai-loading-icon" />}
+        </div>
+        
+        {aiLoading && !aiSuggestions ? (
+          <div className="ai-loading-placeholder">
+            <div className="loading-shimmer" />
+            <div className="loading-shimmer short" />
           </div>
-          
+        ) : aiSuggestions ? (
           <div className="ai-insights-list">
             {aiSuggestions.focusTask && (
               <div className="insight-item insight-focus">
@@ -235,8 +255,12 @@ export default function Dashboard() {
               </div>
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="ai-empty-hint">
+            AI 建议暂不可用
+          </div>
+        )}
+      </section>
 
       {/* 最近任务 */}
       <section className="recent-section">
