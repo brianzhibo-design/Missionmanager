@@ -128,7 +128,6 @@
   padding: 80px 40px;
   text-align: center;
   position: relative;
-  overflow: hidden;
 }
 
 .ai-insights-page .empty-state::before {
