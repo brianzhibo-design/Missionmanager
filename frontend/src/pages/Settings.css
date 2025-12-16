@@ -16,6 +16,18 @@
   gap: 16px;
 }
 
+.settings-page .header-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-hover));
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
 .settings-page .header-text h1 {
   font-size: 28px;
   font-weight: 700;
