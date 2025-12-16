@@ -849,7 +849,6 @@
   padding: var(--space-4);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
-  border: 1px dashed var(--border-secondary);
 }
 
 /* AI 加载状态 */

@@ -22,7 +22,6 @@
 
 .placeholder-card {
   background-color: var(--card-bg);
-  border: 1px dashed var(--border-primary);
   border-radius: var(--radius-lg);
   padding: 48px;
   text-align: center;
