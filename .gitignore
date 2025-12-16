@@ -43,3 +43,6 @@ prisma/*.db-journal
 # Misc
 .cache/
 *.tgz
+
+# Docker 数据卷
+docker/data/
