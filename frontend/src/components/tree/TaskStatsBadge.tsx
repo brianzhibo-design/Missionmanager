@@ -1,6 +1,7 @@
 /**
  * 任务统计徽章组件
  */
+import { CheckCircle, Circle, Clock } from 'lucide-react';
 import { TaskStats } from '../../services/tree';
 import './TaskStatsBadge.css';
 
@@ -22,22 +23,22 @@ export function TaskStatsBadge({ stats, compact = false }: TaskStatsBadgeProps) 
     <div className="task-stats-badge">
       {stats.done > 0 && (
         <span className="stat-item done" title="已完成">
-          ✅ {stats.done}
+          <CheckCircle size={12} /> {stats.done}
         </span>
       )}
       {stats.inProgress > 0 && (
         <span className="stat-item in-progress" title="进行中">
-          🔵 {stats.inProgress}
+          <Clock size={12} /> {stats.inProgress}
         </span>
       )}
       {stats.todo > 0 && (
         <span className="stat-item todo" title="待办">
-          ⚪ {stats.todo}
+          <Circle size={12} /> {stats.todo}
         </span>
       )}
       {stats.review > 0 && (
         <span className="stat-item review" title="审核中">
-          🟡 {stats.review}
+          <Circle size={12} fill="currentColor" /> {stats.review}
         </span>
       )}
     </div>

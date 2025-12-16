@@ -147,26 +147,32 @@ export default function AiInsights() {
             <div className="health-score">
               <div className="score-circle">
                 <svg viewBox="0 0 100 100">
+                  <defs>
+                    <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#6366f1" />
+                      <stop offset="100%" stopColor="#a855f7" />
+                    </linearGradient>
+                  </defs>
                   <circle
                     className="score-bg"
                     cx="50"
                     cy="50"
-                    r="45"
+                    r="42"
                     fill="none"
-                    strokeWidth="8"
                   />
                   <circle
                     className="score-fill"
                     cx="50"
                     cy="50"
-                    r="45"
+                    r="42"
                     fill="none"
-                    strokeWidth="8"
-                    strokeDasharray={`${analysis.organization_health.score * 2.83} 283`}
-                    strokeLinecap="round"
+                    strokeDasharray={`${analysis.organization_health.score * 2.64} 264`}
                   />
                 </svg>
-                <span className="score-value">{analysis.organization_health.score}</span>
+                <div className="score-value">
+                  <span className="number">{analysis.organization_health.score}</span>
+                  <span className="label">健康分</span>
+                </div>
               </div>
             </div>
             <p className="health-summary">{analysis.organization_health.summary}</p>
@@ -179,6 +185,7 @@ export default function AiInsights() {
             </div>
             <div className="risk-grid">
               <div className="risk-level high">
+                <span className="risk-indicator" />
                 <span className="risk-label">高风险</span>
                 <span className="risk-count">{analysis.risk_heatmap.high_risk_projects.length}</span>
                 <div className="risk-projects">
@@ -188,6 +195,7 @@ export default function AiInsights() {
                 </div>
               </div>
               <div className="risk-level medium">
+                <span className="risk-indicator" />
                 <span className="risk-label">中风险</span>
                 <span className="risk-count">{analysis.risk_heatmap.medium_risk_projects.length}</span>
                 <div className="risk-projects">
@@ -197,6 +205,7 @@ export default function AiInsights() {
                 </div>
               </div>
               <div className="risk-level low">
+                <span className="risk-indicator" />
                 <span className="risk-label">低风险</span>
                 <span className="risk-count">{analysis.risk_heatmap.low_risk_projects.length}</span>
                 <div className="risk-projects">

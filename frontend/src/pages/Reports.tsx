@@ -6,6 +6,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { reportService, Report } from '../services/report';
 import { Modal } from '../components/Modal';
 import { config } from '../config';
+import { BarChart3, Calendar, CalendarRange, AlertTriangle, CheckCircle2, Bot, Sparkles, FileText, TrendingUp, FolderOpen, Mail } from 'lucide-react';
 import './Reports.css';
 
 export default function Reports() {
@@ -186,7 +187,7 @@ export default function Reports() {
     <div className="reports-page fade-in">
       <div className="page-header">
         <div className="header-content">
-          <div className="header-icon">📊</div>
+          <div className="header-icon"><BarChart3 size={28} /></div>
           <div className="header-text">
             <h1>报告中心</h1>
             <p>自动生成周报和月报</p>
@@ -198,20 +199,20 @@ export default function Reports() {
             onClick={handleGenerateWeekly}
             disabled={generating || !currentWorkspace}
           >
-            {generating ? '生成中...' : '📅 生成周报'}
+            {generating ? '生成中...' : <><Calendar size={16} /> 生成周报</>}
           </button>
           <button
             className="btn btn-primary"
             onClick={handleGenerateMonthly}
             disabled={generating || !currentWorkspace}
           >
-            {generating ? '生成中...' : '📆 生成月报'}
+            {generating ? '生成中...' : <><CalendarRange size={16} /> 生成月报</>}
           </button>
         </div>
       </div>
 
-      {error && <div className="error-card">⚠️ {error}</div>}
-      {successMessage && <div className="success-toast">✅ {successMessage}</div>}
+      {error && <div className="error-card"><AlertTriangle size={16} /> {error}</div>}
+      {successMessage && <div className="success-toast"><CheckCircle2 size={16} /> {successMessage}</div>}
 
       <div className="reports-layout">
         {/* 报告列表 */}
@@ -233,7 +234,7 @@ export default function Reports() {
                   onClick={() => setSelectedReport(report)}
                 >
                   <span className="report-type">
-                    {report.type === 'weekly' ? '📅 周报' : '📆 月报'}
+                    {report.type === 'weekly' ? <><Calendar size={14} /> 周报</> : <><CalendarRange size={14} /> 月报</>}
                   </span>
                   <span className="report-date">
                     {new Date(report.createdAt).toLocaleDateString()}
@@ -262,20 +263,20 @@ export default function Reports() {
                     onClick={handleExportPDF}
                     disabled={exporting}
                   >
-                    📄 {exporting ? '导出中...' : '导出 PDF'}
+                    <FileText size={14} /> {exporting ? '导出中...' : '导出 PDF'}
                   </button>
                   <button 
                     className="btn btn-secondary btn-sm"
                     onClick={handleExportExcel}
                     disabled={exporting}
                   >
-                    📊 {exporting ? '导出中...' : '导出 Excel'}
+                    <BarChart3 size={14} /> {exporting ? '导出中...' : '导出 Excel'}
                   </button>
                   <button 
                     className="btn btn-primary btn-sm"
                     onClick={() => setSendEmailModalOpen(true)}
                   >
-                    ✉️ 发送邮件
+                    <Mail size={14} /> 发送邮件
                   </button>
                 </div>
               </div>
@@ -283,7 +284,7 @@ export default function Reports() {
               {/* AI 摘要 */}
               {selectedReport.summary && (
                 <div className="report-summary">
-                  <h4>🤖 AI 摘要</h4>
+                  <h4><Bot size={16} /> AI 摘要</h4>
                   <p>{selectedReport.summary}</p>
                 </div>
               )}
@@ -292,7 +293,7 @@ export default function Reports() {
               <div className="report-insights">
                 {Array.isArray(selectedReport.highlights) && selectedReport.highlights.length > 0 && (
                   <div className="insight-section highlights">
-                    <h4>✨ 亮点</h4>
+                    <h4><Sparkles size={16} /> 亮点</h4>
                     <ul>
                       {selectedReport.highlights.map((h, i) => (
                         <li key={i}>{h}</li>
@@ -302,7 +303,7 @@ export default function Reports() {
                 )}
                 {Array.isArray(selectedReport.concerns) && selectedReport.concerns.length > 0 && (
                   <div className="insight-section concerns">
-                    <h4>⚠️ 关注点</h4>
+                    <h4><AlertTriangle size={16} /> 关注点</h4>
                     <ul>
                       {selectedReport.concerns.map((c, i) => (
                         <li key={i}>{c}</li>
@@ -315,7 +316,7 @@ export default function Reports() {
               {/* 统计数据 */}
               {selectedReport.content && (
                 <div className="report-stats">
-                  <h4>📈 数据统计</h4>
+                  <h4><TrendingUp size={16} /> 数据统计</h4>
                   <div className="stats-grid">
                     <div className="stat-item">
                       <span className="stat-value">{selectedReport.content.totalProjects || 0}</span>
@@ -344,7 +345,7 @@ export default function Reports() {
               {/* 项目详情 */}
               {selectedReport.content?.projectStats && selectedReport.content.projectStats.length > 0 && (
                 <div className="report-projects">
-                  <h4>📁 各项目情况</h4>
+                  <h4><FolderOpen size={16} /> 各项目情况</h4>
                   <div className="project-stats-list">
                     {selectedReport.content.projectStats.map((project, i) => (
                       <div key={i} className="project-stat-item">

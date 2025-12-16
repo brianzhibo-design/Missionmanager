@@ -395,19 +395,19 @@ class AIService {
     
     // 检查紧急任务
     if (urgentTasks.length > 0) {
-      suggestions.push(`📌 优先处理 ${urgentTasks.length} 个紧急任务：${urgentTasks.slice(0, 3).map(t => `「${t.title}」`).join('、')}。`);
+      suggestions.push(`[重要] 优先处理 ${urgentTasks.length} 个紧急任务：${urgentTasks.slice(0, 3).map(t => `「${t.title}」`).join('、')}。`);
     }
     
     // 检查高优先级任务
     if (highPriorityTasks.length > 0 && urgentTasks.length === 0) {
-      suggestions.push(`⚡ 建议优先处理高优先级任务：${highPriorityTasks.slice(0, 2).map(t => `「${t.title}」`).join('、')}。`);
+      suggestions.push(`[建议] 优先处理高优先级任务：${highPriorityTasks.slice(0, 2).map(t => `「${t.title}」`).join('、')}。`);
     }
     
     // 检查进行中任务数量
     if (inProgressTasks.length > 3) {
-      suggestions.push(`⚠️ 当前有 ${inProgressTasks.length} 个任务同时进行中，建议完成部分任务后再开始新任务，避免精力分散。`);
+      suggestions.push(`[注意] 当前有 ${inProgressTasks.length} 个任务同时进行中，建议完成部分任务后再开始新任务，避免精力分散。`);
     } else if (inProgressTasks.length === 0 && todoTasks.length > 0) {
-      suggestions.push(`💡 当前没有进行中的任务，建议从待办任务中选择一个开始执行。`);
+      suggestions.push(`[提示] 当前没有进行中的任务，建议从待办任务中选择一个开始执行。`);
     }
     
     // 检查截止日期
@@ -419,20 +419,20 @@ class AIService {
     });
     
     if (overdueTasks.length > 0) {
-      suggestions.push(`🚨 有 ${overdueTasks.length} 个任务已过期，请优先处理或调整截止日期。`);
+      suggestions.push(`[警告] 有 ${overdueTasks.length} 个任务已过期，请优先处理或调整截止日期。`);
     }
     
     // 通用建议
     if (suggestions.length === 0) {
       if (tasks.length === 0) {
-        suggestions.push('📋 项目暂无任务，建议创建第一个任务来开始工作。');
+        suggestions.push('[提示] 项目暂无任务，建议创建第一个任务来开始工作。');
       } else {
-        suggestions.push('✅ 项目任务状态良好！继续保持当前进度，按优先级逐个完成任务。');
+        suggestions.push('[良好] 项目任务状态良好！继续保持当前进度，按优先级逐个完成任务。');
       }
     }
     
     // 添加工作建议
-    suggestions.push('\n💼 工作建议：');
+    suggestions.push('\n[工作建议]');
     suggestions.push('• 每天优先处理最重要的 2-3 个任务');
     suggestions.push('• 大任务可以拆分成小的子任务');
     suggestions.push('• 定期回顾任务进度，及时调整优先级');

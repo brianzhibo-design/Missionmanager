@@ -6,7 +6,7 @@ import { memberService, Member } from '../services/member';
 import { usePermissions } from '../hooks/usePermissions';
 import Modal from '../components/Modal';
 import { TaskBreakdownModal, RiskPredictionPanel } from '../components/ai';
-import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle } from 'lucide-react';
+import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle, Circle, AlertTriangle, FileText, ClipboardList, Activity, Bot, Lightbulb, Package } from 'lucide-react';
 import './TaskDetail.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -16,11 +16,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   done: { label: '已完成', color: 'var(--color-success)', bg: 'var(--color-success-alpha-10)' },
 };
 
-const PRIORITY_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  urgent: { label: '紧急', icon: '🔴', color: 'var(--color-danger)' },
-  high: { label: '高', icon: '🟠', color: 'var(--color-warning)' },
-  medium: { label: '中', icon: '🔵', color: 'var(--color-info)' },
-  low: { label: '低', icon: '⚪', color: 'var(--text-tertiary)' },
+const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
+  urgent: { label: '紧急', color: 'var(--color-danger)' },
+  high: { label: '高', color: 'var(--color-warning)' },
+  medium: { label: '中', color: 'var(--color-info)' },
+  low: { label: '低', color: 'var(--text-tertiary)' },
 };
 
 const STATUS_TRANSITIONS: Record<string, string[]> = {
@@ -30,12 +30,12 @@ const STATUS_TRANSITIONS: Record<string, string[]> = {
   done: ['todo'],
 };
 
-const EVENT_TYPES: Record<string, { label: string; icon: string; color: string }> = {
-  created: { label: '创建任务', icon: '🆕', color: 'var(--color-brand)' },
-  status_changed: { label: '状态变更', icon: '🔄', color: 'var(--color-info)' },
-  priority_changed: { label: '优先级变更', icon: '📊', color: 'var(--color-warning)' },
-  assigned: { label: '分配任务', icon: '👤', color: 'var(--color-success)' },
-  ai_analyzed: { label: 'AI 分析', icon: '🤖', color: 'var(--color-brand)' },
+const EVENT_TYPES: Record<string, { label: string; color: string }> = {
+  created: { label: '创建任务', color: 'var(--color-brand)' },
+  status_changed: { label: '状态变更', color: 'var(--color-info)' },
+  priority_changed: { label: '优先级变更', color: 'var(--color-warning)' },
+  assigned: { label: '分配任务', color: 'var(--color-success)' },
+  ai_analyzed: { label: 'AI 分析', color: 'var(--color-brand)' },
 };
 
 export default function TaskDetail() {
@@ -440,7 +440,7 @@ export default function TaskDetail() {
     return (
       <div className="task-detail-page">
         <div className="error-card">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon"><AlertTriangle size={16} /></span>
           <span className="error-text">{error || '任务不存在'}</span>
           <button className="btn btn-secondary btn-sm" onClick={() => navigate(-1)}>
             返回
@@ -566,7 +566,7 @@ export default function TaskDetail() {
             <div className="attribute">
               <span className="attribute-label">优先级</span>
               <span className="attribute-value">
-                {PRIORITY_CONFIG[task.priority]?.icon} {PRIORITY_CONFIG[task.priority]?.label}
+                <Circle size={10} fill={PRIORITY_CONFIG[task.priority]?.color} color={PRIORITY_CONFIG[task.priority]?.color} /> {PRIORITY_CONFIG[task.priority]?.label}
               </span>
             </div>
             <div className="attribute">
@@ -585,7 +585,7 @@ export default function TaskDetail() {
           {task.description && (
             <div className="task-section card description-section">
               <div className="description-header">
-                <h3 className="section-title">📝 描述</h3>
+                <h3 className="section-title"><FileText size={16} /> 描述</h3>
                 <button 
                   className="btn btn-ghost btn-sm expand-toggle"
                   onClick={() => setDescriptionExpanded(!descriptionExpanded)}
@@ -605,7 +605,7 @@ export default function TaskDetail() {
           {/* Blocked Reason */}
           {task.status === 'blocked' && task.blockedReason && (
             <div className="task-section card card-status card-danger">
-              <h3 className="section-title">⚠️ 阻塞原因</h3>
+              <h3 className="section-title"><AlertTriangle size={16} /> 阻塞原因</h3>
               <p className="blocked-reason">{task.blockedReason}</p>
             </div>
           )}
@@ -614,7 +614,7 @@ export default function TaskDetail() {
           <div className="task-section card subtasks-section">
             <div className="subtasks-header">
               <h3 className="section-title">
-                📋 子任务 
+                <ClipboardList size={16} /> 子任务 
                 {task.subTasks && task.subTasks.length > 0 && (
                   <span className="subtask-count">({task.subTasks.length})</span>
                 )}
@@ -659,7 +659,7 @@ export default function TaskDetail() {
                     onClick={handleBatchCompleteSubtasks}
                     disabled={selectedSubtaskIds.size === 0 || batchProcessing}
                   >
-                    ✓ 批量完成
+                    <CheckSquare size={14} /> 批量完成
                   </button>
                   <button
                     className={`btn btn-sm btn-danger ${batchProcessing ? 'btn-loading' : ''}`}
@@ -707,7 +707,7 @@ export default function TaskDetail() {
             {/* 子任务列表 */}
             {!task.subTasks || task.subTasks.length === 0 ? (
               <div className="no-subtasks">
-                <span className="empty-icon">📦</span>
+                <span className="empty-icon"><Package size={24} /></span>
                 <p>暂无子任务</p>
                 <p className="empty-hint">可以点击上方按钮添加子任务，或使用 AI 任务分解功能</p>
               </div>
@@ -759,13 +759,13 @@ export default function TaskDetail() {
 
           {/* Activity Timeline */}
           <div className="task-section card">
-            <h3 className="section-title">📜 活动记录</h3>
+            <h3 className="section-title"><Activity size={16} /> 活动记录</h3>
             {events.length === 0 ? (
               <p className="no-events">暂无活动记录</p>
             ) : (
               <div className="events-timeline">
                 {events.map((event) => {
-                  const eventType = EVENT_TYPES[event.type] || { label: event.type, icon: '📌', color: 'var(--text-tertiary)' };
+                  const eventType = EVENT_TYPES[event.type] || { label: event.type, color: 'var(--text-tertiary)' };
                   return (
                     <div key={event.id} className="event-item">
                       <div 
@@ -774,7 +774,7 @@ export default function TaskDetail() {
                       />
                       <div className="event-content">
                         <span className="event-type">
-                          {eventType.icon} {eventType.label}
+                          {eventType.label}
                         </span>
                         {event.data?.description && (
                           <span className="event-description">{event.data.description}</span>
@@ -793,7 +793,7 @@ export default function TaskDetail() {
         <div className="task-sidebar">
           <div className="ai-panel card">
             <div className="ai-panel-header">
-              <h3 className="ai-panel-title">🤖 AI 分析</h3>
+              <h3 className="ai-panel-title"><Bot size={16} /> AI 分析</h3>
               <button 
                 className={`btn btn-sm ${analysis ? 'btn-secondary' : 'btn-primary'} ${analyzing ? 'btn-loading' : ''}`}
                 onClick={() => setShowAnalysisModal(true)}
@@ -805,7 +805,7 @@ export default function TaskDetail() {
 
             {!analysis ? (
               <div className="ai-empty">
-                <span className="ai-empty-icon">🔮</span>
+                <span className="ai-empty-icon"><Sparkles size={32} /></span>
                 <p className="ai-empty-text">尚未进行 AI 分析</p>
                 <p className="ai-empty-hint">点击"开始分析"获取智能建议</p>
               </div>
@@ -834,7 +834,7 @@ export default function TaskDetail() {
                 {/* Next Actions */}
                 {analysis.next_actions && analysis.next_actions.length > 0 && (
                   <div className="ai-section">
-                    <h4 className="ai-section-title">📋 建议操作</h4>
+                    <h4 className="ai-section-title"><ClipboardList size={14} /> 建议操作</h4>
                     <div className="actions-list">
                       {analysis.next_actions.map((action: { action: string; priority: string; reason: string }, index: number) => (
                         <div 
@@ -852,7 +852,7 @@ export default function TaskDetail() {
                 {/* Risks */}
                 {analysis.risks && analysis.risks.length > 0 && (
                   <div className="ai-section">
-                    <h4 className="ai-section-title">⚠️ 风险提醒</h4>
+                    <h4 className="ai-section-title"><AlertTriangle size={14} /> 风险提醒</h4>
                     <div className="risks-list">
                       {analysis.risks.map((risk: { risk: string; severity: string; mitigation: string }, index: number) => (
                         <div 
@@ -860,7 +860,7 @@ export default function TaskDetail() {
                           className={`risk-item severity-${risk.severity}`}
                         >
                           <span className="risk-description">{risk.risk}</span>
-                          <span className="risk-mitigation">💡 {risk.mitigation}</span>
+                          <span className="risk-mitigation"><Lightbulb size={12} /> {risk.mitigation}</span>
                         </div>
                       ))}
                     </div>
@@ -888,7 +888,7 @@ export default function TaskDetail() {
                 <div className="chat-messages">
                   {chatMessages.length === 0 ? (
                     <div className="chat-welcome">
-                      <div className="welcome-icon">💬</div>
+                      <div className="welcome-icon"><MessageCircle size={32} /></div>
                       <p className="welcome-text">您好！我可以帮助您分析这个任务。</p>
                       <p className="welcome-hint">您可以问我关于任务的任何问题，例如：</p>
                       <div className="welcome-suggestions">
@@ -920,7 +920,7 @@ export default function TaskDetail() {
                           className={`chat-message ${msg.role}`}
                         >
                           <div className="message-avatar">
-                            {msg.role === 'user' ? '👤' : '🤖'}
+                            {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
                           </div>
                           <div className="message-content">
                             <div className="message-text">{msg.content}</div>
@@ -929,7 +929,7 @@ export default function TaskDetail() {
                       ))}
                       {chatLoading && (
                         <div className="chat-message assistant">
-                          <div className="message-avatar">🤖</div>
+                          <div className="message-avatar"><Bot size={16} /></div>
                           <div className="message-content">
                             <div className="message-text typing">
                               <span className="dot"></span>
@@ -1027,7 +1027,7 @@ export default function TaskDetail() {
               <label className="form-label">优先级</label>
               <select name="priority" className="form-select" defaultValue={task.priority}>
                 {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
-                  <option key={key} value={key}>{config.icon} {config.label}</option>
+                  <option key={key} value={key}>{config.label}</option>
                 ))}
               </select>
             </div>
@@ -1162,7 +1162,7 @@ export default function TaskDetail() {
           setShowOptimizeModal(false);
           setOptimizationResult(null);
         }}
-        title="✨ AI 任务优化"
+        title="AI 任务优化"
       >
         <div className="optimize-modal">
           {optimizing ? (
@@ -1174,7 +1174,7 @@ export default function TaskDetail() {
             <div className="optimize-result">
               {/* 优化后的标题 */}
               <div className="optimize-section">
-                <h4>📝 优化后的标题</h4>
+                <h4><FileText size={16} /> 优化后的标题</h4>
                 <div className="optimize-comparison">
                   <div className="original">
                     <span className="label">原标题：</span>
@@ -1189,7 +1189,7 @@ export default function TaskDetail() {
 
               {/* 优化后的描述 */}
               <div className="optimize-section">
-                <h4>📋 优化后的描述</h4>
+                <h4><ClipboardList size={16} /> 优化后的描述</h4>
                 <div className="optimize-description">
                   <div className="original-desc">
                     <span className="label">原描述：</span>
@@ -1205,7 +1205,7 @@ export default function TaskDetail() {
               {/* 优化建议 */}
               {optimizationResult.suggestions.length > 0 && (
                 <div className="optimize-section">
-                  <h4>💡 其他建议</h4>
+                  <h4><Lightbulb size={16} /> 其他建议</h4>
                   <ul className="suggestions-list">
                     {optimizationResult.suggestions.map((s, i) => (
                       <li key={i}>{s}</li>
@@ -1216,7 +1216,7 @@ export default function TaskDetail() {
 
               {/* 优化理由 */}
               <div className="optimize-reason">
-                <span className="reason-icon">💬</span>
+                <span className="reason-icon"><MessageCircle size={16} /></span>
                 <span className="reason-text">{optimizationResult.reason}</span>
               </div>
 
@@ -1236,7 +1236,7 @@ export default function TaskDetail() {
                   onClick={handleApplyOptimization}
                   disabled={applyingOptimization}
                 >
-                  {applyingOptimization ? '应用中...' : '✓ 应用优化'}
+                  {applyingOptimization ? '应用中...' : '应用优化'}
                 </button>
               </div>
             </div>

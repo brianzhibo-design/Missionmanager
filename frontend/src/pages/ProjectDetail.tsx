@@ -7,7 +7,7 @@ import { aiService, ProjectOptimizationResult, SuggestedTask } from '../services
 import { usePermissions } from '../hooks/usePermissions';
 import Modal from '../components/Modal';
 import TaskList from '../components/TaskList';
-import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown } from 'lucide-react';
+import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Circle, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle } from 'lucide-react';
 import './ProjectDetail.css';
 
 interface ProjectLeader {
@@ -34,11 +34,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   done: { label: '已完成', color: 'var(--color-success)', bg: 'var(--color-success-alpha-10)' },
 };
 
-const PRIORITY_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
-  urgent: { label: '紧急', icon: '🔴', color: 'var(--color-danger)' },
-  high: { label: '高', icon: '🟠', color: 'var(--color-warning)' },
-  medium: { label: '中', icon: '🔵', color: 'var(--color-info)' },
-  low: { label: '低', icon: '⚪', color: 'var(--text-tertiary)' },
+const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
+  urgent: { label: '紧急', color: 'var(--color-danger)' },
+  high: { label: '高', color: 'var(--color-warning)' },
+  medium: { label: '中', color: 'var(--color-info)' },
+  low: { label: '低', color: 'var(--text-tertiary)' },
 };
 
 // 优先级权重（用于排序）
@@ -477,7 +477,7 @@ export default function ProjectDetail() {
     return (
       <div className="project-detail-page">
         <div className="error-card">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon"><AlertTriangle size={16} /></span>
           <span className="error-text">{error}</span>
           <button className="btn btn-secondary btn-sm" onClick={() => navigate('/projects')}>
             返回项目列表
@@ -524,7 +524,7 @@ export default function ProjectDetail() {
             </button>
             {canEditProject && (
               <button className="btn btn-secondary btn-sm" onClick={openSettings}>
-                ⚙️ 设置
+                <Settings size={14} /> 设置
               </button>
             )}
           </div>
@@ -610,7 +610,7 @@ export default function ProjectDetail() {
               >
                 <option value="all">所有优先级</option>
                 {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
-                  <option key={key} value={key}>{config.icon} {config.label}</option>
+                  <option key={key} value={key}>{config.label}</option>
                 ))}
               </select>
               <select 
@@ -657,7 +657,7 @@ export default function ProjectDetail() {
         <div className="task-list-wrapper">
           {filteredTasks.length === 0 ? (
             <div className="empty-state">
-              <span className="empty-state-icon">📋</span>
+              <span className="empty-state-icon"><ClipboardList size={48} /></span>
               <h3 className="empty-state-title">暂无任务</h3>
               <p className="empty-state-description">
                 {canCreateTask ? '创建第一个任务开始工作' : '暂无任务'}
@@ -691,7 +691,7 @@ export default function ProjectDetail() {
           setShowProjectOptimization(false);
           setProjectOptimizationResult(null);
         }}
-        title="✨ AI 项目优化"
+        title="AI 项目优化"
       >
         <div className="project-optimization-modal">
           {projectOptimizationLoading ? (
@@ -703,7 +703,7 @@ export default function ProjectDetail() {
             <div className="project-optimization-content">
               {/* 优化后的标题 */}
               <div className="optimization-section">
-                <h4>📝 项目标题优化</h4>
+                <h4><FileText size={16} /> 项目标题优化</h4>
                 <div className="optimization-comparison">
                   <div className="original">
                     <span className="label">原标题：</span>
@@ -718,7 +718,7 @@ export default function ProjectDetail() {
 
               {/* 优化后的描述 */}
               <div className="optimization-section">
-                <h4>📋 项目描述优化</h4>
+                <h4><ClipboardList size={16} /> 项目描述优化</h4>
                 <div className="optimization-description">
                   <div className="original-desc">
                     <span className="label">原描述：</span>
@@ -733,7 +733,7 @@ export default function ProjectDetail() {
 
               {/* 建议负责人 */}
               <div className="optimization-section">
-                <h4>👤 建议项目负责人</h4>
+                <h4><Crown size={16} /> 建议项目负责人</h4>
                 <div className="leader-suggestion">
                   <div className="leader-role">{projectOptimizationResult.suggestedLeader.role}</div>
                   <div className="leader-skills">
@@ -742,14 +742,14 @@ export default function ProjectDetail() {
                       <span key={i} className="skill-tag">{skill}</span>
                     ))}
                   </div>
-                  <div className="leader-reason">💡 {projectOptimizationResult.suggestedLeader.reason}</div>
+                  <div className="leader-reason"><Lightbulb size={14} /> {projectOptimizationResult.suggestedLeader.reason}</div>
                 </div>
               </div>
 
               {/* 建议团队构成 */}
               {projectOptimizationResult.suggestedTeam.length > 0 && (
                 <div className="optimization-section">
-                  <h4>👥 建议团队构成</h4>
+                  <h4><Users size={16} /> 建议团队构成</h4>
                   <div className="team-suggestions">
                     {projectOptimizationResult.suggestedTeam.map((member, i) => (
                       <div key={i} className="team-member-card">
@@ -772,7 +772,7 @@ export default function ProjectDetail() {
               {/* 其他建议 */}
               {projectOptimizationResult.suggestions.length > 0 && (
                 <div className="optimization-section">
-                  <h4>💡 其他建议</h4>
+                  <h4><Lightbulb size={16} /> 其他建议</h4>
                   <ul className="other-suggestions">
                     {projectOptimizationResult.suggestions.map((s, i) => (
                       <li key={i}>{s}</li>
@@ -783,7 +783,7 @@ export default function ProjectDetail() {
 
               {/* 优化理由 */}
               <div className="optimization-reason">
-                <span className="reason-icon">💬</span>
+                <span className="reason-icon"><MessageCircle size={16} /></span>
                 <span className="reason-text">{projectOptimizationResult.reason}</span>
               </div>
 
@@ -803,7 +803,7 @@ export default function ProjectDetail() {
                   onClick={handleApplyProjectOptimization}
                   disabled={applyingProjectOptimization}
                 >
-                  {applyingProjectOptimization ? '应用中...' : '✓ 应用标题和描述优化'}
+                  {applyingProjectOptimization ? '应用中...' : '应用标题和描述优化'}
                 </button>
               </div>
             </div>
@@ -824,7 +824,7 @@ export default function ProjectDetail() {
           {/* AI 建议区域 */}
           <div className="ai-suggestions-panel">
             <div className="ai-panel-header">
-              <span>✨ AI 智能建议</span>
+              <span><Sparkles size={16} /> AI 智能建议</span>
               <button
                 type="button"
                 className={`btn btn-sm btn-secondary ${newTaskAiLoading ? 'btn-loading' : ''}`}
@@ -852,7 +852,7 @@ export default function ProjectDetail() {
                     </p>
                     <div className="suggestion-item-footer">
                       {suggestion.reason && (
-                        <span className="suggestion-reason">💡 {suggestion.reason}</span>
+                        <span className="suggestion-reason"><Lightbulb size={12} /> {suggestion.reason}</span>
                       )}
                       <span className="suggestion-item-hint">点击使用此建议 →</span>
                     </div>
@@ -865,7 +865,7 @@ export default function ProjectDetail() {
                 <div className="ai-loading-animation">
                   <div className="ai-loading-spinner"></div>
                   <div className="ai-loading-text">
-                    <span className="loading-title">🤖 AI 正在分析项目...</span>
+                    <span className="loading-title">AI 正在分析项目...</span>
                     <span className="loading-subtitle">正在结合已有任务生成智能建议</span>
                   </div>
                 </div>
@@ -918,7 +918,7 @@ export default function ProjectDetail() {
                 <label className="form-label">优先级</label>
                 <select name="priority" className="form-select" defaultValue="medium">
                   {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
-                    <option key={key} value={key}>{config.icon} {config.label}</option>
+                    <option key={key} value={key}>{config.label}</option>
                   ))}
                 </select>
               </div>
@@ -1012,7 +1012,7 @@ export default function ProjectDetail() {
       <Modal
         isOpen={showTeamModal}
         onClose={() => setShowTeamModal(false)}
-        title="👥 项目团队管理"
+        title="项目团队管理"
       >
         <div className="team-modal-content">
           {/* 项目负责人 */}

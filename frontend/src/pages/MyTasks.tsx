@@ -1,5 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import { 
+  CheckCircle2, 
+  ClipboardList, 
+  AlertCircle, 
+  Calendar, 
+  RefreshCw, 
+  CheckSquare,
+  Circle,
+  Inbox
+} from 'lucide-react';
 import { taskService } from '../services/task';
 import './MyTasks.css';
 
@@ -30,11 +40,11 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   done: { label: '已完成', color: '#059669', bg: '#ecfdf5', border: '#6ee7b7' },
 };
 
-const PRIORITY_CONFIG: Record<string, { label: string; icon: string; color: string; border: string }> = {
-  urgent: { label: '紧急', icon: '🔴', color: 'var(--color-danger)', border: 'var(--color-danger)' },
-  high: { label: '高', icon: '🟠', color: 'var(--color-warning)', border: 'var(--color-warning)' },
-  medium: { label: '中', icon: '🔵', color: 'var(--color-info)', border: 'var(--color-info)' },
-  low: { label: '低', icon: '⚪', color: 'var(--text-tertiary)', border: 'var(--text-tertiary)' },
+const PRIORITY_CONFIG: Record<string, { label: string; color: string; border: string }> = {
+  urgent: { label: '紧急', color: 'var(--color-danger)', border: 'var(--color-danger)' },
+  high: { label: '高', color: 'var(--color-warning)', border: 'var(--color-warning)' },
+  medium: { label: '中', color: 'var(--color-info)', border: 'var(--color-info)' },
+  low: { label: '低', color: 'var(--text-tertiary)', border: 'var(--text-tertiary)' },
 };
 
 type TabType = 'all' | 'today' | 'upcoming' | 'overdue';
@@ -175,41 +185,41 @@ export default function MyTasks() {
     <div className="my-tasks-page">
       {/* Header */}
       <div className="page-header">
-        <h1 className="page-title">✅ 我的任务</h1>
+        <h1 className="page-title"><CheckCircle2 size={24} /> 我的任务</h1>
       </div>
 
       {/* Quick Stats */}
       <div className="quick-stats">
         <div className="quick-stat-card">
-          <span className="quick-stat-icon">📋</span>
+          <span className="quick-stat-icon"><ClipboardList size={20} /></span>
           <div className="quick-stat-content">
             <span className="quick-stat-value">{stats?.total || 0}</span>
             <span className="quick-stat-label">总任务</span>
           </div>
         </div>
         <div className="quick-stat-card">
-          <span className="quick-stat-icon">⚠️</span>
+          <span className="quick-stat-icon"><AlertCircle size={20} /></span>
           <div className="quick-stat-content">
             <span className="quick-stat-value danger">{stats?.overdue || 0}</span>
             <span className="quick-stat-label">已逾期</span>
           </div>
         </div>
         <div className="quick-stat-card">
-          <span className="quick-stat-icon">📅</span>
+          <span className="quick-stat-icon"><Calendar size={20} /></span>
           <div className="quick-stat-content">
             <span className="quick-stat-value warning">{stats?.dueToday || 0}</span>
             <span className="quick-stat-label">今日到期</span>
           </div>
         </div>
         <div className="quick-stat-card">
-          <span className="quick-stat-icon">🔄</span>
+          <span className="quick-stat-icon"><RefreshCw size={20} /></span>
           <div className="quick-stat-content">
             <span className="quick-stat-value info">{stats?.inProgress || 0}</span>
             <span className="quick-stat-label">进行中</span>
           </div>
         </div>
         <div className="quick-stat-card">
-          <span className="quick-stat-icon">✅</span>
+          <span className="quick-stat-icon"><CheckSquare size={20} /></span>
           <div className="quick-stat-content">
             <span className="quick-stat-value success">{stats?.done || 0}</span>
             <span className="quick-stat-label">已完成</span>
@@ -252,7 +262,7 @@ export default function MyTasks() {
           >
             <option value="all">所有优先级</option>
             {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
-              <option key={key} value={key}>{config.icon} {config.label}</option>
+              <option key={key} value={key}>{config.label}</option>
             ))}
           </select>
         </div>
@@ -261,7 +271,7 @@ export default function MyTasks() {
       {/* Error */}
       {error && (
         <div className="error-card">
-          <span className="error-icon">⚠️</span>
+          <span className="error-icon"><AlertCircle size={16} /></span>
           <span className="error-text">{error}</span>
           <button className="btn btn-sm btn-secondary" onClick={loadTasks}>重试</button>
         </div>
@@ -270,7 +280,7 @@ export default function MyTasks() {
       {/* Task Groups */}
       {tasks.length === 0 ? (
         <div className="empty-state">
-          <span className="empty-state-icon">📭</span>
+          <span className="empty-state-icon"><Inbox size={48} /></span>
           <h3 className="empty-state-title">暂无任务</h3>
           <p className="empty-state-description">您当前没有分配的任务</p>
         </div>
@@ -295,7 +305,7 @@ export default function MyTasks() {
                       style={{ borderLeftColor: priorityConfig?.border }}
                     >
                       <div className="task-card-content">
-                        <span className="task-priority-icon">{priorityConfig?.icon}</span>
+                        <span className="task-priority-icon"><Circle size={10} fill={priorityConfig?.color} color={priorityConfig?.color} /></span>
                         <div className="task-info">
                           <span className="task-title">{task.title}</span>
                           <span className="task-project">{task.project?.name || '未分配项目'}</span>
