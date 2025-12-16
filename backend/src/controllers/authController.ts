@@ -123,3 +123,101 @@ authRouter.patch('/password', requireAuth, async (req: Request, res: Response, n
   }
 });
 
+/**
+ * POST /auth/forgot-password
+ * 请求密码重置
+ */
+authRouter.post('/forgot-password', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      throw new AppError('请提供邮箱地址', 400, 'MISSING_FIELDS');
+    }
+
+    const result = await authService.requestPasswordReset(email);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /auth/verify-reset-token
+ * 验证重置令牌
+ */
+authRouter.post('/verify-reset-token', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      throw new AppError('请提供重置令牌', 400, 'MISSING_FIELDS');
+    }
+
+    const result = await authService.verifyResetToken(token);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /auth/reset-password
+ * 重置密码
+ */
+authRouter.post('/reset-password', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      throw new AppError('请提供重置令牌和新密码', 400, 'MISSING_FIELDS');
+    }
+
+    const result = await authService.resetPassword(token, newPassword);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * PATCH /auth/complete-profile
+ * 完善个人信息
+ */
+authRouter.patch('/complete-profile', requireAuth, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { profession, bio, phone, company, location } = req.body;
+
+    if (!profession) {
+      throw new AppError('请选择您的职业', 400, 'MISSING_FIELDS');
+    }
+
+    const user = await authService.completeProfile(req.user!.userId, {
+      profession,
+      bio,
+      phone,
+      company,
+      location,
+    });
+
+    res.json({
+      success: true,
+      data: { user },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+

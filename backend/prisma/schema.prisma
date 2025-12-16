@@ -19,6 +19,19 @@ model User {
   name      String
   password  String
   avatar    String?
+  
+  // 个人信息
+  profession    String?   // 职业：designer, developer, pm, marketing, hr, finance, operation, other
+  bio           String?   // 个人简介
+  phone         String?   // 手机号（可选）
+  company       String?   // 公司/组织（可选）
+  location      String?   // 所在地（可选）
+  profileCompleted Boolean @default(false) @map("profile_completed") // 是否完成个人信息填写
+  
+  // 密码重置
+  resetToken       String?   @map("reset_token")
+  resetTokenExpiry DateTime? @map("reset_token_expiry")
+  
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

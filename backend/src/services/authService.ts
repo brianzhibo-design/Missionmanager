@@ -1,9 +1,10 @@
 /**
  * 认证服务
- * 处理用户注册、登录、JWT 签发与验证
+ * 处理用户注册、登录、JWT 签发与验证、密码重置
  */
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { userRepository } from '../repositories/userRepository';
 import { config } from '../infra/config';
 import { AppError } from '../middleware/errorHandler';
@@ -24,8 +25,20 @@ export interface AuthResponse {
     id: string;
     email: string;
     name: string;
+    profileCompleted: boolean;
   };
   token: string;
+}
+
+/**
+ * 用户个人信息类型
+ */
+export interface UserProfile {
+  profession?: string;
+  bio?: string;
+  phone?: string;
+  company?: string;
+  location?: string;
 }
 
 export const authService = {
@@ -53,7 +66,7 @@ export const authService = {
     const token = this.generateToken({ userId: user.id, email: user.email });
 
     return {
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, profileCompleted: user.profileCompleted },
       token,
     };
   },
@@ -78,8 +91,97 @@ export const authService = {
     const token = this.generateToken({ userId: user.id, email: user.email });
 
     return {
-      user: { id: user.id, email: user.email, name: user.name },
+      user: { id: user.id, email: user.email, name: user.name, profileCompleted: user.profileCompleted },
       token,
+    };
+  },
+
+  /**
+   * 请求密码重置（生成重置令牌）
+   */
+  async requestPasswordReset(email: string): Promise<{ message: string; resetToken?: string }> {
+    const user = await userRepository.findByEmail(email);
+    if (!user) {
+      // 为了安全，即使用户不存在也返回成功信息
+      return { message: '如果该邮箱已注册，您将收到密码重置邮件' };
+    }
+
+    // 生成重置令牌
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1小时后过期
+
+    // 保存重置令牌
+    await userRepository.update(user.id, {
+      resetToken,
+      resetTokenExpiry,
+    });
+
+    // 注意：在生产环境中，这里应该发送邮件
+    // 为了演示，我们直接返回令牌
+    return { 
+      message: '密码重置链接已发送到您的邮箱',
+      resetToken // 仅用于演示，生产环境不应返回
+    };
+  },
+
+  /**
+   * 验证重置令牌
+   */
+  async verifyResetToken(token: string): Promise<{ valid: boolean; email?: string }> {
+    const user = await userRepository.findByResetToken(token);
+    if (!user || !user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+      return { valid: false };
+    }
+    return { valid: true, email: user.email };
+  },
+
+  /**
+   * 重置密码
+   */
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    const user = await userRepository.findByResetToken(token);
+    if (!user) {
+      throw new AppError('重置令牌无效', 400, 'INVALID_TOKEN');
+    }
+
+    if (!user.resetTokenExpiry || user.resetTokenExpiry < new Date()) {
+      throw new AppError('重置令牌已过期', 400, 'TOKEN_EXPIRED');
+    }
+
+    if (newPassword.length < 6) {
+      throw new AppError('新密码长度至少 6 位', 400, 'PASSWORD_TOO_SHORT');
+    }
+
+    // 更新密码并清除重置令牌
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await userRepository.update(user.id, {
+      password: hashedPassword,
+      resetToken: null,
+      resetTokenExpiry: null,
+    });
+
+    return { message: '密码重置成功' };
+  },
+
+  /**
+   * 完善个人信息
+   */
+  async completeProfile(userId: string, profile: UserProfile): Promise<AuthResponse['user']> {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('用户不存在', 404, 'USER_NOT_FOUND');
+    }
+
+    const updatedUser = await userRepository.update(userId, {
+      ...profile,
+      profileCompleted: true,
+    });
+
+    return {
+      id: updatedUser.id,
+      email: updatedUser.email,
+      name: updatedUser.name,
+      profileCompleted: updatedUser.profileCompleted,
     };
   },
 

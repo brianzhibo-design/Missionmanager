@@ -20,6 +20,13 @@ export const userRepository = {
   },
 
   /**
+   * 根据重置令牌查找用户
+   */
+  async findByResetToken(token: string): Promise<User | null> {
+    return prisma.user.findFirst({ where: { resetToken: token } });
+  },
+
+  /**
    * 创建用户
    */
   async create(data: { email: string; name: string; password: string }): Promise<User> {
@@ -29,7 +36,11 @@ export const userRepository = {
   /**
    * 更新用户
    */
-  async update(id: string, data: Partial<Pick<User, 'name' | 'email' | 'password' | 'avatar'>>): Promise<User> {
+  async update(id: string, data: Partial<Pick<User, 
+    'name' | 'email' | 'password' | 'avatar' | 
+    'profession' | 'bio' | 'phone' | 'company' | 'location' | 'profileCompleted' |
+    'resetToken' | 'resetTokenExpiry'
+  >>): Promise<User> {
     return prisma.user.update({ where: { id }, data });
   },
 };

@@ -9,6 +9,16 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  profileCompleted?: boolean;
+}
+
+// 用户个人信息类型
+export interface UserProfile {
+  profession?: string;
+  bio?: string;
+  phone?: string;
+  company?: string;
+  location?: string;
 }
 
 // 登录响应
@@ -170,6 +180,48 @@ export const authService = {
       newPassword,
     });
     return response;
+  },
+
+  // 请求密码重置
+  async forgotPassword(email: string): Promise<{ message: string; resetToken?: string }> {
+    const response = await api.post<{ message: string; resetToken?: string }>('/auth/forgot-password', {
+      email,
+    });
+    return response;
+  },
+
+  // 验证重置令牌
+  async verifyResetToken(token: string): Promise<{ valid: boolean; email?: string }> {
+    const response = await api.post<{ valid: boolean; email?: string }>('/auth/verify-reset-token', {
+      token,
+    });
+    return response;
+  },
+
+  // 重置密码
+  async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+    const response = await api.post<{ message: string }>('/auth/reset-password', {
+      token,
+      newPassword,
+    });
+    return response;
+  },
+
+  // 完善个人信息
+  async completeProfile(profile: UserProfile): Promise<User> {
+    const response = await api.patch<{ user: User }>('/auth/complete-profile', profile);
+    
+    // 更新本地状态
+    if (response.user) {
+      currentState = {
+        ...currentState,
+        user: response.user,
+      };
+      localStorage.setItem(config.storageKeys.user, JSON.stringify(response.user));
+      notifyListeners();
+    }
+
+    return response.user;
   },
 };
 
