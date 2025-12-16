@@ -9,7 +9,6 @@ import { Avatar } from '../../components/Avatar';
 import { Users } from 'lucide-react';
 import { 
   ROLE_LABELS, 
-  ROLE_COLORS, 
   WORKSPACE_ROLE_OPTIONS,
   WORKSPACE_ROLE_HIERARCHY 
 } from '../../config/permissions';
@@ -112,8 +111,6 @@ export default function MembersManage() {
     setShowEditRole(true);
   };
 
-  const getRoleStyle = (role: string) => ROLE_COLORS[role] || ROLE_COLORS.member;
-
   // 检查当前用户是否可以修改目标成员
   const canModifyMember = (member: Member) => {
     if (member.role === 'owner') return false;
@@ -170,9 +167,7 @@ export default function MembersManage() {
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => {
-                const roleStyle = getRoleStyle(member.role);
-                return (
+              {members.map((member) => (
                   <tr key={member.userId}>
                     <td>
                       <div className="member-cell">
@@ -182,10 +177,7 @@ export default function MembersManage() {
                     </td>
                     <td className="email-cell">{member.user.email}</td>
                     <td>
-                      <span 
-                        className="role-badge"
-                        style={{ background: roleStyle.bg, color: roleStyle.color }}
-                      >
+                      <span className={`role-badge role-${member.role}`}>
                         {ROLE_LABELS[member.role] || member.role}
                       </span>
                     </td>
@@ -213,8 +205,7 @@ export default function MembersManage() {
                       )}
                     </td>
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>
