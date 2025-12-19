@@ -14,7 +14,7 @@ export interface AIConfig {
 export const aiConfig: AIConfig = {
   enabled: process.env.AI_ENABLED !== 'false',
   provider: 'anthropic',
-  model: process.env.AI_MODEL || 'claude-3-5-sonnet-20241022',
+  model: process.env.AI_MODEL || 'claude-3-5-haiku-20241022',
   timeout: parseInt(process.env.AI_TIMEOUT || '60000'),
   maxRetries: parseInt(process.env.AI_MAX_RETRIES || '2'),
   rateLimit: {
