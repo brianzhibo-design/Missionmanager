@@ -5,6 +5,7 @@ import { taskRepository, CreateTaskInput, UpdateTaskInput } from '../repositorie
 import { taskEventRepository } from '../repositories/taskEventRepository';
 import { projectRepository } from '../repositories/projectRepository';
 import { workspaceService } from './workspaceService';
+import { mapRole } from '../repositories/workspaceRepository';
 import {
   TaskStatus,
   TaskStatusType,
@@ -17,38 +18,46 @@ import {
 import { AppError } from '../middleware/errorHandler';
 
 // 所有角色（可查看）
-const ALL_ROLES = ['owner', 'director', 'manager', 'member', 'observer'] as const;
+const ALL_ROLES = ['owner', 'admin', 'leader', 'member', 'guest'] as const;
 // 可编辑角色（工作区级别）
-const EDIT_ROLES = ['owner', 'director', 'manager', 'member'] as const;
+const EDIT_ROLES = ['owner', 'admin', 'leader', 'member'] as const;
 // 可删除角色
-const DELETE_ROLES = ['owner', 'director', 'manager'] as const;
+const DELETE_ROLES = ['owner', 'admin', 'leader'] as const;
 
 /**
  * 检查用户是否有任务编辑权限
  * 权限条件:
- * 1. owner, director, manager: 可以编辑所有任务
+ * 1. owner, admin, leader: 可以编辑所有任务
  * 2. member: 只能编辑自己创建或被分配的任务
- * 3. observer: 无编辑权限
+ * 3. guest: 无编辑权限
+ * 4. 项目负责人: 可以编辑项目内所有任务
  */
 async function canEditTask(
   projectId: string, 
   workspaceId: string, 
   userId: string, 
-  task?: { creatorId: string; assigneeId: string | null }
+  task?: { creatorId: string; assigneeId: string | null },
+  isProjectLeader?: boolean
 ): Promise<boolean> {
-  // 1. 检查工作区角色（owner, director, manager 可以编辑所有任务）
-  const hasAdminRole = await workspaceService.hasRole(workspaceId, userId, ['owner', 'director', 'manager']);
+  // 1. 检查工作区角色（owner, admin, leader 可以编辑所有任务）
+  const hasAdminRole = await workspaceService.hasRole(workspaceId, userId, ['owner', 'admin', 'leader']);
   if (hasAdminRole) return true;
+  
+  // 2. 项目负责人可以编辑项目内所有任务
+  if (isProjectLeader) return true;
 
-  // 2. member 只能编辑自己创建或被分配的任务
+  // 3. member 只能编辑自己创建或被分配的任务
   if (task) {
     const isCreator = task.creatorId === userId;
     const isAssignee = task.assigneeId === userId;
     if (isCreator || isAssignee) {
       // 验证用户是工作区成员且角色为member
       const membership = await workspaceService.getMembership(workspaceId, userId);
-      if (membership && membership.role === 'member') {
-        return true;
+      if (membership) {
+        const mappedRole = mapRole(membership.role);
+        if (mappedRole === 'member') {
+          return true;
+        }
       }
     }
   }
@@ -154,7 +163,7 @@ export const taskService = {
 
   /**
    * 更新任务
-   * 权限：owner, director, manager 可以编辑所有任务；member 只能编辑自己创建或被分配的任务
+   * 权限：owner, admin, leader 可以编辑所有任务；member 只能编辑自己创建或被分配的任务；项目负责人可以编辑项目内所有任务
    */
   async update(userId: string, taskId: string, data: UpdateTaskInput) {
     // 1. 获取原任务
@@ -163,12 +172,16 @@ export const taskService = {
       throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
     }
 
-    // 2. 检查权限（传入任务信息以便检查member权限）
+    // 2. 检查是否是项目负责人
+    const isProjectLeader = task.project.leaderId === userId;
+
+    // 3. 检查权限（传入任务信息以便检查member权限）
     const hasPermission = await canEditTask(
       task.projectId, 
       task.project.workspaceId, 
       userId,
-      { creatorId: task.creatorId, assigneeId: task.assigneeId }
+      { creatorId: task.creatorId, assigneeId: task.assigneeId },
+      isProjectLeader
     );
     if (!hasPermission) {
       throw new AppError('没有权限编辑任务', 403, 'FORBIDDEN');
@@ -211,7 +224,7 @@ export const taskService = {
 
   /**
    * 变更任务状态（核心状态机逻辑）
-   * 权限：owner, director, manager 可以变更所有任务状态；member 只能变更自己创建或被分配的任务状态
+   * 权限：owner, admin, leader 可以变更所有任务状态；member 只能变更自己创建或被分配的任务状态；项目负责人可以变更项目内所有任务状态
    */
   async changeStatus(userId: string, taskId: string, newStatus: string, blockedReason?: string) {
     // 1. 验证状态值
@@ -225,12 +238,16 @@ export const taskService = {
       throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
     }
 
-    // 3. 检查权限（传入任务信息以便检查member权限）
+    // 3. 检查是否是项目负责人
+    const isProjectLeader = task.project.leaderId === userId;
+
+    // 4. 检查权限（传入任务信息以便检查member权限）
     const hasPermission = await canEditTask(
       task.projectId, 
       task.project.workspaceId, 
       userId,
-      { creatorId: task.creatorId, assigneeId: task.assigneeId }
+      { creatorId: task.creatorId, assigneeId: task.assigneeId },
+      isProjectLeader
     );
     if (!hasPermission) {
       throw new AppError('没有权限变更任务状态', 403, 'FORBIDDEN');
@@ -290,7 +307,7 @@ export const taskService = {
 
   /**
    * 删除任务
-   * 权限：owner, director, manager 可以删除
+   * 权限：owner, admin, leader 可以删除；项目负责人可以删除项目内任务
    */
   async delete(userId: string, taskId: string) {
     const task = await taskRepository.findByIdWithDetails(taskId);
@@ -298,8 +315,13 @@ export const taskService = {
       throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
     }
 
+    // 检查是否是项目负责人
+    const isProjectLeader = task.project.leaderId === userId;
+    
     // 检查权限
-    await workspaceService.requireRole(task.project.workspaceId, userId, [...DELETE_ROLES]);
+    if (!isProjectLeader) {
+      await workspaceService.requireRole(task.project.workspaceId, userId, [...DELETE_ROLES]);
+    }
 
     await taskRepository.delete(taskId);
   },
@@ -360,12 +382,16 @@ export const taskService = {
           continue;
         }
 
+        // 检查是否是项目负责人
+        const isProjectLeader = task.project.leaderId === userId;
+
         // 检查权限（传入任务信息以便检查member权限）
         const hasPermission = await canEditTask(
           task.projectId, 
           task.project.workspaceId, 
           userId,
-          { creatorId: task.creatorId, assigneeId: task.assigneeId }
+          { creatorId: task.creatorId, assigneeId: task.assigneeId },
+          isProjectLeader
         );
         if (!hasPermission) {
           results.failed.push({ id: taskId, reason: '没有权限' });

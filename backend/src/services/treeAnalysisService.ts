@@ -3,7 +3,7 @@
  * 提供团队任务树分析和项目全景分析功能
  */
 import { treeService } from './treeService';
-import { workspaceRepository } from '../repositories/workspaceRepository';
+import { workspaceRepository, mapRole } from '../repositories/workspaceRepository';
 import { projectRepository } from '../repositories/projectRepository';
 import { AppError } from '../middleware/errorHandler';
 import { logger } from '../infra/logger';
@@ -66,10 +66,13 @@ export const treeAnalysisService = {
       throw new AppError('无权访问此项目', 403, 'ACCESS_DENIED');
     }
 
-    // 权限检查：owner、director 可用；manager 只能分析自己负责的项目
+    // 映射角色代码
+    const mappedRole = mapRole(workspaceMembership.role);
+    
+    // 权限检查：owner、admin 可用；项目负责人可以分析自己的项目
     const canAnalyze = 
-      ['owner', 'director'].includes(workspaceMembership.role) ||
-      (workspaceMembership.role === 'manager' && project.leaderId === userId);
+      ['owner', 'admin'].includes(mappedRole) ||
+      project.leaderId === userId;
 
     if (!canAnalyze) {
       throw new AppError('无权使用AI团队分析，需要项目管理员权限', 403, 'REQUIRE_PROJECT_ADMIN');

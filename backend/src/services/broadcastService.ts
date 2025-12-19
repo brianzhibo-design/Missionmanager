@@ -35,7 +35,12 @@ export const broadcastService = {
       },
     });
 
-    if (!senderMembership || !['owner', 'director'].includes(senderMembership.role)) {
+    if (!senderMembership) {
+      throw new Error('FORBIDDEN');
+    }
+    const { mapRole } = await import('../repositories/workspaceRepository');
+    const mappedRole = mapRole(senderMembership.role);
+    if (!['owner', 'admin'].includes(mappedRole)) {
       throw new Error('FORBIDDEN');
     }
 

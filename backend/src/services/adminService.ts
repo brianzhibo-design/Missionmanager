@@ -3,7 +3,7 @@
  * 处理角色管理和汇报关系管理
  */
 import { projectMemberRepository } from '../repositories/projectMemberRepository';
-import { workspaceRepository, WorkspaceRole } from '../repositories/workspaceRepository';
+import { workspaceRepository, WorkspaceRole, mapRole } from '../repositories/workspaceRepository';
 import { projectRepository } from '../repositories/projectRepository';
 import { AppError } from '../middleware/errorHandler';
 
@@ -34,11 +34,15 @@ export const adminService = {
   },
 
   /**
-   * 检查是否有管理权限（owner 或 director）
+   * 检查是否有管理权限（owner 或 admin）
    */
   async requireAdmin(workspaceId: string, userId: string): Promise<void> {
     const membership = await workspaceRepository.getMembership(workspaceId, userId);
-    if (!membership || !['owner', 'director'].includes(membership.role)) {
+    if (!membership) {
+      throw new AppError('需要管理员权限', 403, 'REQUIRE_ADMIN');
+    }
+    const mappedRole = mapRole(membership.role);
+    if (!['owner', 'admin'].includes(mappedRole)) {
       throw new AppError('需要管理员权限', 403, 'REQUIRE_ADMIN');
     }
   },
@@ -52,17 +56,27 @@ export const adminService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    // 检查是否为 workspace 的 owner、director 或 manager
+    // 检查是否为 workspace 的 owner、admin 或 leader
     const workspaceMembership = await workspaceRepository.getMembership(project.workspaceId, userId);
-    if (workspaceMembership && ['owner', 'director', 'manager'].includes(workspaceMembership.role)) {
-      return; // owner/director/manager 有所有项目的权限
+    if (workspaceMembership) {
+      const mappedRole = mapRole(workspaceMembership.role);
+      if (['owner', 'admin', 'leader'].includes(mappedRole)) {
+        return; // owner/admin/leader 有所有项目的权限
+      }
     }
 
-    // 检查是否为项目管理员或团队负责人
-    const projectMember = await projectMemberRepository.findByProjectAndUser(projectId, userId);
-    if (!projectMember || !['project_admin', 'team_lead'].includes(projectMember.role)) {
-      throw new AppError('需要项目管理员或团队负责人权限', 403, 'REQUIRE_PROJECT_ADMIN');
+    // 检查是否为项目负责人（通过 leaderId 或 ProjectMember.isLeader）
+    if (project.leaderId === userId) {
+      return; // 项目负责人有权限
     }
+
+    // 检查 ProjectMember 中的 isLeader 标记（如果数据库已更新）
+    const projectMember = await projectMemberRepository.findByProjectAndUser(projectId, userId);
+    if (projectMember && (projectMember as any).isLeader) {
+      return; // 项目负责人标记
+    }
+
+    throw new AppError('需要项目管理员权限或项目负责人', 403, 'REQUIRE_PROJECT_ADMIN');
   },
 
   /**
@@ -88,13 +102,17 @@ export const adminService = {
       throw new AppError('不能修改工作区创建者的角色', 400, 'CANNOT_CHANGE_OWNER_ROLE');
     }
 
-    // 4. 验证角色值（使用正确的角色枚举）
-    if (!['director', 'manager', 'member', 'observer'].includes(newRole)) {
+    // 4. 验证角色值（支持新旧角色代码）
+    const validRoles = ['admin', 'leader', 'member', 'guest', 'director', 'manager', 'observer'];
+    if (!validRoles.includes(newRole)) {
       throw new AppError('无效的角色', 400, 'INVALID_ROLE');
     }
+    
+    // 映射旧角色代码到新角色代码
+    const mappedRole = mapRole(newRole);
 
-    // 5. 更新角色
-    return workspaceRepository.updateMemberRole(workspaceId, targetUserId, newRole as WorkspaceRole);
+    // 5. 更新角色（使用映射后的新角色代码）
+    return workspaceRepository.updateMemberRole(workspaceId, targetUserId, mappedRole);
   },
 
   /**
@@ -119,46 +137,34 @@ export const adminService = {
       throw new AppError('无权访问此项目', 403, 'ACCESS_DENIED');
     }
 
-    // 3. 如果是 manager，只能编辑自己负责的项目
-    if (workspaceMembership.role === 'manager' && project.leaderId !== operatorId) {
+    // 3. 映射角色代码
+    const mappedRole = mapRole(workspaceMembership.role);
+    
+    // 4. 如果是 leader，只能编辑自己负责的项目
+    if (mappedRole === 'leader' && project.leaderId !== operatorId) {
       throw new AppError('只能编辑自己负责的项目', 403, 'CAN_ONLY_EDIT_OWN_PROJECT');
     }
 
-    // 4. owner 和 director 可以编辑所有项目，继续检查项目管理员权限
-    if (!['owner', 'director'].includes(workspaceMembership.role)) {
+    // 5. owner 和 admin 可以编辑所有项目，继续检查项目管理员权限
+    if (!['owner', 'admin'].includes(mappedRole)) {
       await this.requireProjectAdmin(projectId, operatorId);
     }
 
-    // 2. 验证角色值 - 允许预设角色和自定义角色
-    const presetRoles = ['project_admin', 'team_lead', 'senior', 'member', 'observer'];
-    // 自定义角色名称长度限制
-    if (!presetRoles.includes(newRole) && (newRole.length < 1 || newRole.length > 30)) {
-      throw new AppError('角色名称长度必须在1-30个字符之间', 400, 'INVALID_ROLE_LENGTH');
+    // 6. 根据新方案：项目层面只保留 isLeader 标记
+    // 如果 newRole 是 'lead' 或 'project_admin'，设置为项目负责人
+    const isProjectLeader = newRole === 'lead' || newRole === 'project_admin';
+    
+    // 如果设置为项目负责人，更新 Project.leaderId
+    if (isProjectLeader) {
+      await projectRepository.update(projectId, { leaderId: targetUserId });
     }
 
-    // 3. 如果设置了上级，验证上级存在且在同一项目
-    if (managerId) {
-      const managerMember = await projectMemberRepository.findByProjectAndUser(projectId, managerId);
-      if (!managerMember) {
-        throw new AppError('指定的上级不是项目成员', 400, 'MANAGER_NOT_IN_PROJECT');
-      }
-
-      // 上级的角色优先级必须更高
-      if (getRolePriority(managerMember.role) >= getRolePriority(newRole)) {
-        throw new AppError('上级的角色级别必须高于下属', 400, 'INVALID_MANAGER_ROLE');
-      }
-
-      // 不能把自己设为自己的上级
-      if (managerId === targetUserId) {
-        throw new AppError('不能将自己设为自己的上级', 400, 'SELF_MANAGER_NOT_ALLOWED');
-      }
-    }
-
-    // 4. 创建或更新项目成员
+    // 7. 创建或更新项目成员（保留 role 字段以向后兼容，但主要逻辑使用 leaderId）
+    // 注意：数据库迁移后，可以移除 role 字段，只保留 isLeader 标记
     return projectMemberRepository.upsert({
       projectId,
       userId: targetUserId,
-      role: newRole,
+      role: newRole, // 暂时保留，向后兼容
       managerId: managerId ?? undefined,
     });
   },

@@ -61,7 +61,7 @@ export const taskRepository = {
     return prisma.task.findUnique({
       where: { id },
       include: {
-        project: { select: { id: true, name: true, workspaceId: true } },
+        project: { select: { id: true, name: true, workspaceId: true, leaderId: true } },
         creator: { select: { id: true, name: true, email: true } },
         assignee: { select: { id: true, name: true, email: true } },
         parent: { select: { id: true, title: true } },

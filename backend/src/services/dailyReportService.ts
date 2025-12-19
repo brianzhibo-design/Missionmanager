@@ -126,7 +126,9 @@ export const dailyReportService = {
       where: { userId_workspaceId: { userId: viewerId, workspaceId } },
     });
 
-    if (!viewerMembership || !['owner', 'director', 'manager'].includes(viewerMembership.role)) {
+    const { mapRole } = await import('../repositories/workspaceRepository');
+    const mappedRole = viewerMembership ? mapRole(viewerMembership.role) : null;
+    if (!viewerMembership || !['owner', 'admin', 'leader'].includes(mappedRole || '')) {
       return { reports: [], notSubmitted: [] };
     }
 

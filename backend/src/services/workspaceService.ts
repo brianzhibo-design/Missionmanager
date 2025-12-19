@@ -1,7 +1,7 @@
 /**
  * 工作区服务
  */
-import { workspaceRepository, WorkspaceRole, hasRolePermission, ROLE_HIERARCHY } from '../repositories/workspaceRepository';
+import { workspaceRepository, WorkspaceRole, hasRolePermission, ROLE_HIERARCHY, mapRole, isRoleInList } from '../repositories/workspaceRepository';
 import { userRepository } from '../repositories/userRepository';
 import { AppError } from '../middleware/errorHandler';
 
@@ -45,10 +45,10 @@ export const workspaceService = {
 
   /**
    * 更新工作区
-   * 权限：owner, director 可以更新工作区
+   * 权限：owner, admin 可以更新工作区
    */
   async update(workspaceId: string, userId: string, data: { name?: string; description?: string }) {
-    await this.requireRole(workspaceId, userId, ['owner', 'director']);
+    await this.requireRole(workspaceId, userId, ['owner', 'admin']);
     return workspaceRepository.update(workspaceId, data);
   },
 
@@ -65,16 +65,16 @@ export const workspaceService = {
    * 权限：所有成员都可以查看成员列表
    */
   async getMembers(workspaceId: string, userId: string) {
-    await this.requireRole(workspaceId, userId, ['owner', 'director', 'manager', 'member', 'observer']);
+    await this.requireRole(workspaceId, userId, ['owner', 'admin', 'leader', 'member', 'guest']);
     return workspaceRepository.getMembers(workspaceId);
   },
 
   /**
    * 邀请成员
-   * 权限：owner, director, manager 可以邀请成员
+   * 权限：owner, admin, leader 可以邀请成员
    */
   async inviteMember(workspaceId: string, adminUserId: string, targetUserId: string, role: WorkspaceRole) {
-    await this.requireRole(workspaceId, adminUserId, ['owner', 'director', 'manager']);
+    await this.requireRole(workspaceId, adminUserId, ['owner', 'admin', 'leader']);
 
     // 检查是否已是成员
     const existing = await workspaceRepository.getMembership(workspaceId, targetUserId);
@@ -92,7 +92,7 @@ export const workspaceService = {
 
   /**
    * 通过邮箱邀请成员
-   * 权限：owner, director, manager 可以邀请
+   * 权限：owner, admin, leader 可以邀请
    */
   async inviteMemberByEmail(
     workspaceId: string,
@@ -102,7 +102,11 @@ export const workspaceService = {
   ) {
     // 1. 验证操作者权限
     const adminMembership = await workspaceRepository.getMembership(workspaceId, adminUserId);
-    if (!adminMembership || !['owner', 'director', 'manager'].includes(adminMembership.role)) {
+    if (!adminMembership) {
+      throw new AppError('无权邀请成员', 403, 'PERMISSION_DENIED');
+    }
+    const mappedRole = mapRole(adminMembership.role);
+    if (!['owner', 'admin', 'leader'].includes(mappedRole)) {
       throw new AppError('无权邀请成员', 403, 'PERMISSION_DENIED');
     }
 
@@ -136,7 +140,7 @@ export const workspaceService = {
 
   /**
    * 更新成员角色
-   * 权限：owner 可以修改所有角色，director 可以修改 manager 及以下
+   * 权限：owner 可以修改所有角色，admin 可以修改 leader 及以下
    */
   async updateMemberRole(
     workspaceId: string,
@@ -146,7 +150,11 @@ export const workspaceService = {
   ) {
     // 1. 验证操作者权限
     const adminMembership = await workspaceRepository.getMembership(workspaceId, adminUserId);
-    if (!adminMembership || !['owner', 'director'].includes(adminMembership.role)) {
+    if (!adminMembership) {
+      throw new AppError('无权修改成员角色', 403, 'PERMISSION_DENIED');
+    }
+    const adminMappedRole = mapRole(adminMembership.role);
+    if (!['owner', 'admin'].includes(adminMappedRole)) {
       throw new AppError('无权修改成员角色', 403, 'PERMISSION_DENIED');
     }
 
@@ -166,31 +174,38 @@ export const workspaceService = {
       throw new AppError('不能修改所有者的角色', 403, 'CANNOT_MODIFY_OWNER');
     }
 
-    // 5. director 不能修改 director 或设置为 director/owner
-    if (adminMembership.role === 'director') {
-      if (targetMembership.role === 'director') {
-        throw new AppError('总监不能修改其他总监的角色', 403, 'PERMISSION_DENIED');
+    // 5. admin 不能修改 admin 或设置为 admin/owner
+    const targetMappedRole = mapRole(targetMembership.role);
+    if (adminMappedRole === 'admin') {
+      if (targetMappedRole === 'admin') {
+        throw new AppError('大管家不能修改其他大管家的角色', 403, 'PERMISSION_DENIED');
       }
-      if (newRole === 'owner' || newRole === 'director') {
-        throw new AppError('总监不能设置角色为所有者或总监', 403, 'PERMISSION_DENIED');
+      const newMappedRole = mapRole(newRole);
+      if (newMappedRole === 'owner' || newMappedRole === 'admin') {
+        throw new AppError('大管家不能设置角色为扛把子或大管家', 403, 'PERMISSION_DENIED');
       }
     }
 
-    // 6. 验证新角色有效
-    if (!['director', 'manager', 'member', 'observer'].includes(newRole)) {
+    // 6. 验证新角色有效（支持新旧角色代码）
+    const validRoles = ['admin', 'leader', 'member', 'guest', 'director', 'manager', 'observer'];
+    if (!validRoles.includes(newRole)) {
       throw new AppError('无效的角色', 400, 'INVALID_ROLE');
     }
 
-    // 7. 更新角色
-    return workspaceRepository.updateMemberRoleWithUser(workspaceId, memberId, newRole);
+    // 7. 映射新角色代码
+    const mappedNewRole = mapRole(newRole);
+
+    // 8. 更新角色（使用映射后的新角色代码）
+    return workspaceRepository.updateMemberRoleWithUser(workspaceId, memberId, mappedNewRole);
   },
 
   /**
    * 移除成员
-   * 权限：owner 可以移除所有人，director 可以移除 manager 及以下
+   * 权限：owner 可以移除所有人，admin 可以移除 leader 及以下
    */
   async removeMember(workspaceId: string, adminUserId: string, targetUserId: string) {
-    const adminMembership = await this.requireRole(workspaceId, adminUserId, ['owner', 'director']);
+    const adminMembership = await this.requireRole(workspaceId, adminUserId, ['owner', 'admin']);
+    const adminMappedRole = mapRole(adminMembership.role);
     
     // 不能移除自己
     if (adminUserId === targetUserId) {
@@ -202,10 +217,11 @@ export const workspaceService = {
       throw new AppError('用户不是工作区成员', 404, 'NOT_MEMBER');
     }
 
-    // director 不能移除 owner 或 director
-    if (adminMembership.role === 'director') {
-      if (targetMembership.role === 'owner' || targetMembership.role === 'director') {
-        throw new AppError('总监不能移除所有者或其他总监', 403, 'INSUFFICIENT_PERMISSION');
+    // admin 不能移除 owner 或 admin
+    const targetMappedRole = mapRole(targetMembership.role);
+    if (adminMappedRole === 'admin') {
+      if (targetMappedRole === 'owner' || targetMappedRole === 'admin') {
+        throw new AppError('大管家不能移除扛把子或其他大管家', 403, 'INSUFFICIENT_PERMISSION');
       }
     }
 
@@ -213,7 +229,7 @@ export const workspaceService = {
   },
 
   /**
-   * 权限检查辅助方法
+   * 权限检查辅助方法（支持角色映射）
    * @param allowedRoles 允许的角色列表
    */
   async requireRole(workspaceId: string, userId: string, allowedRoles: WorkspaceRole[]) {
@@ -221,7 +237,8 @@ export const workspaceService = {
     if (!membership) {
       throw new AppError('无权访问此工作区', 403, 'ACCESS_DENIED');
     }
-    if (!allowedRoles.includes(membership.role as WorkspaceRole)) {
+    const mappedRole = mapRole(membership.role);
+    if (!allowedRoles.includes(mappedRole)) {
       throw new AppError('权限不足', 403, 'INSUFFICIENT_PERMISSION');
     }
     return membership;
@@ -251,12 +268,13 @@ export const workspaceService = {
   },
 
   /**
-   * 检查用户是否有指定角色（不抛出异常）
+   * 检查用户是否有指定角色（不抛出异常，支持角色映射）
    */
   async hasRole(workspaceId: string, userId: string, allowedRoles: WorkspaceRole[]): Promise<boolean> {
     const membership = await workspaceRepository.getMembership(workspaceId, userId);
     if (!membership) return false;
-    return allowedRoles.includes(membership.role as WorkspaceRole);
+    const mappedRole = mapRole(membership.role);
+    return allowedRoles.includes(mappedRole);
   },
 
   /**

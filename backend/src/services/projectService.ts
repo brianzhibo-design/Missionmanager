@@ -4,6 +4,7 @@
 import { projectRepository } from '../repositories/projectRepository';
 import { taskRepository } from '../repositories/taskRepository';
 import { workspaceService } from './workspaceService';
+import { mapRole } from '../repositories/workspaceRepository';
 import { AppError } from '../middleware/errorHandler';
 
 // 初始任务类型定义
@@ -17,7 +18,7 @@ interface InitialTask {
 export const projectService = {
   /**
    * 创建项目
-   * 权限：owner, director, manager 可以创建项目
+   * 权限：owner, admin, leader, member 可以创建项目
    * 可同时指定负责人、团队成员和初始任务
    */
   async create(
@@ -31,7 +32,7 @@ export const projectService = {
       initialTasks?: InitialTask[];
     }
   ) {
-    await workspaceService.requireRole(workspaceId, userId, ['owner', 'director', 'manager']);
+    await workspaceService.requireRole(workspaceId, userId, ['owner', 'admin', 'leader', 'member']);
 
     // 如果指定了负责人，验证是否是工作区成员
     if (data.leaderId) {
@@ -95,9 +96,9 @@ export const projectService = {
   /**
    * 获取工作区下的所有项目
    * 权限：
-   * - owner, director, manager: 可以查看所有项目
+   * - owner, admin, leader: 可以查看所有项目
    * - member: 只能查看自己参与的项目（是负责人或团队成员）
-   * - observer: 只能查看自己参与的项目
+   * - guest: 只能查看自己参与的项目
    */
   async getByWorkspace(userId: string, workspaceId: string) {
     // 验证用户是工作区成员
@@ -106,8 +107,11 @@ export const projectService = {
       throw new AppError('您不是此工作区的成员', 403, 'NOT_WORKSPACE_MEMBER');
     }
 
+    // 映射角色代码
+    const mappedRole = mapRole(membership.role);
+
     // 管理员角色可以查看所有项目
-    if (['owner', 'director', 'manager'].includes(membership.role)) {
+    if (['owner', 'admin', 'leader'].includes(mappedRole)) {
       return projectRepository.findByWorkspaceId(workspaceId);
     }
 
@@ -126,14 +130,14 @@ export const projectService = {
     }
 
     // 所有角色都可以查看项目详情
-    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director', 'manager', 'member', 'observer']);
+    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'admin', 'leader', 'member', 'guest']);
 
     return project;
   },
 
   /**
    * 更新项目
-   * 权限：owner, director 可以修改所有项目；manager 只能修改自己负责的项目
+   * 权限：owner, admin 可以修改所有项目；项目负责人可以修改自己的项目
    */
   async update(
     userId: string,
@@ -145,11 +149,11 @@ export const projectService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    // 检查权限：owner/director 可以修改所有项目；manager 只能修改自己负责的项目
-    const isOwnerOrDirector = await workspaceService.hasRole(project.workspaceId, userId, ['owner', 'director']);
-    const isManagerAndLeader = await workspaceService.hasRole(project.workspaceId, userId, ['manager']) && project.leaderId === userId;
+    // 检查权限：owner/admin 可以修改所有项目；项目负责人可以修改自己的项目
+    const isOwnerOrAdmin = await workspaceService.hasRole(project.workspaceId, userId, ['owner', 'admin']);
+    const isProjectLeader = project.leaderId === userId;
 
-    if (!isOwnerOrDirector && !isManagerAndLeader) {
+    if (!isOwnerOrAdmin && !isProjectLeader) {
       throw new AppError('没有权限修改项目', 403, 'FORBIDDEN');
     }
 
@@ -158,7 +162,7 @@ export const projectService = {
 
   /**
    * 删除项目
-   * 权限：owner, director 可以删除项目
+   * 权限：owner, admin 可以删除项目
    */
   async delete(userId: string, projectId: string) {
     const project = await projectRepository.findById(projectId);
@@ -166,14 +170,14 @@ export const projectService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director']);
+    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'admin']);
 
     await projectRepository.delete(projectId);
   },
 
   /**
    * 设置项目负责人
-   * 权限：owner, director 可以设置负责人
+   * 权限：owner, admin 可以设置负责人
    */
   async setLeader(userId: string, projectId: string, leaderId: string | null) {
     const project = await projectRepository.findById(projectId);
@@ -181,7 +185,7 @@ export const projectService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director']);
+    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'admin']);
 
     // 如果设置负责人，检查该用户是否是工作区成员
     if (leaderId) {
@@ -203,14 +207,14 @@ export const projectService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director', 'manager', 'member', 'observer']);
+    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'admin', 'leader', 'member', 'guest']);
 
     return projectRepository.findProjectMembers(projectId);
   },
 
   /**
    * 添加团队成员
-   * 权限：owner, director, manager, 项目负责人 可以添加成员
+   * 权限：owner, admin, 项目负责人 可以添加成员
    */
   async addTeamMember(userId: string, projectId: string, memberId: string, role: string = 'member') {
     const project = await projectRepository.findById(projectId);
@@ -219,7 +223,7 @@ export const projectService = {
     }
 
     // 检查权限：工作区管理员或项目负责人
-    const isWorkspaceAdmin = await workspaceService.hasRole(project.workspaceId, userId, ['owner', 'director', 'manager']);
+    const isWorkspaceAdmin = await workspaceService.hasRole(project.workspaceId, userId, ['owner', 'admin']);
     const isProjectLeader = project.leaderId === userId;
 
     if (!isWorkspaceAdmin && !isProjectLeader) {
@@ -243,7 +247,7 @@ export const projectService = {
 
   /**
    * 移除团队成员
-   * 权限：owner, director, manager, 项目负责人 可以移除成员
+   * 权限：owner, admin, 项目负责人 可以移除成员
    */
   async removeTeamMember(userId: string, projectId: string, memberId: string) {
     const project = await projectRepository.findById(projectId);
@@ -252,7 +256,7 @@ export const projectService = {
     }
 
     // 检查权限
-    const isWorkspaceAdmin = await workspaceService.hasRole(project.workspaceId, userId, ['owner', 'director', 'manager']);
+    const isWorkspaceAdmin = await workspaceService.hasRole(project.workspaceId, userId, ['owner', 'admin']);
     const isProjectLeader = project.leaderId === userId;
 
     if (!isWorkspaceAdmin && !isProjectLeader) {

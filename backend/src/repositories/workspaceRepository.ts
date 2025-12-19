@@ -4,29 +4,56 @@
 import { prisma } from '../infra/database';
 import { Workspace, WorkspaceUser } from '@prisma/client';
 
-// 工作区角色类型（从高到低权限）
-// owner: 创始人/所有者
-// director: 总监
-// manager: 经理
-// member: 成员
-// observer: 协作者/观察者
-export type WorkspaceRole = 'owner' | 'director' | 'manager' | 'member' | 'observer';
+// 工作区角色类型（简化后的角色体系）
+// owner: 扛把子 - 老板，最终负责
+// admin: 大管家 - 管理层，统筹全局
+// leader: 带头大哥 - 团队负责人
+// member: 少侠 - 执行者
+// guest: 吃瓜群侠 - 观察者
+export type WorkspaceRole = 'owner' | 'admin' | 'leader' | 'member' | 'guest';
 
 // 角色权限层级（数字越小权限越高）
 export const ROLE_HIERARCHY: Record<WorkspaceRole, number> = {
   owner: 0,
-  director: 1,
-  manager: 2,
+  admin: 1,
+  leader: 2,
   member: 3,
-  observer: 4,
+  guest: 4,
 };
 
+// 角色映射（向后兼容旧角色代码）
+export const ROLE_MAPPING: Record<string, WorkspaceRole> = {
+  // 旧角色 -> 新角色
+  director: 'admin',
+  manager: 'leader',
+  observer: 'guest',
+  // 新角色保持不变
+  owner: 'owner',
+  admin: 'admin',
+  leader: 'leader',
+  member: 'member',
+  guest: 'guest',
+};
+
+// 映射角色代码（用于兼容旧数据）
+export function mapRole(role: string): WorkspaceRole {
+  return ROLE_MAPPING[role] || (role as WorkspaceRole);
+}
+
 // 检查角色是否有足够权限（角色层级 <= 要求层级）
+// 支持旧角色代码自动映射
 export function hasRolePermission(userRole: string, requiredRole: WorkspaceRole): boolean {
-  const userLevel = ROLE_HIERARCHY[userRole as WorkspaceRole];
+  const mappedUserRole = mapRole(userRole);
+  const userLevel = ROLE_HIERARCHY[mappedUserRole];
   const requiredLevel = ROLE_HIERARCHY[requiredRole];
   if (userLevel === undefined || requiredLevel === undefined) return false;
   return userLevel <= requiredLevel;
+}
+
+// 检查角色是否在允许的角色列表中（支持旧角色代码自动映射）
+export function isRoleInList(userRole: string, allowedRoles: WorkspaceRole[]): boolean {
+  const mappedUserRole = mapRole(userRole);
+  return allowedRoles.includes(mappedUserRole);
 }
 
 export const workspaceRepository = {
