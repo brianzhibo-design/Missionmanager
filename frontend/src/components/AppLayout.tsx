@@ -94,8 +94,11 @@ export default function AppLayout() {
     }
   }, [lastNotificationId]);
 
-  // 初始加载未读数量
+  // 初始化通知服务并加载未读数量
   useEffect(() => {
+    // 自动请求通知权限
+    pushNotificationService.init();
+    
     loadUnreadCount();
     // 每30秒轮询一次
     const interval = setInterval(loadUnreadCount, 30000);

@@ -48,6 +48,21 @@ export const pushNotificationService = {
   },
 
   /**
+   * 初始化通知服务（应用启动时调用）
+   * 如果用户未明确禁用，自动请求权限
+   */
+  async init(): Promise<void> {
+    if (!this.isSupported()) return;
+    
+    const stored = localStorage.getItem(STORAGE_KEY);
+    
+    // 如果用户未明确禁用，且权限为 default，自动请求权限
+    if (stored !== 'false' && Notification.permission === 'default') {
+      await this.requestPermission();
+    }
+  },
+
+  /**
    * 请求通知权限
    */
   async requestPermission(): Promise<NotificationPermission> {
