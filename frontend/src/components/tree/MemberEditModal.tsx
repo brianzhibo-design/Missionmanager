@@ -84,21 +84,20 @@ export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditM
               项目负责人拥有该项目的额外管理权限，可以编辑项目设置、分配任务、管理项目成员等。
             </p>
             
-            <div className="leader-toggle">
-              <label className="toggle-option">
-                <input
-                  type="checkbox"
-                  checked={isLeader}
-                  onChange={(e) => setIsLeader(e.target.checked)}
-                />
-                <div className="toggle-content">
-                  <div className="toggle-header">
-                    <span className="toggle-icon">🎯</span>
-                    <span className="toggle-label">设为项目负责人</span>
-                  </div>
-                  <span className="toggle-desc">拥有项目的管理权限</span>
+            <div 
+              className={`leader-card ${isLeader ? 'active' : ''}`}
+              onClick={() => setIsLeader(!isLeader)}
+            >
+              <div className="leader-card-checkbox">
+                {isLeader && <span className="checkmark">✓</span>}
+              </div>
+              <div className="leader-card-content">
+                <div className="leader-card-title">
+                  <span className="leader-icon">🎯</span>
+                  <span>设为项目负责人</span>
                 </div>
-              </label>
+                <p className="leader-card-desc">拥有项目的管理权限</p>
+              </div>
             </div>
           </div>
 

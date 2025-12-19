@@ -121,115 +121,128 @@
   color: #7dd3fc;
 }
 
-/* 项目负责人切换 */
-.leader-toggle {
-  margin-top: 12px;
-}
-
-.toggle-option {
+/* 项目负责人切换卡片 */
+.leader-card {
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 16px;
-  background: var(--bg-surface);
-  border: 2px solid var(--border-default);
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  background: #ffffff;
+  border: 2px solid #e5e7eb;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+  user-select: none;
 }
 
-.toggle-option:hover {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
+.leader-card:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
 }
 
-.toggle-option:has(input:checked) {
+.leader-card.active {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
   border-color: #10b981;
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
-.toggle-option input[type="checkbox"] {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--border-default);
+.leader-card-checkbox {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #d1d5db;
   border-radius: 6px;
-  background: var(--bg-surface);
-  cursor: pointer;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  margin-top: 2px;
-  position: relative;
   transition: all 0.2s ease;
 }
 
-.toggle-option input[type="checkbox"]:checked {
+.leader-card.active .leader-card-checkbox {
   background: #10b981;
   border-color: #10b981;
 }
 
-.toggle-option input[type="checkbox"]:checked::after {
-  content: '';
-  position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 6px;
-  height: 12px;
-  border: solid white;
-  border-width: 0 2.5px 2.5px 0;
-  transform: rotate(45deg);
+.leader-card-checkbox .checkmark {
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
 }
 
-.toggle-content {
+.leader-card-content {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.toggle-header {
+.leader-card-title {
   display: flex;
   align-items: center;
   gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
 }
 
-.toggle-icon {
+.leader-icon {
   font-size: 18px;
 }
 
-.toggle-label {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.toggle-desc {
+.leader-card-desc {
+  margin: 0;
   font-size: 13px;
-  color: var(--text-tertiary);
+  color: #6b7280;
 }
 
-.toggle-option:has(input:checked) .toggle-label {
+.leader-card.active .leader-card-title {
   color: #059669;
 }
 
-.toggle-option:has(input:checked) .toggle-desc {
+.leader-card.active .leader-card-desc {
   color: #10b981;
 }
 
 /* 深色模式 */
-[data-theme="dark"] .toggle-option {
-  background: var(--bg-surface-secondary);
+[data-theme="dark"] .leader-card {
+  background: #1f2937;
+  border-color: #374151;
 }
 
-[data-theme="dark"] .toggle-option:has(input:checked) {
+[data-theme="dark"] .leader-card:hover {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+[data-theme="dark"] .leader-card.active {
   background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
 }
 
-[data-theme="dark"] .toggle-option:has(input:checked) .toggle-label {
+[data-theme="dark"] .leader-card-checkbox {
+  background: #374151;
+  border-color: #4b5563;
+}
+
+[data-theme="dark"] .leader-card.active .leader-card-checkbox {
+  background: #10b981;
+  border-color: #10b981;
+}
+
+[data-theme="dark"] .leader-card-title {
+  color: #f3f4f6;
+}
+
+[data-theme="dark"] .leader-card-desc {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .leader-card.active .leader-card-title {
   color: #34d399;
 }
 
-[data-theme="dark"] .toggle-option:has(input:checked) .toggle-desc {
+[data-theme="dark"] .leader-card.active .leader-card-desc {
   color: #6ee7b7;
 }
 
