@@ -29,6 +29,7 @@ export interface MemberNode {
   email: string;
   avatar?: string | null;
   role: string;
+  isLeader?: boolean;
   taskStats: TaskStats;
   tasks: TaskBrief[];
   children: MemberNode[];

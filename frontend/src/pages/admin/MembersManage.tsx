@@ -148,7 +148,7 @@ export default function MembersManage() {
           </div>
         </div>
         <div className="header-actions">
-          {(workspaceRole === 'owner' || workspaceRole === 'director') && (
+          {(workspaceRole === 'owner' || workspaceRole === 'admin') && (
             <button className="btn btn-secondary" onClick={() => setShowBroadcast(true)}>
               <Send size={16} /> 群发消息
             </button>

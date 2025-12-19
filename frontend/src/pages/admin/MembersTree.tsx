@@ -132,46 +132,29 @@ export default function MembersTree() {
     await loadMemberTree(selectedProject);
   };
 
-  // 获取角色标签
-  const getRoleLabel = (role: string) => {
-    // 预设角色
-    const presetRoles: Record<string, { label: string; color: string }> = {
-      project_admin: { label: '管理员', color: '#8b5cf6' },
-      team_lead: { label: '负责人', color: '#3b82f6' },
-      senior: { label: '高级', color: '#10b981' },
-      member: { label: '成员', color: '#6b7280' },
-      observer: { label: '观察者', color: '#9ca3af' },
-      // 工作区角色（回退显示）
-      owner: { label: '所有者', color: '#ec4899' },
-      director: { label: '总监', color: '#8b5cf6' },
-      manager: { label: '经理', color: '#3b82f6' },
-      team: { label: '团队', color: '#10b981' },
-    };
-    
-    // 如果是预设角色，使用预设样式
-    if (presetRoles[role]) {
-      return presetRoles[role];
+  // 获取角色标签（已简化为项目负责人标记）
+  const getRoleLabel = (member: MemberNode) => {
+    if (member.isLeader) {
+      return { label: '🎯 项目负责人', color: '#8b5cf6' };
     }
-    
-    // 如果是自定义角色，使用自定义样式（绿色系，表示自定义）
-    return { label: role, color: '#059669' };
+    return { label: '成员', color: '#6b7280' };
   };
 
-  // 检查是否可以编辑成员（owner、director 可以编辑所有；manager 只能编辑自己负责的项目）
+  // 检查是否可以编辑成员（owner、admin 可以编辑所有；leader 只能编辑自己负责的项目）
   const canEditMembers = (): boolean => {
     if (!workspaceRole || !treeData) return false;
     
-    // owner 和 director 可以编辑所有项目
-    if (['owner', 'director'].includes(workspaceRole)) {
+    // owner 和 admin 可以编辑所有项目
+    if (['owner', 'admin'].includes(workspaceRole)) {
       return true;
     }
     
-    // manager 只能编辑自己负责的项目（需要检查项目负责人）
+    // leader 只能编辑自己负责的项目（需要检查项目负责人）
     // 注意：这里需要从 treeData 中获取 leader 信息
     // 如果当前用户是项目负责人，则可以编辑
-    // 由于前端无法直接获取当前用户ID，这里先允许 manager 显示编辑按钮
+    // 由于前端无法直接获取当前用户ID，这里先允许 leader 显示编辑按钮
     // 后端会进行权限验证
-    if (workspaceRole === 'manager') {
+    if (workspaceRole === 'leader') {
       return true; // 显示按钮，后端会验证
     }
     
@@ -324,9 +307,6 @@ export default function MembersTree() {
                         <div key={member.userId} className="team-member-item">
                           <Avatar name={member.name} src={member.avatar ?? undefined} size="sm" />
                           <span className="member-name">{member.name}</span>
-                          {member.isLeader && (
-                            <span className="member-role-tag leader">🎯 负责人</span>
-                          )}
                         </div>
                       ))}
                     </div>

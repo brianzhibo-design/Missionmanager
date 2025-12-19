@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { workspaceService, Workspace } from '../services/workspace';
 import { 
   WorkspaceRole, 
-  ProjectRole, 
   hasWorkspacePermission, 
   hasProjectPermission,
   PERMISSIONS 
@@ -25,13 +24,13 @@ interface PermissionsContextType {
   // 当前工作区角色
   workspaceRole: WorkspaceRole | undefined;
   
-  // 项目角色缓存
-  projectRoles: Record<string, ProjectRole>;
-  setProjectRole: (projectId: string, role: ProjectRole) => void;
+  // 项目负责人标记缓存
+  projectLeaders: Record<string, boolean>;
+  setProjectLeader: (projectId: string, isLeader: boolean) => void;
   
   // 权限检查方法
   canWorkspace: (permission: keyof typeof PERMISSIONS.workspace) => boolean;
-  canProject: (projectId: string, permission: keyof typeof PERMISSIONS.project) => boolean;
+  canProject: (projectId: string, isLeader: boolean, permission: string) => boolean;
   
   // 是否是管理员（用于显示管理菜单）
   isAdmin: boolean;
@@ -46,7 +45,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   const [workspaces, setWorkspaces] = useState<WorkspaceWithRole[]>([]);
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(true);
   const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string>('');
-  const [projectRoles, setProjectRoles] = useState<Record<string, ProjectRole>>({});
+  const [projectLeaders, setProjectLeaders] = useState<Record<string, boolean>>({});
 
   // 加载工作区列表
   const loadWorkspaces = async () => {
@@ -88,14 +87,13 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   };
 
   // 项目权限检查
-  const canProject = (projectId: string, permission: keyof typeof PERMISSIONS.project) => {
-    const role = projectRoles[projectId];
-    return hasProjectPermission(role, permission);
+  const canProject = (_projectId: string, isLeader: boolean, permission: string) => {
+    return hasProjectPermission(workspaceRole, isLeader, permission as any);
   };
 
-  // 设置项目角色
-  const setProjectRole = (projectId: string, role: ProjectRole) => {
-    setProjectRoles(prev => ({ ...prev, [projectId]: role }));
+  // 设置项目负责人标记
+  const setProjectLeader = (projectId: string, isLeader: boolean) => {
+    setProjectLeaders(prev => ({ ...prev, [projectId]: isLeader }));
   };
 
   // 设置当前工作区（接受完整工作区对象）
@@ -112,8 +110,8 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
         workspaces,
         loadingWorkspaces,
         workspaceRole,
-        projectRoles,
-        setProjectRole,
+        projectLeaders,
+        setProjectLeader,
         canWorkspace,
         canProject,
         isAdmin,
