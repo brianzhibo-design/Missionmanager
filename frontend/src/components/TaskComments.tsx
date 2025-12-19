@@ -40,17 +40,33 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     }
   };
 
+  // 提取@提及的用户ID（支持带空格的用户名）
+  // 格式：@[用户名] 或直接匹配已知成员名
   const extractMentions = (content: string): string[] => {
-    const mentionRegex = /@(\S+)/g;
     const mentions: string[] = [];
+    
+    // 首先匹配 @[用户名] 格式
+    const bracketRegex = /@\[([^\]]+)\]/g;
     let match;
-    while ((match = mentionRegex.exec(content)) !== null) {
+    while ((match = bracketRegex.exec(content)) !== null) {
       const mentionName = match[1];
       const member = projectMembers.find(m => m.name === mentionName);
-      if (member) {
+      if (member && !mentions.includes(member.id)) {
         mentions.push(member.id);
       }
     }
+    
+    // 然后尝试匹配不带括号的 @用户名（兼容旧格式和不带空格的用户名）
+    // 按用户名长度降序排列，优先匹配长名字
+    const sortedMembers = [...projectMembers].sort((a, b) => b.name.length - a.name.length);
+    for (const member of sortedMembers) {
+      const escapedName = member.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`@${escapedName}(?![\\w])`, 'g');
+      if (regex.test(content) && !mentions.includes(member.id)) {
+        mentions.push(member.id);
+      }
+    }
+    
     return mentions;
   };
 
@@ -113,17 +129,16 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     const textBefore = newComment.substring(0, cursorPos);
     const textAfter = newComment.substring(cursorPos);
     
-    // 找到当前正在编辑的@符号位置（从光标位置向前找最近的未完成的@）
+    // 找到当前正在编辑的@符号位置
+    // 向前搜索，找到最近的@符号（可能后面跟着部分输入的搜索词）
     let atPos = -1;
     for (let i = textBefore.length - 1; i >= 0; i--) {
       if (textBefore[i] === '@') {
-        const textAfterThisAt = textBefore.substring(i + 1);
-        if (!textAfterThisAt.includes(' ')) {
-          atPos = i;
-          break;
-        }
+        atPos = i;
+        break;
       }
-      if (textBefore[i] === ' ' || textBefore[i] === '\n') {
+      // 遇到换行符停止搜索
+      if (textBefore[i] === '\n') {
         break;
       }
     }
@@ -133,7 +148,9 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
       atPos = cursorPos;
     }
     
-    const newText = newComment.substring(0, atPos) + `@${member.name} ` + textAfter;
+    // 使用 @[用户名] 格式来支持带空格的用户名
+    const mentionText = member.name.includes(' ') ? `@[${member.name}]` : `@${member.name}`;
+    const newText = newComment.substring(0, atPos) + mentionText + ' ' + textAfter;
     
     setNewComment(newText);
     setShowMentions(false);
@@ -142,7 +159,7 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     // 聚焦并设置光标位置
     setTimeout(() => {
       textarea.focus();
-      const newCursorPos = atPos + member.name.length + 2;
+      const newCursorPos = atPos + mentionText.length + 1;
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
@@ -151,36 +168,46 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     const value = e.target.value;
     setNewComment(value);
 
-    // 检测@符号 - 从光标位置向前查找最近的未完成的@符号
+    // 检测@符号 - 从光标位置向前查找最近的@符号
     const cursorPos = e.target.selectionStart;
     const textBefore = value.substring(0, cursorPos);
     
-    // 从光标位置向前找最近的@，并检查它是否是一个未完成的提及
+    // 从光标位置向前找最近的@符号
     let foundAt = -1;
     
     for (let i = textBefore.length - 1; i >= 0; i--) {
       const char = textBefore[i];
       
       if (char === '@') {
-        // 找到一个@符号，检查它后面到光标位置之间是否有空格
-        const textAfterThisAt = textBefore.substring(i + 1);
-        if (!textAfterThisAt.includes(' ')) {
-          // 这是一个未完成的提及
-          foundAt = i;
-        }
-        // 找到@后就停止搜索，无论是否完成
+        // 找到@符号
+        foundAt = i;
         break;
       }
       
-      // 遇到空格或换行时，检查空格后面是否紧跟着@
-      if (char === ' ' || char === '\n') {
-        // 继续向前搜索，看看紧跟着空格后面是否有@
-        continue;
+      // 遇到换行符停止搜索（新的一行不应该继续之前的@搜索）
+      if (char === '\n') {
+        break;
       }
     }
     
     if (foundAt !== -1) {
       const textAfterAt = textBefore.substring(foundAt + 1);
+      
+      // 检查是否已经是完成的 @[用户名] 格式
+      if (textAfterAt.startsWith('[') && textAfterAt.includes(']')) {
+        // 已完成的提及，不再显示下拉菜单
+        setShowMentions(false);
+        setMentionSearch('');
+        return;
+      }
+      
+      // 如果搜索词太长（超过30个字符），可能不是在@人
+      if (textAfterAt.length > 30) {
+        setShowMentions(false);
+        setMentionSearch('');
+        return;
+      }
+      
       setMentionSearch(textAfterAt);
       setShowMentions(true);
       return;
@@ -264,8 +291,20 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     return name.charAt(0).toUpperCase();
   };
 
+  // 高亮显示@提及（支持 @[用户名] 和 @用户名 两种格式）
   const highlightMentions = (content: string) => {
-    return content.replace(/@(\S+)/g, '<span class="mention">@$1</span>');
+    // 首先处理 @[用户名] 格式
+    let result = content.replace(/@\[([^\]]+)\]/g, '<span class="mention">@$1</span>');
+    
+    // 然后处理不带括号的 @用户名（按成员名长度降序匹配，优先匹配长名字）
+    const sortedMembers = [...projectMembers].sort((a, b) => b.name.length - a.name.length);
+    for (const member of sortedMembers) {
+      const escapedName = member.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`@${escapedName}(?![\\w\\[])`, 'g');
+      result = result.replace(regex, `<span class="mention">@${member.name}</span>`);
+    }
+    
+    return result;
   };
 
   return (
