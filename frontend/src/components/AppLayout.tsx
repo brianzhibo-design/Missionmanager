@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
@@ -44,7 +44,8 @@ export default function AppLayout() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [lastNotificationId, setLastNotificationId] = useState<string | null>(null);
+  const lastNotificationIdRef = useRef<string | null>(null);
+  const hasInitializedRef = useRef(false);
 
   // 检查是否有任何管理菜单权限
   const hasAnyAdminPermission = 
@@ -71,12 +72,21 @@ export default function AppLayout() {
       // 检查是否有新通知并推送到系统
       if (result.notifications.length > 0) {
         const latestNotification = result.notifications[0];
+        const lastId = lastNotificationIdRef.current;
+        
+        // 首次加载时只记录 ID，不推送
+        if (!hasInitializedRef.current) {
+          hasInitializedRef.current = true;
+          lastNotificationIdRef.current = latestNotification.id;
+          return;
+        }
         
         // 如果有新通知且与上次不同，发送系统推送
-        if (lastNotificationId && latestNotification.id !== lastNotificationId) {
-          // 推送所有新的未读通知
+        if (lastId && latestNotification.id !== lastId) {
+          // 推送所有比上次更新的未读通知
           result.notifications.forEach((notification: Notification) => {
-            if (notification.id !== lastNotificationId && !notification.isRead) {
+            // 只推送新的通知（ID 不同于上次记录的）
+            if (!notification.isRead) {
               pushNotificationService.showTaskNotification(
                 notification.type,
                 notification.title,
@@ -87,12 +97,12 @@ export default function AppLayout() {
           });
         }
         
-        setLastNotificationId(latestNotification.id);
+        lastNotificationIdRef.current = latestNotification.id;
       }
     } catch (err) {
       console.error('Failed to load unread count:', err);
     }
-  }, [lastNotificationId]);
+  }, []);
 
   // 初始化通知服务并加载未读数量
   useEffect(() => {
