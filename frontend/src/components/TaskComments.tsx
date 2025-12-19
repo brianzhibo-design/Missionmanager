@@ -20,7 +20,9 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
   const [submitting, setSubmitting] = useState(false);
   const [showMentions, setShowMentions] = useState(false);
   const [mentionSearch, setMentionSearch] = useState('');
+  const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const mentionListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadComments();
@@ -193,6 +195,58 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     m.name.toLowerCase().includes(mentionSearch.toLowerCase())
   );
 
+  // 当筛选结果变化时，重置选中索引
+  useEffect(() => {
+    setSelectedMentionIndex(0);
+  }, [mentionSearch]);
+
+  // 滚动选中项到可视区域
+  useEffect(() => {
+    if (showMentions && mentionListRef.current) {
+      const selectedItem = mentionListRef.current.children[selectedMentionIndex] as HTMLElement;
+      if (selectedItem) {
+        selectedItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }, [selectedMentionIndex, showMentions]);
+
+  // 处理键盘导航
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!showMentions || filteredMembers.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedMentionIndex(prev => 
+          prev < filteredMembers.length - 1 ? prev + 1 : 0
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedMentionIndex(prev => 
+          prev > 0 ? prev - 1 : filteredMembers.length - 1
+        );
+        break;
+      case 'Enter':
+        if (showMentions && filteredMembers[selectedMentionIndex]) {
+          e.preventDefault();
+          insertMention(filteredMembers[selectedMentionIndex]);
+        }
+        break;
+      case 'Escape':
+        e.preventDefault();
+        setShowMentions(false);
+        setMentionSearch('');
+        break;
+      case 'Tab':
+        if (showMentions && filteredMembers[selectedMentionIndex]) {
+          e.preventDefault();
+          insertMention(filteredMembers[selectedMentionIndex]);
+        }
+        break;
+    }
+  };
+
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
     const now = new Date();
@@ -286,18 +340,20 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
             ref={inputRef}
             value={newComment}
             onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
             placeholder="写下你的评论... 使用 @ 提及成员"
             rows={2}
             disabled={submitting}
           />
           {showMentions && filteredMembers.length > 0 && (
-            <div className="mention-dropdown">
-              {filteredMembers.slice(0, 5).map((member) => (
+            <div className="mention-dropdown" ref={mentionListRef}>
+              {filteredMembers.map((member, index) => (
                 <button
                   key={member.id}
                   type="button"
-                  className="mention-item"
+                  className={`mention-item ${index === selectedMentionIndex ? 'selected' : ''}`}
                   onClick={() => insertMention(member)}
+                  onMouseEnter={() => setSelectedMentionIndex(index)}
                 >
                   <div className="mention-avatar">
                     {member.avatar ? (

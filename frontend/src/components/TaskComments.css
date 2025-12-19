@@ -283,8 +283,28 @@
   border: 1px solid var(--border-primary);
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
+  max-height: 200px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   z-index: 100;
+}
+
+/* 自定义滚动条 */
+.mention-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mention-dropdown::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.mention-dropdown::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 3px;
+}
+
+.mention-dropdown::-webkit-scrollbar-thumb:hover {
+  background: var(--text-tertiary);
 }
 
 .mention-item {
@@ -300,8 +320,18 @@
   transition: background-color 0.15s ease;
 }
 
-.mention-item:hover {
+.mention-item:hover,
+.mention-item.selected {
   background: var(--bg-hover);
+}
+
+.mention-item.selected {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.mention-item.selected .mention-name {
+  color: var(--color-brand);
+  font-weight: 500;
 }
 
 .mention-avatar {

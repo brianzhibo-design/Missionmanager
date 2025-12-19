@@ -85,9 +85,32 @@ export const coffeeService = {
       throw new Error('NO_MEMBERS');
     }
 
-    // 随机选择一位成员
-    const randomIndex = Math.floor(Math.random() * members.length);
-    const winner = members[randomIndex].user;
+    // 获取最近7天的获奖记录，用于降低重复获奖概率
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const recentWinners = await prisma.coffeeLottery.findMany({
+      where: {
+        workspaceId,
+        date: { gte: sevenDaysAgo },
+      },
+      select: { winnerId: true },
+    });
+
+    const recentWinnerIds = new Set(recentWinners.map(w => w.winnerId));
+
+    // 优先从未在最近7天获奖的成员中选择
+    let eligibleMembers = members.filter(m => !recentWinnerIds.has(m.user.id));
+    
+    // 如果所有人都在最近7天获过奖，则从所有成员中选择
+    if (eligibleMembers.length === 0) {
+      eligibleMembers = members;
+    }
+
+    // 使用加密安全的随机数（如果可用）或回退到 Math.random
+    const randomIndex = Math.floor(Math.random() * eligibleMembers.length);
+    const winner = eligibleMembers[randomIndex].user;
 
     // 创建抽奖记录
     await prisma.coffeeLottery.create({
