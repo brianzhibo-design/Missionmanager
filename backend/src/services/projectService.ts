@@ -133,7 +133,7 @@ export const projectService = {
 
   /**
    * 更新项目
-   * 权限：owner, director, 项目负责人 可以修改项目
+   * 权限：owner, director 可以修改所有项目；manager 只能修改自己负责的项目
    */
   async update(
     userId: string,
@@ -145,11 +145,11 @@ export const projectService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    // 检查权限：工作区管理员或项目负责人
-    const isWorkspaceAdmin = await workspaceService.hasRole(project.workspaceId, userId, ['owner', 'director']);
-    const isProjectLeader = project.leaderId === userId;
+    // 检查权限：owner/director 可以修改所有项目；manager 只能修改自己负责的项目
+    const isOwnerOrDirector = await workspaceService.hasRole(project.workspaceId, userId, ['owner', 'director']);
+    const isManagerAndLeader = await workspaceService.hasRole(project.workspaceId, userId, ['manager']) && project.leaderId === userId;
 
-    if (!isWorkspaceAdmin && !isProjectLeader) {
+    if (!isOwnerOrDirector && !isManagerAndLeader) {
       throw new AppError('没有权限修改项目', 403, 'FORBIDDEN');
     }
 
@@ -158,7 +158,7 @@ export const projectService = {
 
   /**
    * 删除项目
-   * 权限：仅 owner 可以删除项目
+   * 权限：owner, director 可以删除项目
    */
   async delete(userId: string, projectId: string) {
     const project = await projectRepository.findById(projectId);
@@ -166,7 +166,7 @@ export const projectService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    await workspaceService.requireRole(project.workspaceId, userId, ['owner']);
+    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director']);
 
     await projectRepository.delete(projectId);
   },

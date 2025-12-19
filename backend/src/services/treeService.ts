@@ -291,7 +291,8 @@ export const treeService = {
 
   /**
    * 获取工作区的项目树
-   * 最高管理员视角：查看所有项目的工作情况
+   * 管理员视角：查看所有项目的工作情况
+   * 权限：owner, director 可编辑；manager 只读
    */
   async getProjectTree(userId: string, workspaceId: string): Promise<ProjectTreeResponse> {
     // 1. 验证工作区存在
@@ -300,9 +301,9 @@ export const treeService = {
       throw new AppError('工作区不存在', 404, 'WORKSPACE_NOT_FOUND');
     }
 
-    // 2. 验证用户是 owner 或 director
+    // 2. 验证用户是 owner, director 或 manager
     const membership = await workspaceRepository.getMembership(workspaceId, userId);
-    if (!membership || !['owner', 'director'].includes(membership.role)) {
+    if (!membership || !['owner', 'director', 'manager'].includes(membership.role)) {
       throw new AppError('需要管理员权限', 403, 'REQUIRE_ADMIN');
     }
 

@@ -71,10 +71,10 @@ export const workspaceService = {
 
   /**
    * 邀请成员
-   * 权限：owner, director 可以邀请成员
+   * 权限：owner, director, manager 可以邀请成员
    */
   async inviteMember(workspaceId: string, adminUserId: string, targetUserId: string, role: WorkspaceRole) {
-    await this.requireRole(workspaceId, adminUserId, ['owner', 'director']);
+    await this.requireRole(workspaceId, adminUserId, ['owner', 'director', 'manager']);
 
     // 检查是否已是成员
     const existing = await workspaceRepository.getMembership(workspaceId, targetUserId);
@@ -92,7 +92,7 @@ export const workspaceService = {
 
   /**
    * 通过邮箱邀请成员
-   * 权限：owner, director 可以邀请
+   * 权限：owner, director, manager 可以邀请
    */
   async inviteMemberByEmail(
     workspaceId: string,
@@ -102,7 +102,7 @@ export const workspaceService = {
   ) {
     // 1. 验证操作者权限
     const adminMembership = await workspaceRepository.getMembership(workspaceId, adminUserId);
-    if (!adminMembership || !['owner', 'director'].includes(adminMembership.role)) {
+    if (!adminMembership || !['owner', 'director', 'manager'].includes(adminMembership.role)) {
       throw new AppError('无权邀请成员', 403, 'PERMISSION_DENIED');
     }
 
