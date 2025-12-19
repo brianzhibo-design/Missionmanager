@@ -2,7 +2,7 @@
  * AI 分析组件 - Zenith 风格
  */
 import { useState, useEffect, useCallback } from 'react';
-import { Sparkles, AlertTriangle, Lightbulb, CheckCircle2, BarChart3, Clock } from 'lucide-react';
+import { Sparkles, AlertTriangle, Lightbulb, CheckCircle2, BarChart3, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { aiService, AiAnalysis, AiAnalysisResult } from '../services/ai';
 import './AiAnalysis.css';
 
@@ -18,6 +18,7 @@ export function AiAnalysisPanel({ taskId }: AiAnalysisProps) {
   const [history, setHistory] = useState<AiAnalysis[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [showResult, setShowResult] = useState(true);
   const [aiInfo, setAiInfo] = useState<{ name: string; isMock: boolean } | null>(null);
 
   const loadAiInfo = useCallback(async () => {
@@ -77,6 +78,15 @@ export function AiAnalysisPanel({ taskId }: AiAnalysisProps) {
           )}
         </div>
         <div className="ai-analysis-actions">
+          {analysis && (
+            <button 
+              className="collapse-toggle" 
+              onClick={() => setShowResult(!showResult)}
+              title={showResult ? '收起分析结果' : '展开分析结果'}
+            >
+              {showResult ? <><ChevronUp size={16} /> 收起</> : <><ChevronDown size={16} /> 展开</>}
+            </button>
+          )}
           {history.length > 0 && (
             <button className="history-toggle" onClick={() => setShowHistory(!showHistory)}>
               {showHistory ? '隐藏历史' : `历史 (${history.length})`}
@@ -105,7 +115,7 @@ export function AiAnalysisPanel({ taskId }: AiAnalysisProps) {
         </div>
       )}
 
-      {analysis && (
+      {analysis && showResult && (
         <div className="ai-result">
           <ProgressAssessment assessment={analysis.result.progress_assessment} />
           <NextActions actions={analysis.result.next_actions} />
@@ -120,6 +130,12 @@ export function AiAnalysisPanel({ taskId }: AiAnalysisProps) {
             <span>时间: {new Date(analysis.createdAt).toLocaleString()}</span>
             <span>模型: {analysis.model}</span>
           </div>
+        </div>
+      )}
+
+      {analysis && !showResult && (
+        <div className="ai-collapsed-hint">
+          <span>AI 分析结果已收起，点击"展开"查看详情</span>
         </div>
       )}
 
