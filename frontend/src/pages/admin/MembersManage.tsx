@@ -6,7 +6,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { memberService, Member } from '../../services/member';
 import { Modal } from '../../components/Modal';
 import { Avatar } from '../../components/Avatar';
-import { Users, Send } from 'lucide-react';
+import { Users, Send, Mail, Calendar, Shield, Eye } from 'lucide-react';
 import { 
   ROLE_LABELS, 
   WORKSPACE_ROLE_OPTIONS,
@@ -27,6 +27,8 @@ export default function MembersManage() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showBroadcast, setShowBroadcast] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [profileMember, setProfileMember] = useState<Member | null>(null);
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -113,6 +115,11 @@ export default function MembersManage() {
     setShowEditRole(true);
   };
 
+  const openProfile = (member: Member) => {
+    setProfileMember(member);
+    setShowProfile(true);
+  };
+
   // 检查当前用户是否可以修改目标成员
   const canModifyMember = (member: Member) => {
     if (member.role === 'owner') return false;
@@ -179,9 +186,10 @@ export default function MembersManage() {
               {members.map((member) => (
                   <tr key={member.userId}>
                     <td>
-                      <div className="member-cell">
+                      <div className="member-cell clickable" onClick={() => openProfile(member)}>
                         <Avatar name={member.user.name} src={member.user.avatar ?? undefined} size="sm" />
                         <span className="member-name">{member.user.name}</span>
+                        <Eye size={14} className="view-icon" />
                       </div>
                     </td>
                     <td className="email-cell">{member.user.email}</td>
@@ -332,6 +340,67 @@ export default function MembersManage() {
           userRole={workspaceRole}
         />
       )}
+
+      {/* 成员简介弹窗 */}
+      <Modal
+        isOpen={showProfile}
+        onClose={() => { setShowProfile(false); setProfileMember(null); }}
+        title="成员信息"
+        size="sm"
+      >
+        {profileMember && (
+          <div className="member-profile">
+            <div className="profile-header">
+              <Avatar 
+                name={profileMember.user.name} 
+                src={profileMember.user.avatar ?? undefined} 
+                size="xl" 
+              />
+              <h2 className="profile-name">{profileMember.user.name}</h2>
+              <span className={`role-badge role-${profileMember.role}`}>
+                {ROLE_LABELS[profileMember.role] || profileMember.role}
+              </span>
+            </div>
+            <div className="profile-info-list">
+              <div className="profile-info-item">
+                <Mail size={16} />
+                <div>
+                  <span className="info-label">邮箱</span>
+                  <span className="info-value">{profileMember.user.email}</span>
+                </div>
+              </div>
+              <div className="profile-info-item">
+                <Shield size={16} />
+                <div>
+                  <span className="info-label">角色</span>
+                  <span className="info-value">{ROLE_LABELS[profileMember.role] || profileMember.role}</span>
+                </div>
+              </div>
+              <div className="profile-info-item">
+                <Calendar size={16} />
+                <div>
+                  <span className="info-label">加入时间</span>
+                  <span className="info-value">
+                    {new Date(profileMember.joinedAt).toLocaleDateString('zh-CN', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="profile-actions">
+              <button 
+                className="btn btn-secondary"
+                onClick={() => { setShowProfile(false); setProfileMember(null); }}
+              >
+                关闭
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

@@ -452,3 +452,104 @@
   }
 }
 
+/* 可点击的成员单元格 */
+.member-cell.clickable {
+  cursor: pointer;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: var(--radius-md);
+  transition: background-color 0.2s ease;
+}
+
+.member-cell.clickable:hover {
+  background-color: var(--bg-hover);
+}
+
+.member-cell .view-icon {
+  opacity: 0;
+  color: var(--text-tertiary);
+  transition: opacity 0.2s ease;
+  margin-left: auto;
+}
+
+.member-cell.clickable:hover .view-icon {
+  opacity: 1;
+}
+
+/* 成员简介弹窗 */
+.member-profile {
+  text-align: center;
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-primary);
+  margin-bottom: 20px;
+}
+
+.profile-header .avatar {
+  width: 80px !important;
+  height: 80px !important;
+  font-size: 28px !important;
+}
+
+.profile-header .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.profile-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.profile-info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.profile-info-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.profile-info-item > svg {
+  flex-shrink: 0;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.profile-info-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profile-info-item .info-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.profile-info-item .info-value {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.profile-actions {
+  display: flex;
+  justify-content: center;
+}
+

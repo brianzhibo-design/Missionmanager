@@ -2,7 +2,7 @@
  * 任务评论组件
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Trash2, Heart, AtSign, Image, X, Loader2 } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Heart, AtSign, Image, X, Loader2, Smile } from 'lucide-react';
 import { commentService, Comment } from '../services/comment';
 import { uploadCommentImage } from '../services/upload';
 import { useAuth } from '../hooks/useAuth';
@@ -25,13 +25,62 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
   const [uploadingImages, setUploadingImages] = useState<string[]>([]); // 上传中的图片预览URL
   const [attachedImages, setAttachedImages] = useState<{url: string; key: string}[]>([]); // 已上传的图片
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
+  // 常用表情列表
+  const emojis = [
+    '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊',
+    '😇', '🙂', '😉', '😍', '🥰', '😘', '😋', '😎',
+    '🤔', '🤨', '😐', '😑', '😶', '🙄', '😏', '😣',
+    '😥', '😮', '🤐', '😯', '😪', '😫', '🥱', '😴',
+    '😌', '😛', '😜', '😝', '🤤', '😒', '😓', '😔',
+    '👍', '👎', '👏', '🙌', '🤝', '💪', '🎉', '🔥',
+    '❤️', '💯', '✅', '❌', '⭐', '💡', '📌', '🚀',
+  ];
   const mentionListRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadComments();
   }, [taskId]);
+
+  // 点击外部关闭表情选择器
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    if (showEmojiPicker) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showEmojiPicker]);
+
+  // 插入表情
+  const insertEmoji = (emoji: string) => {
+    const textarea = inputRef.current;
+    if (!textarea) {
+      setNewComment(newComment + emoji);
+      return;
+    }
+
+    const cursorPos = textarea.selectionStart;
+    const textBefore = newComment.substring(0, cursorPos);
+    const textAfter = newComment.substring(cursorPos);
+    const newText = textBefore + emoji + textAfter;
+    
+    setNewComment(newText);
+    
+    // 保持焦点并设置光标位置
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = cursorPos + emoji.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
 
   const loadComments = async () => {
     try {
@@ -516,6 +565,35 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
             >
               <AtSign size={18} />
             </button>
+            <div className="emoji-picker-container" ref={emojiPickerRef}>
+              <button
+                type="button"
+                className="emoji-btn"
+                onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                title="插入表情"
+              >
+                <Smile size={18} />
+              </button>
+              {showEmojiPicker && (
+                <div className="emoji-picker">
+                  <div className="emoji-grid">
+                    {emojis.map((emoji, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        className="emoji-item"
+                        onClick={() => {
+                          insertEmoji(emoji);
+                          setShowEmojiPicker(false);
+                        }}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
             <button
               type="button"
               className="image-btn"
