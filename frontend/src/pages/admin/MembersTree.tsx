@@ -7,6 +7,7 @@ import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User, Fo
 import { treeService, MemberNode, MemberTreeResponse } from '../../services/tree';
 import { projectService, Project } from '../../services/project';
 import { treeAnalysisService, TeamAnalysisResult } from '../../services/treeAnalysis';
+import { api } from '../../services/api';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useAuth } from '../../hooks/useAuth';
 import { TreeNode } from '../../components/tree/TreeNode';
@@ -116,19 +117,10 @@ export default function MembersTree() {
     }
     
     // 调用后端API保存项目成员（isLeader标记）
-    const response = await fetch(`/api/admin/projects/${selectedProject}/members`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: memberId,
-        isLeader: data.isLeader,
-      }),
+    await api.post(`/admin/projects/${selectedProject}/members`, {
+      userId: memberId,
+      isLeader: data.isLeader,
     });
-    
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || '保存失败');
-    }
     
     // 重新加载树数据
     await loadMemberTree(selectedProject);
