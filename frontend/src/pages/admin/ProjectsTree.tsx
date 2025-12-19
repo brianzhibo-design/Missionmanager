@@ -152,6 +152,7 @@ export default function ProjectsTree() {
 
 function ProjectCard({ project }: { project: ProjectNode }) {
   const health = getHealthStatus(project.taskStats);
+  const hasMembers = project.topMembers && project.topMembers.length > 0;
 
   return (
     <div className="project-card">
@@ -164,14 +165,13 @@ function ProjectCard({ project }: { project: ProjectNode }) {
         </span>
       </div>
 
-      {project.description && (
-        <p className="project-description">{project.description}</p>
-      )}
+      <p className="project-description">
+        {project.description || '暂无项目描述'}
+      </p>
 
       <div className="progress-section">
         <div className="progress-header">
-          <span>进度</span>
-          <span>{project.progress}%</span>
+          <span>进度{project.progress}%</span>
         </div>
         <div className="progress-bar">
           <div
@@ -188,23 +188,27 @@ function ProjectCard({ project }: { project: ProjectNode }) {
       <div className="members-section">
         <h4>主要成员</h4>
         <div className="members-list">
-          {project.topMembers.slice(0, 3).map((member) => (
-            <div key={member.userId} className="member-item">
-              <div className="member-avatar-sm">
-                {member.name.charAt(0).toUpperCase()}
+          {hasMembers ? (
+            project.topMembers.slice(0, 3).map((member) => (
+              <div key={member.userId} className="member-item">
+                <div className="member-avatar-sm">
+                  {member.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="member-name">{member.name}</span>
+                <span className="member-tasks">{member.taskCount} 任务</span>
               </div>
-              <span className="member-name">{member.name}</span>
-              <span className="member-tasks">{member.taskCount} 任务</span>
-            </div>
-          ))}
+            ))
+          ) : (
+            <div className="no-members">暂无成员</div>
+          )}
         </div>
       </div>
 
-      {project.recentActivity && (
-        <div className="activity-info">
-          最近活动: {new Date(project.recentActivity).toLocaleDateString()}
-        </div>
-      )}
+      <div className="activity-info">
+        最近活动: {project.recentActivity 
+          ? new Date(project.recentActivity).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+          : '无'}
+      </div>
     </div>
   );
 }

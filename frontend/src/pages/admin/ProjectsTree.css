@@ -171,6 +171,9 @@
   border-radius: var(--radius-lg);
   padding: 20px;
   transition: all var(--duration-fast) var(--ease-default);
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 让同一行的卡片高度一致 */
 }
 
 .projects-tree-page .project-card:hover {
@@ -182,14 +185,24 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 12px;
   margin-bottom: 12px;
+  min-height: 52px; /* 固定头部高度，确保对齐 */
 }
 
 .projects-tree-page .project-name {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
   text-decoration: none;
+  flex: 1;
+  min-width: 0;
+  /* 限制两行显示 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
 }
 
 .projects-tree-page .project-name:hover {
@@ -202,6 +215,8 @@
   padding: 4px 8px;
   border-radius: var(--radius-sm);
   color: white;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .projects-tree-page .project-description {
@@ -213,6 +228,7 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 39px; /* 2行的固定高度 */
 }
 
 .progress-section {
@@ -221,23 +237,23 @@
 
 .progress-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   font-size: 12px;
   color: var(--text-secondary);
   margin-bottom: 6px;
 }
 
 .progress-bar {
-  height: 6px;
+  height: 8px;
   background-color: var(--bg-surface-secondary, var(--bg-hover));
-  border-radius: 3px;
+  border-radius: 4px;
   overflow: hidden;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-brand), var(--color-success));
-  border-radius: 3px;
+  background: linear-gradient(90deg, var(--color-success), #10b981);
+  border-radius: 4px;
   transition: width 0.5s ease;
 }
 
@@ -246,6 +262,10 @@
   border-top: 1px solid var(--border-primary);
   border-bottom: 1px solid var(--border-primary);
   margin-bottom: 12px;
+}
+
+.members-section {
+  min-height: 90px; /* 固定成员区域高度 */
 }
 
 .members-section h4 {
@@ -292,10 +312,19 @@
   color: var(--text-secondary);
 }
 
+.no-members {
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-style: italic;
+  padding: 8px 0;
+}
+
 .activity-info {
   font-size: 11px;
   color: var(--text-tertiary);
   margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-primary);
 }
 
 /* ========================================
