@@ -7,7 +7,9 @@ import api from './api';
 export interface UploadResult {
   url: string;
   key: string;
-  filename?: string;
+  name: string;
+  size: number;
+  type: string;
 }
 
 export interface Attachment {
@@ -29,12 +31,6 @@ export interface Attachment {
   };
 }
 
-export interface PresignedUrlResult {
-  uploadUrl: string;
-  publicUrl: string;
-  key: string;
-}
-
 // 文件类型配置
 export const FILE_CONFIG = {
   AVATAR: {
@@ -43,9 +39,9 @@ export const FILE_CONFIG = {
     extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
   },
   TASK_ATTACHMENT: {
-    maxSize: 100 * 1024 * 1024, // 100MB
-    accept: 'image/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.md,.zip,.rar,video/*,audio/*',
-    extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv', '.md', '.zip', '.rar', '.mp4', '.mov', '.avi', '.webm', '.mp3', '.wav', '.ogg'],
+    maxSize: 50 * 1024 * 1024, // 50MB
+    accept: 'image/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar,video/*',
+    extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv', '.zip', '.rar', '.mp4', '.webm'],
   },
   COMMENT_IMAGE: {
     maxSize: 10 * 1024 * 1024, // 10MB
@@ -53,7 +49,7 @@ export const FILE_CONFIG = {
     extensions: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
   },
   PROJECT_FILE: {
-    maxSize: 200 * 1024 * 1024, // 200MB
+    maxSize: 50 * 1024 * 1024, // 50MB
     accept: '*/*',
     extensions: [],
   },
@@ -65,6 +61,7 @@ export const FILE_CONFIG = {
 };
 
 export type FileType = keyof typeof FILE_CONFIG;
+export type FileCategory = 'avatars' | 'attachments' | 'comments' | 'reports';
 
 /**
  * 验证文件
@@ -134,136 +131,105 @@ export function isPreviewable(mimeType: string): boolean {
 /**
  * 上传用户头像
  */
-export async function uploadAvatar(file: File): Promise<UploadResult> {
+export async function uploadAvatar(file: File): Promise<{ url: string }> {
   const formData = new FormData();
   formData.append('file', file);
   
-  const response = await api.upload<{ success: boolean; data: UploadResult }>('/upload/avatar', formData);
+  const response = await api.upload<{ success: boolean; data: { url: string } }>('/upload/avatar', formData);
+  return response.data;
+}
+
+/**
+ * 上传附件（通用）
+ */
+export async function uploadAttachment(file: File, category: FileCategory = 'attachments'): Promise<UploadResult> {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('category', category);
+  
+  const response = await api.upload<{ success: boolean; data: UploadResult }>('/upload/attachment', formData);
   return response.data;
 }
 
 /**
  * 上传任务附件
  */
-export async function uploadTaskAttachment(taskId: string, file: File): Promise<Attachment> {
-  const formData = new FormData();
-  formData.append('file', file);
+export async function uploadTaskAttachment(_taskId: string, file: File): Promise<Attachment> {
+  const result = await uploadAttachment(file, 'attachments');
   
-  const response = await api.upload<{ success: boolean; data: Attachment }>(`/upload/tasks/${taskId}/attachments`, formData);
-  return response.data;
+  // 转换为 Attachment 格式
+  return {
+    id: result.key,
+    fileKey: result.key,
+    fileUrl: result.url,
+    filename: result.name,
+    mimeType: result.type,
+    fileSize: result.size,
+    uploaderId: '',
+    createdAt: new Date().toISOString(),
+  };
 }
 
 /**
  * 获取任务附件列表
+ * 注意：新版 API 不支持获取附件列表，返回空数组
  */
-export async function getTaskAttachments(taskId: string): Promise<Attachment[]> {
-  const response = await api.get<{ data: Attachment[] }>(`/upload/tasks/${taskId}/attachments`);
-  return response.data;
+export async function getTaskAttachments(_taskId: string): Promise<Attachment[]> {
+  // 新版简化 API 不支持获取附件列表
+  return [];
 }
 
 /**
- * 删除任务附件
+ * 删除附件
  */
-export async function deleteTaskAttachment(attachmentId: string): Promise<void> {
-  await api.delete(`/upload/attachments/${attachmentId}`);
+export async function deleteTaskAttachment(key: string): Promise<void> {
+  await api.delete(`/upload/${encodeURIComponent(key)}`);
 }
 
 /**
  * 上传评论图片
  */
-export async function uploadCommentImage(taskId: string, file: File): Promise<UploadResult> {
-  const formData = new FormData();
-  formData.append('file', file);
-  
-  const response = await api.upload<{ success: boolean; data: UploadResult }>(`/upload/tasks/${taskId}/comment-images`, formData);
-  return response.data;
+export async function uploadCommentImage(_taskId: string, file: File): Promise<{ url: string; key: string }> {
+  const result = await uploadAttachment(file, 'comments');
+  return { url: result.url, key: result.key };
 }
 
 /**
  * 上传项目文件
  */
-export async function uploadProjectFile(projectId: string, file: File, folder?: string): Promise<Attachment> {
-  const formData = new FormData();
-  formData.append('file', file);
-  if (folder) {
-    formData.append('folder', folder);
-  }
+export async function uploadProjectFile(_projectId: string, file: File, _folder?: string): Promise<Attachment> {
+  const result = await uploadAttachment(file, 'attachments');
   
-  const response = await api.upload<{ success: boolean; data: Attachment }>(`/upload/projects/${projectId}/files`, formData);
-  return response.data;
+  return {
+    id: result.key,
+    fileKey: result.key,
+    fileUrl: result.url,
+    filename: result.name,
+    mimeType: result.type,
+    fileSize: result.size,
+    uploaderId: '',
+    createdAt: new Date().toISOString(),
+  };
 }
 
 /**
  * 获取项目文件列表
+ * 注意：新版 API 不支持获取文件列表，返回空数组
  */
-export async function getProjectFiles(projectId: string, folder?: string): Promise<Attachment[]> {
-  const params = folder ? `?folder=${encodeURIComponent(folder)}` : '';
-  const response = await api.get<{ data: Attachment[] }>(`/upload/projects/${projectId}/files${params}`);
-  return response.data;
+export async function getProjectFiles(_projectId: string, _folder?: string): Promise<Attachment[]> {
+  return [];
 }
 
 /**
  * 删除项目文件
  */
-export async function deleteProjectFile(fileId: string): Promise<void> {
-  await api.delete(`/upload/files/${fileId}`);
-}
-
-/**
- * 获取预签名上传 URL（用于大文件直传）
- */
-export async function getPresignedUploadUrl(
-  filename: string,
-  mimeType: string,
-  fileType: FileType,
-  entityId?: string
-): Promise<PresignedUrlResult> {
-  const response = await api.post<{ success: boolean; data: PresignedUrlResult }>('/upload/presigned-url', {
-    filename,
-    mimeType,
-    fileType,
-    entityId,
-  });
-  return response.data;
-}
-
-/**
- * 直接上传到对象存储（用于大文件）
- */
-export async function directUpload(
-  file: File,
-  uploadUrl: string,
-  onProgress?: (progress: number) => void
-): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    
-    xhr.upload.addEventListener('progress', (e) => {
-      if (e.lengthComputable && onProgress) {
-        onProgress(Math.round((e.loaded / e.total) * 100));
-      }
-    });
-    
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve();
-      } else {
-        reject(new Error(`上传失败: ${xhr.status}`));
-      }
-    });
-    
-    xhr.addEventListener('error', () => {
-      reject(new Error('上传失败'));
-    });
-    
-    xhr.open('PUT', uploadUrl);
-    xhr.setRequestHeader('Content-Type', file.type);
-    xhr.send(file);
-  });
+export async function deleteProjectFile(key: string): Promise<void> {
+  await api.delete(`/upload/${encodeURIComponent(key)}`);
 }
 
 export default {
   uploadAvatar,
+  uploadAttachment,
   uploadTaskAttachment,
   getTaskAttachments,
   deleteTaskAttachment,
@@ -271,8 +237,6 @@ export default {
   uploadProjectFile,
   getProjectFiles,
   deleteProjectFile,
-  getPresignedUploadUrl,
-  directUpload,
   validateFile,
   formatFileSize,
   getFileIcon,
@@ -280,4 +244,3 @@ export default {
   isVideoFile,
   isPreviewable,
 };
-

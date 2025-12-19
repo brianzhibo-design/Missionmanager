@@ -21,7 +21,7 @@ import { reportRouter } from './controllers/reportController';
 import commentRouter from './controllers/commentController';
 import broadcastRouter from './controllers/broadcastController';
 import dailyReportRouter from './controllers/dailyReportController';
-import uploadRouter from './routes/uploadRoutes';
+import uploadRouter from './controllers/uploadController';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { startScheduler } from './lib/scheduler';
 import { verifyEmailConnection } from './lib/emailService';
