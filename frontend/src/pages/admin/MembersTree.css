@@ -393,64 +393,102 @@
 }
 
 /* ========================================
- * 移动端样式 - 极简模块化
+ * 移动端样式 - iOS 风格优化
  * ======================================== */
 @media (max-width: 768px) {
   .members-tree-page {
     padding: 0;
-    background: #f5f5f5;
+    background: var(--mobile-bg, #f2f2f7);
     height: auto;
     min-height: 100vh;
-    padding-bottom: 80px;
+    padding-bottom: calc(80px + env(safe-area-inset-bottom, 0));
   }
 
   [data-theme="dark"] .members-tree-page {
-    background: #000;
+    background: var(--mobile-bg-dark, #000);
   }
 
+  /* ===== 页面头部 - 大标题风格 ===== */
   .page-header {
     flex-direction: column;
-    align-items: stretch;
-    padding: 20px 16px 16px;
-    background: #fff;
+    align-items: flex-start;
+    padding: 12px 16px 16px;
+    background: var(--mobile-bg, #f2f2f7);
     margin: 0;
-    gap: 12px;
+    gap: 16px;
+    border: none;
   }
 
   [data-theme="dark"] .page-header {
-    background: #1c1c1e;
+    background: var(--mobile-bg-dark, #000);
   }
 
-  .header-left h1 {
-    font-size: 24px;
-  }
-
-  .page-description {
+  .header-icon {
     display: none;
   }
 
+  .header-left h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+
+  .page-description {
+    font-size: 15px;
+    color: var(--text-secondary);
+    margin: 0;
+    display: block;
+  }
+
+  /* ===== 选择器容器 ===== */
   .header-controls {
     width: 100%;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .current-workspace-badge {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    background: var(--mobile-blue, #007aff);
+    color: #fff;
+    font-weight: 600;
   }
 
   .select-control {
     flex: 1;
-    height: 40px;
+    height: 44px;
     border-radius: 10px;
+    font-size: 16px;
+    padding: 0 14px;
+    border: none;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   }
 
+  [data-theme="dark"] .select-control {
+    background: #1c1c1e;
+    color: #fff;
+  }
+
+  /* ===== 主布局 ===== */
   .tree-layout {
     grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 12px 0;
+    gap: 0;
+    padding: 0;
   }
 
+  /* ===== 卡片面板 ===== */
   .tree-panel,
   .detail-panel {
     background: #fff;
-    border-radius: 0;
-    padding: 0;
-    box-shadow: none;
+    border-radius: 12px;
+    margin: 8px;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
   }
 
   [data-theme="dark"] .tree-panel,
@@ -458,30 +496,187 @@
     background: #1c1c1e;
   }
 
+  .tree-panel {
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+  }
+
+  /* ===== 项目信息卡片 ===== */
+  .project-info-card {
+    padding: 16px;
+    background: #fff;
+    margin: 8px;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  [data-theme="dark"] .project-info-card {
+    background: #1c1c1e;
+  }
+
+  .workspace-info,
+  .project-info {
+    margin-bottom: 16px;
+  }
+
+  .info-label {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-bottom: 4px;
+  }
+
+  .info-value {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  /* ===== 团队信息 ===== */
+  .team-info {
+    padding-top: 16px;
+    margin-top: 16px;
+    border-top: 0.5px solid rgba(60, 60, 67, 0.12);
+  }
+
+  [data-theme="dark"] .team-info {
+    border-top-color: rgba(84, 84, 88, 0.65);
+  }
+
+  .team-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .team-section {
+    margin-bottom: 16px;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 8px;
+  }
+
+  .team-member-item {
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--mobile-fill, rgba(118, 118, 128, 0.12));
+    border: none;
+    margin-bottom: 8px;
+  }
+
+  [data-theme="dark"] .team-member-item {
+    background: rgba(118, 118, 128, 0.24);
+  }
+
+  .team-member-item.leader {
+    background: linear-gradient(135deg, rgba(255, 204, 0, 0.15) 0%, rgba(255, 179, 0, 0.1) 100%);
+  }
+
+  [data-theme="dark"] .team-member-item.leader {
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.2) 0%, rgba(255, 159, 10, 0.15) 100%);
+  }
+
+  .team-member-item .member-name {
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  /* ===== 成员任务分布标题 ===== */
+  .tree-panel-header {
+    padding: 16px;
+    background: transparent;
+    border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+  }
+
+  [data-theme="dark"] .tree-panel-header {
+    border-bottom-color: rgba(84, 84, 88, 0.65);
+  }
+
+  .tree-panel-header h3 {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  /* ===== 成员节点列表 ===== */
+  .tree-panel-content {
+    padding: 0;
+  }
+
   .member-node {
-    padding: 14px 16px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 16px;
+    border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
     border-radius: 0;
     margin: 0;
   }
 
   [data-theme="dark"] .member-node {
-    border-bottom-color: #2c2c2e;
+    border-bottom-color: rgba(84, 84, 88, 0.65);
   }
 
   .member-avatar {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
   }
 
   .member-name {
-    font-size: 16px;
+    font-size: 17px;
   }
 
+  .member-label {
+    gap: 12px;
+  }
+
+  .role-tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+  }
+
+  .edit-member-btn {
+    width: 32px;
+    height: 32px;
+    opacity: 1;
+    background: var(--mobile-fill, rgba(118, 118, 128, 0.12));
+    border-radius: 8px;
+  }
+
+  [data-theme="dark"] .edit-member-btn {
+    background: rgba(118, 118, 128, 0.24);
+  }
+
+  /* ===== 详情面板 ===== */
   .detail-panel {
     height: auto;
-    min-height: 300px;
+    min-height: 280px;
     margin-top: 0;
+  }
+
+  /* ===== 加载和空状态 ===== */
+  .loading-state,
+  .empty-state {
+    height: 160px;
+    font-size: 15px;
+    color: var(--text-tertiary);
+  }
+
+  /* ===== AI 分析按钮 ===== */
+  .analyze-btn {
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+
+  /* ===== 错误提示 ===== */
+  .error-message {
+    margin: 8px;
+    border-radius: 10px;
   }
 }
 

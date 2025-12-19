@@ -566,3 +566,222 @@
   cursor: not-allowed;
 }
 
+/* ========================================
+ * 移动端样式 - iOS 风格优化
+ * ======================================== */
+@media (max-width: 768px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-container {
+    max-width: 100%;
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 14px 14px 0 0;
+    animation: slideUpFromBottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  @keyframes slideUpFromBottom {
+    from {
+      transform: translateY(100%);
+      opacity: 0.5;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .modal-header {
+    padding: 16px 20px;
+    border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+  }
+
+  [data-theme="dark"] .modal-header {
+    border-bottom-color: rgba(84, 84, 88, 0.65);
+  }
+
+  .modal-header h2 {
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    flex: 1;
+  }
+
+  .close-btn {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--mobile-fill, rgba(118, 118, 128, 0.12));
+  }
+
+  [data-theme="dark"] .close-btn {
+    background: rgba(118, 118, 128, 0.24);
+  }
+
+  .modal-body {
+    padding: 20px;
+    max-height: calc(90vh - 60px - 80px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .member-info {
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--mobile-fill, rgba(118, 118, 128, 0.08));
+    margin-bottom: 24px;
+  }
+
+  [data-theme="dark"] .member-info {
+    background: rgba(118, 118, 128, 0.16);
+  }
+
+  .member-info .avatar-container {
+    width: 56px;
+    height: 56px;
+  }
+
+  .member-details h3 {
+    font-size: 17px;
+  }
+
+  .member-details p {
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .form-group label {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+
+  .role-note {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+  }
+
+  .leader-card {
+    padding: 16px;
+    border-radius: 12px;
+    background: #fff;
+    border: 2px solid var(--border-default);
+    transition: all 0.2s ease;
+  }
+
+  [data-theme="dark"] .leader-card {
+    background: #2c2c2e;
+    border-color: rgba(84, 84, 88, 0.65);
+  }
+
+  .leader-card.active {
+    border-color: var(--mobile-gold, #ffcc00);
+    background: linear-gradient(135deg, rgba(255, 204, 0, 0.1) 0%, rgba(255, 179, 0, 0.05) 100%);
+  }
+
+  [data-theme="dark"] .leader-card.active {
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.15) 0%, rgba(255, 159, 10, 0.1) 100%);
+  }
+
+  .leader-card-checkbox {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+  }
+
+  .leader-card.active .leader-card-checkbox {
+    background: var(--mobile-gold, #ffcc00);
+    border-color: var(--mobile-gold, #ffcc00);
+  }
+
+  .leader-card-title {
+    font-size: 16px;
+  }
+
+  .leader-card-desc {
+    font-size: 13px;
+    margin-top: 4px;
+  }
+
+  /* 文本域 */
+  .form-group textarea {
+    min-height: 120px;
+    font-size: 16px;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--border-default);
+    background: #fff;
+    -webkit-appearance: none;
+  }
+
+  [data-theme="dark"] .form-group textarea {
+    background: #2c2c2e;
+    border-color: rgba(84, 84, 88, 0.65);
+  }
+
+  .form-group textarea:focus {
+    border-color: var(--mobile-blue, #007aff);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  }
+
+  .help-text {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin-top: 8px;
+  }
+
+  /* 操作按钮 */
+  .modal-actions {
+    padding: 16px 20px;
+    gap: 12px;
+    border-top: 0.5px solid rgba(60, 60, 67, 0.12);
+    background: var(--bg-surface);
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0));
+  }
+
+  [data-theme="dark"] .modal-actions {
+    border-top-color: rgba(84, 84, 88, 0.65);
+  }
+
+  .btn-secondary,
+  .btn-primary {
+    flex: 1;
+    height: 50px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .btn-secondary {
+    background: var(--mobile-fill, rgba(118, 118, 128, 0.12));
+    border: none;
+  }
+
+  [data-theme="dark"] .btn-secondary {
+    background: rgba(118, 118, 128, 0.24);
+  }
+
+  .btn-primary {
+    background: var(--mobile-blue, #007aff);
+  }
+
+  /* 错误提示 */
+  .error-alert {
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+}
+
