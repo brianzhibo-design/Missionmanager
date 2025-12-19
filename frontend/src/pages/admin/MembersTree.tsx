@@ -141,7 +141,7 @@ export default function MembersTree() {
   };
 
   // 检查是否可以编辑成员（owner、admin 可以编辑所有；leader 只能编辑自己负责的项目）
-  const canEditMembers = (): boolean => {
+  const canEditMembers = useMemo(() => {
     if (!workspaceRole || !treeData) return false;
     
     // owner 和 admin 可以编辑所有项目
@@ -150,20 +150,32 @@ export default function MembersTree() {
     }
     
     // leader 只能编辑自己负责的项目（需要检查项目负责人）
-    // 注意：这里需要从 treeData 中获取 leader 信息
-    // 如果当前用户是项目负责人，则可以编辑
-    // 由于前端无法直接获取当前用户ID，这里先允许 leader 显示编辑按钮
-    // 后端会进行权限验证
-    if (workspaceRole === 'leader') {
-      return true; // 显示按钮，后端会验证
+    if (workspaceRole === 'leader' && treeData.leader && currentUser) {
+      return treeData.leader.id === currentUser.id;
     }
     
     return false;
-  };
+  }, [workspaceRole, treeData, currentUser]);
+
+  // 检查是否可以运行 AI 分析（owner、admin 或项目负责人）
+  const canRunAiAnalysis = useMemo(() => {
+    if (!workspaceRole || !treeData || !currentUser) return false;
+    
+    // owner 和 admin 可以运行 AI 分析
+    if (['owner', 'admin'].includes(workspaceRole)) {
+      return true;
+    }
+    
+    // 项目负责人可以运行 AI 分析
+    if (treeData.leader && treeData.leader.id === currentUser.id) {
+      return true;
+    }
+    
+    return false;
+  }, [workspaceRole, treeData, currentUser]);
 
   const renderMemberNode = (member: MemberNode, level: number = 0): JSX.Element => {
     const roleInfo = getRoleLabel(member);
-    const canEdit = canEditMembers();
 
     return (
       <TreeNode
@@ -179,7 +191,7 @@ export default function MembersTree() {
             >
               {roleInfo.label}
             </span>
-            {canEdit && (
+            {canEditMembers && (
               <button
                 className="edit-member-btn"
                 onClick={(e) => handleEditMember(member, e)}
@@ -230,23 +242,26 @@ export default function MembersTree() {
               </option>
             ))}
           </select>
-          <button
-            className="analyze-btn"
-            onClick={handleAnalyze}
-            disabled={!selectedProject || analyzing || loading}
-          >
-            {analyzing ? (
-              <>
-                <RefreshCw size={16} className="spin" />
-                <span>分析中...</span>
-              </>
-            ) : (
-              <>
-                <Brain size={16} />
-                <span>AI 分析团队</span>
-              </>
-            )}
-          </button>
+          {/* AI 分析按钮：只有 owner、admin 或项目负责人可见 */}
+          {canRunAiAnalysis && (
+            <button
+              className="analyze-btn"
+              onClick={handleAnalyze}
+              disabled={!selectedProject || analyzing || loading}
+            >
+              {analyzing ? (
+                <>
+                  <RefreshCw size={16} className="spin" />
+                  <span>分析中...</span>
+                </>
+              ) : (
+                <>
+                  <Brain size={16} />
+                  <span>AI 分析团队</span>
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
