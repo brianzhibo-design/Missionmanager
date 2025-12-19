@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
 }
 
 .avatar-container {
@@ -12,10 +12,18 @@
   border-radius: 50%;
   overflow: hidden;
   background: var(--bg-surface-secondary);
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .avatar-upload.editable .avatar-container {
   cursor: pointer;
+}
+
+.avatar-upload.editable .avatar-container:hover {
+  transform: scale(1.02);
+  box-shadow: 0 12px 32px -8px rgba(99, 102, 241, 0.4);
 }
 
 /* 尺寸 */
@@ -43,6 +51,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 50%;
 }
 
 .avatar-placeholder {
@@ -51,9 +60,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-dark) 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
   color: white;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -1px;
 }
 
 .avatar-upload.avatar-sm .avatar-placeholder {
@@ -80,12 +91,16 @@
   right: 0;
   bottom: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.5);
+  gap: 4px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(168, 85, 247, 0.85));
+  backdrop-filter: blur(4px);
   color: white;
   opacity: 0;
   transition: opacity 0.2s ease;
+  border-radius: 50%;
 }
 
 .avatar-upload.editable .avatar-container:hover .avatar-overlay {
@@ -96,6 +111,12 @@
   animation: spin 1s linear infinite;
 }
 
+.avatar-overlay span {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -103,15 +124,26 @@
 
 /* 提示文字 */
 .avatar-hint {
-  font-size: var(--text-xs);
+  font-size: 12px;
   color: var(--text-tertiary);
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.avatar-upload:hover .avatar-hint {
+  opacity: 1;
+  color: var(--accent-primary);
 }
 
 .avatar-error {
-  font-size: var(--text-xs);
+  font-size: 12px;
   color: var(--color-danger);
   text-align: center;
   max-width: 200px;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 6px 12px;
+  border-radius: 8px;
+  margin-top: 4px;
 }
 
 /* 上传中状态 */

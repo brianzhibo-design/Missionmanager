@@ -94,7 +94,10 @@ export function AvatarUpload({
             {isUploading ? (
               <Loader2 size={24} className="loading-spinner" />
             ) : (
-              <Camera size={24} />
+              <>
+                <Camera size={22} />
+                <span>更换</span>
+              </>
             )}
           </div>
         )}
