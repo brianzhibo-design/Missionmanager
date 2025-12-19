@@ -94,4 +94,27 @@ router.delete('/clear-read', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * 发送测试通知（用于测试实时推送）
+ * POST /notifications/test
+ */
+router.post('/test', async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.userId;
+    const { message } = req.body;
+
+    const notification = await notificationService.create({
+      userId,
+      type: 'system',
+      title: '测试通知',
+      message: message || `这是一条测试通知 - ${new Date().toLocaleString('zh-CN')}`,
+    });
+
+    res.json({ success: true, data: notification });
+  } catch (error: any) {
+    console.error('发送测试通知失败:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '发送测试通知失败' });
+  }
+});
+
 export default router;
