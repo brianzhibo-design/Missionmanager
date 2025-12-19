@@ -220,7 +220,8 @@
 .main-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 /* ========================================
@@ -235,6 +236,9 @@
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-primary);
   flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .topbar-left {
@@ -519,7 +523,6 @@
 .main-content {
   flex: 1;
   padding: var(--space-6);
-  overflow-y: auto;
   width: 100%;
 }
 
