@@ -391,10 +391,14 @@ export const treeService = {
           select: { id: true, status: true, updatedAt: true },
         },
         members: {
-          where: { isLeader: true },
+          // 获取所有项目成员
           include: {
             user: { select: { id: true, name: true, avatar: true } },
           },
+        },
+        leader: {
+          // 获取项目负责人
+          select: { id: true, name: true, avatar: true },
         },
       },
     }) as any;
@@ -411,21 +415,40 @@ export const treeService = {
       ? Math.round((taskStats.done / taskStats.total) * 100)
       : 0;
 
-    // 获取主要成员及其任务数（只统计主任务）
-    const topMembers = await Promise.all(
-      project.members.map(async (m: any) => {
+    // 构建成员列表，包含项目负责人
+    const memberSet = new Map<string, any>();
+    
+    // 首先添加项目负责人（如果存在）
+    if (project.leader) {
+      const leaderTaskCount = await prisma.task.count({
+        where: { projectId, assigneeId: project.leader.id, parentId: null },
+      });
+      memberSet.set(project.leader.id, {
+        userId: project.leader.id,
+        name: project.leader.name,
+        avatar: project.leader.avatar,
+        role: '负责人',
+        taskCount: leaderTaskCount,
+      });
+    }
+    
+    // 添加其他成员
+    for (const m of project.members) {
+      if (!memberSet.has(m.userId)) {
         const taskCount = await prisma.task.count({
           where: { projectId, assigneeId: m.userId, parentId: null },
         });
-        return {
+        memberSet.set(m.userId, {
           userId: m.userId,
           name: m.user.name,
           avatar: m.user.avatar,
-          role: m.isLeader ? '负责人' : '成员',
+          role: m.isLeader ? '验收人' : '成员',
           taskCount,
-        };
-      })
-    );
+        });
+      }
+    }
+    
+    const topMembers = Array.from(memberSet.values());
 
     // 获取最近活动时间
     const recentTask = (project.tasks as any[]).sort(
