@@ -10,9 +10,10 @@ import { workspaceService } from '../services/workspace';
 import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
 import { 
   User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText, Phone,
-  Settings as SettingsIcon, Sun, Moon, Monitor, FolderOpen,
+  Settings as SettingsIcon, Sun, Moon, Monitor, FolderOpen, Bell, BellOff,
   Code, PaintBucket, ClipboardList, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
 } from 'lucide-react';
+import { pushNotificationService } from '../services/pushNotification';
 import { AvatarUpload } from '../components/AvatarUpload';
 import './Settings.css';
 
@@ -58,6 +59,10 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // 通知权限状态
+  const [notificationEnabled, setNotificationEnabled] = useState(pushNotificationService.isEnabled());
+  const [notificationPermission, setNotificationPermission] = useState(pushNotificationService.getPermission());
 
   // 当用户信息更新时，同步表单状态
   useEffect(() => {
@@ -596,6 +601,52 @@ export default function Settings() {
                   >
                     <span className="theme-icon"><Monitor size={20} /></span>
                     <span className="theme-name">跟随系统</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 通知设置 */}
+              <div className="form-group notification-settings">
+                <label className="form-label">消息通知</label>
+                <div className="notification-toggle">
+                  <div className="notification-info">
+                    <div className="notification-icon-wrap">
+                      {notificationEnabled ? <Bell size={20} /> : <BellOff size={20} />}
+                    </div>
+                    <div className="notification-text">
+                      <span className="notification-title">系统推送通知</span>
+                      <span className="notification-desc">
+                        {notificationPermission === 'denied' 
+                          ? '通知权限已被禁用，请在浏览器设置中开启'
+                          : '开启后，新任务、评论和提醒将推送到系统通知'
+                        }
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    className={`toggle-btn ${notificationEnabled ? 'active' : ''}`}
+                    onClick={async () => {
+                      if (notificationEnabled) {
+                        pushNotificationService.disable();
+                        setNotificationEnabled(false);
+                        setSuccess('已关闭系统通知');
+                        setTimeout(() => setSuccess(null), 2000);
+                      } else {
+                        const enabled = await pushNotificationService.enable();
+                        setNotificationEnabled(enabled);
+                        setNotificationPermission(pushNotificationService.getPermission());
+                        if (enabled) {
+                          setSuccess('已开启系统通知');
+                          setTimeout(() => setSuccess(null), 2000);
+                        } else if (pushNotificationService.getPermission() === 'denied') {
+                          setError('通知权限已被禁用，请在浏览器设置中开启');
+                          setTimeout(() => setError(null), 3000);
+                        }
+                      }
+                    }}
+                    disabled={notificationPermission === 'denied'}
+                  >
+                    <span className="toggle-slider" />
                   </button>
                 </div>
               </div>

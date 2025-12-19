@@ -7,7 +7,8 @@ import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
 import { Logo } from './Logo';
 import NotificationCenter from './NotificationCenter';
 import MobileNav from './MobileNav';
-import { notificationService } from '../services/notification';
+import { notificationService, Notification } from '../services/notification';
+import { pushNotificationService } from '../services/pushNotification';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -43,6 +44,7 @@ export default function AppLayout() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [lastNotificationId, setLastNotificationId] = useState<string | null>(null);
 
   // 检查是否有任何管理菜单权限
   const hasAnyAdminPermission = 
@@ -60,15 +62,37 @@ export default function AppLayout() {
     if (ws) setCurrentWorkspace(ws);
   };
 
-  // 加载未读通知数量
+  // 加载未读通知数量并检查新通知
   const loadUnreadCount = useCallback(async () => {
     try {
-      const result = await notificationService.getAll({ limit: 1 });
+      const result = await notificationService.getAll({ limit: 5, unreadOnly: true });
       setUnreadCount(result.unreadCount);
+      
+      // 检查是否有新通知并推送到系统
+      if (result.notifications.length > 0) {
+        const latestNotification = result.notifications[0];
+        
+        // 如果有新通知且与上次不同，发送系统推送
+        if (lastNotificationId && latestNotification.id !== lastNotificationId) {
+          // 推送所有新的未读通知
+          result.notifications.forEach((notification: Notification) => {
+            if (notification.id !== lastNotificationId && !notification.isRead) {
+              pushNotificationService.showTaskNotification(
+                notification.type,
+                notification.title,
+                notification.message,
+                notification.task?.id
+              );
+            }
+          });
+        }
+        
+        setLastNotificationId(latestNotification.id);
+      }
     } catch (err) {
       console.error('Failed to load unread count:', err);
     }
-  }, []);
+  }, [lastNotificationId]);
 
   // 初始加载未读数量
   useEffect(() => {
