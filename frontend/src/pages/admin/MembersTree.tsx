@@ -2,12 +2,13 @@
  * 成员任务树页面
  * 只显示当前工作区的项目和成员
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User, FolderOpen } from 'lucide-react';
 import { treeService, MemberNode, MemberTreeResponse } from '../../services/tree';
 import { projectService, Project } from '../../services/project';
 import { treeAnalysisService, TeamAnalysisResult } from '../../services/treeAnalysis';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useAuth } from '../../hooks/useAuth';
 import { TreeNode } from '../../components/tree/TreeNode';
 import { TaskStatsBadge } from '../../components/tree/TaskStatsBadge';
 import { MemberDetailPanel } from '../../components/tree/MemberDetailPanel';
@@ -19,6 +20,7 @@ import './MembersTree.css';
 export default function MembersTree() {
   // 使用全局当前工作区，确保工作区隔离
   const { currentWorkspace, workspaceRole } = usePermissions();
+  const { user: currentUser } = useAuth();
   
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>('');
