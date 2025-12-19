@@ -61,7 +61,7 @@ export default function Projects() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [hideCompleted, setHideCompleted] = useState(false);
+  const [hideCompleted, setHideCompleted] = useState(true); // 默认隐藏已完成项目
   const [showCompletedSection, setShowCompletedSection] = useState(false);
 
   // Modals
