@@ -18,7 +18,7 @@ import './MembersTree.css';
 
 export default function MembersTree() {
   // 使用全局当前工作区，确保工作区隔离
-  const { currentWorkspace } = usePermissions();
+  const { currentWorkspace, workspaceRole } = usePermissions();
   
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<string>('');
@@ -146,8 +146,30 @@ export default function MembersTree() {
     return { label: role, color: '#059669' };
   };
 
+  // 检查是否可以编辑成员（owner、director 可以编辑所有；manager 只能编辑自己负责的项目）
+  const canEditMembers = (): boolean => {
+    if (!workspaceRole || !treeData) return false;
+    
+    // owner 和 director 可以编辑所有项目
+    if (['owner', 'director'].includes(workspaceRole)) {
+      return true;
+    }
+    
+    // manager 只能编辑自己负责的项目（需要检查项目负责人）
+    // 注意：这里需要从 treeData 中获取 leader 信息
+    // 如果当前用户是项目负责人，则可以编辑
+    // 由于前端无法直接获取当前用户ID，这里先允许 manager 显示编辑按钮
+    // 后端会进行权限验证
+    if (workspaceRole === 'manager') {
+      return true; // 显示按钮，后端会验证
+    }
+    
+    return false;
+  };
+
   const renderMemberNode = (member: MemberNode, level: number = 0): JSX.Element => {
     const roleInfo = getRoleLabel(member.role);
+    const canEdit = canEditMembers();
 
     return (
       <TreeNode
@@ -163,13 +185,15 @@ export default function MembersTree() {
             >
               {roleInfo.label}
             </span>
-            <button
-              className="edit-member-btn"
-              onClick={(e) => handleEditMember(member, e)}
-              title="编辑成员信息"
-            >
-              <Edit2 size={12} />
-            </button>
+            {canEdit && (
+              <button
+                className="edit-member-btn"
+                onClick={(e) => handleEditMember(member, e)}
+                title="编辑成员信息"
+              >
+                <Edit2 size={12} />
+              </button>
+            )}
           </span>
         }
         badge={<TaskStatsBadge stats={member.taskStats} compact />}

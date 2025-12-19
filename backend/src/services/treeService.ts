@@ -37,6 +37,10 @@ export const treeService = {
       throw new AppError('无权访问此项目', 403, 'ACCESS_DENIED');
     }
 
+    const userRole = workspaceMembership.role;
+    const isObserver = userRole === 'observer';
+    const isMember = userRole === 'member';
+
     // 3. 构建项目团队成员列表
     const teamMembers: Array<{
       userId: string;
@@ -99,29 +103,55 @@ export const treeService = {
       }
     }
 
+    // 3.5 如果是 member，获取用户的下属列表（用于过滤可见成员）
+    let visibleUserIds: string[] = [];
+    if (isMember) {
+      // 获取用户在项目中的直接下属
+      const subordinates = await projectMemberRepository.findAllSubordinates(projectId, userId);
+      visibleUserIds = [userId, ...subordinates];
+    }
+
     // 4. 构建成员节点
     const children: MemberNode[] = [];
     
     for (const member of teamMembers) {
-      // 获取该成员在此项目中的任务（只统计主任务，排除子任务）
-      const tasks = await prisma.task.findMany({
-        where: { 
-          projectId, 
-          assigneeId: member.userId,
-          parentId: null,  // 排除子任务
-        },
-        select: {
-          id: true,
-          title: true,
-          status: true,
-          priority: true,
-          dueDate: true,
-        },
-        orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
-      });
+      // 如果是 member，只显示自己和下属
+      if (isMember && !visibleUserIds.includes(member.userId)) {
+        continue;
+      }
 
-      // 计算任务统计
-      const taskStats = this.calculateTaskStats(tasks);
+      // Observer: 不获取任务详情，只显示成员基本信息
+      let tasks: Array<{
+        id: string;
+        title: string;
+        status: string;
+        priority: string;
+        dueDate: Date | null;
+      }> = [];
+      
+      if (!isObserver) {
+        // 获取该成员在此项目中的任务（只统计主任务，排除子任务）
+        tasks = await prisma.task.findMany({
+          where: { 
+            projectId, 
+            assigneeId: member.userId,
+            parentId: null,  // 排除子任务
+          },
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            priority: true,
+            dueDate: true,
+          },
+          orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+        });
+      }
+
+      // 计算任务统计（Observer 不显示任务统计）
+      const taskStats = isObserver 
+        ? { total: 0, todo: 0, inProgress: 0, review: 0, blocked: 0, done: 0 }
+        : this.calculateTaskStats(tasks);
 
       // 显示正确的项目角色
       let displayRole = member.role;
@@ -154,14 +184,18 @@ export const treeService = {
     }
 
     // 5. 计算整体统计（只统计主任务，排除子任务，避免歧义）
-    const allTasks = await prisma.task.findMany({
-      where: { 
-        projectId,
-        parentId: null,  // 排除子任务
-      },
-      select: { status: true },
-    });
-    const overallStats = this.calculateTaskStats(allTasks);
+    // Observer 不显示整体统计
+    let overallStats: TaskStats = { total: 0, todo: 0, inProgress: 0, review: 0, blocked: 0, done: 0 };
+    if (!isObserver) {
+      const allTasks = await prisma.task.findMany({
+        where: { 
+          projectId,
+          parentId: null,  // 排除子任务
+        },
+        select: { status: true },
+      });
+      overallStats = this.calculateTaskStats(allTasks);
+    }
 
     // 6. 获取工作区信息
     const workspace = await workspaceRepository.findById(project.workspaceId);

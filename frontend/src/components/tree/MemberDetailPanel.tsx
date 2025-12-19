@@ -3,6 +3,7 @@
  */
 import { MemberNode } from '../../services/tree';
 import { Link } from 'react-router-dom';
+import { usePermissions } from '../../hooks/usePermissions';
 import './MemberDetailPanel.css';
 
 interface MemberDetailPanelProps {
@@ -31,6 +32,9 @@ const priorityLabels: Record<string, { label: string; color: string }> = {
 };
 
 export function MemberDetailPanel({ member, onClose }: MemberDetailPanelProps) {
+  const { workspaceRole } = usePermissions();
+  const isObserver = workspaceRole === 'observer';
+
   if (!member) {
     return (
       <div className="member-detail-panel empty">
@@ -59,57 +63,69 @@ export function MemberDetailPanel({ member, onClose }: MemberDetailPanelProps) {
         <button className="close-btn" onClick={onClose}>✕</button>
       </div>
 
-      <div className="panel-section">
-        <h4>📊 任务统计</h4>
-        <div className="stats-grid">
-          <div className="stat-card">
-            <span className="stat-value">{member.taskStats.total}</span>
-            <span className="stat-label">主任务</span>
+      {/* Observer 不显示任务统计和任务列表 */}
+      {!isObserver && (
+        <>
+          <div className="panel-section">
+            <h4>📊 任务统计</h4>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <span className="stat-value">{member.taskStats.total}</span>
+                <span className="stat-label">主任务</span>
+              </div>
+              <div className="stat-card done">
+                <span className="stat-value">{member.taskStats.done}</span>
+                <span className="stat-label">已完成</span>
+              </div>
+              <div className="stat-card in-progress">
+                <span className="stat-value">{member.taskStats.inProgress}</span>
+                <span className="stat-label">进行中</span>
+              </div>
+            </div>
           </div>
-          <div className="stat-card done">
-            <span className="stat-value">{member.taskStats.done}</span>
-            <span className="stat-label">已完成</span>
-          </div>
-          <div className="stat-card in-progress">
-            <span className="stat-value">{member.taskStats.inProgress}</span>
-            <span className="stat-label">进行中</span>
-          </div>
-        </div>
-      </div>
 
-      {totalSubordinates > 0 && (
-        <div className="panel-section">
-          <h4>👥 下属</h4>
-          <p className="subordinate-count">共 {totalSubordinates} 人</p>
-        </div>
+          {totalSubordinates > 0 && (
+            <div className="panel-section">
+              <h4>👥 下属</h4>
+              <p className="subordinate-count">共 {totalSubordinates} 人</p>
+            </div>
+          )}
+
+          <div className="panel-section">
+            <h4>📋 任务列表 ({member.tasks.length})</h4>
+            {member.tasks.length === 0 ? (
+              <p className="empty-text">暂无任务</p>
+            ) : (
+              <ul className="task-list">
+                {member.tasks.map((task) => (
+                  <li key={task.id} className="task-item">
+                    <Link to={`/tasks/${task.id}`} className="task-link">
+                      <span
+                        className="task-status"
+                        style={{ backgroundColor: statusLabels[task.status]?.color }}
+                      />
+                      <span className="task-title">{task.title}</span>
+                      <span
+                        className="task-priority"
+                        style={{ color: priorityLabels[task.priority]?.color }}
+                      >
+                        {priorityLabels[task.priority]?.label}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </>
       )}
 
-      <div className="panel-section">
-        <h4>📋 任务列表 ({member.tasks.length})</h4>
-        {member.tasks.length === 0 ? (
-          <p className="empty-text">暂无任务</p>
-        ) : (
-          <ul className="task-list">
-            {member.tasks.map((task) => (
-              <li key={task.id} className="task-item">
-                <Link to={`/tasks/${task.id}`} className="task-link">
-                  <span
-                    className="task-status"
-                    style={{ backgroundColor: statusLabels[task.status]?.color }}
-                  />
-                  <span className="task-title">{task.title}</span>
-                  <span
-                    className="task-priority"
-                    style={{ color: priorityLabels[task.priority]?.color }}
-                  >
-                    {priorityLabels[task.priority]?.label}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {/* Observer 只显示基本信息 */}
+      {isObserver && (
+        <div className="panel-section">
+          <p className="empty-text">观察者只能查看成员基本信息</p>
+        </div>
+      )}
     </div>
   );
 }

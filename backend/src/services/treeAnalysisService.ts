@@ -4,6 +4,7 @@
  */
 import { treeService } from './treeService';
 import { workspaceRepository } from '../repositories/workspaceRepository';
+import { projectRepository } from '../repositories/projectRepository';
 import { AppError } from '../middleware/errorHandler';
 import { logger } from '../infra/logger';
 import { config } from '../infra/config';
@@ -51,9 +52,30 @@ function getProvider(): AiProvider {
 export const treeAnalysisService = {
   /**
    * 分析团队任务树
+   * 权限：owner、director 可用；manager 只能分析自己负责的项目
    */
   async analyzeTeamTree(userId: string, projectId: string): Promise<TeamTreeAnalysisResult> {
-    // 1. 获取成员树数据
+    // 1. 权限检查
+    const project = await projectRepository.findById(projectId);
+    if (!project) {
+      throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    const workspaceMembership = await workspaceRepository.getMembership(project.workspaceId, userId);
+    if (!workspaceMembership) {
+      throw new AppError('无权访问此项目', 403, 'ACCESS_DENIED');
+    }
+
+    // 权限检查：owner、director 可用；manager 只能分析自己负责的项目
+    const canAnalyze = 
+      ['owner', 'director'].includes(workspaceMembership.role) ||
+      (workspaceMembership.role === 'manager' && project.leaderId === userId);
+
+    if (!canAnalyze) {
+      throw new AppError('无权使用AI团队分析，需要项目管理员权限', 403, 'REQUIRE_PROJECT_ADMIN');
+    }
+
+    // 2. 获取成员树数据
     const treeData = await treeService.getMemberTree(userId, projectId);
 
     // 2. 计算统计信息

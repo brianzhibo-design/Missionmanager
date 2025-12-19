@@ -107,8 +107,27 @@ export const adminService = {
     newRole: string,
     managerId?: string | null
   ) {
-    // 1. 验证操作者权限
-    await this.requireProjectAdmin(projectId, operatorId);
+    // 1. 获取项目信息
+    const project = await projectRepository.findById(projectId);
+    if (!project) {
+      throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    // 2. 验证操作者权限
+    const workspaceMembership = await workspaceRepository.getMembership(project.workspaceId, operatorId);
+    if (!workspaceMembership) {
+      throw new AppError('无权访问此项目', 403, 'ACCESS_DENIED');
+    }
+
+    // 3. 如果是 manager，只能编辑自己负责的项目
+    if (workspaceMembership.role === 'manager' && project.leaderId !== operatorId) {
+      throw new AppError('只能编辑自己负责的项目', 403, 'CAN_ONLY_EDIT_OWN_PROJECT');
+    }
+
+    // 4. owner 和 director 可以编辑所有项目，继续检查项目管理员权限
+    if (!['owner', 'director'].includes(workspaceMembership.role)) {
+      await this.requireProjectAdmin(projectId, operatorId);
+    }
 
     // 2. 验证角色值 - 允许预设角色和自定义角色
     const presetRoles = ['project_admin', 'team_lead', 'senior', 'member', 'observer'];
