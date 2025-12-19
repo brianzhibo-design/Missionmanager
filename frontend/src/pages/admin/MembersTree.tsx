@@ -153,7 +153,7 @@ export default function MembersTree() {
       <TreeNode
         key={member.userId}
         level={level}
-        icon={<Avatar name={member.name} src={member.avatar} size="sm" />}
+        icon={<Avatar name={member.name} src={member.avatar ?? undefined} size="sm" />}
         label={
           <span className="member-label">
             <span className="member-name">{member.name}</span>
@@ -268,7 +268,7 @@ export default function MembersTree() {
                       负责人
                     </span>
                     <div className="team-member-item leader">
-                      <Avatar name={treeData.leader.name} src={treeData.leader.avatar} size="sm" />
+                      <Avatar name={treeData.leader.name} src={treeData.leader.avatar ?? undefined} size="sm" />
                       <div className="member-details">
                         <span className="member-name">{treeData.leader.name}</span>
                         <span className="member-email">{treeData.leader.email}</span>
@@ -287,7 +287,7 @@ export default function MembersTree() {
                     <div className="team-members-list">
                       {treeData.teamMembers.filter(m => !m.isLeader).map(member => (
                         <div key={member.userId} className="team-member-item">
-                          <Avatar name={member.name} src={member.avatar} size="sm" />
+                          <Avatar name={member.name} src={member.avatar ?? undefined} size="sm" />
                           <span className="member-name">{member.name}</span>
                           <span className="member-role-tag">{member.role}</span>
                         </div>
