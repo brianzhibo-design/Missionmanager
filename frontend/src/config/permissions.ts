@@ -99,36 +99,102 @@ export function compareWorkspaceRoles(role1: string, role2: string): number {
   return index1 - index2;
 }
 
-// 角色显示名称（真实世界组织架构命名）
+// 角色显示名称（江湖风格命名）
 export const ROLE_LABELS: Record<string, string> = {
   // 工作区角色
-  owner: '掌门',
-  director: '长老',
-  manager: '堂主',
-  member: '弟子',
-  observer: '俗客',
+  owner: '扛把子',
+  director: '狗头军师',
+  manager: '带头大哥',
+  member: '少侠',
+  observer: '吃瓜群侠',
   // 项目角色
-  lead: '项目负责人',
-  senior: '核心成员',
+  lead: '掌舵人',
+  project_admin: '掌舵人',
+  team_lead: '老司机',
+  senior: '扫地僧',
   // 兼容旧角色名
-  super_admin: '长老',
-  admin: '堂主',
-  guest: '俗客',
-  project_admin: '项目负责人',
-  team_lead: '核心成员',
+  super_admin: '狗头军师',
+  admin: '带头大哥',
+  guest: '吃瓜群侠',
+};
+
+// 项目角色显示名称（用于区分项目中的 member 和 observer）
+export const PROJECT_ROLE_LABELS: Record<string, string> = {
+  lead: '掌舵人',
+  project_admin: '掌舵人',
+  team_lead: '老司机',
+  senior: '扫地僧',
+  member: '行者', // 项目成员
+  observer: '看客', // 项目观察者
+};
+
+// 角色图标
+export const ROLE_ICONS: Record<string, string> = {
+  // 工作区角色
+  owner: '💪',
+  director: '🐕',
+  manager: '🤝',
+  member: '🗡️', // 工作区成员
+  observer: '🍉', // 工作区观察者
+  // 项目角色
+  lead: '🚢',
+  project_admin: '🚢',
+  team_lead: '🚗',
+  senior: '🧹',
+  // 兼容旧角色名
+  super_admin: '🐕',
+  admin: '🤝',
+  guest: '🍉',
+};
+
+// 角色语录（可用于 tooltip 或欢迎语）
+export const ROLE_QUOTES: Record<string, string> = {
+  // 工作区角色
+  owner: '这事儿我兜底',
+  director: '主公，臣有一计',
+  manager: '兄弟们，上！',
+  member: '在下初来乍到，多多关照',
+  observer: '诸位继续，我就看看',
+  // 项目角色
+  lead: '方向我来定',
+  project_admin: '方向我来定',
+  team_lead: '这条路我熟',
+  senior: '贫僧只是随便扫扫',
+};
+
+// 项目角色语录
+export const PROJECT_ROLE_QUOTES: Record<string, string> = {
+  lead: '方向我来定',
+  project_admin: '方向我来定',
+  team_lead: '这条路我熟',
+  senior: '贫僧只是随便扫扫',
+  member: '路在脚下',
+  observer: '你们继续，我听着呢',
 };
 
 // 角色描述（用于选择时显示）
 export const ROLE_DESCRIPTIONS: Record<string, string> = {
   // 工作区角色
-  owner: '公司所有者，拥有最终决策权，可管理所有设置和成员',
-  director: '管理多个团队，有招聘和部分解雇权，可查看全局分析',
-  manager: '管理一个团队，可以招人，负责项目交付，可查看团队数据',
-  member: '执行具体工作，对自己的任务负责，可以提建议',
-  observer: '临时参与者，主要是了解情况、学习或提供建议',
+  owner: '💪 这事儿我兜底 - 拥有最终决策权，可管理所有设置和成员',
+  director: '🐕 主公，臣有一计 - 管理多个团队，有招聘和部分解雇权，可查看全局分析',
+  manager: '🤝 兄弟们，上！ - 管理一个团队，可以招人，负责项目交付，可查看团队数据',
+  member: '🗡️ 在下初来乍到，多多关照 - 执行具体工作，对自己的任务负责，可以提建议',
+  observer: '🍉 诸位继续，我就看看 - 临时参与者，主要是了解情况、学习或提供建议',
   // 项目角色
-  lead: '负责项目整体进度和团队管理',
-  senior: '可分配任务，协助管理团队',
+  lead: '🚢 方向我来定 - 负责项目整体进度和团队管理',
+  project_admin: '🚢 方向我来定 - 负责项目整体进度和团队管理',
+  team_lead: '🚗 这条路我熟 - 可分配任务，协助管理团队',
+  senior: '🧹 贫僧只是随便扫扫 - 经验丰富的核心成员',
+};
+
+// 项目角色描述
+export const PROJECT_ROLE_DESCRIPTIONS: Record<string, string> = {
+  lead: '🚢 方向我来定 - 负责项目整体进度和团队管理',
+  project_admin: '🚢 方向我来定 - 负责项目整体进度和团队管理',
+  team_lead: '🚗 这条路我熟 - 可分配任务，协助管理团队',
+  senior: '🧹 贫僧只是随便扫扫 - 经验丰富的核心成员',
+  member: '🚶 路在脚下 - 参与项目任务执行',
+  observer: '👀 你们继续，我听着呢 - 只能查看项目内容，不能编辑',
 };
 
 // 角色徽章颜色
@@ -152,15 +218,17 @@ export const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
 
 // 工作区角色选项（用于邀请/修改角色时）
 export const WORKSPACE_ROLE_OPTIONS = [
-  { value: 'observer', label: '俗客', description: '可查看项目，提供建议和反馈' },
-  { value: 'member', label: '弟子', description: '可创建项目和任务，全面参与协作' },
-  { value: 'manager', label: '堂主', description: '可邀请成员，管理项目进度，查看团队数据' },
-  { value: 'director', label: '长老', description: '可管理团队，查看全局数据和分析' },
+  { value: 'observer', label: '🍉 吃瓜群侠', description: '诸位继续，我就看看 - 可查看项目，提供建议和反馈' },
+  { value: 'member', label: '🗡️ 少侠', description: '在下初来乍到，多多关照 - 可创建项目和任务，全面参与协作' },
+  { value: 'manager', label: '🤝 带头大哥', description: '兄弟们，上！ - 可邀请成员，管理项目进度，查看团队数据' },
+  { value: 'director', label: '🐕 狗头军师', description: '主公，臣有一计 - 可管理团队，查看全局数据和分析' },
 ];
 
 // 项目角色选项
 export const PROJECT_ROLE_OPTIONS = [
-  { value: 'member', label: '项目成员', description: '参与项目任务执行' },
-  { value: 'senior', label: '核心成员', description: '可分配任务，协助项目管理' },
-  { value: 'lead', label: '项目负责人', description: '负责项目整体进度和决策' },
+  { value: 'member', label: '🚶 行者', description: '路在脚下 - 参与项目任务执行' },
+  { value: 'senior', label: '🧹 扫地僧', description: '贫僧只是随便扫扫 - 经验丰富的核心成员' },
+  { value: 'team_lead', label: '🚗 老司机', description: '这条路我熟 - 可分配任务，协助项目管理' },
+  { value: 'lead', label: '🚢 掌舵人', description: '方向我来定 - 负责项目整体进度和决策' },
+  { value: 'project_admin', label: '🚢 掌舵人', description: '方向我来定 - 负责项目整体进度和决策' },
 ];
