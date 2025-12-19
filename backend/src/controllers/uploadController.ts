@@ -6,12 +6,28 @@ import prisma from '../lib/prisma';
 
 const router = Router();
 
+/**
+ * 修复中文文件名编码问题
+ * multer 以 latin1 编码接收文件名，需要转换为 utf8
+ */
+function decodeFileName(filename: string): string {
+  try {
+    // 尝试解码 latin1 -> utf8
+    return Buffer.from(filename, 'latin1').toString('utf8');
+  } catch {
+    return filename;
+  }
+}
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
     fileSize: 50 * 1024 * 1024, // 50MB
   },
   fileFilter: (_req, file, cb) => {
+    // 修复文件名编码
+    file.originalname = decodeFileName(file.originalname);
+    
     const allowedTypes = [
       'image/jpeg', 'image/png', 'image/gif', 'image/webp',
       'video/mp4', 'video/webm',
