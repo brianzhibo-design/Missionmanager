@@ -1,6 +1,6 @@
 export interface AIConfig {
   enabled: boolean;
-  provider: 'anthropic' | 'openai' | 'mock';
+  provider: 'anthropic' | 'openai' | 'deepseek' | 'mock';
   model: string;
   timeout: number;
   maxRetries: number;
@@ -25,5 +25,32 @@ export const aiConfig: AIConfig = {
 };
 
 export function isAIEnabled(): boolean {
-  return aiConfig.enabled && !!process.env.ANTHROPIC_API_KEY;
+  if (!aiConfig.enabled) return false;
+  
+  // 根据配置的提供商检查对应的 API Key
+  switch (aiConfig.provider) {
+    case 'anthropic':
+      return !!process.env.ANTHROPIC_API_KEY;
+    case 'openai':
+      return !!process.env.OPENAI_API_KEY;
+    case 'deepseek':
+      return !!process.env.DEEPSEEK_API_KEY;
+    case 'mock':
+      return true; // mock 模式始终可用
+    default:
+      return false;
+  }
+}
+
+export function getActiveApiKey(): string {
+  switch (aiConfig.provider) {
+    case 'anthropic':
+      return process.env.ANTHROPIC_API_KEY || '';
+    case 'openai':
+      return process.env.OPENAI_API_KEY || '';
+    case 'deepseek':
+      return process.env.DEEPSEEK_API_KEY || '';
+    default:
+      return '';
+  }
 }

@@ -84,6 +84,12 @@ async function callAI(
   type: string,
   options: CallAIOptions = {}
 ): Promise<string> {
+  // Mock 模式：返回模板响应
+  if (aiConfig.provider === 'mock') {
+    log.info(`AI ${type} 使用 Mock 模式`);
+    return generateMockResponse(type, userPrompt);
+  }
+
   if (!isAIEnabled()) {
     throw new AIError('AI 功能当前已禁用', AIErrorCodes.DISABLED);
   }
@@ -135,6 +141,86 @@ async function callAI(
       throw new AIError('AI 服务暂时不可用，请稍后重试', AIErrorCodes.API_ERROR);
     }
   });
+}
+
+// ==================== Mock 响应生成 ====================
+
+function generateMockResponse(type: string, userPrompt: string): string {
+  // 根据类型返回不同的模板响应
+  switch (type) {
+    case 'task_optimize':
+    case 'optimize_task':
+      return JSON.stringify({
+        optimizedTitle: extractTitleFromPrompt(userPrompt),
+        optimizedDescription: '任务目标:\n明确完成本任务的具体目标和预期成果。\n\n具体步骤:\n1. 分析任务需求和背景\n2. 制定执行计划\n3. 执行并跟踪进度\n4. 验收和总结',
+        suggestions: [
+          '建议添加明确的截止日期',
+          '建议拆分为更小的子任务',
+          '建议指定具体负责人'
+        ],
+        priority: 'MEDIUM',
+        estimatedHours: 8
+      });
+    
+    case 'project_suggest':
+    case 'suggest_project_tasks':
+      return JSON.stringify({
+        optimizedTitle: extractTitleFromPrompt(userPrompt),
+        optimizedDescription: '项目描述：本项目旨在实现既定目标，通过有序的任务规划和执行，确保项目顺利完成。',
+        suggestedTasks: [
+          { title: '项目规划与需求分析', description: '明确项目目标、范围和关键里程碑', priority: 'HIGH', estimatedDays: 2, order: 1 },
+          { title: '资源准备与分配', description: '确定所需资源并进行合理分配', priority: 'HIGH', estimatedDays: 1, order: 2 },
+          { title: '核心功能实现', description: '完成项目的核心功能开发', priority: 'MEDIUM', estimatedDays: 5, order: 3 },
+          { title: '测试与优化', description: '进行全面测试并优化问题', priority: 'MEDIUM', estimatedDays: 2, order: 4 },
+          { title: '项目验收与总结', description: '完成项目验收并总结经验', priority: 'LOW', estimatedDays: 1, order: 5 }
+        ],
+        reasoning: '基于项目类型推荐的标准化任务流程'
+      });
+    
+    case 'task_analysis':
+      return JSON.stringify({
+        progress_assessment: {
+          completion_percentage: 50,
+          overall_status: '进展正常',
+          key_findings: ['任务进度正常', '建议继续保持当前进度']
+        },
+        next_actions: [
+          { action: '继续执行当前计划', priority: 'high', reason: '保持进度' },
+          { action: '定期检查进度', priority: 'medium', reason: '及时发现问题' }
+        ],
+        risks: [],
+        insights: ['当前进展顺利，建议保持'],
+        summary: 'AI 分析完成（模拟模式）'
+      });
+    
+    case 'daily_suggestions':
+      return JSON.stringify({
+        greeting: '早上好！',
+        summary: '这是 AI 助手的模拟建议。',
+        topPriorities: ['完成今日重要任务', '检查待办事项'],
+        suggestions: ['建议优先处理紧急任务', '合理安排工作时间'],
+        encouragement: '继续保持，加油！'
+      });
+    
+    default:
+      return JSON.stringify({
+        success: true,
+        message: 'AI 分析完成（模拟模式）',
+        data: {}
+      });
+  }
+}
+
+function extractTitleFromPrompt(prompt: string): string {
+  // 尝试从 prompt 中提取标题
+  const titleMatch = prompt.match(/标题[：:]\s*(.+?)[\n\r]/);
+  if (titleMatch) return titleMatch[1].trim();
+  
+  const projectMatch = prompt.match(/项目[：:]\s*(.+?)[\n\r]/);
+  if (projectMatch) return projectMatch[1].trim();
+  
+  // 返回 prompt 的前 50 个字符
+  return prompt.slice(0, 50).replace(/[\n\r]/g, ' ').trim();
 }
 
 // ==================== JSON 解析 ====================
