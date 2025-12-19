@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, LayoutGrid, List, Crown, Sparkles, Check, X, Loader2 } from 'lucide-react';
+import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, LayoutGrid, List, Crown, Sparkles, Check, X, Loader2, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
 import { projectService, SuggestedTask, InitialTask } from '../services/project';
 import { workspaceService, WorkspaceMember } from '../services/workspace';
@@ -61,6 +61,8 @@ export default function Projects() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [hideCompleted, setHideCompleted] = useState(false);
+  const [showCompletedSection, setShowCompletedSection] = useState(false);
 
   // Modals
   const [showCreateProject, setShowCreateProject] = useState(false);
@@ -240,17 +242,31 @@ export default function Projects() {
     setShowAiSuggestions(false);
   };
 
-  const filteredProjects = projects.filter(project =>
-    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    project.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const getProgress = (project: Project) => {
     const total = project.taskStats?.total || 0;
     const done = project.taskStats?.done || 0;
     if (total === 0) return 0;
     return Math.round((done / total) * 100);
   };
+
+  // 检查项目是否100%完成
+  const isProjectCompleted = (project: Project) => {
+    const total = project.taskStats?.total || 0;
+    const done = project.taskStats?.done || 0;
+    return total > 0 && done === total;
+  };
+
+  // 分离已完成和进行中的项目
+  const searchFiltered = projects.filter(project =>
+    project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    project.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const completedProjects = searchFiltered.filter(isProjectCompleted);
+  const activeProjects = searchFiltered.filter(p => !isProjectCompleted(p));
+  
+  // 根据隐藏状态决定显示哪些项目
+  const filteredProjects = hideCompleted ? activeProjects : searchFiltered;
 
   if (loading) {
     return (
@@ -381,21 +397,34 @@ export default function Projects() {
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <div className="view-switcher">
-          <button 
-            className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-            onClick={() => setViewMode('grid')}
-            title="网格视图"
-          >
-            <LayoutGrid size={18} />
-          </button>
-          <button 
-            className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-            onClick={() => setViewMode('list')}
-            title="列表视图"
-          >
-            <List size={18} />
-          </button>
+        <div className="toolbar-actions">
+          {completedProjects.length > 0 && (
+            <button
+              className={`hide-completed-btn ${hideCompleted ? 'active' : ''}`}
+              onClick={() => setHideCompleted(!hideCompleted)}
+              title={hideCompleted ? '显示已完成项目' : '隐藏已完成项目'}
+            >
+              {hideCompleted ? <Eye size={16} /> : <EyeOff size={16} />}
+              <span>{hideCompleted ? '显示已完成' : '隐藏已完成'}</span>
+              <span className="completed-count">{completedProjects.length}</span>
+            </button>
+          )}
+          <div className="view-switcher">
+            <button 
+              className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+              title="网格视图"
+            >
+              <LayoutGrid size={18} />
+            </button>
+            <button 
+              className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+              title="列表视图"
+            >
+              <List size={18} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -486,6 +515,62 @@ export default function Projects() {
               </Link>
             );
           })}
+        </div>
+      )}
+
+      {/* 已完成项目折叠区域 */}
+      {hideCompleted && completedProjects.length > 0 && (
+        <div className="completed-projects-section">
+          <button 
+            className="completed-section-header"
+            onClick={() => setShowCompletedSection(!showCompletedSection)}
+          >
+            {showCompletedSection ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+            <CheckCircle2 size={16} className="completed-icon" />
+            <span>已完成的项目</span>
+            <span className="completed-badge">{completedProjects.length}</span>
+          </button>
+          
+          {showCompletedSection && (
+            <div className={`projects-${viewMode} completed-projects-list`}>
+              {completedProjects.map((project) => {
+                const color = getProjectColor(project.name);
+                
+                return (
+                  <Link 
+                    key={project.id} 
+                    to={`/projects/${project.id}`}
+                    className="project-card card card-interactive completed"
+                  >
+                    <div className="project-card-header">
+                      <div 
+                        className="project-icon"
+                        style={{ backgroundColor: color.bg, color: color.text }}
+                      >
+                        {project.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="project-info">
+                        <h3 className="project-name">{project.name}</h3>
+                      </div>
+                    </div>
+                    <div className="project-progress-section">
+                      <div className="project-progress-bar">
+                        <div className="project-progress-fill" style={{ width: '100%' }} />
+                      </div>
+                      <span className="project-progress-text">100%</span>
+                    </div>
+                    <div className="project-stats">
+                      <div className="project-stat">
+                        <span className="stat-icon"><CheckCircle2 size={14} /></span>
+                        <span className="stat-value">{project.taskStats?.done || 0}</span>
+                        <span className="stat-label">已完成</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

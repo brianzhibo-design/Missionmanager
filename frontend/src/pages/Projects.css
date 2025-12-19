@@ -151,6 +151,132 @@
   stroke-width: 2;
 }
 
+/* 工具栏右侧操作区 */
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* 隐藏已完成按钮 */
+.hide-completed-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--bg-surface-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hide-completed-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-secondary);
+}
+
+.hide-completed-btn.active {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: #10B981;
+  color: #10B981;
+}
+
+.hide-completed-btn .completed-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--bg-surface-secondary);
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.hide-completed-btn.active .completed-count {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+/* ========================================
+ * 已完成项目折叠区域
+ * ======================================== */
+.completed-projects-section {
+  margin-top: var(--space-4);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+
+.completed-section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-4);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(5, 150, 105, 0.05));
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.completed-section-header:hover {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.08));
+  color: var(--text-primary);
+}
+
+.completed-section-header .completed-icon {
+  color: #10B981;
+}
+
+.completed-section-header .completed-badge {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 22px;
+  padding: 0 8px;
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.completed-projects-list {
+  padding: var(--space-3);
+  background: rgba(16, 185, 129, 0.02);
+}
+
+.completed-projects-list .project-card {
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+}
+
+.completed-projects-list .project-card:hover {
+  opacity: 1;
+}
+
+.completed-projects-list .project-card.completed {
+  border-left: 3px solid #10B981;
+}
+
+.completed-projects-list .project-progress-fill {
+  background: linear-gradient(90deg, #10B981, #059669);
+}
+
 /* ========================================
  * 项目网格
  * ======================================== */
@@ -739,6 +865,42 @@
 
   .view-switcher {
     display: none;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .hide-completed-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .hide-completed-btn span:not(.completed-count) {
+    display: none;
+  }
+
+  .hide-completed-btn .completed-count {
+    margin-left: 0;
+  }
+
+  .completed-projects-section {
+    margin: 12px 0 0;
+    border-radius: 0;
+  }
+
+  .completed-section-header {
+    padding: 14px 16px;
+  }
+
+  .completed-projects-list {
+    padding: 0;
+  }
+
+  .completed-projects-list .project-card {
+    border-left: 3px solid #10B981;
+    border-radius: 0;
   }
 
   .projects-grid,
