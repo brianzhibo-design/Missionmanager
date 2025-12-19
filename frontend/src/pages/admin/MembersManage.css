@@ -83,6 +83,13 @@
   gap: 12px;
 }
 
+.member-cell .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .member-avatar {
   width: 36px;
   height: 36px;
@@ -245,6 +252,13 @@
 .member-info-card .member-email {
   font-size: 13px;
   color: var(--text-secondary);
+}
+
+.member-info-card .avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 /* 角色选项 */

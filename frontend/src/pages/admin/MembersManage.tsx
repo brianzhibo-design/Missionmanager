@@ -180,7 +180,7 @@ export default function MembersManage() {
                   <tr key={member.userId}>
                     <td>
                       <div className="member-cell">
-                        <Avatar name={member.user.name} size="sm" />
+                        <Avatar name={member.user.name} src={member.user.avatar} size="sm" />
                         <span className="member-name">{member.user.name}</span>
                       </div>
                     </td>
@@ -279,7 +279,7 @@ export default function MembersManage() {
         {selectedMember && (
           <form onSubmit={handleUpdateRole}>
             <div className="member-info-card">
-              <Avatar name={selectedMember.user.name} size="lg" />
+              <Avatar name={selectedMember.user.name} src={selectedMember.user.avatar} size="lg" />
               <div>
                 <div className="member-name">{selectedMember.user.name}</div>
                 <div className="member-email">{selectedMember.user.email}</div>
