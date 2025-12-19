@@ -139,6 +139,7 @@ export const treeService = {
         userId: member.userId,
         name: member.name,
         email: member.email,
+        avatar: member.avatar,
         role: displayRole,
         taskStats,
         tasks: tasks.map((t) => ({
@@ -191,6 +192,7 @@ export const treeService = {
       userId: 'team-root',
       name: project.name + ' 团队',
       email: '',
+      avatar: null,
       role: 'team',
       taskStats: overallStats,
       tasks: [],
