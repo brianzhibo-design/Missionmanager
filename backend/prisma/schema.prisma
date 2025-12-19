@@ -39,7 +39,6 @@ model User {
   assignedTasks      Task[]                      @relation("TaskAssignee")
   createdTasks       Task[]                      @relation("TaskCreator")
   workspaces         WorkspaceUser[]
-  dailyReports       DailyReport[]
 
   @@map("users")
 }
@@ -52,7 +51,6 @@ model Workspace {
   updatedAt         DateTime           @updatedAt @map("updated_at")
   broadcastMessages BroadcastMessage[]
   coffeeLotteries   CoffeeLottery[]
-  dailyReports      DailyReport[]
   projects          Project[]
   reports           Report[]
   members           WorkspaceUser[]
@@ -287,32 +285,4 @@ model Report {
   @@index([workspaceId, type])
   @@index([workspaceId, startDate])
   @@map("reports")
-}
-
-// 日报（极简版）
-model DailyReport {
-  id          String    @id @default(cuid())
-  date        DateTime  @db.Date // 报告日期
-  completed   String    // 今日完成
-  planned     String    // 明日计划
-  issues      String?   // 问题/风险（可选）
-  workHours   Float?    @map("work_hours") // 工时（可选）
-  
-  // 自动统计的任务数据
-  taskStats   Json?     @map("task_stats") // { completed: [], inProgress: [], completedCount, inProgressCount }
-  
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
-  
-  // 关联
-  userId      String    @map("user_id")
-  workspaceId String    @map("workspace_id")
-  
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  
-  @@unique([userId, workspaceId, date]) // 每人每天只能提交一份
-  @@index([workspaceId, date])
-  @@index([userId, date])
-  @@map("daily_reports")
 }

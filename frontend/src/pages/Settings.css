@@ -291,6 +291,11 @@
 
 .theme-icon {
   font-size: 28px;
+  color: var(--text-primary);
+}
+
+.theme-option.active .theme-icon {
+  color: var(--accent-primary);
 }
 
 .theme-name {

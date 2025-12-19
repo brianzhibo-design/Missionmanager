@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { authService, UserProfile } from '../services/auth';
 import { 
-  Mail, Lock, Phone, ClipboardList,
+  Mail, Lock, Phone, ClipboardList, User, Building2, MapPin,
   Code, PaintBucket, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
 } from 'lucide-react';
 import './Login.css';
@@ -51,13 +51,14 @@ function Login() {
   const confirmPasswordRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   
-  // 个人信息表单
+  // 个人信息表单（支持职业多选）
   const [profileData, setProfileData] = useState<UserProfile>({
     profession: '',
     bio: '',
     company: '',
     location: '',
   });
+  const [selectedProfessions, setSelectedProfessions] = useState<string[]>([]);
   
   const { login, register, isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
@@ -245,19 +246,34 @@ function Login() {
     }
   };
 
+  // 切换职业选择（多选）
+  const toggleProfession = (value: string) => {
+    setSelectedProfessions(prev => {
+      if (prev.includes(value)) {
+        return prev.filter(p => p !== value);
+      } else {
+        return [...prev, value];
+      }
+    });
+  };
+
   // 完善个人信息
   const handleCompleteProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
 
-    if (!profileData.profession) {
-      setError('请选择您的职业');
+    if (selectedProfessions.length === 0) {
+      setError('请至少选择一个职业');
       return;
     }
 
     setIsLoading(true);
     try {
-      await authService.completeProfile(profileData);
+      // 将多选职业用逗号连接存储
+      await authService.completeProfile({
+        ...profileData,
+        profession: selectedProfessions.join(','),
+      });
       setShowProfileStep(false);
       const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/projects';
       navigate(from, { replace: true });
@@ -429,13 +445,14 @@ function Login() {
       <div className="form-group">
         <label htmlFor="name">您的姓名</label>
         <div className="input-wrapper">
-          <span className="input-icon">👤</span>
+          <span className="input-icon"><User size={18} /></span>
           <input
             id="name"
             type="text"
             ref={nameRef}
             placeholder="请输入姓名"
             required
+            autoComplete="name"
           />
         </div>
       </div>
@@ -585,14 +602,14 @@ function Login() {
       {error && <div className="error-message">{error}</div>}
 
       <div className="form-group">
-        <label>选择您的职业 <span className="required">*</span></label>
+        <label>选择您的职业（可多选）<span className="required">*</span></label>
         <div className="profession-grid">
           {PROFESSIONS.map((prof) => (
             <button
               key={prof.value}
               type="button"
-              className={`profession-item ${profileData.profession === prof.value ? 'active' : ''}`}
-              onClick={() => setProfileData({ ...profileData, profession: prof.value })}
+              className={`profession-item ${selectedProfessions.includes(prof.value) ? 'active' : ''}`}
+              onClick={() => toggleProfession(prof.value)}
             >
               <span className="profession-icon"><prof.Icon size={20} /></span>
               <span className="profession-label">{prof.label}</span>
@@ -604,13 +621,14 @@ function Login() {
       <div className="form-group">
         <label htmlFor="company">公司/组织</label>
         <div className="input-wrapper">
-          <span className="input-icon">🏢</span>
+          <span className="input-icon"><Building2 size={18} /></span>
           <input
             id="company"
             type="text"
             value={profileData.company || ''}
             onChange={(e) => setProfileData({ ...profileData, company: e.target.value })}
             placeholder="您所在的公司或组织"
+            autoComplete="organization"
           />
         </div>
       </div>
@@ -618,13 +636,14 @@ function Login() {
       <div className="form-group">
         <label htmlFor="location">所在地</label>
         <div className="input-wrapper">
-          <span className="input-icon">📍</span>
+          <span className="input-icon"><MapPin size={18} /></span>
           <input
             id="location"
             type="text"
             value={profileData.location || ''}
             onChange={(e) => setProfileData({ ...profileData, location: e.target.value })}
             placeholder="城市"
+            autoComplete="address-level2"
           />
         </div>
       </div>

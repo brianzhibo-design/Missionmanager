@@ -71,10 +71,35 @@ export default function Settings() {
     }
   }, [user]);
 
-  // 获取职业标签
+  // 获取职业标签（支持多选，用逗号分隔）
   const getProfessionLabel = (value: string) => {
-    const prof = PROFESSIONS.find(p => p.value === value);
-    return prof ? prof.label : value || '未设置';
+    if (!value) return '未设置';
+    const values = value.split(',').filter(v => v.trim());
+    if (values.length === 0) return '未设置';
+    const labels = values.map(v => {
+      const prof = PROFESSIONS.find(p => p.value === v.trim());
+      return prof ? prof.label : v.trim();
+    });
+    return labels.join('、');
+  };
+
+  // 切换职业选择（多选）
+  const toggleProfession = (value: string) => {
+    const currentValues = profession ? profession.split(',').filter(v => v.trim()) : [];
+    let newValues: string[];
+    if (currentValues.includes(value)) {
+      newValues = currentValues.filter(v => v !== value);
+    } else {
+      newValues = [...currentValues, value];
+    }
+    setProfession(newValues.join(','));
+  };
+
+  // 检查职业是否被选中
+  const isProfessionSelected = (value: string) => {
+    if (!profession) return false;
+    const values = profession.split(',').map(v => v.trim());
+    return values.includes(value);
   };
 
   // 重置表单
@@ -371,15 +396,17 @@ export default function Settings() {
               <div className="profile-section-title">职业信息</div>
 
               <div className="form-group">
-                <label className="form-label">职业</label>
+                <label className="form-label">
+                  <Briefcase size={14} /> 职业（可多选）
+                </label>
                 {isEditingProfile ? (
                   <div className="profession-select-grid">
                     {PROFESSIONS.map((prof) => (
                       <button
                         key={prof.value}
                         type="button"
-                        className={`profession-option ${profession === prof.value ? 'active' : ''}`}
-                        onClick={() => setProfession(prof.value)}
+                        className={`profession-option ${isProfessionSelected(prof.value) ? 'active' : ''}`}
+                        onClick={() => toggleProfession(prof.value)}
                         disabled={saving}
                       >
                         <span className="profession-icon"><prof.Icon size={18} /></span>
@@ -405,6 +432,7 @@ export default function Settings() {
                       onChange={(e) => setCompany(e.target.value)}
                       disabled={saving}
                       placeholder="您所在的公司或组织"
+                      autoComplete="organization"
                     />
                   ) : (
                     <div className="form-value">{company || '未设置'}</div>
@@ -423,6 +451,7 @@ export default function Settings() {
                       onChange={(e) => setLocation(e.target.value)}
                       disabled={saving}
                       placeholder="城市"
+                      autoComplete="address-level2"
                     />
                   ) : (
                     <div className="form-value">{location || '未设置'}</div>

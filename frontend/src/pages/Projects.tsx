@@ -78,6 +78,7 @@ export default function Projects() {
   const [aiOptimizing, setAiOptimizing] = useState(false);
   const [suggestedTasks, setSuggestedTasks] = useState<SuggestedTask[]>([]);
   const [selectedTaskIndices, setSelectedTaskIndices] = useState<number[]>([]);
+  const [expandedTaskIndices, setExpandedTaskIndices] = useState<number[]>([]);
   const [aiReasoning, setAiReasoning] = useState('');
   const [showAiSuggestions, setShowAiSuggestions] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
@@ -175,6 +176,16 @@ export default function Projects() {
     }
   };
 
+  // 展开/收起任务详情
+  const toggleTaskExpand = (index: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setExpandedTaskIndices(prev =>
+      prev.includes(index)
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
+
   const handleCreateProject = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!currentWorkspace) return;
@@ -224,6 +235,7 @@ export default function Projects() {
     setSelectedTeamMembers([]);
     setSuggestedTasks([]);
     setSelectedTaskIndices([]);
+    setExpandedTaskIndices([]);
     setAiReasoning('');
     setShowAiSuggestions(false);
   };
@@ -596,33 +608,45 @@ export default function Projects() {
                 <p className="ai-reasoning">{aiReasoning}</p>
               )}
               <div className="suggested-tasks-list">
-                {suggestedTasks.map((task, index) => (
-                  <div 
-                    key={index}
-                    className={`suggested-task-item ${selectedTaskIndices.includes(index) ? 'selected' : ''}`}
-                    onClick={() => toggleTaskSelection(index)}
-                  >
-                    <div className="task-checkbox">
-                      {selectedTaskIndices.includes(index) ? (
-                        <Check size={14} />
-                      ) : null}
-                    </div>
-                    <div className="task-content">
-                      <div className="task-header">
-                        <span className="task-title">{task.title}</span>
-                        <span className={`priority-badge priority-${task.priority.toLowerCase()}`}>
-                          {task.priority === 'URGENT' ? '紧急' : 
-                           task.priority === 'HIGH' ? '高' : 
-                           task.priority === 'MEDIUM' ? '中' : '低'}
-                        </span>
+                {suggestedTasks.map((task, index) => {
+                  const isExpanded = expandedTaskIndices.includes(index);
+                  return (
+                    <div 
+                      key={index}
+                      className={`suggested-task-item ${selectedTaskIndices.includes(index) ? 'selected' : ''} ${isExpanded ? 'expanded' : ''}`}
+                      onClick={() => toggleTaskSelection(index)}
+                    >
+                      <div className="task-checkbox">
+                        {selectedTaskIndices.includes(index) ? (
+                          <Check size={14} />
+                        ) : null}
                       </div>
-                      <p className="task-description">{task.description}</p>
-                      {task.estimatedDays && (
-                        <span className="task-estimate">预计 {task.estimatedDays} 天</span>
-                      )}
+                      <div className="task-content">
+                        <div className="task-header">
+                          <span className="task-title">{task.title}</span>
+                          <span className={`priority-badge priority-${task.priority.toLowerCase()}`}>
+                            {task.priority === 'URGENT' ? '紧急' : 
+                             task.priority === 'HIGH' ? '高' : 
+                             task.priority === 'MEDIUM' ? '中' : '低'}
+                          </span>
+                        </div>
+                        <p className={`task-description ${isExpanded ? 'expanded' : ''}`}>{task.description}</p>
+                        <div className="task-footer">
+                          {task.estimatedDays && (
+                            <span className="task-estimate">预计 {task.estimatedDays} 天</span>
+                          )}
+                          <button
+                            type="button"
+                            className="expand-toggle-btn"
+                            onClick={(e) => toggleTaskExpand(index, e)}
+                          >
+                            {isExpanded ? '收起' : '展开详情'}
+                          </button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               <button
                 type="button"

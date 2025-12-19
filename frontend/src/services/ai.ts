@@ -410,12 +410,14 @@ class AIService {
       suggestions.push(`[提示] 当前没有进行中的任务，建议从待办任务中选择一个开始执行。`);
     }
     
-    // 检查截止日期
+    // 检查截止日期（已完成的任务不算逾期）
     const today = new Date();
     const overdueTasks = tasks.filter(t => {
       if (t.dueDate === '无') return false;
+      // 已完成的任务不算逾期
+      if (t.status === '已完成' || t.status === 'done') return false;
       const dueDate = new Date(t.dueDate);
-      return dueDate < today && t.status !== '已完成';
+      return dueDate < today;
     });
     
     if (overdueTasks.length > 0) {

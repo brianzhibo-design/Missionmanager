@@ -60,7 +60,7 @@ export function MemberDetailPanel({ member, onClose }: MemberDetailPanelProps) {
         <div className="stats-grid">
           <div className="stat-card">
             <span className="stat-value">{member.taskStats.total}</span>
-            <span className="stat-label">总任务</span>
+            <span className="stat-label">主任务</span>
           </div>
           <div className="stat-card done">
             <span className="stat-value">{member.taskStats.done}</span>

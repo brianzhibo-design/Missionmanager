@@ -1046,9 +1046,11 @@ export async function getNextTaskSuggestion(
   const urgentTasks = tasks.filter(t => t.priority === '紧急');
   const highPriorityTasks = tasks.filter(t => t.priority === '高');
   
-  // 检查逾期任务
+  // 检查逾期任务（排除已完成的任务）
   const today = new Date();
   const overdueTasks = tasks.filter(t => {
+    // 已完成的任务不算逾期
+    if (t.status === '已完成' || t.status === 'done') return false;
     if (t.dueDate === '无' || !t.dueDate) return false;
     try {
       const dueDate = new Date(t.dueDate);
@@ -1237,12 +1239,14 @@ export async function suggestProjectTasks(
 
   const systemPrompt = `你是一位资深的项目管理专家。根据用户提供的项目标题和描述，进行以下工作：
 
-1. **优化项目信息**：优化项目标题（使其更专业、清晰），优化项目描述（使其更完整，包含背景、目标、范围）
+1. **优化项目信息**：
+   - 项目标题：**尽量保持用户原始输入的核心词汇**，只在语义不清时添加少量补充说明。不要过度专业化或彻底改写用户的项目名称。
+   - 项目描述：使其更完整，包含背景、目标、范围
 2. **推荐初始任务**：基于项目内容，推荐 3-6 个具体、可执行的初始任务
 
 返回纯 JSON 格式（不要 markdown 代码块）：
 {
-  "optimizedTitle": "优化后的项目标题（简洁专业，不超过30字）",
+  "optimizedTitle": "保持用户原始项目名称的核心词汇，只做最小必要的补充（例如：用户输入'跟拍'→输出'跟拍'或'跟拍项目'，而不是'跟拍平台搭建'）",
   "optimizedDescription": "优化后的项目描述（100-200字，包含项目背景和目标）",
   "suggestedTasks": [
     {
@@ -1256,12 +1260,13 @@ export async function suggestProjectTasks(
   "reasoning": "推荐这些任务的理由（一句话说明任务设计思路）"
 }
 
-任务设计原则：
-1. 任务要具体可执行，避免过于宽泛
-2. 按照项目启动的逻辑顺序排列（从规划到实施到验收）
-3. 第一个任务通常是"项目启动/需求分析"相关
-4. 最后一个任务通常是"测试验收/项目总结"相关
-5. 优先级根据任务的紧急性和依赖关系设置`;
+重要原则：
+1. **尊重用户输入**：项目标题应保持用户原始的命名风格和核心词汇，不要自作主张地改成"XX系统"、"XX平台搭建"等专业化名称
+2. 任务要具体可执行，避免过于宽泛
+3. 按照项目启动的逻辑顺序排列（从规划到实施到验收）
+4. 第一个任务通常是"项目启动/需求分析"相关
+5. 最后一个任务通常是"测试验收/项目总结"相关
+6. 优先级根据任务的紧急性和依赖关系设置`;
 
   const userPrompt = `请为以下项目推荐初始任务：
 

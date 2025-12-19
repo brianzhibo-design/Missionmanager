@@ -212,6 +212,11 @@
   left: 1rem;
   font-size: 1rem;
   z-index: 1;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .form-group input {

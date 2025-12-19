@@ -103,9 +103,13 @@ export const treeService = {
     const children: MemberNode[] = [];
     
     for (const member of teamMembers) {
-      // 获取该成员在此项目中的任务
+      // 获取该成员在此项目中的任务（只统计主任务，排除子任务）
       const tasks = await prisma.task.findMany({
-        where: { projectId, assigneeId: member.userId },
+        where: { 
+          projectId, 
+          assigneeId: member.userId,
+          parentId: null,  // 排除子任务
+        },
         select: {
           id: true,
           title: true,
@@ -148,9 +152,12 @@ export const treeService = {
       });
     }
 
-    // 5. 计算整体统计
+    // 5. 计算整体统计（只统计主任务，排除子任务，避免歧义）
     const allTasks = await prisma.task.findMany({
-      where: { projectId },
+      where: { 
+        projectId,
+        parentId: null,  // 排除子任务
+      },
       select: { status: true },
     });
     const overallStats = this.calculateTaskStats(allTasks);
@@ -230,9 +237,13 @@ export const treeService = {
     const membership = await projectMemberRepository.findByProjectAndUser(projectId, userId);
     const role = membership?.role || 'member';
 
-    // 获取该成员负责的任务
+    // 获取该成员负责的任务（只统计主任务，排除子任务）
     const tasks = await prisma.task.findMany({
-      where: { projectId, assigneeId: userId },
+      where: { 
+        projectId, 
+        assigneeId: userId,
+        parentId: null,  // 排除子任务
+      },
       select: {
         id: true,
         title: true,
@@ -339,6 +350,7 @@ export const treeService = {
       where: { id: projectId },
       include: {
         tasks: {
+          where: { parentId: null },  // 只查询主任务，排除子任务
           select: { id: true, status: true, updatedAt: true },
         },
         members: {
@@ -354,7 +366,7 @@ export const treeService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    // 计算任务统计
+    // 计算任务统计（只统计主任务）
     const taskStats = this.calculateTaskStats(project.tasks);
 
     // 计算进度百分比
@@ -362,11 +374,11 @@ export const treeService = {
       ? Math.round((taskStats.done / taskStats.total) * 100)
       : 0;
 
-    // 获取主要成员及其任务数
+    // 获取主要成员及其任务数（只统计主任务）
     const topMembers = await Promise.all(
       project.members.map(async (m) => {
         const taskCount = await prisma.task.count({
-          where: { projectId, assigneeId: m.userId },
+          where: { projectId, assigneeId: m.userId, parentId: null },
         });
         return {
           userId: m.userId,
