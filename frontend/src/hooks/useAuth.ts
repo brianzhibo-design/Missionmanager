@@ -11,7 +11,7 @@ interface UseAuthReturn {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => void;
-  refreshUser: () => void;
+  refreshUser: () => Promise<void>;
   error: string | null;
   clearError: () => void;
 }
@@ -29,6 +29,13 @@ export function useAuth(): UseAuthReturn {
     });
     return unsubscribe;
   }, []);
+
+  // 页面加载时从服务器同步最新用户信息
+  useEffect(() => {
+    if (isAuthenticated) {
+      authService.fetchUser().catch(console.error);
+    }
+  }, [isAuthenticated]);
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
@@ -62,10 +69,16 @@ export function useAuth(): UseAuthReturn {
     authService.logout();
   }, []);
 
-  // 刷新用户信息（从本地状态获取最新）
-  const refreshUser = useCallback(() => {
-    const currentUser = authService.getUser();
-    setUser(currentUser);
+  // 刷新用户信息（从服务器获取最新数据）
+  const refreshUser = useCallback(async () => {
+    try {
+      const updatedUser = await authService.fetchUser();
+      if (updatedUser) {
+        setUser(updatedUser);
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
   }, []);
 
   const clearError = useCallback(() => {

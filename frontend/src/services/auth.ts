@@ -159,9 +159,35 @@ export const authService = {
     return currentState.isAuthenticated;
   },
 
-  // 获取当前用户
+  // 获取当前用户（从本地缓存）
   getUser(): User | null {
     return currentState.user;
+  },
+
+  // 从服务器获取最新用户信息并更新本地缓存
+  async fetchUser(): Promise<User | null> {
+    if (!currentState.isAuthenticated) {
+      return null;
+    }
+    
+    try {
+      const response = await api.get<{ user: User }>('/auth/me');
+      
+      if (response.user) {
+        currentState = {
+          ...currentState,
+          user: response.user,
+        };
+        localStorage.setItem(config.storageKeys.user, JSON.stringify(response.user));
+        notifyListeners();
+        return response.user;
+      }
+      return null;
+    } catch (error) {
+      console.error('Failed to fetch user:', error);
+      // 如果获取失败（可能是 token 过期），不做处理，保持当前状态
+      return null;
+    }
   },
 
   // 更新用户资料（支持完整个人信息）
