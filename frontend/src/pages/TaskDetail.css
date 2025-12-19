@@ -219,7 +219,6 @@
 
 .task-description-wrapper {
   position: relative;
-  transition: max-height 0.3s ease;
 }
 
 .task-description-wrapper.collapsed {
@@ -228,7 +227,8 @@
 }
 
 .task-description-wrapper.expanded {
-  max-height: none;
+  max-height: none !important;
+  overflow: visible !important;
 }
 
 .description-fade {
@@ -248,6 +248,14 @@
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+/* 展开状态下确保完整显示 */
+.task-description-wrapper.expanded .task-description {
+  display: block;
+  max-height: none;
+  overflow: visible;
+  -webkit-line-clamp: unset;
 }
 
 .blocked-reason {
