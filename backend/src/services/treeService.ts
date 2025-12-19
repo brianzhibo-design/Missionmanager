@@ -226,7 +226,7 @@ export const treeService = {
     // 获取用户信息
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, avatar: true },
     });
 
     if (!user) {
@@ -271,6 +271,7 @@ export const treeService = {
       userId: user.id,
       name: user.name,
       email: user.email,
+      avatar: user.avatar,
       role,
       taskStats,
       tasks: tasks.map((t) => ({
@@ -356,7 +357,7 @@ export const treeService = {
         members: {
           where: { role: { in: ['project_admin', 'team_lead'] } },
           include: {
-            user: { select: { id: true, name: true } },
+            user: { select: { id: true, name: true, avatar: true } },
           },
         },
       },
@@ -383,6 +384,7 @@ export const treeService = {
         return {
           userId: m.userId,
           name: m.user.name,
+          avatar: m.user.avatar,
           role: m.role,
           taskCount,
         };

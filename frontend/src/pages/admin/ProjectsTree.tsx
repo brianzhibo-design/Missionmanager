@@ -192,7 +192,11 @@ function ProjectCard({ project }: { project: ProjectNode }) {
             project.topMembers.slice(0, 3).map((member) => (
               <div key={member.userId} className="member-item">
                 <div className="member-avatar-sm">
-                  {member.name.charAt(0).toUpperCase()}
+                  {member.avatar ? (
+                    <img src={member.avatar} alt={member.name} />
+                  ) : (
+                    member.name.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <span className="member-name">{member.name}</span>
                 <span className="member-tasks">{member.taskCount} 任务</span>

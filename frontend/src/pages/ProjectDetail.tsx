@@ -1048,7 +1048,11 @@ export default function ProjectDetail() {
             {project?.leader && (
               <div className="current-leader">
                 <div className="leader-avatar">
-                  {project.leader.name.charAt(0).toUpperCase()}
+                  {project.leader.avatar ? (
+                    <img src={project.leader.avatar} alt={project.leader.name} />
+                  ) : (
+                    project.leader.name.charAt(0).toUpperCase()
+                  )}
                 </div>
                 <div className="leader-info">
                   <span className="leader-name">{project.leader.name}</span>
@@ -1105,7 +1109,11 @@ export default function ProjectDetail() {
                 {teamMembers.map((member) => (
                   <div key={member.id} className="team-member-item">
                     <div className="member-avatar">
-                      {member.user.name.charAt(0).toUpperCase()}
+                      {member.user.avatar ? (
+                        <img src={member.user.avatar} alt={member.user.name} />
+                      ) : (
+                        member.user.name.charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div className="member-info">
                       <span className="member-name">{member.user.name}</span>

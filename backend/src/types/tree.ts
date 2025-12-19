@@ -28,6 +28,7 @@ export interface MemberNode {
   userId: string;
   name: string;
   email: string;
+  avatar?: string | null; // 用户头像
   role: string;           // project_admin, team_lead, member
   taskStats: TaskStats;
   tasks: TaskBrief[];     // 该成员直接负责的任务

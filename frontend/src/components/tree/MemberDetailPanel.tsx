@@ -45,7 +45,11 @@ export function MemberDetailPanel({ member, onClose }: MemberDetailPanelProps) {
     <div className="member-detail-panel">
       <div className="panel-header">
         <div className="member-avatar">
-          {member.name.charAt(0).toUpperCase()}
+          {member.avatar ? (
+            <img src={member.avatar} alt={member.name} />
+          ) : (
+            member.name.charAt(0).toUpperCase()
+          )}
         </div>
         <div className="member-info">
           <h3 className="member-name">{member.name}</h3>

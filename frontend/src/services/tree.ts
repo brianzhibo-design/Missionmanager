@@ -27,6 +27,7 @@ export interface MemberNode {
   userId: string;
   name: string;
   email: string;
+  avatar?: string | null;
   role: string;
   taskStats: TaskStats;
   tasks: TaskBrief[];
@@ -69,6 +70,7 @@ export interface ProjectNode {
   topMembers: Array<{
     userId: string;
     name: string;
+    avatar?: string | null;
     role: string;
     taskCount: number;
   }>;
