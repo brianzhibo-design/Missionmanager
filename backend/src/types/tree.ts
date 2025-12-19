@@ -29,7 +29,8 @@ export interface MemberNode {
   name: string;
   email: string;
   avatar?: string | null; // 用户头像
-  role: string;           // project_admin, team_lead, member
+  role: string;           // 角色显示名称：负责人、成员
+  isLeader?: boolean;     // 是否是项目负责人
   taskStats: TaskStats;
   tasks: TaskBrief[];     // 该成员直接负责的任务
   children: MemberNode[]; // 下属成员

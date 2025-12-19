@@ -170,6 +170,7 @@ export default function MembersTree() {
 
   const renderMemberNode = (member: MemberNode, level: number = 0): JSX.Element => {
     const roleInfo = getRoleLabel(member);
+    const isRootNode = member.userId === 'team-root';
 
     return (
       <TreeNode
@@ -179,13 +180,17 @@ export default function MembersTree() {
         label={
           <span className="member-label">
             <span className="member-name">{member.name}</span>
-            <span 
-              className="role-tag" 
-              style={{ backgroundColor: `${roleInfo.color}20`, color: roleInfo.color }}
-            >
-              {roleInfo.label}
-            </span>
-            {canEditMembers && (
+            {/* 根节点不显示角色标签 */}
+            {!isRootNode && (
+              <span 
+                className="role-tag" 
+                style={{ backgroundColor: `${roleInfo.color}20`, color: roleInfo.color }}
+              >
+                {roleInfo.label}
+              </span>
+            )}
+            {/* 根节点不显示编辑按钮 */}
+            {canEditMembers && !isRootNode && (
               <button
                 className="edit-member-btn"
                 onClick={(e) => handleEditMember(member, e)}

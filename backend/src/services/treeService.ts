@@ -163,6 +163,7 @@ export const treeService = {
         email: member.email,
         avatar: member.avatar,
         role: displayRole,
+        isLeader: member.isLeader,
         taskStats,
         tasks: tasks.map((t) => ({
           id: t.id,
@@ -220,6 +221,7 @@ export const treeService = {
       email: '',
       avatar: null,
       role: 'team',
+      isLeader: false,  // 根节点不是成员，标记为 false
       taskStats: overallStats,
       tasks: [],
       children,
