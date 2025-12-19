@@ -2,7 +2,7 @@
  * 成员任务树页面
  * 只显示当前工作区的项目和成员
  */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User, FolderOpen } from 'lucide-react';
 import { treeService, MemberNode, MemberTreeResponse } from '../../services/tree';
 import { projectService, Project } from '../../services/project';
@@ -56,34 +56,46 @@ export default function MembersTree() {
     }
   }, [currentWorkspace?.id]);
 
-  // 当项目变化时，加载树数据并保存到 localStorage
+  // 当项目变化时，保存到 localStorage 并加载数据
+  // 使用 ref 来跟踪是否是初始加载
+  const isInitialLoad = useRef(true);
+  
   useEffect(() => {
     if (selectedProject) {
       localStorage.setItem('membersTree_selectedProject', selectedProject);
-      loadMemberTree(selectedProject);
+      // 如果项目列表已加载，则加载成员树（用户手动选择）
+      if (projects.length > 0 && !isInitialLoad.current) {
+        loadMemberTree(selectedProject);
+      }
     } else {
       localStorage.removeItem('membersTree_selectedProject');
       setTreeData(null);
     }
   }, [selectedProject]);
 
-  // 当工作区变化时，检查保存的项目是否属于当前工作区
+  // 当项目列表加载完成后，验证并加载保存的项目
   useEffect(() => {
     if (projects.length > 0 && selectedProject) {
       const projectExists = projects.some(p => p.id === selectedProject);
-      if (!projectExists) {
+      if (projectExists) {
+        // 项目有效，加载成员树数据
+        loadMemberTree(selectedProject);
+      } else {
+        // 项目不存在，清除保存的值
+        localStorage.removeItem('membersTree_selectedProject');
         setSelectedProject('');
       }
+      // 标记初始加载完成
+      isInitialLoad.current = false;
     }
-  }, [projects, selectedProject]);
+  }, [projects]); // 只在 projects 变化时执行
 
   const loadProjects = async (workspaceId: string) => {
     try {
       setError(null);
       const data = await projectService.getProjects(workspaceId);
       setProjects(data);
-      // 重置选中的项目
-      setSelectedProject('');
+      // 不再重置 selectedProject，让 useEffect 处理验证逻辑
       setTreeData(null);
     } catch (err: any) {
       setError(err.message);
