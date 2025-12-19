@@ -94,6 +94,7 @@ export default function TaskDetail() {
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showAnalysis, setShowAnalysis] = useState(true);
   const [chatSuggestions, setChatSuggestions] = useState<string[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -809,13 +810,23 @@ export default function TaskDetail() {
           <div className="ai-panel card">
             <div className="ai-panel-header">
               <h3 className="ai-panel-title"><Bot size={16} /> AI 分析</h3>
-              <button 
-                className={`btn btn-sm ${analysis ? 'btn-secondary' : 'btn-primary'} ${analyzing ? 'btn-loading' : ''}`}
-                onClick={() => setShowAnalysisModal(true)}
-                disabled={analyzing}
-              >
-                {analysis ? '重新分析' : '开始分析'}
-              </button>
+              <div className="ai-panel-actions">
+                {analysis && (
+                  <button 
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setShowAnalysis(!showAnalysis)}
+                  >
+                    {showAnalysis ? '收起' : '展开'}
+                  </button>
+                )}
+                <button 
+                  className={`btn btn-sm ${analysis ? 'btn-secondary' : 'btn-primary'} ${analyzing ? 'btn-loading' : ''}`}
+                  onClick={() => setShowAnalysisModal(true)}
+                  disabled={analyzing}
+                >
+                  {analysis ? '重新分析' : '开始分析'}
+                </button>
+              </div>
             </div>
 
             {!analysis ? (
@@ -823,6 +834,10 @@ export default function TaskDetail() {
                 <span className="ai-empty-icon"><Sparkles size={32} /></span>
                 <p className="ai-empty-text">尚未进行 AI 分析</p>
                 <p className="ai-empty-hint">点击"开始分析"获取智能建议</p>
+              </div>
+            ) : !showAnalysis ? (
+              <div className="ai-collapsed">
+                <p>AI 分析结果已收起，点击"展开"查看详情</p>
               </div>
             ) : (
               <div className="ai-content">
