@@ -571,41 +571,8 @@ export default function Settings() {
                   </div>
                 </>
               )}
-            </div>
-          )}
 
-          {/* 外观设置 */}
-          {activeTab === 'appearance' && (
-            <div className="settings-section card-static">
-              <h2>外观设置</h2>
-              <div className="form-group">
-                <label className="form-label">主题</label>
-                <div className="theme-options">
-                  <button
-                    className={`theme-option ${theme === 'light' ? 'active' : ''}`}
-                    onClick={() => setTheme('light')}
-                  >
-                    <span className="theme-icon"><Sun size={20} /></span>
-                    <span className="theme-name">浅色</span>
-                  </button>
-                  <button
-                    className={`theme-option ${theme === 'dark' ? 'active' : ''}`}
-                    onClick={() => setTheme('dark')}
-                  >
-                    <span className="theme-icon"><Moon size={20} /></span>
-                    <span className="theme-name">深色</span>
-                  </button>
-                  <button
-                    className={`theme-option ${theme === 'system' ? 'active' : ''}`}
-                    onClick={() => setTheme('system')}
-                  >
-                    <span className="theme-icon"><Monitor size={20} /></span>
-                    <span className="theme-name">跟随系统</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* 通知设置 */}
+              {/* 通知设置 - 放在账号安全中 */}
               <div className="form-group notification-settings">
                 <label className="form-label">消息通知</label>
                 <div className="notification-toggle">
@@ -647,6 +614,39 @@ export default function Settings() {
                     disabled={notificationPermission === 'denied'}
                   >
                     <span className="toggle-slider" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* 外观设置 */}
+          {activeTab === 'appearance' && (
+            <div className="settings-section card-static">
+              <h2>外观设置</h2>
+              <div className="form-group">
+                <label className="form-label">主题</label>
+                <div className="theme-options">
+                  <button
+                    className={`theme-option ${theme === 'light' ? 'active' : ''}`}
+                    onClick={() => setTheme('light')}
+                  >
+                    <span className="theme-icon"><Sun size={20} /></span>
+                    <span className="theme-name">浅色</span>
+                  </button>
+                  <button
+                    className={`theme-option ${theme === 'dark' ? 'active' : ''}`}
+                    onClick={() => setTheme('dark')}
+                  >
+                    <span className="theme-icon"><Moon size={20} /></span>
+                    <span className="theme-name">深色</span>
+                  </button>
+                  <button
+                    className={`theme-option ${theme === 'system' ? 'active' : ''}`}
+                    onClick={() => setTheme('system')}
+                  >
+                    <span className="theme-icon"><Monitor size={20} /></span>
+                    <span className="theme-name">跟随系统</span>
                   </button>
                 </div>
               </div>

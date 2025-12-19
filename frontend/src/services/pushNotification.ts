@@ -37,11 +37,14 @@ export const pushNotificationService = {
 
   /**
    * 检查是否已启用推送通知
+   * 默认为开启状态（除非用户明确禁用）
    */
   isEnabled(): boolean {
     if (!this.isSupported()) return false;
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored === 'true' && Notification.permission === 'granted';
+    // 默认开启：如果没有存储值或存储值不是 'false'，且有权限，则为开启
+    if (stored === 'false') return false;
+    return Notification.permission === 'granted';
   },
 
   /**
@@ -71,7 +74,7 @@ export const pushNotificationService = {
   async enable(): Promise<boolean> {
     const permission = await this.requestPermission();
     if (permission === 'granted') {
-      localStorage.setItem(STORAGE_KEY, 'true');
+      localStorage.removeItem(STORAGE_KEY); // 移除禁用标记，恢复默认开启
       // 发送测试通知
       this.show({
         title: '通知已启用 🎉',
@@ -86,7 +89,7 @@ export const pushNotificationService = {
    * 禁用推送通知
    */
   disable(): void {
-    localStorage.setItem(STORAGE_KEY, 'false');
+    localStorage.setItem(STORAGE_KEY, 'false'); // 明确设置为禁用
   },
 
   /**
