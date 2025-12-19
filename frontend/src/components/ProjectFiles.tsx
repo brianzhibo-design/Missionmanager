@@ -2,8 +2,8 @@
  * 项目文件管理组件
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { Folder, FolderPlus, Upload, Grid, List, Search, Filter } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Folder, Upload, Grid, List, Search } from 'lucide-react';
 import { FileUpload } from './FileUpload';
 import { AttachmentList } from './AttachmentList';
 import { 

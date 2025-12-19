@@ -3,7 +3,7 @@
  */
 
 import { Router } from 'express';
-import { authMiddleware } from '../middleware/authMiddleware';
+import { requireAuth } from '../middleware/authMiddleware';
 import {
   uploadMiddleware,
   uploadAvatar,
@@ -24,7 +24,7 @@ import {
 const router = Router();
 
 // 所有路由都需要认证
-router.use(authMiddleware);
+router.use(requireAuth);
 
 // 用户头像
 router.post('/avatar', uploadMiddleware.single('file'), uploadAvatar);

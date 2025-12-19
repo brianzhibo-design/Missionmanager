@@ -2,7 +2,7 @@
  * 附件列表组件
  */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
   Download, Trash2, Eye, X, File, Image, Video, Music, 
   FileText, Archive, ExternalLink, ZoomIn, ZoomOut 

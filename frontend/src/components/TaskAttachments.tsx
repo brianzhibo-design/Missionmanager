@@ -2,7 +2,7 @@
  * 任务附件组件
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Paperclip, Plus } from 'lucide-react';
 import { FileUpload, UploadButton } from './FileUpload';
 import { AttachmentList } from './AttachmentList';

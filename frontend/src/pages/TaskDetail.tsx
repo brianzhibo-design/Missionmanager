@@ -8,6 +8,7 @@ import Modal from '../components/Modal';
 import { TaskBreakdownModal, RiskPredictionPanel } from '../components/ai';
 import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle, Circle, AlertTriangle, FileText, ClipboardList, Activity, Bot, Lightbulb, Package } from 'lucide-react';
 import TaskComments from '../components/TaskComments';
+import { TaskAttachments } from '../components/TaskAttachments';
 import './TaskDetail.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -757,6 +758,9 @@ export default function TaskDetail() {
               </div>
             )}
           </div>
+
+          {/* Attachments Section */}
+          <TaskAttachments taskId={id!} canEdit={canEditTask} />
 
           {/* Comments Section */}
           <TaskComments 

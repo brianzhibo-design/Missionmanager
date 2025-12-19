@@ -42,6 +42,7 @@ model User {
   taskAttachments      TaskAttachment[]            @relation("TaskAttachmentUploader")
   projectFiles         ProjectFile[]               @relation("ProjectFileUploader")
   reportAttachments    ReportAttachment[]          @relation("ReportAttachmentUploader")
+  dailyReports         DailyReport[]
 
   @@map("users")
 }
@@ -57,6 +58,7 @@ model Workspace {
   projects          Project[]
   reports           Report[]
   members           WorkspaceUser[]
+  dailyReports      DailyReport[]
 
   @@map("workspaces")
 }
@@ -350,4 +352,27 @@ model ReportAttachment {
 
   @@index([reportId])
   @@map("report_attachments")
+}
+
+// 日报模型
+model DailyReport {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  workspaceId String   @map("workspace_id")
+  date        DateTime
+  completed   String   @db.Text // 今日完成的工作
+  planned     String   @db.Text // 明日计划
+  issues      String?  @db.Text // 遇到的问题
+  workHours   Float?   @map("work_hours") // 工作时长
+  taskStats   Json?    @map("task_stats") // 任务统计
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId, date])
+  @@index([workspaceId, date])
+  @@index([userId, date])
+  @@map("daily_reports")
 }

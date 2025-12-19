@@ -177,7 +177,7 @@ export function generateFileKey(
   const timestamp = Date.now();
   
   // 格式: folder/[entityId/]timestamp-uuid.ext
-  const parts = [config.folder];
+  const parts: string[] = [config.folder];
   if (entityId) {
     parts.push(entityId);
   }

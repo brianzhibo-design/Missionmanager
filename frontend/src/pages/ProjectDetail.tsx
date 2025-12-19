@@ -7,7 +7,8 @@ import { aiService, ProjectOptimizationResult, SuggestedTask } from '../services
 import { usePermissions } from '../hooks/usePermissions';
 import Modal from '../components/Modal';
 import TaskList from '../components/TaskList';
-import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle } from 'lucide-react';
+import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle, FolderOpen } from 'lucide-react';
+import { ProjectFiles } from '../components/ProjectFiles';
 import './ProjectDetail.css';
 
 interface ProjectLeader {
@@ -681,6 +682,14 @@ export default function ProjectDetail() {
               onSelectionChange={setSelectedTaskIds}
             />
           )}
+        </div>
+
+        {/* 项目文件管理 */}
+        <div className="project-files-section">
+          <div className="section-header">
+            <h3><FolderOpen size={18} /> 项目文件</h3>
+          </div>
+          <ProjectFiles projectId={id!} canEdit={canEditProject} />
         </div>
       </div>
 

@@ -13,6 +13,7 @@ import {
   Settings as SettingsIcon, Sun, Moon, Monitor, FolderOpen,
   Code, PaintBucket, ClipboardList, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
 } from 'lucide-react';
+import { AvatarUpload } from '../components/AvatarUpload';
 import './Settings.css';
 
 // 职业选项 - 使用Lucide图标组件
@@ -325,9 +326,18 @@ export default function Settings() {
               </div>
 
               <div className="profile-card">
-                <div className="profile-avatar">
-                  {user?.name?.charAt(0).toUpperCase() || 'U'}
-                </div>
+                <AvatarUpload
+                  currentAvatar={user?.avatar}
+                  userName={user?.name || ''}
+                  onUploadSuccess={() => {
+                    // 头像上传成功后刷新用户信息
+                    refreshUser();
+                    setSuccess('头像更新成功');
+                    setTimeout(() => setSuccess(null), 3000);
+                  }}
+                  size="xl"
+                  editable={true}
+                />
                 <div className="profile-info">
                   <div className="profile-name">{user?.name}</div>
                   <div className="profile-email">{user?.email}</div>
