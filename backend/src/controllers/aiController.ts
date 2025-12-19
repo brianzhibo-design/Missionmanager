@@ -3,6 +3,7 @@ import { aiService, AIError, AIErrorCodes } from '../services/aiService';
 import { requireTaskAccess, requireProjectAccess, requireWorkspaceAccess } from '../middleware/aiAuth';
 import { log } from '../lib/logger';
 import { requireAuth } from '../middleware/authMiddleware';
+import { getAIStatus } from '../lib/aiConfig';
 
 const router = Router();
 
@@ -33,10 +34,18 @@ function handleAIError(error: any, req: Request, res: Response, _next: NextFunct
 }
 
 // AI 状态（无需额外权限）
-router.get('/status', (req, res) => {
+router.get('/status', (_req, res) => {
+  const status = getAIStatus();
   res.json({
     success: true,
-    data: { enabled: aiService.isEnabled(), features: ['breakdown', 'risk', 'priority', 'assignment', 'progress', 'suggestions'] },
+    data: {
+      enabled: status.enabled,
+      hasApiKey: status.hasApiKey,
+      provider: status.provider,
+      model: status.model,
+      reason: status.reason,
+      features: ['breakdown', 'risk', 'priority', 'assignment', 'progress', 'suggestions', 'optimize'],
+    },
   });
 });
 

@@ -1,6 +1,6 @@
 export interface AIConfig {
   enabled: boolean;
-  provider: 'anthropic' | 'openai' | 'deepseek' | 'mock';
+  provider: 'anthropic';
   model: string;
   timeout: number;
   maxRetries: number;
@@ -13,7 +13,7 @@ export interface AIConfig {
 
 export const aiConfig: AIConfig = {
   enabled: process.env.AI_ENABLED !== 'false',
-  provider: (process.env.AI_PROVIDER as AIConfig['provider']) || 'anthropic',
+  provider: 'anthropic',
   model: process.env.AI_MODEL || 'claude-3-5-sonnet-20241022',
   timeout: parseInt(process.env.AI_TIMEOUT || '60000'),
   maxRetries: parseInt(process.env.AI_MAX_RETRIES || '2'),
@@ -26,29 +26,36 @@ export const aiConfig: AIConfig = {
 
 export function isAIEnabled(): boolean {
   if (!aiConfig.enabled) return false;
-  
-  // 根据配置的提供商检查对应的 API Key
-  switch (aiConfig.provider) {
-    case 'anthropic':
-      return !!process.env.ANTHROPIC_API_KEY;
-    case 'openai':
-      return !!process.env.OPENAI_API_KEY;
-    case 'deepseek':
-      return !!process.env.DEEPSEEK_API_KEY;
-    default:
-      return false;
-  }
+  return !!process.env.ANTHROPIC_API_KEY;
 }
 
 export function getActiveApiKey(): string {
-  switch (aiConfig.provider) {
-    case 'anthropic':
-      return process.env.ANTHROPIC_API_KEY || '';
-    case 'openai':
-      return process.env.OPENAI_API_KEY || '';
-    case 'deepseek':
-      return process.env.DEEPSEEK_API_KEY || '';
-    default:
-      return '';
+  return process.env.ANTHROPIC_API_KEY || '';
+}
+
+// 诊断函数：检查 AI 配置状态
+export function getAIStatus(): {
+  enabled: boolean;
+  hasApiKey: boolean;
+  provider: string;
+  model: string;
+  reason?: string;
+} {
+  const hasApiKey = !!process.env.ANTHROPIC_API_KEY;
+  const enabled = aiConfig.enabled && hasApiKey;
+  
+  let reason: string | undefined;
+  if (!aiConfig.enabled) {
+    reason = 'AI_ENABLED 设置为 false';
+  } else if (!hasApiKey) {
+    reason = '未配置 ANTHROPIC_API_KEY';
   }
+  
+  return {
+    enabled,
+    hasApiKey,
+    provider: aiConfig.provider,
+    model: aiConfig.model,
+    reason,
+  };
 }
