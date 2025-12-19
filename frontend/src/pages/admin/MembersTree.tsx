@@ -95,8 +95,7 @@ export default function MembersTree() {
       setError(null);
       const data = await projectService.getProjects(workspaceId);
       setProjects(data);
-      // 不再重置 selectedProject，让 useEffect 处理验证逻辑
-      setTreeData(null);
+      // 不再重置 selectedProject 和 treeData，让 useEffect 处理验证和加载逻辑
     } catch (err: any) {
       setError(err.message);
     }
