@@ -28,17 +28,20 @@ export const storageService = {
     const hash = crypto.randomBytes(8).toString('hex');
     const key = `${category}/${userId}/${Date.now()}-${hash}.${ext}`;
 
+    // 头像和评论图片设为公开，其他文件私有
+    const isPublic = category === 'avatars' || category === 'comments';
+    
     await s3Client.send(
       new PutObjectCommand({
         Bucket: BUCKET,
         Key: key,
         Body: file,
         ContentType: mimeType,
-        ACL: category === 'avatars' ? 'public-read' : 'private',
+        ACL: isPublic ? 'public-read' : 'private',
       })
     );
 
-    const url = category === 'avatars'
+    const url = isPublic
       ? `${process.env.S3_ENDPOINT}/${BUCKET}/${key}`
       : await this.getSignedUrl(key);
 
