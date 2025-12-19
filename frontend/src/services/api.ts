@@ -108,6 +108,36 @@ export const api = {
   delete<T>(endpoint: string): Promise<T> {
     return request<T>(endpoint, { method: 'DELETE' });
   },
+
+  // 文件上传请求
+  async upload<T>(endpoint: string, formData: FormData): Promise<T> {
+    const url = `${config.apiBaseUrl}${endpoint}`;
+    const token = getToken();
+    
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    // 注意：不设置 Content-Type，让浏览器自动设置 multipart/form-data 和 boundary
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const data: ApiResponse<T> = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new ApiError(
+        data.error?.message || data.message || '上传失败',
+        data.error?.code || 'UPLOAD_ERROR',
+        response.status
+      );
+    }
+
+    return data as T;
+  },
 };
 
 export default api;

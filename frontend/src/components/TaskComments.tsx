@@ -2,8 +2,9 @@
  * 任务评论组件
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Trash2, Heart, AtSign } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Heart, AtSign, Image, X, Loader2 } from 'lucide-react';
 import { commentService, Comment } from '../services/comment';
+import { uploadCommentImage } from '../services/upload';
 import { useAuth } from '../hooks/useAuth';
 import './TaskComments.css';
 
@@ -21,8 +22,12 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
   const [showMentions, setShowMentions] = useState(false);
   const [mentionSearch, setMentionSearch] = useState('');
   const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
+  const [uploadingImages, setUploadingImages] = useState<string[]>([]); // 上传中的图片预览URL
+  const [attachedImages, setAttachedImages] = useState<{url: string; key: string}[]>([]); // 已上传的图片
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const mentionListRef = useRef<HTMLDivElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadComments();
@@ -70,19 +75,74 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     return mentions;
   };
 
+  // 处理图片选择
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingImage(true);
+
+    for (const file of Array.from(files)) {
+      // 验证文件类型
+      if (!file.type.startsWith('image/')) {
+        alert('只能上传图片文件');
+        continue;
+      }
+
+      // 验证文件大小 (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('图片大小不能超过 10MB');
+        continue;
+      }
+
+      // 创建预览
+      const previewUrl = URL.createObjectURL(file);
+      setUploadingImages(prev => [...prev, previewUrl]);
+
+      try {
+        const result = await uploadCommentImage(taskId, file);
+        setAttachedImages(prev => [...prev, { url: result.url, key: result.key }]);
+      } catch (error) {
+        console.error('上传图片失败:', error);
+        alert('图片上传失败');
+      } finally {
+        // 移除预览
+        setUploadingImages(prev => prev.filter(url => url !== previewUrl));
+        URL.revokeObjectURL(previewUrl);
+      }
+    }
+
+    setIsUploadingImage(false);
+    e.target.value = '';
+  };
+
+  // 移除已上传的图片
+  const removeAttachedImage = (index: number) => {
+    setAttachedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newComment.trim() || submitting) return;
+    if ((!newComment.trim() && attachedImages.length === 0) || submitting) return;
 
     try {
       setSubmitting(true);
       const mentionedUserIds = extractMentions(newComment);
+      
+      // 将图片 URL 添加到评论内容中
+      let content = newComment.trim();
+      if (attachedImages.length > 0) {
+        const imageMarkdown = attachedImages.map(img => `\n![image](${img.url})`).join('');
+        content = content + imageMarkdown;
+      }
+      
       const comment = await commentService.create(taskId, {
-        content: newComment.trim(),
+        content,
         mentionedUserIds,
       });
       setComments([...comments, comment]);
       setNewComment('');
+      setAttachedImages([]);
     } catch (error) {
       console.error('发表评论失败:', error);
     } finally {
@@ -291,10 +351,14 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
     return name.charAt(0).toUpperCase();
   };
 
-  // 高亮显示@提及（支持 @[用户名] 和 @用户名 两种格式）
+  // 高亮显示@提及和渲染图片（支持 @[用户名] 和 @用户名 两种格式）
   const highlightMentions = (content: string) => {
-    // 首先处理 @[用户名] 格式
-    let result = content.replace(/@\[([^\]]+)\]/g, '<span class="mention">@$1</span>');
+    // 首先处理 markdown 图片语法 ![alt](url)
+    let result = content.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, 
+      '<img src="$2" alt="$1" class="comment-image" loading="lazy" />');
+    
+    // 处理 @[用户名] 格式
+    result = result.replace(/@\[([^\]]+)\]/g, '<span class="mention">@$1</span>');
     
     // 然后处理不带括号的 @用户名（按成员名长度降序匹配，优先匹配长名字）
     const sortedMembers = [...projectMembers].sort((a, b) => b.name.length - a.name.length);
@@ -303,6 +367,9 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
       const regex = new RegExp(`@${escapedName}(?![\\w\\[])`, 'g');
       result = result.replace(regex, `<span class="mention">@${member.name}</span>`);
     }
+    
+    // 将换行符转换为 <br>
+    result = result.replace(/\n/g, '<br />');
     
     return result;
   };
@@ -407,24 +474,70 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
             </div>
           )}
         </div>
+
+        {/* 图片预览区域 */}
+        {(uploadingImages.length > 0 || attachedImages.length > 0) && (
+          <div className="comment-images-preview">
+            {uploadingImages.map((url, index) => (
+              <div key={`uploading-${index}`} className="preview-image uploading">
+                <img src={url} alt="上传中" />
+                <div className="uploading-overlay">
+                  <Loader2 size={20} className="spin" />
+                </div>
+              </div>
+            ))}
+            {attachedImages.map((img, index) => (
+              <div key={`attached-${index}`} className="preview-image">
+                <img src={img.url} alt="附件" />
+                <button
+                  type="button"
+                  className="remove-image-btn"
+                  onClick={() => removeAttachedImage(index)}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="comment-form-footer">
-          <button
-            type="button"
-            className="mention-btn"
-            onClick={() => {
-              setNewComment(newComment + '@');
-              setShowMentions(true);
-              setMentionSearch('');
-              inputRef.current?.focus();
-            }}
-            title="提及成员"
-          >
-            <AtSign size={18} />
-          </button>
+          <div className="form-actions-left">
+            <button
+              type="button"
+              className="mention-btn"
+              onClick={() => {
+                setNewComment(newComment + '@');
+                setShowMentions(true);
+                setMentionSearch('');
+                inputRef.current?.focus();
+              }}
+              title="提及成员"
+            >
+              <AtSign size={18} />
+            </button>
+            <button
+              type="button"
+              className="image-btn"
+              onClick={() => imageInputRef.current?.click()}
+              disabled={isUploadingImage}
+              title="插入图片"
+            >
+              {isUploadingImage ? <Loader2 size={18} className="spin" /> : <Image size={18} />}
+            </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageSelect}
+              hidden
+            />
+          </div>
           <button
             type="submit"
             className="btn btn-primary btn-sm"
-            disabled={!newComment.trim() || submitting}
+            disabled={(!newComment.trim() && attachedImages.length === 0) || submitting}
           >
             <Send size={14} />
             {submitting ? '发送中...' : '发送'}

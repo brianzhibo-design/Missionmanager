@@ -8,37 +8,40 @@ datasource db {
 }
 
 model User {
-  id                 String                      @id @default(cuid())
-  email              String                      @unique
-  name               String
-  password           String?
-  avatar             String?
-  createdAt          DateTime                    @default(now()) @map("created_at")
-  updatedAt          DateTime                    @updatedAt @map("updated_at")
-  bio                String?
-  company            String?
-  location           String?
-  phone              String?                     @unique
-  profession         String?
-  profileCompleted   Boolean                     @default(false) @map("profile_completed")
-  resetToken         String?                     @map("reset_token")
-  resetTokenExpiry   DateTime?                   @map("reset_token_expiry")
-  phoneCode          String?                     @map("phone_code")
-  phoneCodeExpiry    DateTime?                   @map("phone_code_expiry")
-  receivedMessages   BroadcastMessageRecipient[] @relation("MessageRecipient")
-  sentMessages       BroadcastMessage[]          @relation("MessageSender")
-  coffeeLotteries    CoffeeLottery[]
-  mentionedIn        CommentMention[]            @relation("MentionedUser")
-  notifications      Notification[]
-  managedMembers     ProjectMember[]             @relation("ProjectMemberManager")
-  projectMemberships ProjectMember[]             @relation("ProjectMemberUser")
-  leadingProjects    Project[]                   @relation("ProjectLeader")
-  taskComments       TaskComment[]
-  commentLikes       CommentLike[]
-  taskEvents         TaskEvent[]
-  assignedTasks      Task[]                      @relation("TaskAssignee")
-  createdTasks       Task[]                      @relation("TaskCreator")
-  workspaces         WorkspaceUser[]
+  id                   String                      @id @default(cuid())
+  email                String                      @unique
+  name                 String
+  password             String?
+  avatar               String?
+  createdAt            DateTime                    @default(now()) @map("created_at")
+  updatedAt            DateTime                    @updatedAt @map("updated_at")
+  bio                  String?
+  company              String?
+  location             String?
+  phone                String?                     @unique
+  profession           String?
+  profileCompleted     Boolean                     @default(false) @map("profile_completed")
+  resetToken           String?                     @map("reset_token")
+  resetTokenExpiry     DateTime?                   @map("reset_token_expiry")
+  phoneCode            String?                     @map("phone_code")
+  phoneCodeExpiry      DateTime?                   @map("phone_code_expiry")
+  receivedMessages     BroadcastMessageRecipient[] @relation("MessageRecipient")
+  sentMessages         BroadcastMessage[]          @relation("MessageSender")
+  coffeeLotteries      CoffeeLottery[]
+  mentionedIn          CommentMention[]            @relation("MentionedUser")
+  notifications        Notification[]
+  managedMembers       ProjectMember[]             @relation("ProjectMemberManager")
+  projectMemberships   ProjectMember[]             @relation("ProjectMemberUser")
+  leadingProjects      Project[]                   @relation("ProjectLeader")
+  taskComments         TaskComment[]
+  commentLikes         CommentLike[]
+  taskEvents           TaskEvent[]
+  assignedTasks        Task[]                      @relation("TaskAssignee")
+  createdTasks         Task[]                      @relation("TaskCreator")
+  workspaces           WorkspaceUser[]
+  taskAttachments      TaskAttachment[]            @relation("TaskAttachmentUploader")
+  projectFiles         ProjectFile[]               @relation("ProjectFileUploader")
+  reportAttachments    ReportAttachment[]          @relation("ReportAttachmentUploader")
 
   @@map("users")
 }
@@ -84,6 +87,7 @@ model Project {
   leaderId      String?         @map("leader_id")
   notifications Notification[]
   members       ProjectMember[]
+  files         ProjectFile[]
   leader        User?           @relation("ProjectLeader", fields: [leaderId], references: [id])
   workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   tasks         Task[]
@@ -128,6 +132,7 @@ model Task {
   aiAnalyses    TaskAiAnalysis[]
   comments      TaskComment[]
   events        TaskEvent[]
+  attachments   TaskAttachment[]
   assignee      User?            @relation("TaskAssignee", fields: [assigneeId], references: [id])
   creator       User             @relation("TaskCreator", fields: [creatorId], references: [id])
   parent        Task?            @relation("SubTasks", fields: [parentId], references: [id])
@@ -268,21 +273,81 @@ model Notification {
 }
 
 model Report {
-  id          String    @id @default(cuid())
+  id          String             @id @default(cuid())
   type        String
   title       String
-  startDate   DateTime  @map("start_date")
-  endDate     DateTime  @map("end_date")
+  startDate   DateTime           @map("start_date")
+  endDate     DateTime           @map("end_date")
   content     Json
   summary     String?
   highlights  Json?
   concerns    Json?
-  generatedBy String?   @map("generated_by")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  workspaceId String    @map("workspace_id")
-  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  generatedBy String?            @map("generated_by")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  workspaceId String             @map("workspace_id")
+  workspace   Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  attachments ReportAttachment[]
 
   @@index([workspaceId, type])
   @@index([workspaceId, startDate])
   @@map("reports")
+}
+
+// ============ 文件附件相关模型 ============
+
+model TaskAttachment {
+  id        String   @id @default(cuid())
+  taskId    String   @map("task_id")
+  uploaderId String  @map("uploader_id")
+  filename  String
+  fileKey   String   @map("file_key")
+  fileUrl   String   @map("file_url")
+  mimeType  String   @map("mime_type")
+  fileSize  Int      @map("file_size")
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploader  User     @relation("TaskAttachmentUploader", fields: [uploaderId], references: [id])
+
+  @@index([taskId])
+  @@map("task_attachments")
+}
+
+model ProjectFile {
+  id         String   @id @default(cuid())
+  projectId  String   @map("project_id")
+  uploaderId String   @map("uploader_id")
+  filename   String
+  fileKey    String   @map("file_key")
+  fileUrl    String   @map("file_url")
+  mimeType   String   @map("mime_type")
+  fileSize   Int      @map("file_size")
+  folder     String?  // 虚拟文件夹路径
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploader   User     @relation("ProjectFileUploader", fields: [uploaderId], references: [id])
+
+  @@index([projectId])
+  @@index([projectId, folder])
+  @@map("project_files")
+}
+
+model ReportAttachment {
+  id         String   @id @default(cuid())
+  reportId   String   @map("report_id")
+  uploaderId String   @map("uploader_id")
+  filename   String
+  fileKey    String   @map("file_key")
+  fileUrl    String   @map("file_url")
+  mimeType   String   @map("mime_type")
+  fileSize   Int      @map("file_size")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  report     Report   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  uploader   User     @relation("ReportAttachmentUploader", fields: [uploaderId], references: [id])
+
+  @@index([reportId])
+  @@map("report_attachments")
 }

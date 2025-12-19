@@ -1,0 +1,202 @@
+/* 文件上传组件样式 */
+
+.file-upload-container {
+  width: 100%;
+}
+
+.file-upload-dropzone {
+  border: 2px dashed var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--bg-surface);
+}
+
+.file-upload-dropzone:hover {
+  border-color: var(--color-brand);
+  background: var(--bg-surface-hover);
+}
+
+.file-upload-dropzone.dragging {
+  border-color: var(--color-brand);
+  background: var(--color-brand-light);
+}
+
+.file-upload-dropzone.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.file-upload-dropzone .upload-icon {
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-3);
+}
+
+.file-upload-dropzone:hover .upload-icon {
+  color: var(--color-brand);
+}
+
+.upload-text {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.upload-link {
+  color: var(--color-brand);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.upload-link:hover {
+  text-decoration: underline;
+}
+
+.upload-hint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin: 0;
+}
+
+/* 上传中文件列表 */
+.uploading-files {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.uploading-file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+}
+
+.uploading-file.error {
+  border-color: var(--color-danger);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.uploading-file .file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--bg-surface-secondary);
+  color: var(--text-secondary);
+}
+
+.uploading-file .file-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.uploading-file .file-name {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.uploading-file .file-size {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+}
+
+.uploading-file .file-error {
+  font-size: var(--text-xs);
+  color: var(--color-danger);
+}
+
+.uploading-file .loading-spinner {
+  animation: spin 1s linear infinite;
+  color: var(--color-brand);
+}
+
+.uploading-file .remove-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s ease;
+}
+
+.uploading-file .remove-btn:hover {
+  background: var(--bg-surface-hover);
+  color: var(--color-danger);
+}
+
+/* 上传按钮 */
+.upload-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-brand);
+  background: var(--bg-surface);
+  border: 1px solid var(--color-brand);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.upload-button:hover:not(:disabled) {
+  background: var(--color-brand);
+  color: white;
+}
+
+.upload-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.upload-button .loading-spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 紧凑模式 */
+.file-upload-dropzone.compact {
+  padding: var(--space-4);
+}
+
+.file-upload-dropzone.compact .upload-icon {
+  display: none;
+}
+
+/* 内联模式 */
+.file-upload-container.inline {
+  display: inline-block;
+}
+
+.file-upload-container.inline .file-upload-dropzone {
+  padding: var(--space-2) var(--space-3);
+  border-style: solid;
+  border-width: 1px;
+}
+
