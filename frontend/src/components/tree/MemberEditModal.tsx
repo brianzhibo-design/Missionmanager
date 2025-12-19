@@ -2,7 +2,7 @@
  * 成员编辑弹窗 - 编辑成员在项目中的角色和描述
  */
 import { useState, useEffect } from 'react';
-import { X, Crown, Briefcase, FileText, Save } from 'lucide-react';
+import { X, Crown, FileText, Save } from 'lucide-react';
 import { MemberNode } from '../../services/tree';
 import { Avatar } from '../Avatar';
 import './MemberEditModal.css';
@@ -17,13 +17,11 @@ interface MemberEditModalProps {
 
 export interface MemberEditData {
   isLeader?: boolean;   // 设为负责人
-  isReviewer?: boolean; // 设为验收人
   description?: string;
 }
 
 export function MemberEditModal({ isOpen, member, currentLeaderId, onClose, onSave }: MemberEditModalProps) {
   const [isLeader, setIsLeader] = useState(false);
-  const [isReviewer, setIsReviewer] = useState(false);
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,8 +31,6 @@ export function MemberEditModal({ isOpen, member, currentLeaderId, onClose, onSa
   useEffect(() => {
     if (member) {
       setIsLeader(member.userId === currentLeaderId);
-      // isLeader 字段在数据库中表示验收人
-      setIsReviewer(member.isLeader || false);
       setDescription((member as any).description || '');
     }
   }, [member, currentLeaderId]);
@@ -52,7 +48,6 @@ export function MemberEditModal({ isOpen, member, currentLeaderId, onClose, onSa
       const leaderChanged = isLeader !== isCurrentLeader;
       await onSave(member.userId, { 
         isLeader: leaderChanged ? isLeader : undefined,
-        isReviewer, 
         description 
       });
       onClose();
@@ -114,33 +109,6 @@ export function MemberEditModal({ isOpen, member, currentLeaderId, onClose, onSa
                     ? '取消勾选可转让负责人角色' 
                     : '设置后将替换当前负责人'}
                 </p>
-              </div>
-            </div>
-          </div>
-
-          {/* 验收人标记 */}
-          <div className="form-group">
-            <label>
-              <Briefcase size={16} />
-              <span>项目验收人</span>
-            </label>
-            <p className="role-note">
-              验收人负责审核和验收项目任务，确保任务质量符合要求。可设置多名验收人。
-            </p>
-            
-            <div 
-              className={`leader-card reviewer ${isReviewer ? 'active' : ''}`}
-              onClick={() => setIsReviewer(!isReviewer)}
-            >
-              <div className="leader-card-checkbox">
-                {isReviewer && <span className="checkmark">✓</span>}
-              </div>
-              <div className="leader-card-content">
-                <div className="leader-card-title">
-                  <span className="leader-icon">✅</span>
-                  <span>{isReviewer ? '当前是验收人' : '设为验收人'}</span>
-                </div>
-                <p className="leader-card-desc">负责任务的审核与验收</p>
               </div>
             </div>
           </div>

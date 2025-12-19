@@ -442,7 +442,7 @@ export const treeService = {
           userId: m.userId,
           name: m.user.name,
           avatar: m.user.avatar,
-          role: m.isLeader ? '验收人' : '成员',
+          role: '成员',
           taskCount,
         });
       }

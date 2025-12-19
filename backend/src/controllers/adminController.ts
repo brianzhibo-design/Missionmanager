@@ -68,36 +68,24 @@ adminRouter.get(
 
 /**
  * POST /admin/projects/:projectId/members
- * 添加/更新项目成员
+ * 添加/更新项目成员（已简化，移除验收人角色）
  */
 adminRouter.post(
   '/projects/:projectId/members',
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { projectId } = req.params;
-      const { userId, isLeader, isReviewer, managerId, role } = req.body; // 支持 isReviewer、isLeader、role
+      const { userId, managerId } = req.body;
 
       if (!userId) {
         throw new AppError('请提供 userId', 400, 'MISSING_FIELDS');
-      }
-
-      // 支持多种接口：isReviewer（新）、isLeader（旧）、role（向后兼容）
-      // isLeader 数据库字段实际存储验收人标记
-      let isReviewerValue = false;
-      if (typeof isReviewer === 'boolean') {
-        isReviewerValue = isReviewer;
-      } else if (typeof isLeader === 'boolean') {
-        isReviewerValue = isLeader;
-      } else if (role) {
-        // 向后兼容：将 role 转换为验收人
-        isReviewerValue = role === 'lead' || role === 'project_admin';
       }
 
       const member = await adminService.setProjectMember(
         req.user!.userId,
         projectId,
         userId,
-        isReviewerValue,
+        false,  // isLeader 不再使用
         managerId
       );
 
