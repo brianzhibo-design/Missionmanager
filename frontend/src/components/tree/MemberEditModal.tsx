@@ -2,7 +2,7 @@
  * 成员编辑弹窗 - 编辑成员在项目中的角色和描述
  */
 import { useState, useEffect } from 'react';
-import { X, Briefcase, FileText, Save } from 'lucide-react';
+import { X, Crown, Briefcase, FileText, Save } from 'lucide-react';
 import { MemberNode } from '../../services/tree';
 import { Avatar } from '../Avatar';
 import './MemberEditModal.css';
@@ -10,28 +10,34 @@ import './MemberEditModal.css';
 interface MemberEditModalProps {
   isOpen: boolean;
   member: MemberNode | null;
+  currentLeaderId?: string;  // 当前项目负责人ID
   onClose: () => void;
   onSave: (memberId: string, data: MemberEditData) => Promise<void>;
 }
 
 export interface MemberEditData {
-  isReviewer: boolean;  // 验收人标记
+  isLeader?: boolean;   // 设为负责人
+  isReviewer?: boolean; // 设为验收人
   description?: string;
 }
 
-export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditModalProps) {
+export function MemberEditModal({ isOpen, member, currentLeaderId, onClose, onSave }: MemberEditModalProps) {
+  const [isLeader, setIsLeader] = useState(false);
   const [isReviewer, setIsReviewer] = useState(false);
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const isCurrentLeader = member?.userId === currentLeaderId;
+
   useEffect(() => {
     if (member) {
-      // isLeader 在新设计中表示验收人
-      setIsReviewer((member as any).isReviewer || member.isLeader || false);
+      setIsLeader(member.userId === currentLeaderId);
+      // isLeader 字段在数据库中表示验收人
+      setIsReviewer(member.isLeader || false);
       setDescription((member as any).description || '');
     }
-  }, [member]);
+  }, [member, currentLeaderId]);
 
   if (!isOpen || !member) return null;
 
@@ -42,7 +48,13 @@ export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditM
     setError(null);
 
     try {
-      await onSave(member.userId, { isReviewer, description });
+      // 如果从负责人变为非负责人，或者从非负责人变为负责人，需要传递 isLeader
+      const leaderChanged = isLeader !== isCurrentLeader;
+      await onSave(member.userId, { 
+        isLeader: leaderChanged ? isLeader : undefined,
+        isReviewer, 
+        description 
+      });
       onClose();
     } catch (err: any) {
       setError(err.message || '保存失败');
@@ -75,6 +87,37 @@ export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditM
             <div className="error-alert">{error}</div>
           )}
 
+          {/* 项目负责人 */}
+          <div className="form-group">
+            <label>
+              <Crown size={16} />
+              <span>项目负责人</span>
+            </label>
+            <p className="role-note">
+              负责人拥有项目的完整管理权限，可以编辑项目设置、分配任务等。每个项目只有一名负责人。
+            </p>
+            
+            <div 
+              className={`leader-card leader ${isLeader ? 'active' : ''}`}
+              onClick={() => setIsLeader(!isLeader)}
+            >
+              <div className="leader-card-checkbox">
+                {isLeader && <span className="checkmark">✓</span>}
+              </div>
+              <div className="leader-card-content">
+                <div className="leader-card-title">
+                  <span className="leader-icon">👑</span>
+                  <span>{isCurrentLeader ? '当前是负责人' : '设为负责人'}</span>
+                </div>
+                <p className="leader-card-desc">
+                  {isCurrentLeader 
+                    ? '取消勾选可转让负责人角色' 
+                    : '设置后将替换当前负责人'}
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* 验收人标记 */}
           <div className="form-group">
             <label>
@@ -82,11 +125,11 @@ export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditM
               <span>项目验收人</span>
             </label>
             <p className="role-note">
-              验收人负责审核和验收项目任务，确保任务质量符合要求。每个项目最多设置一名验收人。
+              验收人负责审核和验收项目任务，确保任务质量符合要求。可设置多名验收人。
             </p>
             
             <div 
-              className={`leader-card ${isReviewer ? 'active' : ''}`}
+              className={`leader-card reviewer ${isReviewer ? 'active' : ''}`}
               onClick={() => setIsReviewer(!isReviewer)}
             >
               <div className="leader-card-checkbox">
@@ -95,7 +138,7 @@ export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditM
               <div className="leader-card-content">
                 <div className="leader-card-title">
                   <span className="leader-icon">✅</span>
-                  <span>设为验收人</span>
+                  <span>{isReviewer ? '当前是验收人' : '设为验收人'}</span>
                 </div>
                 <p className="leader-card-desc">负责任务的审核与验收</p>
               </div>

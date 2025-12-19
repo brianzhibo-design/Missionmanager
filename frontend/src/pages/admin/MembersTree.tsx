@@ -24,7 +24,13 @@ export default function MembersTree() {
   const { user: currentUser } = useAuth();
   
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>('');
+  // 从 localStorage 恢复项目选择
+  const [selectedProject, setSelectedProject] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('membersTree_selectedProject') || '';
+    }
+    return '';
+  });
   const [treeData, setTreeData] = useState<MemberTreeResponse | null>(null);
   const [selectedMember, setSelectedMember] = useState<MemberNode | null>(null);
   const [loading, setLoading] = useState(false);
@@ -50,14 +56,26 @@ export default function MembersTree() {
     }
   }, [currentWorkspace?.id]);
 
-  // 当项目变化时，加载树数据
+  // 当项目变化时，加载树数据并保存到 localStorage
   useEffect(() => {
     if (selectedProject) {
+      localStorage.setItem('membersTree_selectedProject', selectedProject);
       loadMemberTree(selectedProject);
     } else {
+      localStorage.removeItem('membersTree_selectedProject');
       setTreeData(null);
     }
   }, [selectedProject]);
+
+  // 当工作区变化时，检查保存的项目是否属于当前工作区
+  useEffect(() => {
+    if (projects.length > 0 && selectedProject) {
+      const projectExists = projects.some(p => p.id === selectedProject);
+      if (!projectExists) {
+        setSelectedProject('');
+      }
+    }
+  }, [projects, selectedProject]);
 
   const loadProjects = async (workspaceId: string) => {
     try {
@@ -116,18 +134,31 @@ export default function MembersTree() {
       throw new Error('请先选择项目');
     }
     
-    // 调用后端API保存项目成员（isReviewer = 验收人标记）
-    await api.post(`/admin/projects/${selectedProject}/members`, {
-      userId: memberId,
-      isReviewer: data.isReviewer,
-    });
+    // 如果设置新负责人
+    if (data.isLeader !== undefined) {
+      await api.post(`/admin/projects/${selectedProject}/leader`, {
+        userId: data.isLeader ? memberId : null,
+      });
+    }
+    
+    // 保存验收人标记
+    if (data.isReviewer !== undefined) {
+      await api.post(`/admin/projects/${selectedProject}/members`, {
+        userId: memberId,
+        isReviewer: data.isReviewer,
+      });
+    }
     
     // 重新加载树数据（保持当前项目选择）
     await loadMemberTree(selectedProject);
   };
 
-  // 获取角色标签
+  // 获取角色标签 - 区分负责人和验收人
   const getRoleLabel = (member: MemberNode) => {
+    // 检查是否是项目负责人
+    if (treeData?.leader && member.userId === treeData.leader.id) {
+      return { label: '👑 负责人', color: '#f59e0b' };
+    }
     // isLeader 在新设计中表示验收人
     if (member.isLeader) {
       return { label: '✅ 验收人', color: '#10b981' };
@@ -403,6 +434,7 @@ export default function MembersTree() {
       <MemberEditModal
         isOpen={showEditModal}
         member={editingMember}
+        currentLeaderId={treeData?.leader?.id}
         onClose={() => {
           setShowEditModal(false);
           setEditingMember(null);

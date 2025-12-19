@@ -146,6 +146,30 @@
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
+/* 负责人卡片 - 金色主题 */
+.leader-card.leader.active {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(245, 158, 11, 0.04) 100%);
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+
+.leader-card.leader.active .leader-card-checkbox {
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+/* 验收人卡片 - 绿色主题 */
+.leader-card.reviewer.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.leader-card.reviewer.active .leader-card-checkbox {
+  background: #10b981;
+  border-color: #10b981;
+}
+
 .leader-card-checkbox {
   width: 24px;
   height: 24px;

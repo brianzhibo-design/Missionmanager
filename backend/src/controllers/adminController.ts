@@ -112,6 +112,33 @@ adminRouter.post(
 );
 
 /**
+ * POST /admin/projects/:projectId/leader
+ * 设置项目负责人
+ */
+adminRouter.post(
+  '/projects/:projectId/leader',
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { projectId } = req.params;
+      const { userId } = req.body;
+
+      const project = await adminService.setProjectLeader(
+        req.user!.userId,
+        projectId,
+        userId || null
+      );
+
+      res.json({
+        success: true,
+        data: { project },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
  * POST /admin/projects/:projectId/reporting
  * 批量设置汇报关系
  */

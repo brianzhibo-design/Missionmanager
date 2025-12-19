@@ -187,6 +187,33 @@ export const adminService = {
   },
 
   /**
+   * 设置项目负责人
+   */
+  async setProjectLeader(
+    operatorId: string,
+    projectId: string,
+    newLeaderId: string | null
+  ) {
+    await this.requireProjectAdmin(projectId, operatorId);
+
+    const project = await projectRepository.findById(projectId);
+    if (!project) {
+      throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
+    }
+
+    // 如果设置新负责人，验证其是工作区成员
+    if (newLeaderId) {
+      const membership = await workspaceRepository.getMembership(project.workspaceId, newLeaderId);
+      if (!membership) {
+        throw new AppError('该用户不是工作区成员', 400, 'USER_NOT_IN_WORKSPACE');
+      }
+    }
+
+    // 更新项目负责人
+    return projectRepository.update(projectId, { leaderId: newLeaderId });
+  },
+
+  /**
    * 批量设置汇报关系
    */
   async setReportingRelation(
