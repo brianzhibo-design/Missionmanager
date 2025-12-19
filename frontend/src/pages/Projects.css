@@ -352,6 +352,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--space-1);
   text-align: left;
 }
@@ -363,6 +364,7 @@
   margin: 0;
   line-height: 1.4;
   text-align: left;
+  width: 100%;
   /* 两行截断，让长名称能换行显示更多内容 */
   display: -webkit-box;
   -webkit-line-clamp: 2;
