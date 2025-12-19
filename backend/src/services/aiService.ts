@@ -454,21 +454,24 @@ export async function getDailySuggestions(userId: string): Promise<DailySuggesti
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // 完成状态的所有可能值
+  const doneStatuses = ['DONE', 'done', '已完成', 'completed'];
+  
   const [todayTasks, overdueTasks, recentCompleted, user] = await Promise.all([
     prisma.task.findMany({
       where: {
         assigneeId: userId,
         dueDate: { gte: today, lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) },
-        status: { not: 'DONE' },
+        status: { notIn: doneStatuses },
       },
       include: { project: true },
       take: 5,
     }),
     prisma.task.count({
-      where: { assigneeId: userId, dueDate: { lt: today }, status: { not: 'DONE' } },
+      where: { assigneeId: userId, dueDate: { lt: today }, status: { notIn: doneStatuses } },
     }),
     prisma.task.count({
-      where: { assigneeId: userId, status: 'DONE', updatedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
+      where: { assigneeId: userId, status: { in: doneStatuses }, updatedAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } },
     }),
     prisma.user.findUnique({ where: { id: userId } }),
   ]);

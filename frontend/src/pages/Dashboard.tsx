@@ -87,8 +87,10 @@ export default function Dashboard() {
 
       // 我的任务（用于显示最近任务）
       const myTasks = tasksRes.tasks || [];
+      // 完成状态的所有可能值
+      const doneStatuses = ['DONE', 'done', '已完成', 'completed'];
       const myOverdueTasks = myTasks.filter((t: RecentTask) => 
-        t.dueDate && new Date(t.dueDate) < new Date() && t.status !== 'done' && t.status !== 'DONE'
+        t.dueDate && new Date(t.dueDate) < new Date() && !doneStatuses.includes(t.status)
       ).length;
 
       setStats({
