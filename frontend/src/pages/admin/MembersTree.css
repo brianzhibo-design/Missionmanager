@@ -263,6 +263,11 @@
   border-radius: var(--radius-full);
 }
 
+.team-member-item .leader-badge {
+  margin-left: auto;
+  font-size: 14px;
+}
+
 .team-member-item .avatar img {
   width: 100%;
   height: 100%;

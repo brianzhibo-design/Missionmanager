@@ -309,23 +309,30 @@ export default function MembersTree() {
                   </div>
                 )}
                 
-                {/* 团队成员 */}
-                {treeData.teamMembers.filter(m => !m.isLeader).length > 0 && (
-                  <div className="team-section">
-                    <span className="section-label">
-                      <User size={14} />
-                      成员 ({treeData.teamMembers.filter(m => !m.isLeader).length})
-                    </span>
-                    <div className="team-members-list">
-                      {treeData.teamMembers.filter(m => !m.isLeader).map(member => (
-                        <div key={member.userId} className="team-member-item">
-                          <Avatar name={member.name} src={member.avatar ?? undefined} size="sm" />
-                          <span className="member-name">{member.name}</span>
-                        </div>
-                      ))}
+                {/* 团队成员（排除主负责人，避免重复显示） */}
+                {(() => {
+                  const leaderId = treeData.leader?.id;
+                  const otherMembers = treeData.teamMembers.filter(m => m.userId !== leaderId);
+                  return otherMembers.length > 0 && (
+                    <div className="team-section">
+                      <span className="section-label">
+                        <User size={14} />
+                        成员 ({otherMembers.length})
+                      </span>
+                      <div className="team-members-list">
+                        {otherMembers.map(member => (
+                          <div key={member.userId} className="team-member-item">
+                            <Avatar name={member.name} src={member.avatar ?? undefined} size="sm" />
+                            <span className="member-name">{member.name}</span>
+                            {member.isLeader && (
+                              <span className="leader-badge">🎯</span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  );
+                })()}
                 
                 {/* 无团队成员提示 */}
                 {!treeData.leader && treeData.teamMembers.length === 0 && (
