@@ -116,20 +116,21 @@ export default function MembersTree() {
       throw new Error('请先选择项目');
     }
     
-    // 调用后端API保存项目成员（isLeader标记）
+    // 调用后端API保存项目成员（isReviewer = 验收人标记）
     await api.post(`/admin/projects/${selectedProject}/members`, {
       userId: memberId,
-      isLeader: data.isLeader,
+      isReviewer: data.isReviewer,
     });
     
-    // 重新加载树数据
+    // 重新加载树数据（保持当前项目选择）
     await loadMemberTree(selectedProject);
   };
 
-  // 获取角色标签（已简化为项目负责人标记）
+  // 获取角色标签
   const getRoleLabel = (member: MemberNode) => {
+    // isLeader 在新设计中表示验收人
     if (member.isLeader) {
-      return { label: '🎯 项目负责人', color: '#8b5cf6' };
+      return { label: '✅ 验收人', color: '#10b981' };
     }
     return { label: '成员', color: '#6b7280' };
   };
@@ -313,24 +314,45 @@ export default function MembersTree() {
                 {(() => {
                   const leaderId = treeData.leader?.id;
                   const otherMembers = treeData.teamMembers.filter(m => m.userId !== leaderId);
-                  return otherMembers.length > 0 && (
-                    <div className="team-section">
-                      <span className="section-label">
-                        <User size={14} />
-                        成员 ({otherMembers.length})
-                      </span>
-                      <div className="team-members-list">
-                        {otherMembers.map(member => (
-                          <div key={member.userId} className="team-member-item">
-                            <Avatar name={member.name} src={member.avatar ?? undefined} size="sm" />
-                            <span className="member-name">{member.name}</span>
-                            {member.isLeader && (
-                              <span className="leader-badge">🎯</span>
-                            )}
+                  // 找到验收人
+                  const reviewer = otherMembers.find(m => m.isLeader);
+                  const regularMembers = otherMembers.filter(m => !m.isLeader);
+                  
+                  return (
+                    <>
+                      {/* 验收人 */}
+                      {reviewer && (
+                        <div className="team-section">
+                          <span className="section-label">
+                            <User size={14} />
+                            验收人
+                          </span>
+                          <div className="team-member-item reviewer">
+                            <Avatar name={reviewer.name} src={reviewer.avatar ?? undefined} size="sm" />
+                            <span className="member-name">{reviewer.name}</span>
+                            <span className="reviewer-badge">✅</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
+                        </div>
+                      )}
+                      
+                      {/* 普通成员 */}
+                      {regularMembers.length > 0 && (
+                        <div className="team-section">
+                          <span className="section-label">
+                            <User size={14} />
+                            成员 ({regularMembers.length})
+                          </span>
+                          <div className="team-members-list">
+                            {regularMembers.map(member => (
+                              <div key={member.userId} className="team-member-item">
+                                <Avatar name={member.name} src={member.avatar ?? undefined} size="sm" />
+                                <span className="member-name">{member.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </>
                   );
                 })()}
                 

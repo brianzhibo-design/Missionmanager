@@ -15,19 +15,20 @@ interface MemberEditModalProps {
 }
 
 export interface MemberEditData {
-  isLeader: boolean;
+  isReviewer: boolean;  // 验收人标记
   description?: string;
 }
 
 export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditModalProps) {
-  const [isLeader, setIsLeader] = useState(false);
+  const [isReviewer, setIsReviewer] = useState(false);
   const [description, setDescription] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (member) {
-      setIsLeader(member.isLeader || false);
+      // isLeader 在新设计中表示验收人
+      setIsReviewer((member as any).isReviewer || member.isLeader || false);
       setDescription((member as any).description || '');
     }
   }, [member]);
@@ -41,7 +42,7 @@ export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditM
     setError(null);
 
     try {
-      await onSave(member.userId, { isLeader, description });
+      await onSave(member.userId, { isReviewer, description });
       onClose();
     } catch (err: any) {
       setError(err.message || '保存失败');
@@ -74,29 +75,29 @@ export function MemberEditModal({ isOpen, member, onClose, onSave }: MemberEditM
             <div className="error-alert">{error}</div>
           )}
 
-          {/* 项目负责人标记 */}
+          {/* 验收人标记 */}
           <div className="form-group">
             <label>
               <Briefcase size={16} />
-              <span>项目负责人</span>
+              <span>项目验收人</span>
             </label>
             <p className="role-note">
-              项目负责人拥有该项目的额外管理权限，可以编辑项目设置、分配任务、管理项目成员等。
+              验收人负责审核和验收项目任务，确保任务质量符合要求。每个项目最多设置一名验收人。
             </p>
             
             <div 
-              className={`leader-card ${isLeader ? 'active' : ''}`}
-              onClick={() => setIsLeader(!isLeader)}
+              className={`leader-card ${isReviewer ? 'active' : ''}`}
+              onClick={() => setIsReviewer(!isReviewer)}
             >
               <div className="leader-card-checkbox">
-                {isLeader && <span className="checkmark">✓</span>}
+                {isReviewer && <span className="checkmark">✓</span>}
               </div>
               <div className="leader-card-content">
                 <div className="leader-card-title">
-                  <span className="leader-icon">🎯</span>
-                  <span>设为项目负责人</span>
+                  <span className="leader-icon">✅</span>
+                  <span>设为验收人</span>
                 </div>
-                <p className="leader-card-desc">拥有项目的管理权限</p>
+                <p className="leader-card-desc">负责任务的审核与验收</p>
               </div>
             </div>
           </div>
