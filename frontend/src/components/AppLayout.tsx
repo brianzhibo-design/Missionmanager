@@ -293,7 +293,11 @@ export default function AppLayout() {
                 }}
               >
                 <div className="user-avatar">
-                  {getUserInitials()}
+                  {user?.avatar ? (
+                    <img src={user.avatar} alt={user.name} className="avatar-img" />
+                  ) : (
+                    getUserInitials()
+                  )}
                 </div>
               </button>
 
@@ -301,7 +305,11 @@ export default function AppLayout() {
                 <div className="user-menu" onClick={(e) => e.stopPropagation()}>
                   <div className="user-menu-header">
                     <div className="user-avatar user-avatar-lg">
-                      {getUserInitials()}
+                      {user?.avatar ? (
+                        <img src={user.avatar} alt={user.name} className="avatar-img" />
+                      ) : (
+                        getUserInitials()
+                      )}
                     </div>
                     <div className="user-info">
                       <span className="user-name">{user?.name}</span>

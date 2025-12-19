@@ -129,12 +129,24 @@
 .profile-card .avatar-container {
   width: 88px !important;
   height: 88px !important;
+  min-width: 88px !important;
+  min-height: 88px !important;
   border-radius: 50% !important;
   box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.3);
   border: 3px solid var(--bg-surface);
+  overflow: hidden !important;
+}
+
+.profile-card .avatar-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 50% !important;
 }
 
 .profile-card .avatar-placeholder {
+  width: 100% !important;
+  height: 100% !important;
   font-size: 32px !important;
   background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%) !important;
   letter-spacing: -1px;
