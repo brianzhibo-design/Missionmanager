@@ -192,12 +192,12 @@ export const projectRepository = {
   /**
    * 添加项目成员
    */
-  async addProjectMember(projectId: string, userId: string, role: string = 'member') {
+  async addProjectMember(projectId: string, userId: string, isLeader: boolean = false) {
     return prisma.projectMember.create({
       data: {
         projectId,
         userId,
-        role,
+        isLeader,
       },
       include: {
         user: {

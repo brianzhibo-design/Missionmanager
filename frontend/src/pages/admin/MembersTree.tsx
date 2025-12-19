@@ -113,9 +113,20 @@ export default function MembersTree() {
       throw new Error('请先选择项目');
     }
     
-    // 调用后端API保存成员角色
-    const role = data.customRole || data.role;
-    await treeService.updateMemberRole(selectedProject, memberId, role);
+    // 调用后端API保存项目成员（isLeader标记）
+    const response = await fetch(`/api/admin/projects/${selectedProject}/members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: memberId,
+        isLeader: data.isLeader,
+      }),
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || '保存失败');
+    }
     
     // 重新加载树数据
     await loadMemberTree(selectedProject);
@@ -168,7 +179,7 @@ export default function MembersTree() {
   };
 
   const renderMemberNode = (member: MemberNode, level: number = 0): JSX.Element => {
-    const roleInfo = getRoleLabel(member.role);
+    const roleInfo = getRoleLabel(member);
     const canEdit = canEditMembers();
 
     return (
@@ -313,7 +324,9 @@ export default function MembersTree() {
                         <div key={member.userId} className="team-member-item">
                           <Avatar name={member.name} src={member.avatar ?? undefined} size="sm" />
                           <span className="member-name">{member.name}</span>
-                          <span className="member-role-tag">{member.role}</span>
+                          {member.isLeader && (
+                            <span className="member-role-tag leader">🎯 负责人</span>
+                          )}
                         </div>
                       ))}
                     </div>

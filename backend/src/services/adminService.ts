@@ -7,19 +7,7 @@ import { workspaceRepository, WorkspaceRole, mapRole } from '../repositories/wor
 import { projectRepository } from '../repositories/projectRepository';
 import { AppError } from '../middleware/errorHandler';
 
-// 项目角色优先级（数字越小权限越高）
-const PROJECT_ROLE_PRIORITY: Record<string, number> = {
-  project_admin: 1,
-  team_lead: 2,
-  senior: 3,
-  member: 4,
-  observer: 5,
-};
-
-// 获取角色优先级（自定义角色默认为成员级别）
-const getRolePriority = (role: string): number => {
-  return PROJECT_ROLE_PRIORITY[role] ?? 4; // 默认为 member 级别
-};
+// 注意：项目角色体系已移除，现在只使用 isLeader 标记
 
 export const adminService = {
   /**
@@ -116,13 +104,13 @@ export const adminService = {
   },
 
   /**
-   * 设置项目成员角色
+   * 设置项目成员（支持设置项目负责人标记）
    */
-  async setProjectMemberRole(
+  async setProjectMember(
     operatorId: string,
     projectId: string,
     targetUserId: string,
-    newRole: string,
+    isLeader: boolean,
     managerId?: string | null
   ) {
     // 1. 获取项目信息
@@ -150,23 +138,34 @@ export const adminService = {
       await this.requireProjectAdmin(projectId, operatorId);
     }
 
-    // 6. 根据新方案：项目层面只保留 isLeader 标记
-    // 如果 newRole 是 'lead' 或 'project_admin'，设置为项目负责人
-    const isProjectLeader = newRole === 'lead' || newRole === 'project_admin';
-    
-    // 如果设置为项目负责人，更新 Project.leaderId
-    if (isProjectLeader) {
+    // 6. 如果设置为项目负责人，同时更新 Project.leaderId
+    if (isLeader) {
       await projectRepository.update(projectId, { leaderId: targetUserId });
     }
 
-    // 7. 创建或更新项目成员（保留 role 字段以向后兼容，但主要逻辑使用 leaderId）
-    // 注意：数据库迁移后，可以移除 role 字段，只保留 isLeader 标记
+    // 7. 创建或更新项目成员
     return projectMemberRepository.upsert({
       projectId,
       userId: targetUserId,
-      role: newRole, // 暂时保留，向后兼容
+      isLeader,
       managerId: managerId ?? undefined,
     });
+  },
+
+  /**
+   * 设置项目成员角色（已废弃，使用 setProjectMember 替代）
+   * @deprecated 使用 setProjectMember 替代
+   */
+  async setProjectMemberRole(
+    operatorId: string,
+    projectId: string,
+    targetUserId: string,
+    newRole: string,
+    managerId?: string | null
+  ) {
+    // 兼容旧接口：将 role 转换为 isLeader
+    const isLeader = newRole === 'lead' || newRole === 'project_admin';
+    return this.setProjectMember(operatorId, projectId, targetUserId, isLeader, managerId);
   },
 
   /**

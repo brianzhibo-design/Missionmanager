@@ -75,17 +75,26 @@ adminRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { projectId } = req.params;
-      const { userId, role, managerId } = req.body;
+      const { userId, isLeader, managerId, role } = req.body; // 支持 role（向后兼容）和 isLeader
 
-      if (!userId || !role) {
-        throw new AppError('请提供 userId 和 role', 400, 'MISSING_FIELDS');
+      if (!userId) {
+        throw new AppError('请提供 userId', 400, 'MISSING_FIELDS');
       }
 
-      const member = await adminService.setProjectMemberRole(
+      // 支持新旧两种接口：isLeader 或 role
+      let isLeaderValue = false;
+      if (typeof isLeader === 'boolean') {
+        isLeaderValue = isLeader;
+      } else if (role) {
+        // 向后兼容：将 role 转换为 isLeader
+        isLeaderValue = role === 'lead' || role === 'project_admin';
+      }
+
+      const member = await adminService.setProjectMember(
         req.user!.userId,
         projectId,
         userId,
-        role,
+        isLeaderValue,
         managerId
       );
 

@@ -65,14 +65,14 @@ export const projectService = {
       for (const memberId of data.teamMemberIds) {
         // 跳过负责人（如果已设置）
         if (memberId !== data.leaderId) {
-          await projectRepository.addProjectMember(project.id, memberId, 'member');
+          await projectRepository.addProjectMember(project.id, memberId, false);
         }
       }
     }
 
-    // 如果有负责人，也添加为项目成员（角色为 project_admin）
+    // 如果有负责人，也添加为项目成员（isLeader = true）
     if (data.leaderId) {
-      await projectRepository.addProjectMember(project.id, data.leaderId, 'project_admin');
+      await projectRepository.addProjectMember(project.id, data.leaderId, true);
     }
 
     // 创建初始任务
@@ -216,7 +216,7 @@ export const projectService = {
    * 添加团队成员
    * 权限：owner, admin, 项目负责人 可以添加成员
    */
-  async addTeamMember(userId: string, projectId: string, memberId: string, role: string = 'member') {
+  async addTeamMember(userId: string, projectId: string, memberId: string, isLeader: boolean = false) {
     const project = await projectRepository.findById(projectId);
     if (!project) {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
@@ -242,7 +242,12 @@ export const projectService = {
       throw new AppError('该用户已经是项目成员', 400, 'ALREADY_PROJECT_MEMBER');
     }
 
-    return projectRepository.addProjectMember(projectId, memberId, role);
+    // 如果设置为项目负责人，同时更新 Project.leaderId
+    if (isLeader) {
+      await projectRepository.update(projectId, { leaderId: memberId });
+    }
+
+    return projectRepository.addProjectMember(projectId, memberId, isLeader);
   },
 
   /**

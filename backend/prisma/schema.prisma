@@ -99,7 +99,7 @@ model Project {
 
 model ProjectMember {
   id        String   @id @default(cuid())
-  role      String   @default("member")
+  isLeader  Boolean  @default(false) @map("is_leader")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   projectId String   @map("project_id")
@@ -113,6 +113,7 @@ model ProjectMember {
   @@index([projectId])
   @@index([userId])
   @@index([managerId])
+  @@index([isLeader])
   @@map("project_members")
 }
 

@@ -74,8 +74,8 @@ export const treeService = {
         name: member.user.name,
         email: member.user.email,
         avatar: member.user.avatar,
-        role: member.role,
-        isLeader: false,
+        role: member.isLeader ? '负责人' : '成员',
+        isLeader: member.isLeader,
       });
     }
 
@@ -98,7 +98,7 @@ export const treeService = {
           name: member.user.name,
           email: member.user.email,
           avatar: member.user.avatar,
-          role: member.role,
+          role: '成员',
           isLeader: false,
         });
       }
@@ -154,17 +154,8 @@ export const treeService = {
         ? { total: 0, todo: 0, inProgress: 0, review: 0, blocked: 0, done: 0 }
         : this.calculateTaskStats(tasks);
 
-      // 显示正确的项目角色
-      let displayRole = member.role;
-      if (member.isLeader) {
-        displayRole = '负责人';
-      } else if (member.role === 'project_admin') {
-        displayRole = '项目管理员';
-      } else if (member.role === 'team_lead') {
-        displayRole = '团队负责人';
-      } else if (member.role === 'member') {
-        displayRole = '团队成员';
-      }
+      // 显示项目角色（基于 isLeader 标记）
+      const displayRole = member.isLeader ? '负责人' : '成员';
 
       children.push({
         userId: member.userId,
@@ -272,7 +263,8 @@ export const treeService = {
 
     // 获取项目成员信息
     const membership = await projectMemberRepository.findByProjectAndUser(projectId, userId);
-    const role = membership?.role || 'member';
+    const isProjectMember = !!membership;
+    const role = membership?.isLeader ? '负责人' : '成员';
 
     // 获取该成员负责的任务（只统计主任务，排除子任务）
     const tasks = await prisma.task.findMany({
@@ -397,13 +389,13 @@ export const treeService = {
           select: { id: true, status: true, updatedAt: true },
         },
         members: {
-          where: { role: { in: ['project_admin', 'team_lead'] } },
+          where: { isLeader: true },
           include: {
             user: { select: { id: true, name: true, avatar: true } },
           },
         },
       },
-    });
+    }) as any;
 
     if (!project) {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
@@ -419,7 +411,7 @@ export const treeService = {
 
     // 获取主要成员及其任务数（只统计主任务）
     const topMembers = await Promise.all(
-      project.members.map(async (m) => {
+      project.members.map(async (m: any) => {
         const taskCount = await prisma.task.count({
           where: { projectId, assigneeId: m.userId, parentId: null },
         });
@@ -427,15 +419,15 @@ export const treeService = {
           userId: m.userId,
           name: m.user.name,
           avatar: m.user.avatar,
-          role: m.role,
+          role: m.isLeader ? '负责人' : '成员',
           taskCount,
         };
       })
     );
 
     // 获取最近活动时间
-    const recentTask = project.tasks.sort(
-      (a, b) => b.updatedAt.getTime() - a.updatedAt.getTime()
+    const recentTask = (project.tasks as any[]).sort(
+      (a: any, b: any) => b.updatedAt.getTime() - a.updatedAt.getTime()
     )[0];
 
     return {

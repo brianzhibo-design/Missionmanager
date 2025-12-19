@@ -11,11 +11,7 @@ interface MemberDetailPanelProps {
   onClose: () => void;
 }
 
-const roleLabels: Record<string, string> = {
-  project_admin: '项目管理员',
-  team_lead: '组长',
-  member: '成员',
-};
+// 角色显示已简化为项目负责人标记
 
 const statusLabels: Record<string, { label: string; color: string }> = {
   todo: { label: '待办', color: 'var(--color-muted)' },
@@ -58,7 +54,11 @@ export function MemberDetailPanel({ member, onClose }: MemberDetailPanelProps) {
         <div className="member-info">
           <h3 className="member-name">{member.name}</h3>
           <p className="member-email">{member.email}</p>
-          <span className="member-role">{roleLabels[member.role] || member.role}</span>
+          {member.isLeader && (
+            <span className="member-role leader-badge">
+              🎯 项目负责人
+            </span>
+          )}
         </div>
         <button className="close-btn" onClick={onClose}>✕</button>
       </div>

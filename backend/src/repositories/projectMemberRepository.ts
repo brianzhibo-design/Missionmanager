@@ -7,12 +7,12 @@ import { ProjectMember } from '@prisma/client';
 export interface CreateProjectMemberInput {
   projectId: string;
   userId: string;
-  role?: string;
+  isLeader?: boolean;
   managerId?: string;
 }
 
 export interface UpdateProjectMemberInput {
-  role?: string;
+  isLeader?: boolean;
   managerId?: string | null;
 }
 
@@ -29,11 +29,11 @@ export const projectMemberRepository = {
       create: {
         projectId: data.projectId,
         userId: data.userId,
-        role: data.role || 'member',
+        isLeader: data.isLeader || false,
         managerId: data.managerId,
       },
       update: {
-        role: data.role,
+        isLeader: data.isLeader,
         managerId: data.managerId,
       },
     });
@@ -54,7 +54,7 @@ export const projectMemberRepository = {
         user: { select: { id: true, name: true, email: true } },
         manager: { select: { id: true, name: true, email: true } },
       },
-      orderBy: [{ role: 'asc' }, { createdAt: 'asc' }],
+      orderBy: [{ isLeader: 'desc' }, { createdAt: 'asc' }],
     });
   },
 
