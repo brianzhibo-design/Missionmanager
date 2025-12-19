@@ -35,8 +35,6 @@ export function isAIEnabled(): boolean {
       return !!process.env.OPENAI_API_KEY;
     case 'deepseek':
       return !!process.env.DEEPSEEK_API_KEY;
-    case 'mock':
-      return true; // mock 模式始终可用
     default:
       return false;
   }
