@@ -1,9 +1,11 @@
 import express from 'express';
+import { createServer } from 'http';
 import cors from 'cors';
 import { config } from './infra/config';
 import { testDatabaseConnection, disconnectDatabase } from './infra/database';
 import { logger } from './infra/logger';
 import { log } from './lib/logger';
+import { initSocketService } from './lib/socketService';
 import { metricsMiddleware, metricsEndpoint } from './lib/metrics';
 import { requestLogger } from './middleware/requestLogger';
 import { healthRouter } from './controllers/healthController';
@@ -87,9 +89,14 @@ async function bootstrap() {
       logger.warn('⚠️ 邮件服务不可用，邮件通知功能将被禁用');
     }
 
-    // 3. 启动 HTTP 服务
+    // 3. 创建 HTTP 服务器并集成 WebSocket
     const port = config.port;
-    app.listen(port, () => {
+    const httpServer = createServer(app);
+    
+    // 初始化 WebSocket 服务
+    initSocketService(httpServer);
+    
+    httpServer.listen(port, () => {
       log.info(`🚀 Server started`, {
         port,
         environment: config.nodeEnv,
@@ -97,6 +104,7 @@ async function bootstrap() {
       });
       log.info(`📊 Metrics available at http://localhost:${port}/metrics`);
       log.info(`❤️ Health check at http://localhost:${port}/health`);
+      log.info(`🔌 WebSocket available at ws://localhost:${port}/socket.io`);
       logger.info(`环境: ${config.nodeEnv}`);
       
       // 4. 启动定时任务调度器

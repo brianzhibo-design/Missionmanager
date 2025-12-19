@@ -4,6 +4,7 @@
  */
 import { prisma } from '../infra/database';
 import { emailService } from '../lib/emailService';
+import { pushNotificationToUser, pushNotificationToUsers } from '../lib/socketService';
 
 export interface CreateNotificationInput {
   userId: string;
@@ -64,6 +65,21 @@ export const notificationService = {
         },
       },
     });
+
+    // 通过 WebSocket 实时推送通知
+    try {
+      pushNotificationToUser(userId, {
+        id: notification.id,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        taskId: notification.task?.id,
+        projectId: notification.project?.id,
+        createdAt: notification.createdAt.toISOString(),
+      });
+    } catch (error) {
+      console.error('WebSocket 推送失败:', error);
+    }
 
     // 如果需要发送邮件通知
     if (sendEmail) {
@@ -209,6 +225,22 @@ export const notificationService = {
         projectId,
       })),
     });
+
+    // 通过 WebSocket 实时推送通知给所有用户
+    try {
+      const now = new Date().toISOString();
+      pushNotificationToUsers(userIds, {
+        id: `batch-${Date.now()}`,
+        type,
+        title,
+        message,
+        taskId,
+        projectId,
+        createdAt: now,
+      });
+    } catch (error) {
+      console.error('批量 WebSocket 推送失败:', error);
+    }
 
     // 如果需要发送邮件
     if (sendEmail) {

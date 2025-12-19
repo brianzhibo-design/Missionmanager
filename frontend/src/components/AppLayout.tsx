@@ -7,8 +7,9 @@ import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
 import { Logo } from './Logo';
 import NotificationCenter from './NotificationCenter';
 import MobileNav from './MobileNav';
-import { notificationService, Notification } from '../services/notification';
+import { notificationService } from '../services/notification';
 import { pushNotificationService } from '../services/pushNotification';
+import { socketService, SocketNotification } from '../services/socket';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -44,8 +45,6 @@ export default function AppLayout() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const lastNotificationIdRef = useRef<string | null>(null);
-  const hasInitializedRef = useRef(false);
 
   // 检查是否有任何管理菜单权限
   const hasAnyAdminPermission = 
@@ -63,56 +62,41 @@ export default function AppLayout() {
     if (ws) setCurrentWorkspace(ws);
   };
 
-  // 加载未读通知数量并检查新通知
+  // 加载未读通知数量
   const loadUnreadCount = useCallback(async () => {
     try {
-      const result = await notificationService.getAll({ limit: 5, unreadOnly: true });
+      const result = await notificationService.getAll({ limit: 1 });
       setUnreadCount(result.unreadCount);
-      
-      // 检查是否有新通知并推送到系统
-      if (result.notifications.length > 0) {
-        const latestNotification = result.notifications[0];
-        const lastId = lastNotificationIdRef.current;
-        
-        // 首次加载时只记录 ID，不推送
-        if (!hasInitializedRef.current) {
-          hasInitializedRef.current = true;
-          lastNotificationIdRef.current = latestNotification.id;
-          return;
-        }
-        
-        // 如果有新通知且与上次不同，发送系统推送
-        if (lastId && latestNotification.id !== lastId) {
-          // 推送所有比上次更新的未读通知
-          result.notifications.forEach((notification: Notification) => {
-            // 只推送新的通知（ID 不同于上次记录的）
-            if (!notification.isRead) {
-              pushNotificationService.showTaskNotification(
-                notification.type,
-                notification.title,
-                notification.message,
-                notification.task?.id
-              );
-            }
-          });
-        }
-        
-        lastNotificationIdRef.current = latestNotification.id;
-      }
     } catch (err) {
       console.error('Failed to load unread count:', err);
     }
   }, []);
 
-  // 初始化通知服务并加载未读数量
+  // 初始化通知服务和 WebSocket 连接
   useEffect(() => {
-    // 自动请求通知权限
+    // 自动请求浏览器通知权限
     pushNotificationService.init();
     
+    // 初始化 WebSocket 连接
+    socketService.init();
+    
+    // 监听实时通知，更新未读数
+    const unsubscribe = socketService.addListener((_notification: SocketNotification) => {
+      // 收到新通知时，增加未读数
+      setUnreadCount(prev => prev + 1);
+    });
+    
+    // 加载初始未读数量
     loadUnreadCount();
-    // 每30秒轮询一次
-    const interval = setInterval(loadUnreadCount, 30000);
-    return () => clearInterval(interval);
+    
+    // 每60秒同步一次未读数（作为备份）
+    const interval = setInterval(loadUnreadCount, 60000);
+    
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+      socketService.disconnect();
+    };
   }, [loadUnreadCount]);
 
   // Close menus when clicking outside
