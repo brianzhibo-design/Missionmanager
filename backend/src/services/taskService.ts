@@ -615,4 +615,95 @@ export const taskService = {
 
     return updatedTask;
   },
+
+  /**
+   * 开始任务
+   * todo → in_progress
+   * 权限：任务负责人/创建者
+   */
+  async startTask(userId: string, taskId: string) {
+    const task = await taskRepository.findByIdWithDetails(taskId);
+    if (!task) {
+      throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
+    }
+
+    // 检查当前状态
+    const currentStatus = (task.status || 'todo') as TaskStatusType;
+    if (currentStatus !== TaskStatus.TODO) {
+      throw new AppError('只有待办任务可以开始', 400, 'INVALID_STATUS');
+    }
+
+    // 检查权限：任务负责人或创建者
+    if (task.assigneeId !== userId && task.creatorId !== userId) {
+      const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+      if (!['owner', 'admin', 'leader'].includes(role || '')) {
+        throw new AppError('只有任务负责人或创建者可以开始任务', 403, 'FORBIDDEN');
+      }
+    }
+
+    // 更新状态
+    const updatedTask = await taskRepository.update(taskId, { status: TaskStatus.IN_PROGRESS });
+
+    // 记录事件
+    await taskEventRepository.create({
+      taskId,
+      userId,
+      type: 'status_changed',
+      data: {
+        description: `开始任务：将状态从「${STATUS_LABELS[currentStatus]}」变更为「${STATUS_LABELS[TaskStatus.IN_PROGRESS]}」`,
+        oldValue: currentStatus,
+        newValue: TaskStatus.IN_PROGRESS,
+      },
+    });
+
+    return updatedTask;
+  },
+
+  /**
+   * 重新打开任务
+   * done → in_progress
+   * 权限：任务负责人/项目负责人/管理员
+   */
+  async reopenTask(userId: string, taskId: string) {
+    const task = await taskRepository.findByIdWithDetails(taskId);
+    if (!task) {
+      throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
+    }
+
+    // 检查当前状态
+    const currentStatus = (task.status || 'todo') as TaskStatusType;
+    if (currentStatus !== TaskStatus.DONE) {
+      throw new AppError('只有已完成的任务可以重新打开', 400, 'INVALID_STATUS');
+    }
+
+    // 检查权限：任务负责人、项目负责人、管理员
+    const isAssignee = task.assigneeId === userId;
+    const isProjectLeader = task.project.leaderId === userId;
+    if (!isAssignee && !isProjectLeader) {
+      const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+      if (!['owner', 'admin'].includes(role || '')) {
+        throw new AppError('只有任务负责人或管理员可以重新打开任务', 403, 'FORBIDDEN');
+      }
+    }
+
+    // 更新状态
+    const updatedTask = await taskRepository.update(taskId, { 
+      status: TaskStatus.IN_PROGRESS,
+      completedAt: null,
+    });
+
+    // 记录事件
+    await taskEventRepository.create({
+      taskId,
+      userId,
+      type: 'status_changed',
+      data: {
+        description: `重新打开任务：将状态从「${STATUS_LABELS[currentStatus]}」变更为「${STATUS_LABELS[TaskStatus.IN_PROGRESS]}」`,
+        oldValue: currentStatus,
+        newValue: TaskStatus.IN_PROGRESS,
+      },
+    });
+
+    return updatedTask;
+  },
 };

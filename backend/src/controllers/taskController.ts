@@ -372,3 +372,39 @@ taskRouter.post('/:id/reject', async (req: Request, res: Response, next: NextFun
   }
 });
 
+/**
+ * POST /tasks/:id/start - 开始任务
+ * 将任务从 todo 转为 in_progress
+ */
+taskRouter.post('/:id/start', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const task = await taskService.startTask(req.user!.userId, req.params.id);
+
+    res.json({
+      success: true,
+      message: '任务已开始',
+      data: { task: normalizeTask(task) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /tasks/:id/reopen - 重新打开任务
+ * 将任务从 done 转为 in_progress
+ */
+taskRouter.post('/:id/reopen', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const task = await taskService.reopenTask(req.user!.userId, req.params.id);
+
+    res.json({
+      success: true,
+      message: '任务已重新打开',
+      data: { task: normalizeTask(task) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+

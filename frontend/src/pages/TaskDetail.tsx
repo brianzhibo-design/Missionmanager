@@ -28,14 +28,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
   low: { label: '低', color: 'var(--text-tertiary)' },
 };
 
-// 状态转换规则：必须通过 review 才能到 done
-const STATUS_TRANSITIONS: Record<string, string[]> = {
-  todo: ['in_progress', 'blocked'],                   // 待办 → 进行中/阻塞
-  in_progress: ['todo', 'review', 'blocked'],         // 进行中 → 待办/提交审核/阻塞（不能直接完成！）
-  review: ['in_progress', 'done'],                    // 审核 → 退回/审核通过
-  blocked: ['todo', 'in_progress'],                   // 阻塞 → 待办/进行中
-  done: ['in_progress'],                              // 完成 → 重新打开
-};
+// 状态转换规则已移到后端，前端使用专用 API 操作
 
 const EVENT_TYPES: Record<string, { label: string; color: string }> = {
   created: { label: '创建任务', color: 'var(--color-brand)' },
@@ -74,7 +67,7 @@ function DesktopTaskDetail() {
 
   // Modals
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showStatusModal, setShowStatusModal] = useState(false);
+  // 状态选择弹窗已移除，使用专用状态操作按钮
   const [updating, setUpdating] = useState(false);
   
   // AI 功能状态
@@ -144,6 +137,26 @@ function DesktopTaskDetail() {
     // 是工作区管理员
     const isAdmin = ['owner', 'admin'].includes(workspaceRole || '');
     return isProjectLeader || isAdmin;
+  }, [task, currentUser, workspaceRole]);
+
+  // 是否可以开始任务（todo 状态，任务负责人/创建者/管理员）
+  const canStartTask = useMemo(() => {
+    if (!task || !currentUser) return false;
+    if (task.status !== 'todo') return false;
+    const isAssignee = task.assigneeId === currentUser.id;
+    const isCreator = task.creatorId === currentUser.id;
+    const isAdmin = ['owner', 'admin', 'leader'].includes(workspaceRole || '');
+    return isAssignee || isCreator || isAdmin;
+  }, [task, currentUser, workspaceRole]);
+
+  // 是否可以重新打开任务（done 状态，任务负责人/项目负责人/管理员）
+  const canReopenTask = useMemo(() => {
+    if (!task || !currentUser) return false;
+    if (task.status !== 'done') return false;
+    const isAssignee = task.assigneeId === currentUser.id;
+    const isProjectLeader = task.project?.leaderId === currentUser.id;
+    const isAdmin = ['owner', 'admin'].includes(workspaceRole || '');
+    return isAssignee || isProjectLeader || isAdmin;
   }, [task, currentUser, workspaceRole]);
 
   const loadTask = useCallback(async () => {
@@ -285,6 +298,44 @@ function DesktopTaskDetail() {
       alert(errorMessage);
     } finally {
       setRejecting(false);
+    }
+  };
+
+  // 开始任务
+  const [starting, setStarting] = useState(false);
+  const handleStartTask = async () => {
+    if (!task) return;
+    try {
+      setStarting(true);
+      await taskService.startTask(task.id);
+      alert('任务已开始');
+      loadTask();
+      loadEvents();
+    } catch (err: unknown) {
+      console.error('开始任务失败:', err);
+      const errorMessage = err instanceof Error ? err.message : '开始任务失败';
+      alert(errorMessage);
+    } finally {
+      setStarting(false);
+    }
+  };
+
+  // 重新打开任务
+  const [reopening, setReopening] = useState(false);
+  const handleReopenTask = async () => {
+    if (!task) return;
+    try {
+      setReopening(true);
+      await taskService.reopenTask(task.id);
+      alert('任务已重新打开');
+      loadTask();
+      loadEvents();
+    } catch (err: unknown) {
+      console.error('重新打开失败:', err);
+      const errorMessage = err instanceof Error ? err.message : '重新打开失败';
+      alert(errorMessage);
+    } finally {
+      setReopening(false);
     }
   };
 
@@ -509,25 +560,6 @@ function DesktopTaskDetail() {
     }
   };
 
-  const handleStatusChange = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const newStatus = formData.get('status') as string;
-    const blockedReason = formData.get('blockedReason') as string;
-
-    try {
-      setUpdating(true);
-      await taskService.updateTaskStatus(id!, newStatus, blockedReason || undefined);
-      setShowStatusModal(false);
-      loadTask();
-      loadEvents();
-    } catch (err) {
-      alert('更新状态失败');
-    } finally {
-      setUpdating(false);
-    }
-  };
-
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleString('zh-CN', {
       year: 'numeric',
@@ -563,8 +595,6 @@ function DesktopTaskDetail() {
     );
   }
 
-  const availableStatuses = STATUS_TRANSITIONS[task.status] || [];
-
   return (
     <div className="task-detail-page">
       {/* Back Link */}
@@ -594,7 +624,20 @@ function DesktopTaskDetail() {
                   <Edit size={14} /> 编辑
                 </button>
                 
-                {/* 审核相关按钮 */}
+                {/* 状态操作按钮 - 根据当前状态显示不同操作 */}
+                
+                {/* TODO 状态：开始任务 */}
+                {canStartTask && (
+                  <button 
+                    className="btn btn-primary btn-sm"
+                    onClick={handleStartTask}
+                    disabled={starting}
+                  >
+                    <RefreshCw size={14} /> {starting ? '处理中...' : '开始任务'}
+                  </button>
+                )}
+                
+                {/* IN_PROGRESS 状态：提交审核 */}
                 {canSubmitReview && (
                   <button 
                     className="btn btn-success btn-sm"
@@ -605,6 +648,7 @@ function DesktopTaskDetail() {
                   </button>
                 )}
                 
+                {/* REVIEW 状态：审核通过/退回 */}
                 {canApproveReject && (
                   <>
                     <button 
@@ -631,12 +675,16 @@ function DesktopTaskDetail() {
                   </span>
                 )}
                 
-                <button 
-                  className="btn btn-primary btn-sm"
-                  onClick={() => setShowStatusModal(true)}
-                >
-                  <RefreshCw size={14} /> 更改状态
-                </button>
+                {/* DONE 状态：重新打开 */}
+                {canReopenTask && (
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={handleReopenTask}
+                    disabled={reopening}
+                  >
+                    <RefreshCw size={14} /> {reopening ? '处理中...' : '重新打开'}
+                  </button>
+                )}
                 <button 
                   className="btn btn-danger btn-sm"
                   onClick={handleDeleteTask}
@@ -1225,72 +1273,6 @@ function DesktopTaskDetail() {
             </button>
             <button type="submit" className={`btn btn-primary ${updating ? 'btn-loading' : ''}`} disabled={updating}>
               保存更改
-            </button>
-          </div>
-        </form>
-      </Modal>
-
-      {/* Status Change Modal */}
-      <Modal
-        isOpen={showStatusModal}
-        onClose={() => setShowStatusModal(false)}
-        title="更改任务状态"
-      >
-        <form onSubmit={handleStatusChange}>
-          <div className="current-status-info">
-            <span className="label">当前状态：</span>
-            <span 
-              className="status-badge"
-              style={{
-                color: STATUS_CONFIG[task.status]?.color,
-                backgroundColor: STATUS_CONFIG[task.status]?.bg,
-              }}
-            >
-              {STATUS_CONFIG[task.status]?.label}
-            </span>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">选择新状态</label>
-            <div className="status-options">
-              {availableStatuses.map(status => (
-                <label key={status} className="status-option">
-                  <input
-                    type="radio"
-                    name="status"
-                    value={status}
-                    required
-                  />
-                  <span 
-                    className="status-option-badge"
-                    style={{
-                      color: STATUS_CONFIG[status]?.color,
-                      backgroundColor: STATUS_CONFIG[status]?.bg,
-                    }}
-                  >
-                    {STATUS_CONFIG[status]?.label}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">阻塞原因（仅阻塞状态需要）</label>
-            <textarea
-              name="blockedReason"
-              className="form-textarea"
-              placeholder="请说明阻塞原因..."
-              rows={3}
-            />
-          </div>
-
-          <div className="form-actions">
-            <button type="button" className="btn btn-secondary" onClick={() => setShowStatusModal(false)}>
-              取消
-            </button>
-            <button type="submit" className={`btn btn-primary ${updating ? 'btn-loading' : ''}`} disabled={updating}>
-              确认更改
             </button>
           </div>
         </form>

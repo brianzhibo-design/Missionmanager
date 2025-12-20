@@ -210,6 +210,24 @@ export const taskService = {
     const response = await api.post<{ task: Task }>(`/tasks/${taskId}/reject`, { reason });
     return response;
   },
+
+  /**
+   * 开始任务
+   * 将任务从 todo 转为 in_progress
+   */
+  async startTask(taskId: string): Promise<{ task: Task }> {
+    const response = await api.post<{ task: Task }>(`/tasks/${taskId}/start`);
+    return response;
+  },
+
+  /**
+   * 重新打开任务
+   * 将任务从 done 转为 in_progress
+   */
+  async reopenTask(taskId: string): Promise<{ task: Task }> {
+    const response = await api.post<{ task: Task }>(`/tasks/${taskId}/reopen`);
+    return response;
+  },
 };
 
 // 状态标签映射
