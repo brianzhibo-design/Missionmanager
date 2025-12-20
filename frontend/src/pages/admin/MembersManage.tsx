@@ -356,7 +356,7 @@ export default function MembersManage() {
                 size="xl" 
               />
               <h2 className="profile-name">{profileMember.user.name}</h2>
-              <RoleBadge role={profileMember.role} size="md" variant="solid" />
+              <RoleBadge role={profileMember.role} size="md" variant="dot" />
             </div>
             <div className="profile-info-list">
               <div className="profile-info-item">
