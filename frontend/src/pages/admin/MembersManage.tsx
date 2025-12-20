@@ -12,6 +12,7 @@ import {
   WORKSPACE_ROLE_OPTIONS,
   WORKSPACE_ROLE_HIERARCHY 
 } from '../../config/permissions';
+import RoleBadge from '../../components/RoleBadge';
 import BroadcastPanel from '../../components/BroadcastPanel';
 import './MembersManage.css';
 
@@ -194,9 +195,7 @@ export default function MembersManage() {
                     </td>
                     <td className="email-cell">{member.user.email}</td>
                     <td>
-                      <span className={`role-badge role-${member.role}`}>
-                        {ROLE_LABELS[member.role] || member.role}
-                      </span>
+                      <RoleBadge role={member.role} size="md" variant="soft" />
                     </td>
                     <td className="date-cell">
                       {new Date(member.joinedAt).toLocaleDateString()}
@@ -357,9 +356,7 @@ export default function MembersManage() {
                 size="xl" 
               />
               <h2 className="profile-name">{profileMember.user.name}</h2>
-              <span className={`role-badge role-${profileMember.role}`}>
-                {ROLE_LABELS[profileMember.role] || profileMember.role}
-              </span>
+              <RoleBadge role={profileMember.role} size="md" variant="solid" />
             </div>
             <div className="profile-info-list">
               <div className="profile-info-item">

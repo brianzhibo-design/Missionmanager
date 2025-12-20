@@ -32,7 +32,7 @@ import { usePermissions } from '../../hooks/usePermissions';
 import { authService } from '../../services/auth';
 import { workspaceService } from '../../services/workspace';
 import { pushNotificationService } from '../../services/pushNotification';
-import { ROLE_LABELS } from '../../config/permissions';
+import RoleBadge from '../../components/RoleBadge';
 import '../../styles/mobile-minimal.css';
 
 // 职业选项
@@ -296,9 +296,7 @@ export default function MobileSettings() {
             <h2 className="mm-profile-name">{user?.name}</h2>
             <p className="mm-profile-email">{user?.email}</p>
             {workspaceRole && (
-              <span className="mm-profile-role">
-                {ROLE_LABELS[workspaceRole]}
-              </span>
+              <RoleBadge role={workspaceRole} size="sm" variant="soft" />
             )}
           </div>
           <ChevronRight size={20} className="mm-profile-arrow" />

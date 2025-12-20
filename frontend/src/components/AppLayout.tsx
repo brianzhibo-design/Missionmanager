@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { usePermissions } from '../hooks/usePermissions';
 import { useIsMobile } from '../hooks/useIsMobile';
-import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
+import RoleBadge from './RoleBadge';
 import { Logo } from './Logo';
 import NotificationCenter from './NotificationCenter';
 import MobileNav from './MobileNav';
@@ -181,16 +181,7 @@ export default function AppLayout() {
               ))}
             </select>
             {workspaceRole && (
-              <span 
-                className="workspace-role"
-                style={{ 
-                  background: ROLE_COLORS[workspaceRole]?.bg,
-                  color: ROLE_COLORS[workspaceRole]?.color,
-                  borderColor: ROLE_COLORS[workspaceRole]?.border,
-                }}
-              >
-                {ROLE_LABELS[workspaceRole]}
-              </span>
+              <RoleBadge role={workspaceRole} size="sm" variant="soft" />
             )}
           </div>
         )}

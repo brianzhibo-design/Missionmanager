@@ -8,7 +8,7 @@ import { usePermissions } from '../hooks/usePermissions';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { authService } from '../services/auth';
 import { workspaceService } from '../services/workspace';
-import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
+import RoleBadge from '../components/RoleBadge';
 import { 
   User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText, Phone,
   Settings as SettingsIcon, Sun, Moon, Monitor, FolderOpen, Bell, BellOff,
@@ -672,8 +672,6 @@ function DesktopSettings() {
               <h2>我的工作区</h2>
               <div className="workspaces-list">
                 {workspaces.map((ws) => {
-                  const wsRoleStyle = ROLE_COLORS[ws.role] || ROLE_COLORS.member;
-                  const wsRoleLabel = ROLE_LABELS[ws.role] || ws.role;
                   const isCurrent = ws.id === currentWorkspace?.id;
                   const canDelete = ws.role === 'owner';
                   
@@ -689,12 +687,7 @@ function DesktopSettings() {
                           {isCurrent && <span className="current-badge">当前</span>}
                         </div>
                         <div className="workspace-meta">
-                          <span 
-                            className="role-badge"
-                            style={{ background: wsRoleStyle.bg, color: wsRoleStyle.color }}
-                          >
-                            {wsRoleLabel}
-                          </span>
+                          <RoleBadge role={ws.role} size="sm" variant="soft" />
                         </div>
                       </div>
                       {canDelete && (
