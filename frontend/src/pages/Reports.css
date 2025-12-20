@@ -1082,10 +1082,42 @@
   margin-bottom: 10px;
   border: 1px solid transparent;
   transition: all 0.2s ease;
+  position: relative;
+}
+
+.team-report-item.clickable {
+  cursor: pointer;
 }
 
 .team-report-item:hover {
   border-color: var(--border-primary);
+}
+
+.team-report-item .btn-view-detail {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: var(--color-brand);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.team-report-item:hover .btn-view-detail {
+  display: flex;
+}
+
+.team-report-item .btn-view-detail:hover {
+  background: var(--color-brand-dark);
 }
 
 .report-user {

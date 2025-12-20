@@ -77,9 +77,9 @@ router.get('/projects/:id/optimize-project', requireAuth, requireProjectAccess, 
 router.post('/tasks/:id/breakdown', requireAuth, requireTaskAccess, async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { maxSubtasks, granularity } = req.body;
+    const { maxSubtasks, granularity, direction } = req.body;
     const userId = req.user!.userId;
-    const result = await aiService.breakdownTask(id, userId, { maxSubtasks, granularity });
+    const result = await aiService.breakdownTask(id, userId, { maxSubtasks, granularity, direction });
     res.json({ success: true, data: result });
   } catch (error) {
     handleAIError(error, req, res, next);

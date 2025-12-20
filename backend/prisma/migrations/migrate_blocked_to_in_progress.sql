@@ -17,3 +17,5 @@ SELECT COUNT(*) as remaining_blocked
 FROM tasks 
 WHERE status = 'blocked';
 -- 应该返回 0
+
+

@@ -16,17 +16,30 @@ const priorityColors: Record<string, string> = {
   URGENT: '#EF4444', HIGH: '#F97316', MEDIUM: '#3B82F6', LOW: '#6B7280',
 };
 
+// 预设的拆解方向
+const BREAKDOWN_DIRECTIONS = [
+  { label: '按开发阶段', value: '请按照需求分析、设计、开发、测试、上线的阶段拆解任务' },
+  { label: '按功能模块', value: '请按照不同的功能模块拆解任务' },
+  { label: '按团队分工', value: '请按照前端、后端、设计、测试等团队角色拆解任务' },
+  { label: '按时间周期', value: '请按照每周的工作量拆解任务，确保每个子任务1-3天内完成' },
+  { label: '按执行步骤', value: '请按照任务执行的先后顺序拆解，确保步骤清晰可执行' },
+];
+
 export function TaskBreakdownModal({ isOpen, onClose, taskId, taskTitle, onCreateSubtasks }: Props) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<TaskBreakdownResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [granularity, setGranularity] = useState<'fine' | 'medium' | 'coarse'>('medium');
+  const [direction, setDirection] = useState('');
 
   const handleBreakdown = async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await aiService.breakdownTask(taskId, { granularity });
+      const data = await aiService.breakdownTask(taskId, { 
+        granularity, 
+        direction: direction.trim() || undefined 
+      });
       setResult(data);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'AI 服务暂时不可用';
@@ -71,6 +84,29 @@ export function TaskBreakdownModal({ isOpen, onClose, taskId, taskTitle, onCreat
                   </button>
                 ))}
               </div>
+            </div>
+
+            <div className="ai-options">
+              <label className="form-label">拆解方向（可选）</label>
+              <div className="direction-quick-options">
+                {BREAKDOWN_DIRECTIONS.map(d => (
+                  <button
+                    key={d.label}
+                    className={`direction-btn ${direction === d.value ? 'active' : ''}`}
+                    onClick={() => setDirection(direction === d.value ? '' : d.value)}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                className="direction-input"
+                value={direction}
+                onChange={(e) => setDirection(e.target.value)}
+                placeholder="自定义拆解方向，例如：按照用户角色拆解、按照数据流程拆解..."
+                rows={2}
+              />
+              <p className="ai-hint">提供拆解方向可以让 AI 更精准地理解您的需求</p>
             </div>
 
             <button className="btn btn-primary ai-generate-btn" onClick={handleBreakdown} disabled={loading}>

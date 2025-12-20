@@ -11,8 +11,9 @@ import { config } from '../config';
 import { 
   BarChart3, Calendar, CalendarRange, AlertTriangle, CheckCircle2, Bot, 
   Sparkles, FileText, TrendingUp, FolderOpen, Mail, ChevronLeft, ChevronRight,
-  Users, Clock, Zap, Save, Edit2, Trash2
+  Users, Clock, Zap, Save, Edit2, Trash2, Eye
 } from 'lucide-react';
+import DailyReportDetailModal from '../components/DailyReportDetailModal';
 import './Reports.css';
 
 type TabType = 'daily' | 'weekly';
@@ -51,6 +52,9 @@ export default function Reports() {
   const [savingDaily, setSavingDaily] = useState(false);
   const [aiFilling, setAiFilling] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  
+  // 日报详情弹窗状态
+  const [selectedDailyReport, setSelectedDailyReport] = useState<DailyReport | null>(null);
 
   const isManager = workspaceRole && ['owner', 'director', 'manager'].includes(workspaceRole);
 
@@ -638,7 +642,11 @@ export default function Reports() {
                         <div className="submitted-list">
                           <h4>已提交日报</h4>
                           {teamData.reports.map(report => (
-                            <div key={report.id} className="team-report-item">
+                            <div 
+                              key={report.id} 
+                              className="team-report-item clickable"
+                              onClick={() => setSelectedDailyReport(report)}
+                            >
                               <div className="report-user">
                                 <div className="member-avatar">
                                   {report.user.avatar ? (
@@ -657,6 +665,15 @@ export default function Reports() {
                               <div className="report-preview">
                                 <p><strong>完成：</strong>{report.completed.substring(0, 50)}...</p>
                               </div>
+                              <button 
+                                className="btn-view-detail"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedDailyReport(report);
+                                }}
+                              >
+                                <Eye size={14} /> 查看详情
+                              </button>
                             </div>
                           ))}
                         </div>
@@ -921,6 +938,13 @@ export default function Reports() {
           </div>
         </>
       )}
+
+      {/* 日报详情弹窗 */}
+      <DailyReportDetailModal
+        isOpen={!!selectedDailyReport}
+        onClose={() => setSelectedDailyReport(null)}
+        report={selectedDailyReport || undefined}
+      />
 
       {/* 发送邮件弹窗 */}
       <Modal

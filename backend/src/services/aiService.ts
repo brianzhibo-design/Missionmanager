@@ -214,7 +214,7 @@ interface TaskBreakdownResult {
 export async function breakdownTask(
   taskId: string,
   userId: string,
-  options?: { maxSubtasks?: number; granularity?: 'fine' | 'medium' | 'coarse' }
+  options?: { maxSubtasks?: number; granularity?: 'fine' | 'medium' | 'coarse'; direction?: string }
 ): Promise<TaskBreakdownResult> {
   const task = await prisma.task.findUnique({
     where: { id: taskId },
@@ -225,14 +225,25 @@ export async function breakdownTask(
 
   const maxSubtasks = options?.maxSubtasks || 8;
   const granularity = options?.granularity || 'medium';
+  const direction = options?.direction;
+
+  const directionInstruction = direction 
+    ? `\n5. 重要：严格按照用户指定的拆解方向进行拆解` 
+    : '';
 
   const systemPrompt = `你是专业项目管理AI。将任务分解为${maxSubtasks}个以内的子任务。
+要求：
+1. 每个子任务应该是具体的、可执行的
+2. 子任务之间应该有清晰的先后顺序或依赖关系
+3. 根据粒度调整每个子任务的工作量
+4. 子任务数量控制在3-${maxSubtasks}个${directionInstruction}
+
 返回纯JSON：{"subtasks":[{"title":"","description":"","estimatedHours":2,"priority":"HIGH","skills":[],"dependencies":[]}],"totalEstimatedHours":0,"suggestedOrder":[0,1],"reasoning":""}`;
 
   const userPrompt = `分解任务：${task.title}
 描述：${task.description || '无'}
 优先级：${task.priority}
-粒度：${granularity}`;
+粒度：${granularity}${direction ? `\n\n拆解方向：${direction}` : ''}`;
 
   const result = await callAI(systemPrompt, userPrompt, 'task_breakdown', {
     userId,

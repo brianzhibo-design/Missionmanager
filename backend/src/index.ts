@@ -24,6 +24,7 @@ import commentRouter from './controllers/commentController';
 import broadcastRouter from './controllers/broadcastController';
 import dailyReportRouter from './controllers/dailyReportController';
 import uploadRouter from './controllers/uploadController';
+import permissionRouter from './controllers/permissionController';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { startScheduler } from './lib/scheduler';
 import { verifyEmailConnection } from './lib/emailService';
@@ -58,6 +59,7 @@ app.use('/comments', commentRouter);
 app.use('/broadcast', broadcastRouter);
 app.use('/daily-reports', dailyReportRouter);
 app.use('/upload', uploadRouter);
+app.use('/permissions', permissionRouter);
 
 // 测试错误处理的路由（开发用）
 if (config.isDev) {

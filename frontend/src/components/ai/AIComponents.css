@@ -40,6 +40,64 @@
   color: var(--color-brand);
 }
 
+/* 拆解方向样式 */
+.direction-quick-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.direction-btn {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-primary);
+  background: var(--bg-surface);
+  border-radius: 20px;
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--text-secondary);
+}
+
+.direction-btn:hover {
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+.direction-btn.active {
+  border-color: var(--color-brand);
+  background: var(--color-brand-alpha-10);
+  color: var(--color-brand);
+}
+
+.direction-input {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  resize: none;
+  transition: border-color 0.2s;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.direction-input:focus {
+  outline: none;
+  border-color: var(--color-brand);
+}
+
+.direction-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.ai-hint {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  margin-top: var(--space-2);
+}
+
 .ai-generate-btn {
   width: 100%;
   display: flex;

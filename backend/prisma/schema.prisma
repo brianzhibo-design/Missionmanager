@@ -70,6 +70,7 @@ model WorkspaceUser {
   joinedAt    DateTime  @default(now()) @map("joined_at")
   userId      String    @map("user_id")
   workspaceId String    @map("workspace_id")
+  permissions String[]  @default([]) // 自定义权限数组
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 

@@ -334,3 +334,5 @@ console.log(`  - 状态流转路径: ${paths.length} 条路径全部通过`);
 console.log(`  - API 端点: ${requiredEndpoints.length} 个全部找到`);
 console.log(`  - blocked 残留检查: 通过`);
 console.log('\n✅ 任务状态机逻辑测试完成！\n');
+
+

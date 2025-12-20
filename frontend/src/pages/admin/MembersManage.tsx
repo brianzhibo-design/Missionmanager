@@ -13,6 +13,7 @@ import {
 } from '../../config/permissions';
 import RoleBadge from '../../components/RoleBadge';
 import BroadcastPanel from '../../components/BroadcastPanel';
+import PermissionSettingsModal from '../../components/PermissionSettingsModal';
 import './MembersManage.css';
 
 export default function MembersManage() {
@@ -29,6 +30,8 @@ export default function MembersManage() {
   const [showBroadcast, setShowBroadcast] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [profileMember, setProfileMember] = useState<Member | null>(null);
+  const [showPermission, setShowPermission] = useState(false);
+  const [permissionMember, setPermissionMember] = useState<Member | null>(null);
 
   useEffect(() => {
     if (currentWorkspace) {
@@ -120,6 +123,11 @@ export default function MembersManage() {
     setShowProfile(true);
   };
 
+  const openPermission = (member: Member) => {
+    setPermissionMember(member);
+    setShowPermission(true);
+  };
+
   // 检查当前用户是否可以修改目标成员
   const canModifyMember = (member: Member) => {
     if (member.role === 'owner') return false;
@@ -200,24 +208,37 @@ export default function MembersManage() {
                       {new Date(member.joinedAt).toLocaleDateString()}
                     </td>
                     <td>
-                      {canModifyMember(member) ? (
-                        <div className="action-buttons">
+                      <div className="action-buttons">
+                        {/* 权限设置按钮 - 仅创始人可见 */}
+                        {workspaceRole === 'owner' && member.role !== 'owner' && (
                           <button 
                             className="btn btn-ghost btn-sm"
-                            onClick={() => openEditRole(member)}
+                            onClick={() => openPermission(member)}
+                            title="权限设置"
                           >
-                            修改角色
+                            <Shield size={14} /> 权限
                           </button>
-                          <button 
-                            className="btn btn-ghost btn-sm danger"
-                            onClick={() => handleRemove(member)}
-                          >
-                            移除
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="no-action">—</span>
-                      )}
+                        )}
+                        {canModifyMember(member) ? (
+                          <>
+                            <button 
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => openEditRole(member)}
+                            >
+                              修改角色
+                            </button>
+                            <button 
+                              className="btn btn-ghost btn-sm danger"
+                              onClick={() => handleRemove(member)}
+                            >
+                              移除
+                            </button>
+                          </>
+                        ) : null}
+                        {!canModifyMember(member) && (workspaceRole !== 'owner' || member.role === 'owner') && (
+                          <span className="no-action">—</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -397,6 +418,22 @@ export default function MembersManage() {
           </div>
         )}
       </Modal>
+
+      {/* 权限设置弹窗 */}
+      {currentWorkspace && permissionMember && (
+        <PermissionSettingsModal
+          isOpen={showPermission}
+          onClose={() => {
+            setShowPermission(false);
+            setPermissionMember(null);
+          }}
+          workspaceId={currentWorkspace.id}
+          userId={permissionMember.userId}
+          userName={permissionMember.user.name}
+          userAvatar={permissionMember.user.avatar}
+          onUpdate={loadMembers}
+        />
+      )}
     </div>
   );
 }

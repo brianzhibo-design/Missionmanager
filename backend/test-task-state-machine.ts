@@ -235,3 +235,5 @@ console.log(`  - 状态验证: 通过`);
 console.log(`  - 状态标签: 通过`);
 console.log(`  - 状态流转路径: ${paths.length} 条路径全部通过`);
 console.log('\n✅ 任务状态机逻辑测试完成！\n');
+
+

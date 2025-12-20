@@ -234,3 +234,5 @@ export default function MobileAIAnalysis() {
     </MobileLayout>
   );
 }
+
+

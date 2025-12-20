@@ -260,7 +260,7 @@ class AIService {
     };
   }
 
-  async breakdownTask(taskId: string, options?: { maxSubtasks?: number; granularity?: string }): Promise<TaskBreakdownResult> {
+  async breakdownTask(taskId: string, options?: { maxSubtasks?: number; granularity?: string; direction?: string }): Promise<TaskBreakdownResult> {
     return api.post<TaskBreakdownResult>(`/ai/tasks/${taskId}/breakdown`, options || {});
   }
 
