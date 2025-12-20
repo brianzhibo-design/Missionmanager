@@ -5,10 +5,11 @@ import { taskService, Task } from '../services/task';
 import { memberService, Member } from '../services/member';
 import { aiService, ProjectOptimizationResult, SuggestedTask } from '../services/ai';
 import { usePermissions } from '../hooks/usePermissions';
+import { useAuth } from '../hooks/useAuth';
 import { useIsMobile } from '../hooks/useIsMobile';
 import Modal from '../components/Modal';
 import TaskList from '../components/TaskList';
-import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle, FolderOpen } from 'lucide-react';
+import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle, FolderOpen, Trash2 } from 'lucide-react';
 import { ProjectFiles } from '../components/ProjectFiles';
 import MobileProjectDetail from './mobile/MobileProjectDetail';
 import './ProjectDetail.css';
@@ -78,7 +79,8 @@ export default function ProjectDetail() {
 function DesktopProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { canWorkspace } = usePermissions();
+  const { canWorkspace, workspaceRole } = usePermissions();
+  const { user: currentUser } = useAuth();
 
   const [project, setProject] = useState<Project | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -126,6 +128,16 @@ function DesktopProjectDetail() {
   const canCreateTask = canWorkspace('createTask');
   const canEditProject = canWorkspace('editProject');
   const canDeleteProject = canWorkspace('deleteProject');
+  
+  // 批量删除权限：工作区创始人(owner)、管理员(admin)、项目负责人
+  const canBatchDelete = useMemo(() => {
+    if (!currentUser) return false;
+    // 工作区 owner 或 admin 可以批量删除
+    if (['owner', 'admin'].includes(workspaceRole || '')) return true;
+    // 项目负责人可以批量删除
+    if (project?.leaderId === currentUser.id) return true;
+    return false;
+  }, [workspaceRole, project, currentUser]);
 
   const loadProject = useCallback(async () => {
     try {
@@ -407,6 +419,54 @@ function DesktopProjectDetail() {
     setSelectedTaskIds(new Set());
   };
 
+  // 批量删除任务（仅 owner/admin/项目负责人可用）
+  const handleBatchDelete = async () => {
+    if (selectedTaskIds.size === 0) return;
+    
+    // 确认弹窗
+    const confirmMessage = [
+      `确定要删除选中的 ${selectedTaskIds.size} 个任务吗？`,
+      '',
+      '⚠️ 警告：',
+      '• 此操作将同时删除所有子任务',
+      '• 删除后无法恢复',
+      '',
+      '删除权限：',
+      '• 工作区创始人/管理员',
+      '• 项目负责人',
+    ].join('\n');
+    
+    if (!window.confirm(confirmMessage)) return;
+    
+    setBatchProcessing(true);
+    try {
+      const result = await taskService.batchDelete(Array.from(selectedTaskIds));
+      
+      const successCount = result.results.success.length;
+      const failedCount = result.results.failed.length;
+      const subtaskCount = result.results.subtaskCount || 0;
+      
+      if (failedCount > 0) {
+        const failedReasons = result.results.failed.map(f => `  • ${f.reason}`).join('\n');
+        alert(`删除结果：\n✅ 成功: ${successCount} 个${subtaskCount > 0 ? `（含 ${subtaskCount} 个子任务）` : ''}\n❌ 失败: ${failedCount} 个\n\n失败原因：\n${failedReasons}`);
+      } else {
+        const subtaskInfo = subtaskCount > 0 ? `（含 ${subtaskCount} 个子任务）` : '';
+        alert(`✅ 成功删除 ${successCount} 个任务${subtaskInfo}`);
+      }
+      
+      // 刷新任务列表
+      loadTasks();
+      // 退出选择模式
+      setSelectionMode(false);
+      setSelectedTaskIds(new Set());
+    } catch (err: any) {
+      console.error('批量删除失败:', err);
+      alert(err?.message || '批量删除失败，请重试');
+    } finally {
+      setBatchProcessing(false);
+    }
+  };
+
   // AI 项目优化
   const handleProjectOptimization = async () => {
     if (!project) {
@@ -640,6 +700,17 @@ function DesktopProjectDetail() {
                 <CheckSquare size={14} />
                 {batchProcessing ? '处理中...' : '批量完成'}
               </button>
+              {canBatchDelete && (
+                <button
+                  className={`btn btn-danger btn-sm ${batchProcessing ? 'btn-loading' : ''}`}
+                  onClick={handleBatchDelete}
+                  disabled={selectedTaskIds.size === 0 || batchProcessing}
+                  title="删除权限：工作区创始人/管理员/项目负责人"
+                >
+                  <Trash2 size={14} />
+                  {batchProcessing ? '处理中...' : '批量删除'}
+                </button>
+              )}
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={cancelSelectionMode}
