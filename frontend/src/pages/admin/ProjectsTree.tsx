@@ -141,9 +141,9 @@ function DesktopProjectsTree() {
               <span className="stat-value">{treeData.overallStats.inProgress}</span>
               <span className="stat-label">进行中</span>
             </div>
-            <div className="stat-card large blocked">
-              <span className="stat-value">{treeData.overallStats.blocked}</span>
-              <span className="stat-label">阻塞</span>
+            <div className="stat-card large review">
+              <span className="stat-value">{treeData.overallStats.review}</span>
+              <span className="stat-label">审核中</span>
             </div>
           </div>
 
@@ -231,8 +231,12 @@ function ProjectCard({ project }: { project: ProjectNode }) {
 }
 
 function getHealthStatus(stats: TaskStats) {
-  const blockedRatio = stats.total > 0 ? stats.blocked / stats.total : 0;
-  if (blockedRatio > 0.2) return { status: 'critical', label: '需要关注', color: 'var(--color-danger)' };
-  if (blockedRatio > 0.1) return { status: 'warning', label: '有风险', color: 'var(--color-warning)' };
+  // 计算完成率作为健康指标
+  const completionRate = stats.total > 0 ? stats.done / stats.total : 1;
+  // 审核中任务比例过高也需要关注
+  const reviewRatio = stats.total > 0 ? stats.review / stats.total : 0;
+  
+  if (completionRate < 0.3 && stats.total > 5) return { status: 'warning', label: '进度较慢', color: 'var(--color-warning)' };
+  if (reviewRatio > 0.5) return { status: 'warning', label: '待审核', color: 'var(--color-warning)' };
   return { status: 'healthy', label: '健康', color: 'var(--color-success)' };
 }

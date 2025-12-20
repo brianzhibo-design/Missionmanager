@@ -420,17 +420,18 @@ export async function estimateProjectProgress(projectId: string, userId: string)
   if (!project) throw new AIError('项目不存在', AIErrorCodes.NOT_FOUND);
 
   const total = project.tasks.length;
-  const completed = project.tasks.filter(t => t.status === 'DONE').length;
-  const blocked = project.tasks.filter(t => t.status === 'BLOCKED').length;
+  const completed = project.tasks.filter(t => t.status === 'done').length;
+  const inProgress = project.tasks.filter(t => t.status === 'in_progress').length;
+  const review = project.tasks.filter(t => t.status === 'review').length;
 
   const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-  const completedLastWeek = project.tasks.filter(t => t.status === 'DONE' && t.updatedAt >= oneWeekAgo).length;
+  const completedLastWeek = project.tasks.filter(t => t.status === 'done' && t.updatedAt >= oneWeekAgo).length;
 
   const systemPrompt = `你是进度预测专家。返回纯JSON：
 {"currentProgress":45,"estimatedCompletionDate":"2024-02-15","confidence":75,"velocity":5,"milestones":[{"name":"","estimatedDate":"","confidence":80,"blockers":[]}],"risks":[],"recommendations":[]}`;
 
   const userPrompt = `预估项目：${project.name}
-总任务：${total}，完成：${completed}，阻塞：${blocked}
+总任务：${total}，完成：${completed}，进行中：${inProgress}，审核中：${review}
 本周完成：${completedLastWeek}`;
 
   const result = await callAI(systemPrompt, userPrompt, 'progress_estimation', {

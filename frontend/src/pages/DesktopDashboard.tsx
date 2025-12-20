@@ -82,9 +82,8 @@ export default function DesktopDashboard() {
           done: acc.done + (stats.done || 0),
           inProgress: acc.inProgress + (stats.inProgress || 0),
           todo: acc.todo + (stats.todo || 0),
-          blocked: acc.blocked + (stats.blocked || 0),
         };
-      }, { total: 0, done: 0, inProgress: 0, todo: 0, blocked: 0 });
+      }, { total: 0, done: 0, inProgress: 0, todo: 0 });
 
       // 我的任务（用于显示最近任务）
       const myTasks = tasksRes.tasks || [];

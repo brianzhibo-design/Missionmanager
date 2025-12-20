@@ -16,7 +16,7 @@ export interface TeamAnalysisResult {
     overloaded_members: Array<{
       name: string;
       task_count: number;
-      blocked_count: number;
+      review_count?: number;
       suggestion: string;
     }>;
     idle_members: Array<{

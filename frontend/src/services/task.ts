@@ -17,7 +17,6 @@ export interface Task {
   creatorId: string;
   assigneeId: string | null;
   parentId: string | null;
-  blockedReason?: string | null;
   project?: {
     id: string;
     name: string;
@@ -86,7 +85,6 @@ export interface MyTasksStats {
   todo: number;
   inProgress: number;
   review: number;
-  blocked: number;
   done: number;
   overdue: number;
   dueToday: number;
@@ -300,7 +298,6 @@ export const STATUS_LABELS: Record<string, string> = {
   todo: '待办',
   in_progress: '进行中',
   review: '审核中',
-  blocked: '已阻塞',
   done: '已完成',
 };
 

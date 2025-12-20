@@ -36,7 +36,7 @@ export interface ReportContent {
     created: number;
     completed: number;
     inProgress: number;
-    blocked: number;
+    review?: number;
     completionRate: number;
   }>;
   dailySummary?: DailySummary;

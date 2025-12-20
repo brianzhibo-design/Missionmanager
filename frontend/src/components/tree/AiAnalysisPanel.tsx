@@ -91,7 +91,7 @@ export function TeamAnalysisPanel({ analysis, onClose }: TeamAnalysisPanelProps)
               <div key={i} className="member-item overloaded">
                 <div className="member-header">
                   <span className="member-name">{m.name}</span>
-                  <span className="task-count">{m.task_count} 任务 | {m.blocked_count} 阻塞</span>
+                  <span className="task-count">{m.task_count} 任务{m.review_count ? ` | ${m.review_count} 审核中` : ''}</span>
                 </div>
                 <p className="member-suggestion">{m.suggestion}</p>
               </div>

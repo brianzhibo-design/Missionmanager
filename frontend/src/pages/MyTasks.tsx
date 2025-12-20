@@ -29,7 +29,6 @@ interface TaskStats {
   todo: number;
   inProgress: number;
   review: number;
-  blocked: number;
   done: number;
   overdue: number;
   dueToday: number;
