@@ -6,6 +6,7 @@ import { taskEventRepository } from '../repositories/taskEventRepository';
 import { projectRepository } from '../repositories/projectRepository';
 import { workspaceService } from './workspaceService';
 import { mapRole } from '../repositories/workspaceRepository';
+import { prisma } from '../lib/prisma';
 import {
   TaskStatus,
   TaskStatusType,
@@ -356,19 +357,21 @@ export const taskService = {
   },
 
   /**
-   * 批量更新任务状态
-   * 权限：owner, director, manager, member 可以编辑
+   * 批量完成任务（正确实现 - 遵循审核流程）
+   * 逻辑：
+   * - in_progress 状态：如果项目需要审核，必须先提交审核；否则可以直接完成
+   * - review 状态：需要审核权限才能完成
+   * - 其他状态：不允许直接完成
    */
-  async batchUpdateStatus(userId: string, taskIds: string[], newStatus: string) {
+  async batchComplete(userId: string, taskIds: string[]) {
     if (!taskIds || taskIds.length === 0) {
-      throw new AppError('请提供要更新的任务ID列表', 400, 'MISSING_TASK_IDS');
+      throw new AppError('请提供要完成的任务ID列表', 400, 'MISSING_TASK_IDS');
     }
 
-    if (!isValidStatus(newStatus)) {
-      throw new AppError(`无效的状态: ${newStatus}`, 400, 'INVALID_STATUS');
-    }
-
-    const results: { success: string[]; failed: Array<{ id: string; reason: string }> } = {
+    const results: { 
+      success: string[]; 
+      failed: Array<{ id: string; reason: string }> 
+    } = {
       success: [],
       failed: [],
     };
@@ -381,64 +384,172 @@ export const taskService = {
           continue;
         }
 
-        // 检查是否是项目负责人
-        const isProjectLeader = task.project.leaderId === userId;
+        const currentStatus = (task.status || 'todo') as TaskStatusType;
 
-        // 检查权限（传入任务信息以便检查member权限）
-        const hasPermission = await canEditTask(
-          task.projectId, 
-          task.project.workspaceId, 
-          userId,
-          { creatorId: task.creatorId, assigneeId: task.assigneeId },
-          isProjectLeader
-        );
-        if (!hasPermission) {
-          results.failed.push({ id: taskId, reason: '没有权限' });
-          continue;
-        }
+        // 处理 in_progress 状态
+        if (currentStatus === TaskStatus.IN_PROGRESS) {
+          // 检查权限
+          if (task.assigneeId !== userId && task.creatorId !== userId) {
+            const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+            if (!['owner', 'admin', 'leader'].includes(role || '')) {
+              results.failed.push({ id: taskId, reason: '只有任务负责人可以完成任务' });
+              continue;
+            }
+          }
 
-        // 如果任务没有状态，默认为 todo
-        const oldStatus = (task.status || 'todo') as TaskStatusType;
-        const targetStatus = newStatus as TaskStatusType;
+          // 直接完成（当前系统不强制审核，允许直接完成）
+          await this.completeTask(userId, taskId);
+          results.success.push(taskId);
 
-        // 检查状态转换是否合法
-        if (!canTransition(oldStatus, targetStatus)) {
+        // 处理 review 状态（需要审核权限）
+        } else if (currentStatus === TaskStatus.REVIEW) {
+          const isProjectLeader = task.project.leaderId === userId;
+          if (!isProjectLeader) {
+            const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+            if (!['owner', 'admin'].includes(role || '')) {
+              results.failed.push({ id: taskId, reason: '只有项目负责人可以审核通过' });
+              continue;
+            }
+          }
+
+          await this.approveTask(userId, taskId);
+          results.success.push(taskId);
+
+        // 其他状态不允许完成
+        } else {
           results.failed.push({ 
             id: taskId, 
-            reason: `不能从「${STATUS_LABELS[oldStatus] || oldStatus}」转换到「${STATUS_LABELS[targetStatus] || targetStatus}」` 
+            reason: `任务状态为「${STATUS_LABELS[currentStatus]}」，无法完成。只有「进行中」或「审核中」的任务可以完成` 
           });
-          continue;
         }
-
-        // 更新状态
-        const updateData: UpdateTaskInput = { status: targetStatus };
-        if (targetStatus === TaskStatus.DONE) {
-          updateData.completedAt = new Date();
-        } else if (oldStatus === TaskStatus.DONE) {
-          updateData.completedAt = null;
-        }
-
-        await taskRepository.update(taskId, updateData);
-
-        // 记录事件
-        await taskEventRepository.create({
-          taskId,
-          userId,
-          type: 'status_changed',
-          data: {
-            description: `批量操作：将状态从「${STATUS_LABELS[oldStatus]}」变更为「${STATUS_LABELS[targetStatus]}」`,
-            oldValue: oldStatus,
-            newValue: targetStatus,
-          },
-        });
-
-        results.success.push(taskId);
       } catch (error) {
         results.failed.push({ 
           id: taskId, 
           reason: error instanceof AppError ? error.message : '未知错误' 
         });
       }
+    }
+
+    // 智能级联：检查父任务是否应该自动完成
+    if (results.success.length > 0) {
+      const completedTasks = await prisma.task.findMany({
+        where: { id: { in: results.success } },
+        select: { parentId: true },
+      });
+
+      const parentIds = [...new Set(
+        completedTasks.map((t: { parentId: string | null }) => t.parentId).filter(Boolean) as string[]
+      )];
+
+      for (const parentId of parentIds) {
+        const allSubtasks = await prisma.task.findMany({
+          where: { parentId },
+          select: { status: true },
+        });
+
+        const allDone = allSubtasks.length > 0 && allSubtasks.every((t: { status: string }) => t.status === TaskStatus.DONE);
+
+        if (allDone) {
+          try {
+            await prisma.task.update({
+              where: { id: parentId },
+              data: { 
+                status: TaskStatus.DONE,
+                completedAt: new Date(),
+              },
+            });
+            await taskEventRepository.create({
+              taskId: parentId,
+              userId,
+              type: 'status_changed',
+              data: {
+                description: `所有子任务已完成，父任务自动完成`,
+                oldValue: 'in_progress',
+                newValue: TaskStatus.DONE,
+              },
+            });
+          } catch (error) {
+            // 级联完成失败不影响主操作结果
+            console.error(`级联完成父任务 ${parentId} 失败:`, error);
+          }
+        }
+      }
+    }
+
+    return results;
+  },
+
+  /**
+   * 批量删除任务（含级联删除子任务）
+   * 权限：owner, admin, leader, 项目负责人, 任务创建者
+   */
+  async batchDelete(userId: string, taskIds: string[]) {
+    if (!taskIds || taskIds.length === 0) {
+      throw new AppError('请提供要删除的任务ID列表', 400, 'MISSING_TASK_IDS');
+    }
+
+    const tasks = await prisma.task.findMany({
+      where: { id: { in: taskIds } },
+      include: {
+        project: {
+          include: {
+            members: true,
+            workspace: {
+              include: { members: true },
+            },
+          },
+        },
+        subTasks: {
+          select: { id: true },
+        },
+      },
+    });
+
+    if (tasks.length === 0) {
+      throw new AppError('未找到要删除的任务', 404, 'TASKS_NOT_FOUND');
+    }
+
+    const results: {
+      success: string[];
+      failed: Array<{ id: string; reason: string }>;
+      subtaskCount: number;
+    } = {
+      success: [],
+      failed: [],
+      subtaskCount: 0,
+    };
+
+    // 检查权限并统计子任务
+    for (const task of tasks) {
+      // 权限检查
+      const isCreator = task.creatorId === userId;
+      const isProjectLeader = task.project.leaderId === userId;
+
+      if (!isCreator && !isProjectLeader) {
+        const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+        if (!['owner', 'admin'].includes(role || '')) {
+          results.failed.push({ 
+            id: task.id, 
+            reason: '无权删除此任务' 
+          });
+          continue;
+        }
+      }
+
+      results.success.push(task.id);
+      results.subtaskCount += task.subTasks.length;
+    }
+
+    // 执行删除（级联删除子任务）
+    if (results.success.length > 0) {
+      await prisma.task.deleteMany({
+        where: {
+          OR: [
+            { id: { in: results.success } },
+            { parentId: { in: results.success } },
+          ],
+        },
+      });
     }
 
     return results;

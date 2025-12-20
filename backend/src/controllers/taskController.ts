@@ -272,27 +272,48 @@ taskRouter.delete('/:id', async (req: Request, res: Response, next: NextFunction
 });
 
 /**
- * POST /tasks/batch/status - 批量更新任务状态
+ * POST /tasks/batch/complete - 批量完成任务（遵循审核流程）
  */
-taskRouter.post('/batch/status', async (req: Request, res: Response, next: NextFunction) => {
+taskRouter.post('/batch/complete', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { taskIds, status } = req.body;
+    const { taskIds } = req.body;
 
     if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
-      throw new AppError('请提供要更新的任务ID列表', 400, 'MISSING_TASK_IDS');
+      throw new AppError('请提供要完成的任务ID列表', 400, 'MISSING_TASK_IDS');
     }
 
-    if (!status) {
-      throw new AppError('请提供目标状态', 400, 'MISSING_STATUS');
-    }
-
-    const results = await taskService.batchUpdateStatus(req.user!.userId, taskIds, status);
+    const results = await taskService.batchComplete(req.user!.userId, taskIds);
 
     res.json({
       success: true,
       data: {
         results,
-        message: `成功更新 ${results.success.length} 个任务${results.failed.length > 0 ? `，${results.failed.length} 个任务更新失败` : ''}`,
+        message: `成功完成 ${results.success.length} 个任务${results.failed.length > 0 ? `，${results.failed.length} 个任务失败` : ''}`,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /tasks/batch/delete - 批量删除任务（含级联删除子任务）
+ */
+taskRouter.post('/batch/delete', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { taskIds } = req.body;
+
+    if (!taskIds || !Array.isArray(taskIds) || taskIds.length === 0) {
+      throw new AppError('请提供要删除的任务ID列表', 400, 'MISSING_TASK_IDS');
+    }
+
+    const results = await taskService.batchDelete(req.user!.userId, taskIds);
+
+    res.json({
+      success: true,
+      data: {
+        results,
+        message: `成功删除 ${results.success.length} 个任务${results.subtaskCount > 0 ? `及 ${results.subtaskCount} 个子任务` : ''}${results.failed.length > 0 ? `，${results.failed.length} 个任务删除失败` : ''}`,
       },
     });
   } catch (error) {

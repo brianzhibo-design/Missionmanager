@@ -163,8 +163,8 @@ export const taskService = {
     await api.delete(`/tasks/${taskId}`);
   },
 
-  // 批量更新任务状态
-  async batchUpdateStatus(taskIds: string[], status: string): Promise<{
+  // 批量完成任务（遵循审核流程）
+  async batchComplete(taskIds: string[]): Promise<{
     results: {
       success: string[];
       failed: Array<{ id: string; reason: string }>;
@@ -177,7 +177,27 @@ export const taskService = {
         failed: Array<{ id: string; reason: string }>;
       };
       message: string;
-    }>('/tasks/batch/status', { taskIds, status });
+    }>('/tasks/batch/complete', { taskIds });
+    return response;
+  },
+
+  // 批量删除任务（含级联删除子任务）
+  async batchDelete(taskIds: string[]): Promise<{
+    results: {
+      success: string[];
+      failed: Array<{ id: string; reason: string }>;
+      subtaskCount: number;
+    };
+    message: string;
+  }> {
+    const response = await api.post<{
+      results: {
+        success: string[];
+        failed: Array<{ id: string; reason: string }>;
+        subtaskCount: number;
+      };
+      message: string;
+    }>('/tasks/batch/delete', { taskIds });
     return response;
   },
 

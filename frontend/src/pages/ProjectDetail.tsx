@@ -338,11 +338,13 @@ function DesktopProjectDetail() {
     
     setBatchProcessing(true);
     try {
-      const result = await taskService.batchUpdateStatus(Array.from(selectedTaskIds), 'done');
+      const result = await taskService.batchComplete(Array.from(selectedTaskIds));
       
       // 显示结果
       if (result.results.failed.length > 0) {
         alert(`成功完成 ${result.results.success.length} 个任务\n失败 ${result.results.failed.length} 个：\n${result.results.failed.map(f => f.reason).join('\n')}`);
+      } else {
+        alert(`成功完成 ${result.results.success.length} 个任务`);
       }
       
       // 刷新任务列表

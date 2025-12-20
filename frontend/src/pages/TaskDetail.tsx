@@ -397,7 +397,12 @@ function DesktopTaskDetail() {
     
     setBatchProcessing(true);
     try {
-      await taskService.batchUpdateStatus(Array.from(selectedSubtaskIds), 'done');
+      const result = await taskService.batchComplete(Array.from(selectedSubtaskIds));
+      
+      if (result.results.failed.length > 0) {
+        alert(`成功完成 ${result.results.success.length} 个子任务\n失败 ${result.results.failed.length} 个：\n${result.results.failed.map(f => f.reason).join('\n')}`);
+      }
+      
       await loadTask();
       setSelectedSubtaskIds(new Set());
       setSubtaskSelectionMode(false);
@@ -412,13 +417,23 @@ function DesktopTaskDetail() {
   // 批量删除子任务
   const handleBatchDeleteSubtasks = async () => {
     if (selectedSubtaskIds.size === 0) return;
-    if (!window.confirm(`确定要删除选中的 ${selectedSubtaskIds.size} 个子任务吗？`)) return;
+    
+    // 获取子任务详情以显示删除提示
+    const subtasksToDelete = task?.subTasks?.filter(s => selectedSubtaskIds.has(s.id)) || [];
+    const subtaskCount = subtasksToDelete.length;
+    
+    if (!window.confirm(`确定要删除选中的 ${subtaskCount} 个子任务吗？\n此操作无法撤销！`)) return;
     
     setBatchProcessing(true);
     try {
-      for (const subtaskId of selectedSubtaskIds) {
-        await taskService.deleteTask(subtaskId);
+      const result = await taskService.batchDelete(Array.from(selectedSubtaskIds));
+      
+      if (result.results.failed.length > 0) {
+        alert(`成功删除 ${result.results.success.length} 个子任务\n失败 ${result.results.failed.length} 个：\n${result.results.failed.map(f => f.reason).join('\n')}`);
+      } else {
+        alert(`成功删除 ${result.results.success.length} 个子任务${result.results.subtaskCount > 0 ? `（含 ${result.results.subtaskCount} 个嵌套子任务）` : ''}`);
       }
+      
       await loadTask();
       setSelectedSubtaskIds(new Set());
       setSubtaskSelectionMode(false);
