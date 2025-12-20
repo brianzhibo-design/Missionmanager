@@ -8,11 +8,24 @@ import { Building2, FolderOpen, RefreshCw, Bot } from 'lucide-react';
 import { treeService, ProjectTreeResponse, ProjectNode, TaskStats } from '../../services/tree';
 import { treeAnalysisService, ProjectsOverviewResult } from '../../services/treeAnalysis';
 import { usePermissions } from '../../hooks/usePermissions';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { TaskStatsBadge } from '../../components/tree/TaskStatsBadge';
 import { ProjectsAnalysisPanel } from '../../components/tree/AiAnalysisPanel';
+import MobileProjectsTree from '../mobile/MobileProjectsTree';
 import './ProjectsTree.css';
 
 export default function ProjectsTree() {
+  const isMobile = useIsMobile();
+
+  // 移动端渲染
+  if (isMobile) {
+    return <MobileProjectsTree />;
+  }
+
+  return <DesktopProjectsTree />;
+}
+
+function DesktopProjectsTree() {
   // 使用全局当前工作区，确保工作区隔离
   const { currentWorkspace } = usePermissions();
   

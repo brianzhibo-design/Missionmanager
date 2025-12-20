@@ -5,10 +5,12 @@ import { taskService, Task } from '../services/task';
 import { memberService, Member } from '../services/member';
 import { aiService, ProjectOptimizationResult, SuggestedTask } from '../services/ai';
 import { usePermissions } from '../hooks/usePermissions';
+import { useIsMobile } from '../hooks/useIsMobile';
 import Modal from '../components/Modal';
 import TaskList from '../components/TaskList';
 import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle, FolderOpen } from 'lucide-react';
 import { ProjectFiles } from '../components/ProjectFiles';
+import MobileProjectDetail from './mobile/MobileProjectDetail';
 import './ProjectDetail.css';
 
 interface ProjectLeader {
@@ -63,6 +65,17 @@ const SORT_OPTIONS: { value: SortOption; label: string }[] = [
 ];
 
 export default function ProjectDetail() {
+  const isMobile = useIsMobile();
+
+  // 移动端渲染
+  if (isMobile) {
+    return <MobileProjectDetail />;
+  }
+
+  return <DesktopProjectDetail />;
+}
+
+function DesktopProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { canWorkspace } = usePermissions();

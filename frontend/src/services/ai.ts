@@ -467,6 +467,37 @@ class AIService {
       context,
     });
   }
+
+  // 🌞 暖阳 AI 伙伴聊天
+  async chat(options: {
+    message: string;
+    context?: { userName?: string; role?: string; style?: string };
+  }): Promise<CompanionChatResult> {
+    return api.post<CompanionChatResult>('/ai/chat', options);
+  }
+
+  // ✨ 智能任务拆解（基于标题）
+  async breakdownTaskByTitle(
+    title: string,
+    options?: { maxSubtasks?: number }
+  ): Promise<TitleBreakdownResult> {
+    return api.post<TitleBreakdownResult>('/ai/breakdown-title', {
+      title,
+      ...options,
+    });
+  }
+}
+
+// 暖阳 AI 伙伴聊天结果
+export interface CompanionChatResult {
+  reply: string;
+  suggestions?: string[];
+}
+
+// 任务标题拆解结果
+export interface TitleBreakdownResult {
+  subtasks: string[];
+  estimatedTime?: string;
 }
 
 // 群发消息优化结果

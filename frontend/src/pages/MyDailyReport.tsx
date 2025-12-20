@@ -4,14 +4,27 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { usePermissions } from '../hooks/usePermissions';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { dailyReportService, DailyReport } from '../services/dailyReport';
 import { 
   FileText, Calendar, AlertTriangle, CheckCircle2, 
   ChevronLeft, ChevronRight, Zap, Save, Edit2, Trash2, Clock
 } from 'lucide-react';
+import MobileDailyReport from './mobile/MobileDailyReport';
 import './MyDailyReport.css';
 
 export default function MyDailyReport() {
+  const isMobile = useIsMobile();
+
+  // 移动端渲染
+  if (isMobile) {
+    return <MobileDailyReport />;
+  }
+
+  return <DesktopMyDailyReport />;
+}
+
+function DesktopMyDailyReport() {
   const { currentWorkspace} = usePermissions();
   
   // 日报相关状态

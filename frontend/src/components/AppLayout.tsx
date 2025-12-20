@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { usePermissions } from '../hooks/usePermissions';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
 import { Logo } from './Logo';
 import NotificationCenter from './NotificationCenter';
@@ -41,10 +42,32 @@ export default function AppLayout() {
     canWorkspace 
   } = usePermissions();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isMobile = useIsMobile();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // 判断是否使用新的移动端布局（简约蓝主题页面）
+  // 这些页面使用独立的 MobileLayout，不需要 AppLayout 的 MobileNav
+  // 判断是否使用新的移动端布局
+  const mobileLayoutPaths = [
+    '/dashboard', 
+    '/my-tasks', 
+    '/projects',
+    '/settings',
+    '/notifications',
+    '/search',
+    '/daily-report',
+    '/ai/',
+    '/admin/members-tree',
+    '/admin/projects-tree',
+    '/tasks/',
+  ];
+  const useNewMobileLayout = isMobile && mobileLayoutPaths.some(path => 
+    location.pathname === path || location.pathname.startsWith(path)
+  );
 
   // 检查是否有任何管理菜单权限
   const hasAnyAdminPermission = 
@@ -132,8 +155,8 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="app-layout" data-sidebar-collapsed={sidebarCollapsed}>
-      {/* Sidebar */}
+    <div className="app-layout" data-sidebar-collapsed={sidebarCollapsed} data-mobile-new-layout={useNewMobileLayout}>
+      {/* Sidebar - 移动端隐藏 */}
       <aside className="sidebar">
         <div className="sidebar-header">
           <Logo size={sidebarCollapsed ? 'sm' : 'md'} showText={!sidebarCollapsed} />
@@ -358,8 +381,8 @@ export default function AppLayout() {
         </main>
       </div>
 
-      {/* Mobile Navigation */}
-      <MobileNav />
+      {/* Mobile Navigation - 隐藏于使用新布局的页面 */}
+      {!useNewMobileLayout && <MobileNav />}
     </div>
   );
 }

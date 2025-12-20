@@ -41,9 +41,7 @@ export function initSocket(): void {
 
   // 获取 API 基础 URL
   const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-  const wsUrl = apiUrl.replace('/api', '').replace('http', 'ws').replace('https', 'wss');
-  
-  // 实际上 socket.io 会自动处理协议，我们使用 http URL
+  // socket.io 会自动处理协议，我们使用 http URL
   const baseUrl = apiUrl.replace('/api', '');
 
   socket = io(baseUrl, {

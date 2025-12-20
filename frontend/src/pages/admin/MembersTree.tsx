@@ -10,15 +10,28 @@ import { treeAnalysisService, TeamAnalysisResult } from '../../services/treeAnal
 import { api } from '../../services/api';
 import { usePermissions } from '../../hooks/usePermissions';
 import { useAuth } from '../../hooks/useAuth';
+import { useIsMobile } from '../../hooks/useIsMobile';
 import { TreeNode } from '../../components/tree/TreeNode';
 import { TaskStatsBadge } from '../../components/tree/TaskStatsBadge';
 import { MemberDetailPanel } from '../../components/tree/MemberDetailPanel';
 import { TeamAnalysisPanel } from '../../components/tree/AiAnalysisPanel';
 import { MemberEditModal, MemberEditData } from '../../components/tree/MemberEditModal';
 import { Avatar } from '../../components/Avatar';
+import MobileMembersTree from '../mobile/MobileMembersTree';
 import './MembersTree.css';
 
 export default function MembersTree() {
+  const isMobile = useIsMobile();
+
+  // 移动端渲染
+  if (isMobile) {
+    return <MobileMembersTree />;
+  }
+
+  return <DesktopMembersTree />;
+}
+
+function DesktopMembersTree() {
   // 使用全局当前工作区，确保工作区隔离
   const { currentWorkspace, workspaceRole } = usePermissions();
   const { user: currentUser } = useAuth();

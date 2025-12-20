@@ -11,6 +11,8 @@ import {
   Inbox
 } from 'lucide-react';
 import { taskService } from '../services/task';
+import { useIsMobile } from '../hooks/useIsMobile';
+import MobileTaskList from './mobile/MobileTaskList';
 import './MyTasks.css';
 
 interface Task {
@@ -50,6 +52,17 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string; border: st
 type TabType = 'all' | 'today' | 'upcoming' | 'overdue';
 
 export default function MyTasks() {
+  const isMobile = useIsMobile();
+
+  // 移动端：渲染简约蓝主题任务列表
+  if (isMobile) {
+    return <MobileTaskList />;
+  }
+
+  return <DesktopMyTasks />;
+}
+
+function DesktopMyTasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [stats, setStats] = useState<TaskStats | null>(null);
   const [loading, setLoading] = useState(true);

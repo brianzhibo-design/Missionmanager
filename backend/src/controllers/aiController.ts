@@ -279,5 +279,45 @@ router.post('/optimize-broadcast', requireAuth, async (req, res, next) => {
   }
 });
 
+// 🌞 暖阳 AI 伙伴通用聊天
+router.post('/chat', requireAuth, async (req, res, next) => {
+  try {
+    const { message, context } = req.body;
+    const userId = req.user!.userId;
+
+    if (!message?.trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        error: { code: 'BAD_REQUEST', message: '请提供消息内容' } 
+      });
+    }
+
+    const result = await aiService.companionChat(message.trim(), userId, context);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleAIError(error, req, res, next);
+  }
+});
+
+// ✨ 智能任务拆解（基于任务标题）
+router.post('/breakdown-title', requireAuth, async (req, res, next) => {
+  try {
+    const { title, maxSubtasks } = req.body;
+    const userId = req.user!.userId;
+
+    if (!title?.trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        error: { code: 'BAD_REQUEST', message: '请提供任务标题' } 
+      });
+    }
+
+    const result = await aiService.breakdownTaskByTitle(title.trim(), userId, { maxSubtasks: maxSubtasks || 5 });
+    res.json({ success: true, data: result });
+  } catch (error) {
+    handleAIError(error, req, res, next);
+  }
+});
+
 export const aiRouter = router;
 export default router;

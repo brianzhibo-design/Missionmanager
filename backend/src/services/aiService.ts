@@ -1404,6 +1404,131 @@ export async function optimizeBroadcastMessage(
   }
 }
 
+// ==================== 🌞 暖阳 AI 伙伴聊天 ====================
+
+interface CompanionChatResult {
+  reply: string;
+  suggestions?: string[];
+}
+
+async function companionChat(
+  message: string,
+  userId: string,
+  context?: { userName?: string; role?: string; style?: string }
+): Promise<CompanionChatResult> {
+  if (!isAIEnabled()) {
+    return {
+      reply: '你好！我是暖阳，你的 AI 伙伴。虽然现在 AI 功能暂时不可用，但我相信你一定能把事情做好！💪',
+      suggestions: ['查看今日任务', '创建新任务', '查看项目进度'],
+    };
+  }
+
+  const userName = context?.userName || '朋友';
+  
+  const systemPrompt = `你是"暖阳"，一个温暖、鼓励型的 AI 生产力伙伴。你的角色是：
+1. 以温暖友好的语气与用户交流
+2. 给予积极的鼓励和建议
+3. 帮助用户规划任务、提高效率
+4. 在用户感到压力时提供支持
+
+交流风格：
+- 使用适当的 emoji 增加亲和力
+- 回复简洁但温暖
+- 主动提供可行的建议
+- 始终保持积极乐观的态度
+
+用户名：${userName}
+
+请用中文回复，返回 JSON 格式：
+{
+  "reply": "你的回复内容",
+  "suggestions": ["建议1", "建议2"]
+}`;
+
+  try {
+    const result = await callAI(systemPrompt, message, 'companion_chat', {
+      userId,
+      maxTokens: 500,
+    });
+
+    return parseJSON<CompanionChatResult>(result, 'companion_chat');
+  } catch (error) {
+    log.error('暖阳聊天失败', { error: (error as Error).message });
+    
+    return {
+      reply: `${userName}，我明白你的想法！有什么具体需要帮助的吗？我在这里支持你！☀️`,
+      suggestions: ['规划今天的任务', '查看待办事项', '创建新任务'],
+    };
+  }
+}
+
+// ==================== ✨ 智能任务拆解（基于标题） ====================
+
+interface TitleBreakdownResult {
+  subtasks: string[];
+  estimatedTime?: string;
+}
+
+async function breakdownTaskByTitle(
+  title: string,
+  userId: string,
+  options: { maxSubtasks?: number } = {}
+): Promise<TitleBreakdownResult> {
+  const maxSubtasks = options.maxSubtasks || 5;
+
+  if (!isAIEnabled()) {
+    // 基于标题的简单拆解
+    const keywords = title.toLowerCase();
+    let subtasks: string[] = [];
+    
+    if (keywords.includes('报告') || keywords.includes('周报')) {
+      subtasks = ['收集本周工作数据', '总结主要完成事项', '分析遇到的问题', '制定下周计划', '格式化并提交'];
+    } else if (keywords.includes('会议') || keywords.includes('开会')) {
+      subtasks = ['确认会议主题和议程', '通知参会人员', '准备会议材料', '预订会议室/设置线上链接', '记录会议纪要'];
+    } else if (keywords.includes('方案') || keywords.includes('策划')) {
+      subtasks = ['明确目标和需求', '调研参考案例', '制定初步方案', '内部评审优化', '输出最终文档'];
+    } else {
+      subtasks = ['明确任务目标', '分析所需资源', '制定执行步骤', '开始执行', '检查并完成'];
+    }
+    
+    return { subtasks: subtasks.slice(0, maxSubtasks), estimatedTime: '1-2 小时' };
+  }
+
+  const systemPrompt = `你是一个任务分解专家。根据用户提供的任务标题，将其拆解为具体可执行的子任务。
+
+规则：
+1. 子任务应该具体、可执行
+2. 每个子任务用一句话描述
+3. 保持逻辑顺序
+4. 最多返回 ${maxSubtasks} 个子任务
+
+返回 JSON 格式：
+{
+  "subtasks": ["子任务1", "子任务2", ...],
+  "estimatedTime": "预估总时间"
+}`;
+
+  const userPrompt = `请将以下任务拆解为具体的执行步骤：
+
+**任务**：${title}`;
+
+  try {
+    const result = await callAI(systemPrompt, userPrompt, 'title_breakdown', {
+      userId,
+      maxTokens: 500,
+    });
+
+    return parseJSON<TitleBreakdownResult>(result, 'title_breakdown');
+  } catch (error) {
+    log.error('任务标题拆解失败', { error: (error as Error).message });
+    
+    return {
+      subtasks: ['分析任务需求', '准备必要资源', '执行主要工作', '检查并优化', '完成并归档'],
+      estimatedTime: '1-2 小时',
+    };
+  }
+}
+
 // ==================== 导出 ====================
 
 export const aiService = {
@@ -1421,6 +1546,8 @@ export const aiService = {
   chatWithTask,
   suggestProjectTasks,
   optimizeBroadcastMessage,
+  companionChat,
+  breakdownTaskByTitle,
   isEnabled: isAIEnabled,
   AIError,
   AIErrorCodes,

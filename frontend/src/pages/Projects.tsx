@@ -2,10 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, LayoutGrid, List, Crown, Sparkles, Check, X, Loader2, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
 import { usePermissions } from '../hooks/usePermissions';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { projectService, SuggestedTask, InitialTask } from '../services/project';
 import { workspaceService, WorkspaceMember } from '../services/workspace';
 import Modal from '../components/Modal';
 import MemberSelector from '../components/MemberSelector';
+import MobileProjects from './mobile/MobileProjects';
 import './Projects.css';
 
 interface Project {
@@ -53,6 +55,17 @@ const getProjectColor = (name: string) => {
 };
 
 export default function Projects() {
+  const isMobile = useIsMobile();
+
+  // 移动端：渲染暖阳主题项目列表
+  if (isMobile) {
+    return <MobileProjects />;
+  }
+
+  return <DesktopProjects />;
+}
+
+function DesktopProjects() {
   const { currentWorkspace, canWorkspace } = usePermissions();
   const navigate = useNavigate();
 

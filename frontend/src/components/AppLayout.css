@@ -566,6 +566,15 @@
     display: none;
   }
 
+  /* 使用新移动端布局时，隐藏桌面端的 topbar */
+  .app-layout[data-mobile-new-layout="true"] .topbar {
+    display: none !important;
+  }
+
+  .app-layout[data-mobile-new-layout="true"] .main-content {
+    padding: 0;
+  }
+
   /* ===== 导航栏 - iOS Navigation Bar ===== */
   .topbar {
     height: 44px;

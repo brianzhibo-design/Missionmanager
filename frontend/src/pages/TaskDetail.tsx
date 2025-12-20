@@ -4,11 +4,13 @@ import { taskService, Task, TaskEvent } from '../services/task';
 import { aiService, AiAnalysisResult, SingleTaskOptimization, ChatMessage } from '../services/ai';
 import { memberService, Member } from '../services/member';
 import { usePermissions } from '../hooks/usePermissions';
+import { useIsMobile } from '../hooks/useIsMobile';
 import Modal from '../components/Modal';
 import { TaskBreakdownModal, RiskPredictionPanel } from '../components/ai';
 import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle, Circle, AlertTriangle, FileText, ClipboardList, Activity, Bot, Lightbulb, Package } from 'lucide-react';
 import TaskComments from '../components/TaskComments';
 import { TaskAttachments } from '../components/TaskAttachments';
+import MobileTaskDetail from './mobile/MobileTaskDetail';
 import './TaskDetail.css';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -41,6 +43,17 @@ const EVENT_TYPES: Record<string, { label: string; color: string }> = {
 };
 
 export default function TaskDetail() {
+  const isMobile = useIsMobile();
+
+  // 移动端渲染
+  if (isMobile) {
+    return <MobileTaskDetail />;
+  }
+
+  return <DesktopTaskDetail />;
+}
+
+function DesktopTaskDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { canWorkspace } = usePermissions();

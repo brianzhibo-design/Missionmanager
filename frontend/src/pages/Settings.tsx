@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { usePermissions } from '../hooks/usePermissions';
+import { useIsMobile } from '../hooks/useIsMobile';
 import { authService } from '../services/auth';
 import { workspaceService } from '../services/workspace';
 import { ROLE_LABELS, ROLE_COLORS } from '../config/permissions';
@@ -15,6 +16,7 @@ import {
 } from 'lucide-react';
 import { pushNotificationService } from '../services/pushNotification';
 import { AvatarUpload } from '../components/AvatarUpload';
+import MobileSettings from './mobile/MobileSettings';
 import './Settings.css';
 
 // 职业选项 - 使用Lucide图标组件
@@ -32,6 +34,17 @@ const PROFESSIONS = [
 ];
 
 export default function Settings() {
+  const isMobile = useIsMobile();
+
+  // 移动端：渲染暖阳主题设置页面
+  if (isMobile) {
+    return <MobileSettings />;
+  }
+
+  return <DesktopSettings />;
+}
+
+function DesktopSettings() {
   const { user, refreshUser } = useAuth();
   const { theme, setTheme } = useTheme();
   const { currentWorkspace, workspaces, refreshWorkspaces, setCurrentWorkspaceId } = usePermissions();

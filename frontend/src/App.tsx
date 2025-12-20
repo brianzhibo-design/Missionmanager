@@ -19,6 +19,9 @@ import AiInsights from './pages/AiInsights';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
 import MyDailyReport from './pages/MyDailyReport';
+import MobileNotifications from './pages/mobile/MobileNotifications';
+import MobileSearch from './pages/mobile/MobileSearch';
+import MobileAIAnalysis from './pages/mobile/MobileAIAnalysis';
 
 /**
  * 应用主组件
@@ -56,6 +59,17 @@ function App() {
           
           {/* 设置页面 */}
           <Route path="/settings" element={<Settings />} />
+          
+          {/* 通知页面 */}
+          <Route path="/notifications" element={<MobileNotifications />} />
+          
+          {/* 搜索页面 */}
+          <Route path="/search" element={<MobileSearch />} />
+          
+          {/* AI 分析页面 */}
+          <Route path="/ai/analysis" element={<MobileAIAnalysis />} />
+          <Route path="/ai/tasks/:taskId/analysis" element={<MobileAIAnalysis />} />
+          <Route path="/ai/projects/:projectId/analysis" element={<MobileAIAnalysis />} />
           
           {/* Admin 页面 - 需要管理员权限 */}
           <Route 

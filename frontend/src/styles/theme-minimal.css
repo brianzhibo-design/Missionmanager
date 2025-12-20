@@ -1,0 +1,56 @@
+/* =========================================
+   简约蓝主题变量 (Minimalist Blue)
+   ========================================= */
+
+:root {
+  /* 主色调 - 理性蓝 */
+  --min-primary: #2563EB;
+  --min-primary-hover: #1D4ED8;
+  --min-primary-light: #EFF6FF;
+  --min-accent: #3B82F6;
+  
+  /* AI 色 - Indigo */
+  --min-ai: #6366F1;
+  --min-ai-light: #F5F3FF;
+  
+  /* 功能色 */
+  --min-success: #10B981;
+  --min-warning: #F59E0B;
+  --min-danger: #EF4444;
+  
+  /* 中性色 (Cool Grays) */
+  --min-text-title: #0F172A;
+  --min-text-body: #334155;
+  --min-text-muted: #94A3B8;
+  --min-bg: #F8FAFC;
+  --min-bg-card: #FFFFFF;
+  --min-border: #E2E8F0;
+  
+  /* 渐变 */
+  --min-gradient-header: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+  --min-gradient-ai: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  
+  /* 圆角 */
+  --min-radius-sm: 6px;
+  --min-radius-md: 8px;
+  --min-radius-lg: 12px;
+  --min-radius-xl: 24px;
+  
+  /* 阴影 (极轻) */
+  --min-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --min-shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --min-shadow-float: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* 深色模式 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --min-text-title: #F1F5F9;
+    --min-text-body: #CBD5E1;
+    --min-text-muted: #64748B;
+    --min-bg: #0F172A;
+    --min-bg-card: #1E293B;
+    --min-border: #334155;
+    --min-primary-light: #1E3A5F;
+  }
+}
