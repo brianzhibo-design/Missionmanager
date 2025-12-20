@@ -39,12 +39,14 @@ export function initSocket(): void {
     return;
   }
 
-  // 获取 API 基础 URL
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-  // socket.io 会自动处理协议，我们使用 http URL
-  const baseUrl = apiUrl.replace('/api', '');
+  // 获取 WebSocket URL
+  // 生产环境使用当前域名，开发环境使用 localhost:3000
+  const wsUrl = import.meta.env.VITE_WS_URL || 
+    (import.meta.env.VITE_API_URL?.startsWith('/') 
+      ? window.location.origin 
+      : (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace('/api', ''));
 
-  socket = io(baseUrl, {
+  socket = io(wsUrl, {
     auth: {
       token: state.token,
     },
