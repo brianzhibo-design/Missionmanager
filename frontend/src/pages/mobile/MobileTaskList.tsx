@@ -5,7 +5,7 @@ import MobileLayout from '../../components/mobile/MobileLayout';
 import { taskService, TaskWithProject } from '../../services/task';
 import '../../styles/mobile-minimal.css';
 
-type StatusFilter = 'all' | 'todo' | 'in_progress' | 'done';
+type StatusFilter = 'all' | 'todo' | 'in_progress' | 'review' | 'done';
 
 interface DateGroup {
   key: string;
@@ -18,6 +18,7 @@ const STATUS_TABS: { key: StatusFilter; label: string }[] = [
   { key: 'all', label: '全部' },
   { key: 'todo', label: '待办' },
   { key: 'in_progress', label: '进行中' },
+  { key: 'review', label: '审核中' },
   { key: 'done', label: '已完成' },
 ];
 
@@ -219,12 +220,7 @@ export default function MobileTaskList() {
   // 筛选任务
   const filteredTasks = useMemo(() => {
     if (activeFilter === 'all') return tasks;
-    return tasks.filter((t) => {
-      if (activeFilter === 'in_progress') {
-        return t.status === 'in_progress' || t.status === 'review';
-      }
-      return t.status === activeFilter;
-    });
+    return tasks.filter((t) => t.status === activeFilter);
   }, [tasks, activeFilter]);
 
   // 按日期范围分组
@@ -234,9 +230,10 @@ export default function MobileTaskList() {
   const counts = useMemo(() => {
     const all = tasks.length;
     const todo = tasks.filter(t => t.status === 'todo').length;
-    const inProgress = tasks.filter(t => t.status === 'in_progress' || t.status === 'review').length;
+    const inProgress = tasks.filter(t => t.status === 'in_progress').length;
+    const review = tasks.filter(t => t.status === 'review').length;
     const done = tasks.filter(t => t.status === 'done').length;
-    return { all, todo, in_progress: inProgress, done };
+    return { all, todo, in_progress: inProgress, review, done };
   }, [tasks]);
 
   const handleTaskClick = (taskId: string) => {
