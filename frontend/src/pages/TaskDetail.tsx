@@ -393,22 +393,47 @@ function DesktopTaskDetail() {
 
   // 批量完成子任务
   const handleBatchCompleteSubtasks = async () => {
-    if (selectedSubtaskIds.size === 0) return;
+    if (selectedSubtaskIds.size === 0) {
+      alert('请选择要完成的子任务');
+      return;
+    }
     
     setBatchProcessing(true);
     try {
       const result = await taskService.batchComplete(Array.from(selectedSubtaskIds));
       
-      if (result.results.failed.length > 0) {
-        alert(`成功完成 ${result.results.success.length} 个子任务\n失败 ${result.results.failed.length} 个：\n${result.results.failed.map(f => f.reason).join('\n')}`);
+      // 显示详细结果
+      const completed = result.results.success.length;
+      const reviewed = result.results.autoReviewed?.length || 0;
+      const failed = result.results.failed.length;
+      
+      let msg = '';
+      if (completed > 0) {
+        msg += `${completed} 个子任务已完成`;
+      }
+      if (reviewed > 0) {
+        msg += (msg ? '，' : '') + `${reviewed} 个子任务已提交审核`;
+      }
+      if (failed > 0) {
+        msg += (msg ? '，' : '') + `${failed} 个子任务失败`;
       }
       
+      if (failed > 0) {
+        // 有失败的任务，显示详细错误
+        alert(`${msg}\n\n失败原因：\n${result.results.failed.map(f => `• ${f.reason}`).join('\n')}`);
+      } else if (msg) {
+        // 全部成功，显示成功消息
+        alert(msg);
+      }
+      
+      // 刷新任务数据
       await loadTask();
+      // 清空选择并退出选择模式
       setSelectedSubtaskIds(new Set());
       setSubtaskSelectionMode(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('批量完成子任务失败:', err);
-      alert('批量完成失败');
+      alert(err.message || '批量完成失败，请重试');
     } finally {
       setBatchProcessing(false);
     }
