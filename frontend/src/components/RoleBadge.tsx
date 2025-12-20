@@ -27,34 +27,34 @@ const roleLabels: Record<string, string> = {
 };
 
 // 尺寸配置
-const sizeConfig = {
-  xs: { text: 'text-[10px]', dot: 'w-1.5 h-1.5', gap: 'gap-1.5', padding: 'px-1.5 py-0.5' },
-  sm: { text: 'text-xs', dot: 'w-2 h-2', gap: 'gap-2', padding: 'px-2 py-0.5' },
-  md: { text: 'text-sm', dot: 'w-2.5 h-2.5', gap: 'gap-2.5', padding: 'px-2.5 py-1' },
+const sizeConfig: Record<Size, { fontSize: string; dotSize: number; gap: number; padding: string }> = {
+  xs: { fontSize: '10px', dotSize: 6, gap: 6, padding: '2px 6px' },
+  sm: { fontSize: '12px', dotSize: 8, gap: 8, padding: '2px 8px' },
+  md: { fontSize: '14px', dotSize: 10, gap: 10, padding: '4px 10px' },
 };
 
-// Dot 风格圆点颜色
-const dotColors: Record<string, string> = {
-  owner: 'bg-amber-500 shadow-[0_0_8px_-2px_rgba(245,158,11,0.6)]',
-  admin: 'bg-orange-500 shadow-[0_0_8px_-2px_rgba(249,115,22,0.6)]',
-  director: 'bg-orange-500 shadow-[0_0_8px_-2px_rgba(249,115,22,0.6)]',
-  leader: 'bg-violet-500 shadow-[0_0_6px_-2px_rgba(139,92,246,0.5)]',
-  manager: 'bg-violet-500 shadow-[0_0_6px_-2px_rgba(139,92,246,0.5)]',
-  member: 'bg-emerald-500',
-  guest: 'bg-slate-400',
-  observer: 'bg-slate-400',
+// 圆点颜色配置
+const dotColorConfig: Record<string, { bg: string; shadow?: string }> = {
+  owner: { bg: '#f59e0b', shadow: '0 0 8px -2px rgba(245,158,11,0.6)' },
+  admin: { bg: '#f97316', shadow: '0 0 8px -2px rgba(249,115,22,0.6)' },
+  director: { bg: '#f97316', shadow: '0 0 8px -2px rgba(249,115,22,0.6)' },
+  leader: { bg: '#8b5cf6', shadow: '0 0 6px -2px rgba(139,92,246,0.5)' },
+  manager: { bg: '#8b5cf6', shadow: '0 0 6px -2px rgba(139,92,246,0.5)' },
+  member: { bg: '#10b981' },
+  guest: { bg: '#94a3b8' },
+  observer: { bg: '#94a3b8' },
 };
 
-// Soft 风格颜色
-const softColors: Record<string, string> = {
-  owner: 'bg-amber-50 text-amber-700 border-amber-200',
-  admin: 'bg-orange-50 text-orange-700 border-orange-200',
-  director: 'bg-orange-50 text-orange-700 border-orange-200',
-  leader: 'bg-violet-50 text-violet-700 border-violet-200',
-  manager: 'bg-violet-50 text-violet-700 border-violet-200',
-  member: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  guest: 'bg-slate-100 text-slate-600 border-slate-200',
-  observer: 'bg-slate-100 text-slate-600 border-slate-200',
+// Soft 风格颜色配置
+const softColorConfig: Record<string, { bg: string; color: string; border: string }> = {
+  owner: { bg: '#fffbeb', color: '#b45309', border: '#fde68a' },
+  admin: { bg: '#fff7ed', color: '#c2410c', border: '#fed7aa' },
+  director: { bg: '#fff7ed', color: '#c2410c', border: '#fed7aa' },
+  leader: { bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe' },
+  manager: { bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe' },
+  member: { bg: '#ecfdf5', color: '#047857', border: '#a7f3d0' },
+  guest: { bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
+  observer: { bg: '#f8fafc', color: '#475569', border: '#e2e8f0' },
 };
 
 export default function RoleBadge({ 
@@ -68,10 +68,29 @@ export default function RoleBadge({
 
   // Dot 风格（商务圆点 - 默认）
   if (variant === 'dot') {
-    const dotClass = dotColors[role] || dotColors.guest;
+    const dotColor = dotColorConfig[role] || dotColorConfig.guest;
     return (
-      <span className={`inline-flex items-center ${currentSize.gap} font-medium text-slate-700 dark:text-slate-300 ${currentSize.text} transition-opacity hover:opacity-80 ${className}`}>
-        <span className={`rounded-full flex-shrink-0 ${currentSize.dot} ${dotClass}`} />
+      <span 
+        className={className}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: `${currentSize.gap}px`,
+          fontSize: currentSize.fontSize,
+          fontWeight: 500,
+          color: '#475569',
+        }}
+      >
+        <span 
+          style={{
+            width: currentSize.dotSize,
+            height: currentSize.dotSize,
+            borderRadius: '50%',
+            backgroundColor: dotColor.bg,
+            boxShadow: dotColor.shadow,
+            flexShrink: 0,
+          }}
+        />
         {label}
       </span>
     );
@@ -79,9 +98,22 @@ export default function RoleBadge({
 
   // Soft 风格（柔和微光）
   if (variant === 'soft') {
-    const colorClass = softColors[role] || softColors.guest;
+    const softColor = softColorConfig[role] || softColorConfig.guest;
     return (
-      <span className={`inline-flex items-center ${currentSize.padding} rounded-md border ${currentSize.text} font-medium ${colorClass} ${className}`}>
+      <span 
+        className={className}
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          padding: currentSize.padding,
+          borderRadius: '6px',
+          border: `1px solid ${softColor.border}`,
+          fontSize: currentSize.fontSize,
+          fontWeight: 500,
+          backgroundColor: softColor.bg,
+          color: softColor.color,
+        }}
+      >
         {label}
       </span>
     );
