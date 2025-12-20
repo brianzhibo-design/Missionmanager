@@ -169,6 +169,18 @@ function DesktopTaskDetail() {
     return isAssignee || isProjectLeader || isAdmin;
   }, [task, currentUser, workspaceRole]);
 
+  // 是否可以删除子任务（项目负责人/管理员/任务创建者可以批量删除）
+  const canDeleteSubtasks = useMemo(() => {
+    if (!task || !currentUser) return false;
+    // 项目负责人
+    const isProjectLeader = task.project?.leaderId === currentUser.id;
+    // 工作区管理员 (owner, admin)
+    const isAdmin = ['owner', 'admin'].includes(workspaceRole || '');
+    // 主任务创建者（可以删除自己任务的子任务）
+    const isTaskCreator = task.creatorId === currentUser.id;
+    return isProjectLeader || isAdmin || isTaskCreator;
+  }, [task, currentUser, workspaceRole]);
+
   const loadTask = useCallback(async () => {
     try {
       setLoading(true);
@@ -454,24 +466,38 @@ function DesktopTaskDetail() {
     const subtasksToDelete = task?.subTasks?.filter(s => selectedSubtaskIds.has(s.id)) || [];
     const subtaskCount = subtasksToDelete.length;
     
-    if (!window.confirm(`确定要删除选中的 ${subtaskCount} 个子任务吗？\n此操作无法撤销！`)) return;
+    // 显示确认弹窗，包含权限提示
+    const confirmMessage = [
+      `确定要删除选中的 ${subtaskCount} 个子任务吗？`,
+      '',
+      '⚠️ 此操作无法撤销！',
+      '',
+      '删除权限说明：',
+      '• 任务创建者可删除自己创建的任务',
+      '• 项目负责人可删除项目内任务',
+      '• 管理员可删除任何任务',
+    ].join('\n');
+    
+    if (!window.confirm(confirmMessage)) return;
     
     setBatchProcessing(true);
     try {
       const result = await taskService.batchDelete(Array.from(selectedSubtaskIds));
       
       if (result.results.failed.length > 0) {
-        alert(`成功删除 ${result.results.success.length} 个子任务\n失败 ${result.results.failed.length} 个：\n${result.results.failed.map(f => f.reason).join('\n')}`);
+        const failedReasons = result.results.failed.map(f => `  • ${f.reason}`).join('\n');
+        alert(`删除结果：\n✅ 成功: ${result.results.success.length} 个\n❌ 失败: ${result.results.failed.length} 个\n\n失败原因：\n${failedReasons}`);
       } else {
-        alert(`成功删除 ${result.results.success.length} 个子任务${result.results.subtaskCount > 0 ? `（含 ${result.results.subtaskCount} 个嵌套子任务）` : ''}`);
+        const nestedInfo = result.results.subtaskCount > 0 ? `（含 ${result.results.subtaskCount} 个嵌套子任务）` : '';
+        alert(`✅ 成功删除 ${result.results.success.length} 个子任务${nestedInfo}`);
       }
       
       await loadTask();
       setSelectedSubtaskIds(new Set());
       setSubtaskSelectionMode(false);
-    } catch (err) {
+    } catch (err: any) {
       console.error('批量删除子任务失败:', err);
-      alert('批量删除失败');
+      alert(`批量删除失败：${err?.message || '未知错误'}`);
     } finally {
       setBatchProcessing(false);
     }
@@ -959,14 +985,17 @@ function DesktopTaskDetail() {
                   >
                     <CheckSquare size={14} /> 批量完成
                   </button>
-                  <button
-                    className={`btn btn-sm btn-danger ${batchProcessing ? 'btn-loading' : ''}`}
-                    onClick={handleBatchDeleteSubtasks}
-                    disabled={selectedSubtaskIds.size === 0 || batchProcessing}
-                  >
-                    <Trash2 size={14} />
-                    批量删除
-                  </button>
+                  {canDeleteSubtasks && (
+                    <button
+                      className={`btn btn-sm btn-danger ${batchProcessing ? 'btn-loading' : ''}`}
+                      onClick={handleBatchDeleteSubtasks}
+                      disabled={selectedSubtaskIds.size === 0 || batchProcessing}
+                      title="删除权限：创建者/项目负责人/管理员"
+                    >
+                      <Trash2 size={14} />
+                      批量删除
+                    </button>
+                  )}
                 </div>
               </div>
             )}

@@ -67,7 +67,55 @@ async function canEditTask(
   return false;
 }
 
+/**
+ * 检查用户是否有权限删除任务
+ * 删除权限比编辑权限更严格：
+ * 1. 工作区创始人（owner）
+ * 2. 大管家（admin）
+ * 3. 项目负责人（leaderId 或 members.isLeader）
+ * 4. 任务创建者
+ */
+async function canDeleteTask(
+  task: {
+    creatorId: string;
+    project: {
+      leaderId: string | null;
+      workspaceId: string;
+      members?: Array<{ userId: string; isLeader: boolean }>;
+      workspace?: { members: Array<{ userId: string; role: string }> };
+    };
+  },
+  userId: string
+): Promise<boolean> {
+  // 1. 任务创建者可以删除自己的任务
+  if (task.creatorId === userId) return true;
+
+  // 2. 项目负责人（通过 leaderId）
+  if (task.project.leaderId === userId) return true;
+
+  // 3. 项目成员中标记为 leader 的用户
+  if (task.project.members?.some(m => m.userId === userId && m.isLeader)) {
+    return true;
+  }
+
+  // 4. 工作区 owner 或 admin
+  if (task.project.workspace?.members) {
+    const isOwnerOrAdmin = task.project.workspace.members.some(
+      m => m.userId === userId && ['owner', 'admin'].includes(m.role)
+    );
+    if (isOwnerOrAdmin) return true;
+  } else {
+    // 如果 workspace.members 未加载，使用 workspaceService 查询
+    const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+    if (['owner', 'admin'].includes(role || '')) return true;
+  }
+
+  return false;
+}
+
 export const taskService = {
+  // 暴露 canDeleteTask 供内部使用
+  canDeleteTask,
   /**
    * 创建任务
    * 权限：工作区编辑角色、项目负责人、项目团队成员 可以创建
@@ -492,19 +540,14 @@ export const taskService = {
 
     // 检查权限并统计子任务
     for (const task of tasks) {
-      // 权限检查
-      const isCreator = task.creatorId === userId;
-      const isProjectLeader = task.project.leaderId === userId;
-
-      if (!isCreator && !isProjectLeader) {
-        const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-        if (!['owner', 'admin'].includes(role || '')) {
-          results.failed.push({ 
-            id: task.id, 
-            reason: '无权删除此任务' 
-          });
-          continue;
-        }
+      const canDelete = await this.canDeleteTask(task, userId);
+      
+      if (!canDelete) {
+        results.failed.push({ 
+          id: task.id, 
+          reason: '无权删除此任务（需要：创建者/项目负责人/管理员）' 
+        });
+        continue;
       }
 
       results.success.push(task.id);
