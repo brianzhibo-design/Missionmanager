@@ -296,7 +296,7 @@ export default function MobileSettings() {
             <h2 className="mm-profile-name">{user?.name}</h2>
             <p className="mm-profile-email">{user?.email}</p>
             {workspaceRole && (
-              <RoleBadge role={workspaceRole} size="sm" variant="soft" />
+              <RoleBadge role={workspaceRole} size="sm" variant="dot" />
             )}
           </div>
           <ChevronRight size={20} className="mm-profile-arrow" />

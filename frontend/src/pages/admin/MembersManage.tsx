@@ -8,7 +8,6 @@ import { Modal } from '../../components/Modal';
 import { Avatar } from '../../components/Avatar';
 import { Users, Send, Mail, Calendar, Shield, Eye } from 'lucide-react';
 import { 
-  ROLE_LABELS, 
   WORKSPACE_ROLE_OPTIONS,
   WORKSPACE_ROLE_HIERARCHY 
 } from '../../config/permissions';
@@ -195,7 +194,7 @@ export default function MembersManage() {
                     </td>
                     <td className="email-cell">{member.user.email}</td>
                     <td>
-                      <RoleBadge role={member.role} size="md" variant="soft" />
+                      <RoleBadge role={member.role} size="sm" variant="dot" />
                     </td>
                     <td className="date-cell">
                       {new Date(member.joinedAt).toLocaleDateString()}
@@ -370,7 +369,7 @@ export default function MembersManage() {
                 <Shield size={16} />
                 <div>
                   <span className="info-label">角色</span>
-                  <span className="info-value">{ROLE_LABELS[profileMember.role] || profileMember.role}</span>
+                  <RoleBadge role={profileMember.role} size="sm" variant="dot" />
                 </div>
               </div>
               <div className="profile-info-item">

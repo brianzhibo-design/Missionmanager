@@ -4,6 +4,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import { Search, Check, Users, Crown, X } from 'lucide-react';
+import RoleBadge from './RoleBadge';
 import './MemberSelector.css';
 
 export interface SelectableMember {
@@ -30,13 +31,6 @@ interface MemberSelectorProps {
   mode?: 'checkbox' | 'single';
 }
 
-const ROLE_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  owner: { bg: 'linear-gradient(135deg, #fbbf24, #f59e0b)', text: '#fff', label: '所有者' },
-  director: { bg: 'linear-gradient(135deg, #8b5cf6, #7c3aed)', text: '#fff', label: '总监' },
-  manager: { bg: 'linear-gradient(135deg, #3b82f6, #2563eb)', text: '#fff', label: '经理' },
-  member: { bg: 'linear-gradient(135deg, #10b981, #059669)', text: '#fff', label: '成员' },
-  observer: { bg: 'linear-gradient(135deg, #6b7280, #4b5563)', text: '#fff', label: '观察者' },
-};
 
 export const MemberSelector: React.FC<MemberSelectorProps> = ({
   members,
@@ -101,10 +95,6 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
     return name.charAt(0).toUpperCase();
   };
 
-  const getRoleStyle = (role?: string) => {
-    if (!role) return null;
-    return ROLE_STYLES[role.toLowerCase()] || ROLE_STYLES.member;
-  };
 
   return (
     <div className="member-selector">
@@ -184,7 +174,6 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
         ) : (
           filteredMembers.map((member) => {
             const isSelected = selectedIds.includes(member.id);
-            const roleStyle = getRoleStyle(member.role);
             
             return (
               <div
@@ -223,16 +212,8 @@ export const MemberSelector: React.FC<MemberSelectorProps> = ({
                 </div>
 
                 {/* Role tag */}
-                {roleStyle && (
-                  <div
-                    className="item-role"
-                    style={{
-                      background: roleStyle.bg,
-                      color: roleStyle.text,
-                    }}
-                  >
-                    {roleStyle.label}
-                  </div>
+                {member.role && (
+                  <RoleBadge role={member.role} size="xs" variant="dot" />
                 )}
 
                 {/* Disabled indicator */}

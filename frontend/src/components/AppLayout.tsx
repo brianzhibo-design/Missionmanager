@@ -181,7 +181,7 @@ export default function AppLayout() {
               ))}
             </select>
             {workspaceRole && (
-              <RoleBadge role={workspaceRole} size="sm" variant="soft" />
+              <RoleBadge role={workspaceRole} size="xs" variant="dot" />
             )}
           </div>
         )}

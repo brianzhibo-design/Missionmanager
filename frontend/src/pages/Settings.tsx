@@ -687,7 +687,7 @@ function DesktopSettings() {
                           {isCurrent && <span className="current-badge">当前</span>}
                         </div>
                         <div className="workspace-meta">
-                          <RoleBadge role={ws.role} size="sm" variant="soft" />
+                          <RoleBadge role={ws.role} size="xs" variant="dot" />
                         </div>
                       </div>
                       {canDelete && (
