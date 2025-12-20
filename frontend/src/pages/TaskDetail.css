@@ -89,12 +89,10 @@
 .task-ai-actions {
   display: flex;
   gap: 8px;
-  padding: 12px 0;
-  border-top: 1px solid var(--border-secondary);
-  border-bottom: 1px solid var(--border-secondary);
+  padding: 12px 16px;
+  border: 1px solid var(--border-secondary);
   background: var(--bg-surface);
   border-radius: var(--radius-lg);
-  padding: 12px 16px;
 }
 
 .ai-action-btn {
