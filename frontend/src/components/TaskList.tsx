@@ -250,8 +250,8 @@ export default function TaskList({
         </div>
       );
     }
-    // todo
-    return <div className="status-icon todo" />;
+    // todo - 明确设置边框颜色
+    return <div className="status-icon todo" style={{ borderColor: color, backgroundColor: 'transparent' }} />;
   };
 
   // 渲染任务行
