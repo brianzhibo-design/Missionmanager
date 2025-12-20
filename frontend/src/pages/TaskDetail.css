@@ -1507,3 +1507,65 @@
   background: rgba(99, 102, 241, 0.15);
   border-color: rgba(99, 102, 241, 0.3);
 }
+
+/* ========================================
+ * 审核功能样式
+ * ======================================== */
+.review-pending-hint {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  font-size: var(--text-xs);
+  color: var(--color-warning);
+  background: var(--color-warning-alpha-10);
+  border: 1px solid var(--color-warning-alpha-20);
+  border-radius: var(--radius-md);
+}
+
+.reject-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.reject-hint {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.reject-reason-count {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  text-align: right;
+}
+
+.btn-success {
+  background: var(--color-success);
+  color: white;
+  border: none;
+}
+
+.btn-success:hover {
+  background: var(--color-success-emphasis);
+}
+
+.btn-success:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-warning {
+  background: var(--color-warning);
+  color: white;
+  border: none;
+}
+
+.btn-warning:hover {
+  background: var(--color-warning-emphasis);
+}
+
+.btn-warning:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

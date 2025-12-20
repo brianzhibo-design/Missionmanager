@@ -22,6 +22,7 @@ export interface Task {
     id: string;
     name: string;
     workspaceId?: string;
+    leaderId?: string;
   };
   creator?: {
     id: string;

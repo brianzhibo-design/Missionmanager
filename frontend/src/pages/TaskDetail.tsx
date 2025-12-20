@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { taskService, Task, TaskEvent } from '../services/task';
 import { aiService, AiAnalysisResult, SingleTaskOptimization, ChatMessage } from '../services/ai';
 import { memberService, Member } from '../services/member';
 import { usePermissions } from '../hooks/usePermissions';
 import { useIsMobile } from '../hooks/useIsMobile';
+import { useAuth } from '../hooks/useAuth';
 import Modal from '../components/Modal';
 import { TaskBreakdownModal, RiskPredictionPanel } from '../components/ai';
 import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle, Circle, AlertTriangle, FileText, ClipboardList, Activity, Bot, Lightbulb, Package } from 'lucide-react';
@@ -56,7 +57,8 @@ export default function TaskDetail() {
 function DesktopTaskDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { canWorkspace } = usePermissions();
+  const { canWorkspace, workspaceRole } = usePermissions();
+  const { user: currentUser } = useAuth();
 
   // 权限检查
   const canEditTask = canWorkspace('editTask');
@@ -117,6 +119,30 @@ function DesktopTaskDetail() {
   const [showAnalysis, setShowAnalysis] = useState(true);
   const [chatSuggestions, setChatSuggestions] = useState<string[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // ===== 审核权限判断 =====
+  // 是否可以提交审核（任务负责人/创建者）
+  const canSubmitReview = useMemo(() => {
+    if (!task || !currentUser) return false;
+    if (task.status !== 'in_progress') return false;
+    // 是任务负责人或创建者
+    const isAssignee = task.assigneeId === currentUser.id;
+    const isCreator = task.creatorId === currentUser.id;
+    // 管理员也可以
+    const isAdmin = ['owner', 'admin', 'leader'].includes(workspaceRole || '');
+    return isAssignee || isCreator || isAdmin;
+  }, [task, currentUser, workspaceRole]);
+
+  // 是否可以审核（项目负责人/管理员）
+  const canApproveReject = useMemo(() => {
+    if (!task || !currentUser) return false;
+    if (task.status !== 'review') return false;
+    // 是项目负责人
+    const isProjectLeader = task.project?.leaderId === currentUser.id;
+    // 是工作区管理员
+    const isAdmin = ['owner', 'admin'].includes(workspaceRole || '');
+    return isProjectLeader || isAdmin;
+  }, [task, currentUser, workspaceRole]);
 
   const loadTask = useCallback(async () => {
     try {
@@ -239,9 +265,13 @@ function DesktopTaskDetail() {
   // 审核不通过
   const handleReject = async () => {
     if (!task) return;
+    if (!rejectReason.trim()) {
+      alert('请填写退回原因');
+      return;
+    }
     try {
       setRejecting(true);
-      await taskService.rejectTask(task.id, rejectReason);
+      await taskService.rejectTask(task.id, rejectReason.trim());
       alert('已退回修改');
       setShowRejectModal(false);
       setRejectReason('');
@@ -563,7 +593,7 @@ function DesktopTaskDetail() {
                 </button>
                 
                 {/* 审核相关按钮 */}
-                {task.status === 'in_progress' && (
+                {canSubmitReview && (
                   <button 
                     className="btn btn-success btn-sm"
                     onClick={handleSubmitReview}
@@ -573,7 +603,7 @@ function DesktopTaskDetail() {
                   </button>
                 )}
                 
-                {task.status === 'review' && (
+                {canApproveReject && (
                   <>
                     <button 
                       className="btn btn-success btn-sm"
@@ -590,6 +620,13 @@ function DesktopTaskDetail() {
                       <X size={14} /> 退回修改
                     </button>
                   </>
+                )}
+                
+                {/* 审核中状态提示（任务负责人不是审核人时） */}
+                {task.status === 'review' && !canApproveReject && (
+                  <span className="review-pending-hint">
+                    等待项目负责人审核...
+                  </span>
                 )}
                 
                 <button 
@@ -1469,14 +1506,16 @@ function DesktopTaskDetail() {
         title="退回任务"
       >
         <div className="reject-modal">
-          <p className="reject-hint">任务将退回给负责人修改，请填写退回原因（可选）：</p>
+          <p className="reject-hint">任务将退回给负责人修改，请说明需要修改的内容：</p>
           <textarea
             className="form-textarea"
             rows={4}
-            placeholder="请输入退回原因..."
+            placeholder="请说明退回原因，帮助负责人了解需要修改的内容..."
             value={rejectReason}
             onChange={(e) => setRejectReason(e.target.value)}
+            maxLength={500}
           />
+          <div className="reject-reason-count">{rejectReason.length}/500</div>
           <div className="modal-actions">
             <button 
               className="btn btn-secondary"
@@ -1490,7 +1529,7 @@ function DesktopTaskDetail() {
             <button 
               className="btn btn-warning"
               onClick={handleReject}
-              disabled={rejecting}
+              disabled={rejecting || !rejectReason.trim()}
             >
               {rejecting ? '处理中...' : '确认退回'}
             </button>
