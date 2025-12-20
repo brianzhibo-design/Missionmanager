@@ -7,6 +7,20 @@ import { requireAuth } from '../middleware/authMiddleware';
 import { AppError } from '../middleware/errorHandler';
 import { prisma } from '../infra/database';
 
+/**
+ * 规范化任务数据，确保 status 始终有值
+ */
+function normalizeTask<T extends { status?: string | null }>(task: T): T & { status: string } {
+  return {
+    ...task,
+    status: task.status || 'todo',
+  };
+}
+
+function normalizeTasks<T extends { status?: string | null }>(tasks: T[]): (T & { status: string })[] {
+  return tasks.map(normalizeTask);
+}
+
 export const taskRouter = Router();
 
 taskRouter.use(requireAuth);
@@ -171,7 +185,7 @@ taskRouter.get('/my', async (req: Request, res: Response, next: NextFunction) =>
     res.json({
       success: true,
       data: {
-        tasks,
+        tasks: normalizeTasks(tasks),
         stats,
       },
     });
@@ -189,7 +203,7 @@ taskRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =
 
     res.json({
       success: true,
-      data: { task },
+      data: { task: normalizeTask(task) },
     });
   } catch (error) {
     next(error);
