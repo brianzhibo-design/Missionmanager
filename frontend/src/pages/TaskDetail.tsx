@@ -28,11 +28,13 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
   low: { label: '低', color: 'var(--text-tertiary)' },
 };
 
+// 状态转换规则：必须通过 review 才能到 done
 const STATUS_TRANSITIONS: Record<string, string[]> = {
-  todo: ['in_progress'],
-  in_progress: ['review', 'done'],
-  review: ['in_progress', 'done'],
-  done: ['todo'],
+  todo: ['in_progress', 'blocked'],                   // 待办 → 进行中/阻塞
+  in_progress: ['todo', 'review', 'blocked'],         // 进行中 → 待办/提交审核/阻塞（不能直接完成！）
+  review: ['in_progress', 'done'],                    // 审核 → 退回/审核通过
+  blocked: ['todo', 'in_progress'],                   // 阻塞 → 待办/进行中
+  done: ['in_progress'],                              // 完成 → 重新打开
 };
 
 const EVENT_TYPES: Record<string, { label: string; color: string }> = {

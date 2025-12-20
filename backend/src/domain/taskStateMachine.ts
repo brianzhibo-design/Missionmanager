@@ -25,12 +25,13 @@ export const TaskPriority = {
 export type TaskPriorityType = (typeof TaskPriority)[keyof typeof TaskPriority];
 
 // 状态流转规则：从哪个状态可以转到哪些状态
+// 注意：in_progress 必须通过 review 才能到 done（审核流程）
 const STATE_TRANSITIONS: Record<TaskStatusType, TaskStatusType[]> = {
-  todo: ['in_progress', 'blocked', 'done'],           // 待办 → 进行中/阻塞/完成
-  in_progress: ['todo', 'review', 'blocked', 'done'], // 进行中 → 待办/审核/阻塞/完成
-  review: ['in_progress', 'blocked', 'done'],         // 审核 → 进行中/阻塞/完成
+  todo: ['in_progress', 'blocked'],                   // 待办 → 进行中/阻塞
+  in_progress: ['todo', 'review', 'blocked'],         // 进行中 → 待办/审核/阻塞（不能直接完成！）
+  review: ['in_progress', 'done'],                    // 审核 → 进行中（退回）/完成（审核通过）
   blocked: ['todo', 'in_progress'],                   // 阻塞 → 待办/进行中
-  done: ['todo', 'in_progress'],                      // 完成 → 重新打开
+  done: ['in_progress'],                              // 完成 → 重新打开为进行中
 };
 
 // 状态显示名称
