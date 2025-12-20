@@ -97,6 +97,24 @@ export interface MyTasksResponse {
   stats: MyTasksStats;
 }
 
+// 智能状态转换结果
+export interface StatusChangeResult {
+  task: Task;
+  actualStatus: string;
+  message: string;
+  statusChanged: boolean;
+}
+
+// 批量完成结果
+export interface BatchCompleteResult {
+  results: {
+    success: string[];
+    failed: Array<{ id: string; reason: string }>;
+    autoReviewed?: string[];
+  };
+  message: string;
+}
+
 export const taskService = {
   // 获取项目下的任务列表
   async getTasks(projectId: string): Promise<Task[]> {
@@ -130,12 +148,16 @@ export const taskService = {
     return response.task;
   },
 
-  // 更新任务状态
-  async updateTaskStatus(taskId: string, status: string): Promise<Task> {
-    const response = await api.patch<{ task: Task }>(`/tasks/${taskId}/status`, {
+  // 智能状态转换（保留用户习惯，后端智能处理）
+  async updateTaskStatus(taskId: string, status: string): Promise<StatusChangeResult> {
+    const response = await api.patch<{
+      success: boolean;
+      data: StatusChangeResult;
+      message: string;
+    }>(`/tasks/${taskId}/status`, {
       status,
     });
-    return response.task;
+    return response.data;
   },
 
   // 更新任务
@@ -163,22 +185,13 @@ export const taskService = {
     await api.delete(`/tasks/${taskId}`);
   },
 
-  // 批量完成任务（遵循审核流程）
-  async batchComplete(taskIds: string[]): Promise<{
-    results: {
-      success: string[];
-      failed: Array<{ id: string; reason: string }>;
-    };
-    message: string;
-  }> {
+  // 批量完成任务（智能实现 - 遵循审核流程）
+  async batchComplete(taskIds: string[]): Promise<BatchCompleteResult> {
     const response = await api.post<{
-      results: {
-        success: string[];
-        failed: Array<{ id: string; reason: string }>;
-      };
+      data: BatchCompleteResult;
       message: string;
     }>('/tasks/batch/complete', { taskIds });
-    return response;
+    return response.data;
   },
 
   // 批量删除任务（含级联删除子任务）

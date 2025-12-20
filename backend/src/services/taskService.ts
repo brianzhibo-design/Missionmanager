@@ -357,11 +357,11 @@ export const taskService = {
   },
 
   /**
-   * 批量完成任务（正确实现 - 遵循审核流程）
+   * 批量完成任务（智能实现 - 使用智能状态转换）
    * 逻辑：
-   * - in_progress 状态：如果项目需要审核，必须先提交审核；否则可以直接完成
-   * - review 状态：需要审核权限才能完成
-   * - 其他状态：不允许直接完成
+   * - 使用 changeStatusSmart 处理每个任务
+   * - 自动处理审核流程
+   * - 统计自动提交审核的任务
    */
   async batchComplete(userId: string, taskIds: string[]) {
     if (!taskIds || taskIds.length === 0) {
@@ -370,56 +370,27 @@ export const taskService = {
 
     const results: { 
       success: string[]; 
-      failed: Array<{ id: string; reason: string }> 
+      failed: Array<{ id: string; reason: string }>;
+      autoReviewed: string[];  // 自动提交审核的任务
     } = {
       success: [],
       failed: [],
+      autoReviewed: [],
     };
 
     for (const taskId of taskIds) {
       try {
-        const task = await taskRepository.findByIdWithDetails(taskId);
-        if (!task) {
-          results.failed.push({ id: taskId, reason: '任务不存在' });
-          continue;
-        }
+        // 使用智能状态转换
+        const result = await this.changeStatusSmart(userId, taskId, 'done');
 
-        const currentStatus = (task.status || 'todo') as TaskStatusType;
-
-        // 处理 in_progress 状态
-        if (currentStatus === TaskStatus.IN_PROGRESS) {
-          // 检查权限
-          if (task.assigneeId !== userId && task.creatorId !== userId) {
-            const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-            if (!['owner', 'admin', 'leader'].includes(role || '')) {
-              results.failed.push({ id: taskId, reason: '只有任务负责人可以完成任务' });
-              continue;
-            }
-          }
-
-          // 直接完成（当前系统不强制审核，允许直接完成）
-          await this.completeTask(userId, taskId);
+        if (result.actualStatus === TaskStatus.DONE) {
           results.success.push(taskId);
-
-        // 处理 review 状态（需要审核权限）
-        } else if (currentStatus === TaskStatus.REVIEW) {
-          const isProjectLeader = task.project.leaderId === userId;
-          if (!isProjectLeader) {
-            const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-            if (!['owner', 'admin'].includes(role || '')) {
-              results.failed.push({ id: taskId, reason: '只有项目负责人可以审核通过' });
-              continue;
-            }
-          }
-
-          await this.approveTask(userId, taskId);
-          results.success.push(taskId);
-
-        // 其他状态不允许完成
+        } else if (result.actualStatus === TaskStatus.REVIEW) {
+          results.autoReviewed.push(taskId);
         } else {
           results.failed.push({ 
             id: taskId, 
-            reason: `任务状态为「${STATUS_LABELS[currentStatus]}」，无法完成。只有「进行中」或「审核中」的任务可以完成` 
+            reason: `状态转换为「${STATUS_LABELS[result.actualStatus]}」，未完成` 
           });
         }
       } catch (error) {
@@ -722,6 +693,190 @@ export const taskService = {
     }
 
     return updatedTask;
+  },
+
+  /**
+   * 智能状态转换 - 保留用户习惯，后端智能处理
+   * 根据用户选择的状态，智能判断实际应该执行的操作
+   */
+  async changeStatusSmart(userId: string, taskId: string, newStatus: string) {
+    // 1. 获取任务信息
+    const task = await taskRepository.findByIdWithDetails(taskId);
+    if (!task) {
+      throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
+    }
+
+    const oldStatus = (task.status || 'todo') as TaskStatusType;
+
+    // 2. 权限检查
+    const isProjectLeader = task.project.leaderId === userId;
+    const hasPermission = await canEditTask(
+      task.projectId,
+      task.project.workspaceId,
+      userId,
+      { creatorId: task.creatorId, assigneeId: task.assigneeId },
+      isProjectLeader
+    );
+    if (!hasPermission) {
+      throw new AppError('无权修改此任务', 403, 'FORBIDDEN');
+    }
+
+    // 3. 状态值验证
+    const validStatuses = ['todo', 'in_progress', 'review', 'done'];
+    if (!validStatuses.includes(newStatus)) {
+      throw new AppError('无效的状态', 400, 'INVALID_STATUS');
+    }
+
+    // 4. 智能转换逻辑
+    let actualStatus = newStatus as TaskStatusType;
+    let message = '';
+    let needsNotification = false;
+
+    try {
+      // === 各种状态转换场景 ===
+
+      // 场景1: todo → done (禁止)
+      if (oldStatus === TaskStatus.TODO && newStatus === 'done') {
+        throw new AppError('待办任务需要先开始，才能完成', 400, 'INVALID_TRANSITION');
+      }
+
+      // 场景2: todo → review (禁止)
+      if (oldStatus === TaskStatus.TODO && newStatus === 'review') {
+        throw new AppError('待办任务需要先开始，才能提交审核', 400, 'INVALID_TRANSITION');
+      }
+
+      // 场景3: todo → in_progress (开始任务)
+      if (oldStatus === TaskStatus.TODO && newStatus === 'in_progress') {
+        await this.startTask(userId, taskId);
+        actualStatus = TaskStatus.IN_PROGRESS;
+        message = '任务已开始';
+      }
+
+      // 场景4: in_progress → todo (退回待办)
+      else if (oldStatus === TaskStatus.IN_PROGRESS && newStatus === 'todo') {
+        if (!canTransition(oldStatus, TaskStatus.TODO)) {
+          throw new AppError('不能从「进行中」转换到「待办」', 400, 'INVALID_TRANSITION');
+        }
+        await taskRepository.update(taskId, {
+          status: TaskStatus.TODO,
+          completedAt: null,
+        });
+        await taskEventRepository.create({
+          taskId,
+          userId,
+          type: 'status_changed',
+          data: {
+            description: `将状态从「${STATUS_LABELS[oldStatus]}」变更为「${STATUS_LABELS[TaskStatus.TODO]}」`,
+            oldValue: oldStatus,
+            newValue: TaskStatus.TODO,
+          },
+        });
+        actualStatus = TaskStatus.TODO;
+        message = '任务已退回待办';
+      }
+
+      // 场景5: in_progress → review (提交审核)
+      else if (oldStatus === TaskStatus.IN_PROGRESS && newStatus === 'review') {
+        await this.submitForReview(userId, taskId);
+        actualStatus = TaskStatus.REVIEW;
+        message = '任务已提交审核';
+        needsNotification = true;
+      }
+
+      // 场景6: in_progress → done (智能完成)
+      else if (oldStatus === TaskStatus.IN_PROGRESS && newStatus === 'done') {
+        // 检查是否有审核权限（项目负责人或管理员）
+        const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+        const canApprove = isProjectLeader || ['owner', 'admin'].includes(role || '');
+
+        // 当前系统不强制审核，允许直接完成
+        // 如果需要审核且用户无审核权限，则自动提交审核
+        // 注意：当前项目模型中没有 requireReview 字段，默认不强制审核
+        // 如果需要强制审核，可以在项目设置中添加此字段
+        const requiresReview = false; // 默认不强制审核
+        if (requiresReview && !canApprove) {
+          // 自动提交审核
+          await this.submitForReview(userId, taskId);
+          actualStatus = TaskStatus.REVIEW;
+          message = '任务已提交审核，等待项目负责人审核通过';
+          needsNotification = true;
+        } else {
+          // 直接完成
+          await this.completeTask(userId, taskId);
+          actualStatus = TaskStatus.DONE;
+          message = '任务已完成';
+        }
+      }
+
+      // 场景7: review → in_progress (退回修改)
+      else if (oldStatus === TaskStatus.REVIEW && newStatus === 'in_progress') {
+        if (!isProjectLeader) {
+          const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+          if (!['owner', 'admin'].includes(role || '')) {
+            throw new AppError('只有项目负责人可以退回任务', 403, 'FORBIDDEN');
+          }
+        }
+        await this.rejectTask(userId, taskId, '手动退回');
+        actualStatus = TaskStatus.IN_PROGRESS;
+        message = '任务已退回修改';
+        needsNotification = true;
+      }
+
+      // 场景8: review → done (审核通过)
+      else if (oldStatus === TaskStatus.REVIEW && newStatus === 'done') {
+        if (!isProjectLeader) {
+          const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+          if (!['owner', 'admin'].includes(role || '')) {
+            throw new AppError('只有项目负责人可以审核通过', 403, 'FORBIDDEN');
+          }
+        }
+        await this.approveTask(userId, taskId);
+        actualStatus = TaskStatus.DONE;
+        message = '审核通过，任务已完成';
+        needsNotification = true;
+      }
+
+      // 场景9: done → in_progress (重新打开)
+      else if (oldStatus === TaskStatus.DONE && newStatus === 'in_progress') {
+        await this.reopenTask(userId, taskId);
+        actualStatus = TaskStatus.IN_PROGRESS;
+        message = '任务已重新打开';
+      }
+
+      // 场景10: done → todo/review (禁止)
+      else if (oldStatus === TaskStatus.DONE && (newStatus === 'todo' || newStatus === 'review')) {
+        throw new AppError('已完成的任务只能重新打开为「进行中」状态', 400, 'INVALID_TRANSITION');
+      }
+
+      // 场景11: 相同状态 (无变化)
+      else if (oldStatus === newStatus) {
+        message = '状态未改变';
+      }
+
+      // 场景12: 其他非法转换
+      else {
+        throw new AppError(
+          `不能从「${STATUS_LABELS[oldStatus] || oldStatus}」转换到「${STATUS_LABELS[newStatus as TaskStatusType] || newStatus}」`,
+          400,
+          'INVALID_TRANSITION'
+        );
+      }
+
+      // 5. 获取更新后的任务
+      const updatedTask = await taskRepository.findByIdWithDetails(taskId);
+
+      return {
+        task: updatedTask,
+        actualStatus,
+        message,
+        statusChanged: oldStatus !== actualStatus,
+      };
+    } catch (error) {
+      if (error instanceof AppError) {
+        throw error;
+      }
+      throw new AppError(error instanceof Error ? error.message : '状态转换失败', 400, 'STATUS_CHANGE_FAILED');
+    }
   },
 
   /**

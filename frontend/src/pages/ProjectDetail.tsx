@@ -288,10 +288,30 @@ function DesktopProjectDetail() {
 
   const handleTaskStatusChange = async (taskId: string, newStatus: string) => {
     try {
-      await taskService.updateTaskStatus(taskId, newStatus);
+      const result = await taskService.updateTaskStatus(taskId, newStatus);
+      
+      // 显示智能提示
+      if (result.message) {
+        if (result.statusChanged) {
+          // 状态确实改变了
+          if (result.actualStatus !== newStatus) {
+            // 实际状态与选择不同（智能转换）
+            alert(result.message);
+          } else {
+            // 状态符合预期
+            alert(result.message);
+          }
+        } else {
+          // 状态未改变
+          alert(result.message);
+        }
+      }
+      
+      // 刷新任务列表
       loadTasks();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to update task status:', err);
+      alert(err.message || '状态更新失败');
     }
   };
 
@@ -340,11 +360,26 @@ function DesktopProjectDetail() {
     try {
       const result = await taskService.batchComplete(Array.from(selectedTaskIds));
       
-      // 显示结果
-      if (result.results.failed.length > 0) {
-        alert(`成功完成 ${result.results.success.length} 个任务\n失败 ${result.results.failed.length} 个：\n${result.results.failed.map(f => f.reason).join('\n')}`);
+      // 显示详细结果
+      const completed = result.results.success.length;
+      const reviewed = result.results.autoReviewed?.length || 0;
+      const failed = result.results.failed.length;
+      
+      let msg = '';
+      if (completed > 0) {
+        msg += `${completed} 个任务已完成`;
+      }
+      if (reviewed > 0) {
+        msg += (msg ? '，' : '') + `${reviewed} 个任务已提交审核`;
+      }
+      if (failed > 0) {
+        msg += (msg ? '，' : '') + `${failed} 个任务失败`;
+      }
+      
+      if (failed > 0) {
+        alert(`${msg}\n\n失败原因：\n${result.results.failed.map(f => `• ${f.reason}`).join('\n')}`);
       } else {
-        alert(`成功完成 ${result.results.success.length} 个任务`);
+        alert(msg || '操作完成');
       }
       
       // 刷新任务列表
@@ -352,9 +387,9 @@ function DesktopProjectDetail() {
       // 退出选择模式
       setSelectionMode(false);
       setSelectedTaskIds(new Set());
-    } catch (err) {
+    } catch (err: any) {
       console.error('批量完成失败:', err);
-      alert('批量完成失败，请重试');
+      alert(err.message || '批量完成失败，请重试');
     } finally {
       setBatchProcessing(false);
     }

@@ -472,20 +472,34 @@ function DesktopTaskDetail() {
   // 快速变更子任务状态
   const handleSubtaskStatusChange = async (subtaskId: string, newStatus: string) => {
     try {
-      await taskService.updateTaskStatus(subtaskId, newStatus);
-      // 本地更新子任务状态，避免重新加载整个页面
+      const result = await taskService.updateTaskStatus(subtaskId, newStatus);
+      
+      // 显示反馈
+      if (result.message) {
+        if (result.actualStatus !== newStatus) {
+          // 智能转换提示
+          alert(result.message);
+        } else {
+          // 状态符合预期
+          // 静默更新，不显示提示（避免频繁弹窗）
+        }
+      }
+      
+      // 本地更新子任务状态，使用实际状态
       setTask(prevTask => {
         if (!prevTask) return prevTask;
         return {
           ...prevTask,
           subTasks: prevTask.subTasks?.map(subtask =>
-            subtask.id === subtaskId ? { ...subtask, status: newStatus } : subtask
+            subtask.id === subtaskId 
+              ? { ...subtask, status: result.actualStatus }
+              : subtask
           ),
         };
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('更新子任务状态失败:', err);
-      alert('更新状态失败');
+      alert(err.message || '更新状态失败');
     }
   };
 

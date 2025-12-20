@@ -234,7 +234,7 @@ taskRouter.patch('/:id', async (req: Request, res: Response, next: NextFunction)
 });
 
 /**
- * PATCH /tasks/:id/status - 变更任务状态
+ * PATCH /tasks/:id/status - 智能状态转换（保留用户习惯，后端智能处理）
  */
 taskRouter.patch('/:id/status', async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -244,11 +244,12 @@ taskRouter.patch('/:id/status', async (req: Request, res: Response, next: NextFu
       throw new AppError('请提供 status', 400, 'MISSING_STATUS');
     }
 
-    const task = await taskService.changeStatus(req.user!.userId, req.params.id, status);
+    const result = await taskService.changeStatusSmart(req.user!.userId, req.params.id, status);
 
     res.json({
       success: true,
-      data: { task },
+      data: result,
+      message: result.message,
     });
   } catch (error) {
     next(error);
