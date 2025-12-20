@@ -185,7 +185,8 @@ export default function AppLayout() {
                 className="workspace-role"
                 style={{ 
                   background: ROLE_COLORS[workspaceRole]?.bg,
-                  color: ROLE_COLORS[workspaceRole]?.color 
+                  color: ROLE_COLORS[workspaceRole]?.color,
+                  borderColor: ROLE_COLORS[workspaceRole]?.border,
                 }}
               >
                 {ROLE_LABELS[workspaceRole]}

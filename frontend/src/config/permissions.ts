@@ -210,19 +210,19 @@ export const ROLE_DESCRIPTIONS: Record<string, string> = {
   observer: '🍉 诸位继续，我就看看 - 观察者',
 };
 
-// 角色徽章颜色
-export const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
-  // 工作区角色（新体系）
+// 角色徽章颜色 - 现代微色背景 + 深色文字风格
+export const ROLE_COLORS: Record<string, { bg: string; color: string; border?: string }> = {
+  // 工作区角色（新体系）- 扛把子使用渐变，其他使用微色背景
   owner: { bg: 'linear-gradient(135deg, #fbbf24, #f59e0b)', color: '#fff' },
-  admin: { bg: 'var(--accent-light)', color: 'var(--accent-primary)' },
-  leader: { bg: 'var(--color-info-light)', color: 'var(--color-info)' },
-  member: { bg: 'var(--color-success-light)', color: 'var(--color-success)' },
-  guest: { bg: 'var(--bg-tertiary)', color: 'var(--text-secondary)' },
+  admin: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },      // 大管家 - 橙色系
+  leader: { bg: '#ede9fe', color: '#7c3aed', border: '#ddd6fe' },     // 带头大哥 - 紫色系
+  member: { bg: '#d1fae5', color: '#059669', border: '#a7f3d0' },     // 少侠 - 绿色系
+  guest: { bg: '#f1f5f9', color: '#64748b', border: '#e2e8f0' },      // 吃瓜 - 灰色系
   // 兼容旧角色代码
-  director: { bg: 'var(--accent-light)', color: 'var(--accent-primary)' },
-  manager: { bg: 'var(--color-info-light)', color: 'var(--color-info)' },
-  observer: { bg: 'var(--bg-tertiary)', color: 'var(--text-secondary)' },
-  super_admin: { bg: 'var(--accent-light)', color: 'var(--accent-primary)' },
+  director: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },
+  manager: { bg: '#ede9fe', color: '#7c3aed', border: '#ddd6fe' },
+  observer: { bg: '#f1f5f9', color: '#64748b', border: '#e2e8f0' },
+  super_admin: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },
 };
 
 // 工作区角色选项（用于邀请/修改角色时）
