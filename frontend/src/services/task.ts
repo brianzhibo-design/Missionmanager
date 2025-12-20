@@ -180,6 +180,35 @@ export const taskService = {
     }>('/tasks/batch/status', { taskIds, status });
     return response;
   },
+
+  // ===== 任务审核相关 =====
+
+  /**
+   * 提交任务审核
+   * 任务负责人将任务从 in_progress 转为 review
+   */
+  async submitForReview(taskId: string): Promise<{ task: Task }> {
+    const response = await api.post<{ task: Task }>(`/tasks/${taskId}/submit-review`);
+    return response;
+  },
+
+  /**
+   * 审核通过
+   * 项目负责人/管理员将任务从 review 转为 done
+   */
+  async approveTask(taskId: string): Promise<{ task: Task }> {
+    const response = await api.post<{ task: Task }>(`/tasks/${taskId}/approve`);
+    return response;
+  },
+
+  /**
+   * 审核不通过
+   * 项目负责人/管理员将任务从 review 退回 in_progress
+   */
+  async rejectTask(taskId: string, reason?: string): Promise<{ task: Task }> {
+    const response = await api.post<{ task: Task }>(`/tasks/${taskId}/reject`, { reason });
+    return response;
+  },
 };
 
 // 状态标签映射

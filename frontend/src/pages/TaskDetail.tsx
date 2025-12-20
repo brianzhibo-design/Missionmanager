@@ -82,6 +82,13 @@ function DesktopTaskDetail() {
   // 删除任务状态
   const [deleting, setDeleting] = useState(false);
   
+  // 审核状态
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [approving, setApproving] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  
   // 成员列表（用于任务分配）
   const [members, setMembers] = useState<Member[]>([]);
   
@@ -188,6 +195,64 @@ function DesktopTaskDetail() {
       alert('删除任务失败');
     } finally {
       setDeleting(false);
+    }
+  };
+
+  // ==================== 任务审核功能 ====================
+
+  // 提交审核
+  const handleSubmitReview = async () => {
+    if (!task) return;
+    try {
+      setSubmittingReview(true);
+      await taskService.submitForReview(task.id);
+      alert('任务已提交审核');
+      loadTask();
+      loadEvents();
+    } catch (err: unknown) {
+      console.error('提交审核失败:', err);
+      const errorMessage = err instanceof Error ? err.message : '提交审核失败';
+      alert(errorMessage);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  // 审核通过
+  const handleApprove = async () => {
+    if (!task) return;
+    try {
+      setApproving(true);
+      await taskService.approveTask(task.id);
+      alert('审核通过！任务已完成');
+      loadTask();
+      loadEvents();
+    } catch (err: unknown) {
+      console.error('审核失败:', err);
+      const errorMessage = err instanceof Error ? err.message : '审核失败';
+      alert(errorMessage);
+    } finally {
+      setApproving(false);
+    }
+  };
+
+  // 审核不通过
+  const handleReject = async () => {
+    if (!task) return;
+    try {
+      setRejecting(true);
+      await taskService.rejectTask(task.id, rejectReason);
+      alert('已退回修改');
+      setShowRejectModal(false);
+      setRejectReason('');
+      loadTask();
+      loadEvents();
+    } catch (err: unknown) {
+      console.error('退回失败:', err);
+      const errorMessage = err instanceof Error ? err.message : '退回失败';
+      alert(errorMessage);
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -496,6 +561,37 @@ function DesktopTaskDetail() {
                 >
                   <Edit size={14} /> 编辑
                 </button>
+                
+                {/* 审核相关按钮 */}
+                {task.status === 'in_progress' && (
+                  <button 
+                    className="btn btn-success btn-sm"
+                    onClick={handleSubmitReview}
+                    disabled={submittingReview}
+                  >
+                    <CheckSquare size={14} /> {submittingReview ? '提交中...' : '提交审核'}
+                  </button>
+                )}
+                
+                {task.status === 'review' && (
+                  <>
+                    <button 
+                      className="btn btn-success btn-sm"
+                      onClick={handleApprove}
+                      disabled={approving}
+                    >
+                      <CheckSquare size={14} /> {approving ? '处理中...' : '审核通过'}
+                    </button>
+                    <button 
+                      className="btn btn-warning btn-sm"
+                      onClick={() => setShowRejectModal(true)}
+                      disabled={rejecting}
+                    >
+                      <X size={14} /> 退回修改
+                    </button>
+                  </>
+                )}
+                
                 <button 
                   className="btn btn-primary btn-sm"
                   onClick={() => setShowStatusModal(true)}
@@ -1358,6 +1454,45 @@ function DesktopTaskDetail() {
             >
               <Sparkles size={14} />
               {analyzing ? '分析中...' : '开始分析'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* 退回原因弹窗 */}
+      <Modal
+        isOpen={showRejectModal}
+        onClose={() => {
+          setShowRejectModal(false);
+          setRejectReason('');
+        }}
+        title="退回任务"
+      >
+        <div className="reject-modal">
+          <p className="reject-hint">任务将退回给负责人修改，请填写退回原因（可选）：</p>
+          <textarea
+            className="form-textarea"
+            rows={4}
+            placeholder="请输入退回原因..."
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+          <div className="modal-actions">
+            <button 
+              className="btn btn-secondary"
+              onClick={() => {
+                setShowRejectModal(false);
+                setRejectReason('');
+              }}
+            >
+              取消
+            </button>
+            <button 
+              className="btn btn-warning"
+              onClick={handleReject}
+              disabled={rejecting}
+            >
+              {rejecting ? '处理中...' : '确认退回'}
             </button>
           </div>
         </div>
