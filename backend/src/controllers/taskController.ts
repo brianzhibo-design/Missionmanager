@@ -168,7 +168,6 @@ taskRouter.get('/my', async (req: Request, res: Response, next: NextFunction) =>
       todo: allTasks.filter(t => t.status === 'todo').length,
       inProgress: allTasks.filter(t => t.status === 'in_progress').length,
       review: allTasks.filter(t => t.status === 'review').length,
-      blocked: allTasks.filter(t => t.status === 'blocked').length,
       done: allTasks.filter(t => t.status === 'done').length,
       overdue: allTasks.filter(t => 
         t.dueDate && 

@@ -268,12 +268,7 @@ export const taskService = {
       );
     }
 
-    // 5. BLOCKED 状态需要提供原因
-    if (targetStatus === TaskStatus.BLOCKED && !blockedReason) {
-      throw new AppError('设置为阻塞状态时请提供原因', 400, 'BLOCKED_REASON_REQUIRED');
-    }
-
-    // 6. 更新状态
+    // 5. 更新状态
     const updateData: UpdateTaskInput = {
       status: targetStatus,
     };
