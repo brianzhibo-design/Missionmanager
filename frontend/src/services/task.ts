@@ -228,6 +228,15 @@ export const taskService = {
     const response = await api.post<{ task: Task }>(`/tasks/${taskId}/reopen`);
     return response;
   },
+
+  /**
+   * 直接完成任务（无需审核）
+   * 将任务从 in_progress 转为 done
+   */
+  async completeTask(taskId: string): Promise<{ task: Task }> {
+    const response = await api.post<{ task: Task }>(`/tasks/${taskId}/complete`);
+    return response;
+  },
 };
 
 // 状态标签映射

@@ -408,3 +408,21 @@ taskRouter.post('/:id/reopen', async (req: Request, res: Response, next: NextFun
   }
 });
 
+/**
+ * POST /tasks/:id/complete - 直接完成任务（无需审核）
+ * 将任务从 in_progress 转为 done
+ */
+taskRouter.post('/:id/complete', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const task = await taskService.completeTask(req.user!.userId, req.params.id);
+
+    res.json({
+      success: true,
+      message: '任务已完成',
+      data: { task: normalizeTask(task) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+

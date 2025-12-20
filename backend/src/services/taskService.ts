@@ -706,4 +706,51 @@ export const taskService = {
 
     return updatedTask;
   },
+
+  /**
+   * 直接完成任务（无需审核）
+   * in_progress → done
+   * 权限：任务负责人/创建者/管理员
+   * 注意：如果项目要求审核，应使用 submitForReview
+   */
+  async completeTask(userId: string, taskId: string) {
+    const task = await taskRepository.findByIdWithDetails(taskId);
+    if (!task) {
+      throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
+    }
+
+    // 检查当前状态
+    const currentStatus = (task.status || 'todo') as TaskStatusType;
+    if (currentStatus !== TaskStatus.IN_PROGRESS) {
+      throw new AppError('只有进行中的任务可以完成', 400, 'INVALID_STATUS');
+    }
+
+    // 检查权限：任务负责人或创建者
+    if (task.assigneeId !== userId && task.creatorId !== userId) {
+      const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
+      if (!['owner', 'admin', 'leader'].includes(role || '')) {
+        throw new AppError('只有任务负责人或创建者可以完成任务', 403, 'FORBIDDEN');
+      }
+    }
+
+    // 更新状态
+    const updatedTask = await taskRepository.update(taskId, { 
+      status: TaskStatus.DONE,
+      completedAt: new Date(),
+    });
+
+    // 记录事件
+    await taskEventRepository.create({
+      taskId,
+      userId,
+      type: 'status_changed',
+      data: {
+        description: `直接完成任务：将状态从「${STATUS_LABELS[currentStatus]}」变更为「${STATUS_LABELS[TaskStatus.DONE]}」`,
+        oldValue: currentStatus,
+        newValue: TaskStatus.DONE,
+      },
+    });
+
+    return updatedTask;
+  },
 };

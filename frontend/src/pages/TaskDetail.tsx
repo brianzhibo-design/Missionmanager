@@ -149,6 +149,16 @@ function DesktopTaskDetail() {
     return isAssignee || isCreator || isAdmin;
   }, [task, currentUser, workspaceRole]);
 
+  // 是否可以直接完成任务（in_progress 状态，任务负责人/创建者/管理员）
+  const canCompleteTask = useMemo(() => {
+    if (!task || !currentUser) return false;
+    if (task.status !== 'in_progress') return false;
+    const isAssignee = task.assigneeId === currentUser.id;
+    const isCreator = task.creatorId === currentUser.id;
+    const isAdmin = ['owner', 'admin', 'leader'].includes(workspaceRole || '');
+    return isAssignee || isCreator || isAdmin;
+  }, [task, currentUser, workspaceRole]);
+
   // 是否可以重新打开任务（done 状态，任务负责人/项目负责人/管理员）
   const canReopenTask = useMemo(() => {
     if (!task || !currentUser) return false;
@@ -336,6 +346,25 @@ function DesktopTaskDetail() {
       alert(errorMessage);
     } finally {
       setReopening(false);
+    }
+  };
+
+  // 直接完成任务（无需审核）
+  const [completing, setCompleting] = useState(false);
+  const handleCompleteTask = async () => {
+    if (!task) return;
+    try {
+      setCompleting(true);
+      await taskService.completeTask(task.id);
+      alert('任务已完成');
+      loadTask();
+      loadEvents();
+    } catch (err: unknown) {
+      console.error('完成任务失败:', err);
+      const errorMessage = err instanceof Error ? err.message : '完成任务失败';
+      alert(errorMessage);
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -637,7 +666,7 @@ function DesktopTaskDetail() {
                   </button>
                 )}
                 
-                {/* IN_PROGRESS 状态：提交审核 */}
+                {/* IN_PROGRESS 状态：提交审核 或 直接完成 */}
                 {canSubmitReview && (
                   <button 
                     className="btn btn-success btn-sm"
@@ -645,6 +674,16 @@ function DesktopTaskDetail() {
                     disabled={submittingReview}
                   >
                     <CheckSquare size={14} /> {submittingReview ? '提交中...' : '提交审核'}
+                  </button>
+                )}
+                {canCompleteTask && (
+                  <button 
+                    className="btn btn-primary btn-sm"
+                    onClick={handleCompleteTask}
+                    disabled={completing}
+                    title="直接完成任务（不经过审核）"
+                  >
+                    <CheckSquare size={14} /> {completing ? '处理中...' : '直接完成'}
                   </button>
                 )}
                 
