@@ -840,14 +840,6 @@ function DesktopTaskDetail() {
             </div>
           )}
 
-          {/* Blocked Reason */}
-          {task.status === 'blocked' && task.blockedReason && (
-            <div className="task-section card card-status card-danger">
-              <h3 className="section-title"><AlertTriangle size={16} /> 阻塞原因</h3>
-              <p className="blocked-reason">{task.blockedReason}</p>
-            </div>
-          )}
-
           {/* Subtasks Section */}
           <div className="task-section card subtasks-section">
             <div className="subtasks-header">

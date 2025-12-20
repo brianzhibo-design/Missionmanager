@@ -33,7 +33,6 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   todo: { label: '待办', className: 'todo' },
   in_progress: { label: '进行中', className: 'in-progress' },
   review: { label: '审核', className: 'in-progress' },
-  blocked: { label: '阻塞', className: 'blocked' },
   done: { label: '完成', className: 'done' },
 };
 

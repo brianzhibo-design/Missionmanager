@@ -239,13 +239,13 @@ taskRouter.patch('/:id', async (req: Request, res: Response, next: NextFunction)
  */
 taskRouter.patch('/:id/status', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { status, blockedReason } = req.body;
+    const { status } = req.body;
 
     if (!status) {
       throw new AppError('请提供 status', 400, 'MISSING_STATUS');
     }
 
-    const task = await taskService.changeStatus(req.user!.userId, req.params.id, status, blockedReason);
+    const task = await taskService.changeStatus(req.user!.userId, req.params.id, status);
 
     res.json({
       success: true,

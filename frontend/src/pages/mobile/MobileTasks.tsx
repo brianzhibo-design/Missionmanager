@@ -44,7 +44,6 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
   in_progress: { label: '进行中', color: 'var(--warm-secondary)' },
   review: { label: '审核中', color: 'var(--warm-warning)' },
   done: { label: '已完成', color: 'var(--warm-success)' },
-  blocked: { label: '阻塞', color: 'var(--warm-danger)' },
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
@@ -413,7 +412,6 @@ export default function MobileTasks() {
               { key: 'in_progress', label: '进行中' },
               { key: 'review', label: '审核中' },
               { key: 'done', label: '已完成' },
-              { key: 'blocked', label: '阻塞' },
             ].map(s => (
               <button
                 key={s.key}

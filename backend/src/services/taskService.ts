@@ -227,7 +227,7 @@ export const taskService = {
    * 变更任务状态（核心状态机逻辑）
    * 权限：owner, admin, leader 可以变更所有任务状态；member 只能变更自己创建或被分配的任务状态；项目负责人可以变更项目内所有任务状态
    */
-  async changeStatus(userId: string, taskId: string, newStatus: string, blockedReason?: string) {
+  async changeStatus(userId: string, taskId: string, newStatus: string) {
     // 1. 验证状态值
     if (!isValidStatus(newStatus)) {
       throw new AppError(`无效的状态: ${newStatus}`, 400, 'INVALID_STATUS');
@@ -294,10 +294,9 @@ export const taskService = {
       userId,
       type: 'status_changed',
       data: {
-        description: `将状态从「${STATUS_LABELS[oldStatus]}」变更为「${STATUS_LABELS[targetStatus]}」${blockedReason ? `，原因: ${blockedReason}` : ''}`,
+        description: `将状态从「${STATUS_LABELS[oldStatus]}」变更为「${STATUS_LABELS[targetStatus]}」`,
         oldValue: oldStatus,
         newValue: targetStatus,
-        blockedReason,
       },
     });
 

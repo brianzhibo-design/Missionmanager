@@ -131,10 +131,9 @@ export const taskService = {
   },
 
   // 更新任务状态
-  async updateTaskStatus(taskId: string, status: string, blockedReason?: string): Promise<Task> {
+  async updateTaskStatus(taskId: string, status: string): Promise<Task> {
     const response = await api.patch<{ task: Task }>(`/tasks/${taskId}/status`, {
       status,
-      blockedReason,
     });
     return response.task;
   },
@@ -261,7 +260,6 @@ export const STATUS_COLORS: Record<string, string> = {
   todo: '#6b7280',
   in_progress: '#3b82f6',
   review: '#8b5cf6',
-  blocked: '#ef4444',
   done: '#10b981',
 };
 

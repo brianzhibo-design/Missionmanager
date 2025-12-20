@@ -27,7 +27,6 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   todo: { label: '待办', className: 'todo' },
   in_progress: { label: '进行中', className: 'in-progress' },
   review: { label: '审核中', className: 'in-progress' },
-  blocked: { label: '已阻塞', className: 'in-progress' },
   done: { label: '已完成', className: 'done' },
 };
 
