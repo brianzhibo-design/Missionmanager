@@ -156,35 +156,56 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* 创始人 - 金色渐变 */
+/* 扛把子 (owner) - 金色渐变 */
 .role-badge.role-owner {
   background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(251, 191, 36, 0.35);
 }
 
-/* 总监 - 紫色渐变 */
+/* 大管家 (admin) - 紫色渐变 */
+.role-badge.role-admin {
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
+}
+
+/* 总监 (director) - 紫色渐变（兼容旧角色） */
 .role-badge.role-director {
   background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(139, 92, 246, 0.35);
 }
 
-/* 经理 - 蓝色渐变 */
+/* 带头大哥 (leader) - 蓝色渐变 */
+.role-badge.role-leader {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
+}
+
+/* 经理 (manager) - 蓝色渐变（兼容旧角色） */
 .role-badge.role-manager {
   background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.35);
 }
 
-/* 同事 - 绿色渐变 */
+/* 少侠 (member) - 绿色渐变 */
 .role-badge.role-member {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
 }
 
-/* 协作者 - 灰色渐变 */
+/* 吃瓜群侠 (guest) - 灰色渐变 */
+.role-badge.role-guest {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(107, 114, 128, 0.35);
+}
+
+/* 协作者 (observer) - 灰色渐变（兼容旧角色） */
 .role-badge.role-observer {
   background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
   color: #fff;
