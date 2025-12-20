@@ -253,14 +253,15 @@ export const taskService = {
       throw new AppError('没有权限变更任务状态', 403, 'FORBIDDEN');
     }
 
-    const oldStatus = task.status as TaskStatusType;
+    // 如果任务没有状态，默认为 todo
+    const oldStatus = (task.status || 'todo') as TaskStatusType;
     const targetStatus = newStatus as TaskStatusType;
 
     // 4. 检查状态转换是否合法
     if (!canTransition(oldStatus, targetStatus)) {
       const available = getAvailableTransitions(oldStatus);
       throw new AppError(
-        `不能从「${STATUS_LABELS[oldStatus]}」转换到「${STATUS_LABELS[targetStatus]}」，可选: ${available.map(s => STATUS_LABELS[s]).join(', ')}`,
+        `不能从「${STATUS_LABELS[oldStatus] || oldStatus}」转换到「${STATUS_LABELS[targetStatus] || targetStatus}」，可选: ${available.map(s => STATUS_LABELS[s]).join(', ')}`,
         400,
         'INVALID_TRANSITION'
       );
@@ -398,14 +399,15 @@ export const taskService = {
           continue;
         }
 
-        const oldStatus = task.status as TaskStatusType;
+        // 如果任务没有状态，默认为 todo
+        const oldStatus = (task.status || 'todo') as TaskStatusType;
         const targetStatus = newStatus as TaskStatusType;
 
         // 检查状态转换是否合法
         if (!canTransition(oldStatus, targetStatus)) {
           results.failed.push({ 
             id: taskId, 
-            reason: `不能从「${STATUS_LABELS[oldStatus]}」转换到「${STATUS_LABELS[targetStatus]}」` 
+            reason: `不能从「${STATUS_LABELS[oldStatus] || oldStatus}」转换到「${STATUS_LABELS[targetStatus] || targetStatus}」` 
           });
           continue;
         }
