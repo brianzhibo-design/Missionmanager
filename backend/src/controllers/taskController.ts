@@ -317,3 +317,58 @@ taskRouter.get('/:id/events', async (req: Request, res: Response, next: NextFunc
   }
 });
 
+/**
+ * POST /tasks/:id/submit-review - 提交任务审核
+ * 任务负责人点击"完成"后，将任务从 in_progress 转为 review
+ */
+taskRouter.post('/:id/submit-review', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const task = await taskService.submitForReview(req.user!.userId, req.params.id);
+
+    res.json({
+      success: true,
+      message: '任务已提交审核',
+      data: { task: normalizeTask(task) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /tasks/:id/approve - 审核通过
+ * 项目负责人/管理员将任务从 review 转为 done
+ */
+taskRouter.post('/:id/approve', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const task = await taskService.approveTask(req.user!.userId, req.params.id);
+
+    res.json({
+      success: true,
+      message: '审核通过',
+      data: { task: normalizeTask(task) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /tasks/:id/reject - 审核不通过
+ * 项目负责人/管理员将任务从 review 退回 in_progress
+ */
+taskRouter.post('/:id/reject', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { reason } = req.body;
+    const task = await taskService.rejectTask(req.user!.userId, req.params.id, reason);
+
+    res.json({
+      success: true,
+      message: '已退回修改',
+      data: { task: normalizeTask(task) },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+

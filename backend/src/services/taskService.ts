@@ -16,6 +16,7 @@ import {
   STATUS_LABELS,
 } from '../domain/taskStateMachine';
 import { AppError } from '../middleware/errorHandler';
+import { notificationService } from './notificationService';
 
 // 所有角色（可查看）
 const ALL_ROLES = ['owner', 'admin', 'leader', 'member', 'guest'] as const;
@@ -444,5 +445,174 @@ export const taskService = {
     }
 
     return results;
+  },
+
+  /**
+   * 提交任务审核
+   * 任务负责人将任务从 in_progress 转为 review
+   */
+  async submitForReview(userId: string, taskId: string) {
+    const task = await taskRepository.findByIdWithDetails(taskId);
+    if (!task) {
+      throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
+    }
+
+    // 检查当前状态是否为进行中
+    const currentStatus = (task.status || 'todo') as TaskStatusType;
+    if (currentStatus !== TaskStatus.IN_PROGRESS) {
+      throw new AppError('只有进行中的任务才能提交审核', 400, 'INVALID_STATUS');
+    }
+
+    // 检查是否是任务负责人或创建者
+    if (task.assigneeId !== userId && task.creatorId !== userId) {
+      // 检查是否是管理员
+      const role = await workspaceService.getUserWorkspaceRole(task.project.workspaceId, userId);
+      if (!['owner', 'admin', 'leader'].includes(role || '')) {
+        throw new AppError('只有任务负责人才能提交审核', 403, 'FORBIDDEN');
+      }
+    }
+
+    // 更新状态为审核中
+    const updatedTask = await taskRepository.update(taskId, { status: TaskStatus.REVIEW });
+
+    // 记录事件
+    await taskEventRepository.create({
+      taskId,
+      userId,
+      type: 'status_changed',
+      data: {
+        description: `提交审核：将状态从「${STATUS_LABELS[currentStatus]}」变更为「${STATUS_LABELS[TaskStatus.REVIEW]}」`,
+        oldValue: currentStatus,
+        newValue: TaskStatus.REVIEW,
+      },
+    });
+
+    // 通知项目负责人审核
+    if (task.project.leaderId && task.project.leaderId !== userId) {
+      await notificationService.create({
+        userId: task.project.leaderId,
+        type: 'task_review_request',
+        title: '任务待审核',
+        message: `任务「${task.title}」已提交审核，请及时处理`,
+        taskId: task.id,
+        projectId: task.projectId,
+      });
+    }
+
+    return updatedTask;
+  },
+
+  /**
+   * 审核通过
+   * 项目负责人/管理员将任务从 review 转为 done
+   */
+  async approveTask(userId: string, taskId: string) {
+    const task = await taskRepository.findByIdWithDetails(taskId);
+    if (!task) {
+      throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
+    }
+
+    // 检查当前状态是否为审核中
+    const currentStatus = (task.status || 'todo') as TaskStatusType;
+    if (currentStatus !== TaskStatus.REVIEW) {
+      throw new AppError('只有审核中的任务才能审核通过', 400, 'INVALID_STATUS');
+    }
+
+    // 检查是否是项目负责人或管理员
+    const isProjectLeader = task.project.leaderId === userId;
+    if (!isProjectLeader) {
+      const role = await workspaceService.getUserWorkspaceRole(task.project.workspaceId, userId);
+      if (!['owner', 'admin'].includes(role || '')) {
+        throw new AppError('只有项目负责人或管理员才能审核任务', 403, 'FORBIDDEN');
+      }
+    }
+
+    // 更新状态为已完成
+    const updatedTask = await taskRepository.update(taskId, { 
+      status: TaskStatus.DONE,
+      completedAt: new Date(),
+    });
+
+    // 记录事件
+    await taskEventRepository.create({
+      taskId,
+      userId,
+      type: 'status_changed',
+      data: {
+        description: `审核通过：将状态从「${STATUS_LABELS[currentStatus]}」变更为「${STATUS_LABELS[TaskStatus.DONE]}」`,
+        oldValue: currentStatus,
+        newValue: TaskStatus.DONE,
+      },
+    });
+
+    // 通知任务负责人审核通过
+    if (task.assigneeId && task.assigneeId !== userId) {
+      await notificationService.create({
+        userId: task.assigneeId,
+        type: 'task_approved',
+        title: '任务审核通过',
+        message: `您的任务「${task.title}」已审核通过`,
+        taskId: task.id,
+        projectId: task.projectId,
+      });
+    }
+
+    return updatedTask;
+  },
+
+  /**
+   * 审核不通过
+   * 项目负责人/管理员将任务从 review 退回 in_progress
+   */
+  async rejectTask(userId: string, taskId: string, reason?: string) {
+    const task = await taskRepository.findByIdWithDetails(taskId);
+    if (!task) {
+      throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
+    }
+
+    // 检查当前状态是否为审核中
+    const currentStatus = (task.status || 'todo') as TaskStatusType;
+    if (currentStatus !== TaskStatus.REVIEW) {
+      throw new AppError('只有审核中的任务才能退回修改', 400, 'INVALID_STATUS');
+    }
+
+    // 检查是否是项目负责人或管理员
+    const isProjectLeader = task.project.leaderId === userId;
+    if (!isProjectLeader) {
+      const role = await workspaceService.getUserWorkspaceRole(task.project.workspaceId, userId);
+      if (!['owner', 'admin'].includes(role || '')) {
+        throw new AppError('只有项目负责人或管理员才能退回任务', 403, 'FORBIDDEN');
+      }
+    }
+
+    // 更新状态为进行中
+    const updatedTask = await taskRepository.update(taskId, { status: TaskStatus.IN_PROGRESS });
+
+    // 记录事件
+    await taskEventRepository.create({
+      taskId,
+      userId,
+      type: 'status_changed',
+      data: {
+        description: `审核不通过：将状态从「${STATUS_LABELS[currentStatus]}」退回「${STATUS_LABELS[TaskStatus.IN_PROGRESS]}」${reason ? `，原因: ${reason}` : ''}`,
+        oldValue: currentStatus,
+        newValue: TaskStatus.IN_PROGRESS,
+        rejectReason: reason,
+      },
+    });
+
+    // 通知任务负责人审核不通过
+    if (task.assigneeId && task.assigneeId !== userId) {
+      await notificationService.create({
+        userId: task.assigneeId,
+        type: 'task_rejected',
+        title: '任务审核不通过',
+        message: `您的任务「${task.title}」审核不通过${reason ? `，原因：${reason}` : ''}，请修改后重新提交`,
+        taskId: task.id,
+        projectId: task.projectId,
+      });
+    }
+
+    return updatedTask;
   },
 };
