@@ -109,18 +109,9 @@
   box-shadow: var(--glow-brand);
 }
 
-.workspace-role {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+/* 工作区选择器中的角色标签间距 */
+.workspace-selector .role-badge {
   margin-top: var(--space-2);
-  padding: 6px 10px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  transition: all 0.15s ease;
 }
 
 /* ========================================
