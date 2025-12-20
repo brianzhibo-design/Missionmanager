@@ -84,15 +84,17 @@ export const taskService = {
       throw new AppError('没有权限创建任务', 403, 'FORBIDDEN');
     }
 
-    // 3. 验证状态和优先级
-    if (data.status && !isValidStatus(data.status)) {
-      throw new AppError(`无效的状态: ${data.status}`, 400, 'INVALID_STATUS');
+    // 3. 禁止在创建时设置状态（新任务必须为 todo）
+    if (data.status && data.status !== TaskStatus.TODO) {
+      throw new AppError('新创建的任务状态必须为「待办」，请使用状态转换 API 修改状态', 400, 'INVALID_INITIAL_STATUS');
     }
+
+    // 4. 验证优先级
     if (data.priority && !isValidPriority(data.priority)) {
       throw new AppError(`无效的优先级: ${data.priority}`, 400, 'INVALID_PRIORITY');
     }
 
-    // 4. 如果指定了父任务，检查父任务是否存在且属于同一项目
+    // 5. 如果指定了父任务，检查父任务是否存在且属于同一项目
     if (data.parentId) {
       const parentTask = await taskRepository.findById(data.parentId);
       if (!parentTask) {
@@ -103,9 +105,10 @@ export const taskService = {
       }
     }
 
-    // 5. 创建任务
+    // 6. 创建任务（强制状态为 todo）
     const task = await taskRepository.create({
       ...data,
+      status: TaskStatus.TODO, // 强制新任务为 todo
       creatorId: userId,
     });
 
