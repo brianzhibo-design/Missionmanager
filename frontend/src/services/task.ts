@@ -187,26 +187,25 @@ export const taskService = {
 
   // 批量完成任务（智能实现 - 遵循审核流程）
   async batchComplete(taskIds: string[]): Promise<BatchCompleteResult> {
+    // API 封装层已经提取了 data.data，所以这里直接接收 { results, message }
     const response = await api.post<{
-      success: boolean;
-      data: {
-        results: {
-          success: string[];
-          failed: Array<{ id: string; reason: string }>;
-          autoReviewed?: string[];
-        };
-        message: string;
+      results: {
+        success: string[];
+        failed: Array<{ id: string; reason: string }>;
+        autoReviewed?: string[];
       };
+      message: string;
     }>('/tasks/batch/complete', { taskIds });
     
     // 确保返回格式正确
-    if (!response.data || !response.data.results) {
+    if (!response || !response.results) {
+      console.error('批量完成返回数据格式错误:', response);
       throw new Error('批量完成返回数据格式错误');
     }
     
     return {
-      results: response.data.results,
-      message: response.data.message,
+      results: response.results,
+      message: response.message || '',
     };
   },
 
