@@ -440,7 +440,7 @@ function DesktopTaskDetail() {
       setSubtaskSelectionMode(false);
     } catch (err: any) {
       console.error('批量完成子任务失败:', err);
-      alert(err.message || '批量完成失败，请重试');
+      alert(err?.message || '批量完成失败，请重试');
     } finally {
       setBatchProcessing(false);
     }
