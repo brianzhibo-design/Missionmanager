@@ -290,6 +290,13 @@ function DesktopProjectDetail() {
     try {
       const result = await taskService.updateTaskStatus(taskId, newStatus);
       
+      // 安全检查：确保 result 存在
+      if (!result) {
+        console.error('状态更新返回数据为空');
+        alert('状态更新失败：返回数据为空');
+        return;
+      }
+      
       // 显示智能提示
       if (result.message) {
         if (result.statusChanged) {
@@ -298,8 +305,7 @@ function DesktopProjectDetail() {
             // 实际状态与选择不同（智能转换）
             alert(result.message);
           } else {
-            // 状态符合预期
-            alert(result.message);
+            // 状态符合预期，静默更新（避免频繁弹窗）
           }
         } else {
           // 状态未改变
@@ -311,7 +317,7 @@ function DesktopProjectDetail() {
       loadTasks();
     } catch (err: any) {
       console.error('Failed to update task status:', err);
-      alert(err.message || '状态更新失败');
+      alert(err?.message || '状态更新失败');
     }
   };
 
@@ -378,8 +384,8 @@ function DesktopProjectDetail() {
       
       if (failed > 0) {
         alert(`${msg}\n\n失败原因：\n${result.results.failed.map(f => `• ${f.reason}`).join('\n')}`);
-      } else {
-        alert(msg || '操作完成');
+      } else if (msg) {
+        alert(msg);
       }
       
       // 刷新任务列表
@@ -389,7 +395,7 @@ function DesktopProjectDetail() {
       setSelectedTaskIds(new Set());
     } catch (err: any) {
       console.error('批量完成失败:', err);
-      alert(err.message || '批量完成失败，请重试');
+      alert(err?.message || '批量完成失败，请重试');
     } finally {
       setBatchProcessing(false);
     }

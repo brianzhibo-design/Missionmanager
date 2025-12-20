@@ -150,14 +150,23 @@ export const taskService = {
 
   // 智能状态转换（保留用户习惯，后端智能处理）
   async updateTaskStatus(taskId: string, status: string): Promise<StatusChangeResult> {
-    const response = await api.patch<{
-      success: boolean;
-      data: StatusChangeResult;
-      message: string;
-    }>(`/tasks/${taskId}/status`, {
+    // API 封装层已经提取了 data.data，所以这里直接接收 StatusChangeResult
+    const response = await api.patch<StatusChangeResult>(`/tasks/${taskId}/status`, {
       status,
     });
-    return response.data;
+    
+    // 安全检查
+    if (!response) {
+      throw new Error('状态更新返回数据为空');
+    }
+    
+    // 确保所有必需字段存在
+    return {
+      task: response.task || {} as Task,
+      actualStatus: response.actualStatus || status,
+      message: response.message || '',
+      statusChanged: response.statusChanged ?? false,
+    };
   },
 
   // 更新任务

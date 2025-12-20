@@ -506,6 +506,13 @@ function DesktopTaskDetail() {
     try {
       const result = await taskService.updateTaskStatus(subtaskId, newStatus);
       
+      // 安全检查：确保 result 存在
+      if (!result) {
+        console.error('状态更新返回数据为空');
+        alert('更新状态失败：返回数据为空');
+        return;
+      }
+      
       // 显示反馈
       if (result.message) {
         if (result.actualStatus !== newStatus) {
@@ -524,14 +531,14 @@ function DesktopTaskDetail() {
           ...prevTask,
           subTasks: prevTask.subTasks?.map(subtask =>
             subtask.id === subtaskId 
-              ? { ...subtask, status: result.actualStatus }
+              ? { ...subtask, status: result.actualStatus || newStatus }
               : subtask
           ),
         };
       });
     } catch (err: any) {
       console.error('更新子任务状态失败:', err);
-      alert(err.message || '更新状态失败');
+      alert(err?.message || '更新状态失败');
     }
   };
 
