@@ -288,7 +288,11 @@ taskRouter.post('/batch/complete', async (req: Request, res: Response, next: Nex
     res.json({
       success: true,
       data: {
-        results,
+        results: {
+          success: results.success || [],
+          failed: results.failed || [],
+          autoReviewed: results.autoReviewed || [],
+        },
         message: `成功完成 ${results.success.length} 个任务${results.failed.length > 0 ? `，${results.failed.length} 个任务失败` : ''}`,
       },
     });

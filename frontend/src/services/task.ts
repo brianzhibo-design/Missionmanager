@@ -188,10 +188,26 @@ export const taskService = {
   // 批量完成任务（智能实现 - 遵循审核流程）
   async batchComplete(taskIds: string[]): Promise<BatchCompleteResult> {
     const response = await api.post<{
-      data: BatchCompleteResult;
-      message: string;
+      success: boolean;
+      data: {
+        results: {
+          success: string[];
+          failed: Array<{ id: string; reason: string }>;
+          autoReviewed?: string[];
+        };
+        message: string;
+      };
     }>('/tasks/batch/complete', { taskIds });
-    return response.data;
+    
+    // 确保返回格式正确
+    if (!response.data || !response.data.results) {
+      throw new Error('批量完成返回数据格式错误');
+    }
+    
+    return {
+      results: response.data.results,
+      message: response.data.message,
+    };
   },
 
   // 批量删除任务（含级联删除子任务）

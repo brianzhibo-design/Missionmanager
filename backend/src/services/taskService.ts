@@ -865,11 +865,17 @@ export const taskService = {
       // 5. 获取更新后的任务
       const updatedTask = await taskRepository.findByIdWithDetails(taskId);
 
+      // 确保返回的状态值是小写字符串
+      const normalizedStatus = (actualStatus || 'todo').toLowerCase() as TaskStatusType;
+
       return {
-        task: updatedTask,
-        actualStatus,
+        task: {
+          ...updatedTask,
+          status: normalizedStatus, // 确保状态值是小写
+        },
+        actualStatus: normalizedStatus,
         message,
-        statusChanged: oldStatus !== actualStatus,
+        statusChanged: oldStatus !== normalizedStatus,
       };
     } catch (error) {
       if (error instanceof AppError) {

@@ -402,10 +402,17 @@ function DesktopTaskDetail() {
     try {
       const result = await taskService.batchComplete(Array.from(selectedSubtaskIds));
       
+      // 安全检查：确保 result 和 result.results 存在
+      if (!result || !result.results) {
+        console.error('批量完成返回数据格式错误:', result);
+        alert('批量完成失败：返回数据格式错误');
+        return;
+      }
+      
       // 显示详细结果
-      const completed = result.results.success.length;
+      const completed = result.results.success?.length || 0;
       const reviewed = result.results.autoReviewed?.length || 0;
-      const failed = result.results.failed.length;
+      const failed = result.results.failed?.length || 0;
       
       let msg = '';
       if (completed > 0) {
