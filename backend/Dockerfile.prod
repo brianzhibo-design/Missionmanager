@@ -1,10 +1,9 @@
 # 构建阶段
 FROM node:20-alpine AS builder
-
 WORKDIR /app
 
-# 安装 OpenSSL 1.1 兼容库（Prisma 需要）
-RUN apk add --no-cache openssl1.1-compat
+# 安装 OpenSSL
+RUN apk add --no-cache openssl
 
 # 安装依赖
 COPY package*.json ./
@@ -18,11 +17,13 @@ RUN npm run build
 
 # 生产阶段
 FROM node:20-alpine AS runner
-
 WORKDIR /app
 
-# 安装 OpenSSL 1.1 兼容库（Prisma 需要）
-RUN apk add --no-cache openssl1.1-compat
+# 安装 OpenSSL
+RUN apk add --no-cache openssl
+
+# 创建 logs 目录
+RUN mkdir -p /app/logs && chmod 777 /app/logs
 
 # 安装生产依赖
 COPY package*.json ./
@@ -34,15 +35,15 @@ RUN npm ci --only=production && \
 # 复制构建产物
 COPY --from=builder /app/dist ./dist
 
-# 创建非 root 用户
+# 创建非 root 用户并设置权限
 RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 taskflow
+    adduser --system --uid 1001 taskflow && \
+    chown -R taskflow:nodejs /app/logs
+
 USER taskflow
 
-# 健康检查
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD wget -q --spider http://localhost:3000/health || exit 1
 
 EXPOSE 3000
-
 CMD ["node", "dist/index.js"]
