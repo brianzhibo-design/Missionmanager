@@ -77,7 +77,7 @@ export const projectRepository = {
   },
 
   /**
-   * 查找成员参与的项目（作为负责人或团队成员）
+   * 查找成员参与的项目（作为负责人、团队成员或有分配任务）
    */
   async findByWorkspaceIdForMember(workspaceId: string, userId: string) {
     const projects = await prisma.project.findMany({
@@ -86,6 +86,8 @@ export const projectRepository = {
         OR: [
           { leaderId: userId }, // 是项目负责人
           { members: { some: { userId } } }, // 是团队成员
+          { tasks: { some: { assigneeId: userId } } }, // 有分配给该用户的任务
+          { tasks: { some: { creatorId: userId } } }, // 创建了任务
         ],
       },
       orderBy: { createdAt: 'desc' },

@@ -110,12 +110,13 @@ export const projectService = {
     // 映射角色代码
     const mappedRole = mapRole(membership.role);
 
-    // 管理员角色可以查看所有项目
-    if (['owner', 'admin', 'leader'].includes(mappedRole)) {
+    // owner, admin, leader, member 都可以查看所有项目
+    // 只有 guest 限制只能看参与的项目
+    if (['owner', 'admin', 'leader', 'member'].includes(mappedRole)) {
       return projectRepository.findByWorkspaceId(workspaceId);
     }
 
-    // 普通成员只能查看自己参与的项目
+    // guest 只能查看自己参与的项目
     return projectRepository.findByWorkspaceIdForMember(workspaceId, userId);
   },
 
