@@ -429,7 +429,7 @@ ${stats.projectStats.length > 0
 
     const { mapRole } = await import('../repositories/workspaceRepository');
     const mappedRole = membership ? mapRole(membership.role) : null;
-    if (!membership || (report.generatedBy !== userId && !['owner', 'admin'].includes(mappedRole || ''))) {
+    if (!membership || (report.generatedBy !== userId && !['owner', 'director'].includes(mappedRole || ''))) {
       throw new Error('无权删除此报告');
     }
 

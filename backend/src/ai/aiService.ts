@@ -60,7 +60,7 @@ export const aiService = {
     }
 
     // 2. 权限检查（所有成员都可以使用 AI 分析）
-    await workspaceService.requireRole(task.project.workspaceId, userId, ['owner', 'admin', 'leader', 'member', 'guest']);
+    await workspaceService.requireRole(task.project.workspaceId, userId, ['owner', 'director', 'leader', 'member', 'guest']);
 
     // 3. 获取任务事件历史
     const events = await taskEventRepository.findByTaskId(taskId, 10);
@@ -141,7 +141,7 @@ export const aiService = {
       throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
     }
 
-    await workspaceService.requireRole(task.project.workspaceId, userId, ['owner', 'admin', 'leader', 'member', 'guest']);
+    await workspaceService.requireRole(task.project.workspaceId, userId, ['owner', 'director', 'leader', 'member', 'guest']);
 
     return taskAiAnalysisRepository.findByTaskId(taskId);
   },

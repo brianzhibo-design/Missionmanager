@@ -107,7 +107,7 @@ router.get('/:workspaceId/:userId', async (req: Request, res: Response) => {
       where: { userId_workspaceId: { userId: requesterId, workspaceId } },
     });
 
-    if (!requesterMember || !['owner', 'admin', 'director'].includes(requesterMember.role)) {
+    if (!requesterMember || !['owner', 'director'].includes(requesterMember.role)) {
       // 非管理者只能查看自己的权限
       if (requesterId !== userId) {
         return res.status(403).json({ error: 'FORBIDDEN', message: '无权查看其他成员权限' });
@@ -241,7 +241,7 @@ router.get('/:workspaceId', async (req: Request, res: Response) => {
       where: { userId_workspaceId: { userId: requesterId, workspaceId } },
     });
 
-    if (!requesterMember || !['owner', 'admin', 'director'].includes(requesterMember.role)) {
+    if (!requesterMember || !['owner', 'director'].includes(requesterMember.role)) {
       return res.status(403).json({ error: 'FORBIDDEN', message: '无权查看成员权限列表' });
     }
 

@@ -6,16 +6,16 @@ import { Workspace, WorkspaceUser } from '@prisma/client';
 
 // 工作区角色类型（简化后的角色体系）
 // owner: 扛把子 - 老板，最终负责
-// admin: 大管家 - 管理层，统筹全局
+// director: 大管家 - 管理层，统筹全局
 // leader: 带头大哥 - 团队负责人
 // member: 少侠 - 执行者
 // guest: 吃瓜群侠 - 观察者
-export type WorkspaceRole = 'owner' | 'admin' | 'leader' | 'member' | 'guest';
+export type WorkspaceRole = 'owner' | 'director' | 'leader' | 'member' | 'guest';
 
 // 角色权限层级（数字越小权限越高）
 export const ROLE_HIERARCHY: Record<WorkspaceRole, number> = {
   owner: 0,
-  admin: 1,
+  director: 1,
   leader: 2,
   member: 3,
   guest: 4,
@@ -24,12 +24,12 @@ export const ROLE_HIERARCHY: Record<WorkspaceRole, number> = {
 // 角色映射（向后兼容旧角色代码）
 export const ROLE_MAPPING: Record<string, WorkspaceRole> = {
   // 旧角色 -> 新角色
-  director: 'admin',
+  admin: 'director',    // 旧 admin 映射到 director
   manager: 'leader',
   observer: 'guest',
   // 新角色保持不变
   owner: 'owner',
-  admin: 'admin',
+  director: 'director',
   leader: 'leader',
   member: 'member',
   guest: 'guest',

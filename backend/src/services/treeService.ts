@@ -336,7 +336,7 @@ export const treeService = {
       throw new AppError('需要管理员权限', 403, 'REQUIRE_ADMIN');
     }
     const mappedRole = mapRole(membership.role);
-    if (!['owner', 'admin'].includes(mappedRole)) {
+    if (!['owner', 'director'].includes(mappedRole)) {
       throw new AppError('需要管理员权限', 403, 'REQUIRE_ADMIN');
     }
 

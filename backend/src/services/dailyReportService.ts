@@ -128,7 +128,7 @@ export const dailyReportService = {
 
     const { mapRole } = await import('../repositories/workspaceRepository');
     const mappedRole = viewerMembership ? mapRole(viewerMembership.role) : null;
-    if (!viewerMembership || !['owner', 'admin', 'leader'].includes(mappedRole || '')) {
+    if (!viewerMembership || !['owner', 'director', 'leader'].includes(mappedRole || '')) {
       return { reports: [], notSubmitted: [] };
     }
 

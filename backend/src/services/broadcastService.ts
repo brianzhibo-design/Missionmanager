@@ -40,7 +40,7 @@ export const broadcastService = {
     }
     const { mapRole } = await import('../repositories/workspaceRepository');
     const mappedRole = mapRole(senderMembership.role);
-    if (!['owner', 'admin'].includes(mappedRole)) {
+    if (!['owner', 'director'].includes(mappedRole)) {
       throw new Error('FORBIDDEN');
     }
 

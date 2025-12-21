@@ -20,11 +20,11 @@ import { AppError } from '../middleware/errorHandler';
 import { notificationService } from './notificationService';
 
 // 所有角色（可查看）
-const ALL_ROLES = ['owner', 'admin', 'leader', 'member', 'guest'] as const;
+const ALL_ROLES = ['owner', 'director', 'leader', 'member', 'guest'] as const;
 // 可编辑角色（工作区级别）
-const EDIT_ROLES = ['owner', 'admin', 'leader', 'member'] as const;
+const EDIT_ROLES = ['owner', 'director', 'leader', 'member'] as const;
 // 可删除角色
-const DELETE_ROLES = ['owner', 'admin', 'leader'] as const;
+const DELETE_ROLES = ['owner', 'director', 'leader'] as const;
 
 /**
  * 检查用户是否有任务编辑权限
@@ -42,7 +42,7 @@ async function canEditTask(
   isProjectLeader?: boolean
 ): Promise<boolean> {
   // 1. 检查工作区角色（owner, admin, leader 可以编辑所有任务）
-  const hasAdminRole = await workspaceService.hasRole(workspaceId, userId, ['owner', 'admin', 'leader']);
+  const hasAdminRole = await workspaceService.hasRole(workspaceId, userId, ['owner', 'director', 'leader']);
   if (hasAdminRole) return true;
   
   // 2. 项目负责人可以编辑项目内所有任务
@@ -101,13 +101,13 @@ async function canDeleteTask(
   // 4. 工作区 owner 或 admin
   if (task.project.workspace?.members) {
     const isOwnerOrAdmin = task.project.workspace.members.some(
-      m => m.userId === userId && ['owner', 'admin'].includes(m.role)
+      m => m.userId === userId && ['owner', 'director'].includes(m.role)
     );
     if (isOwnerOrAdmin) return true;
   } else {
     // 如果 workspace.members 未加载，使用 workspaceService 查询
     const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-    if (['owner', 'admin'].includes(role || '')) return true;
+    if (['owner', 'director'].includes(role || '')) return true;
   }
 
   return false;
@@ -589,7 +589,7 @@ export const taskService = {
     if (task.assigneeId !== userId && task.creatorId !== userId) {
       // 检查是否是管理员
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'admin', 'leader'].includes(role || '')) {
+      if (!['owner', 'director', 'leader'].includes(role || '')) {
         throw new AppError('只有任务负责人才能提交审核', 403, 'FORBIDDEN');
       }
     }
@@ -644,7 +644,7 @@ export const taskService = {
     const isProjectLeader = task.project.leaderId === userId;
     if (!isProjectLeader) {
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'admin'].includes(role || '')) {
+      if (!['owner', 'director'].includes(role || '')) {
         throw new AppError('只有项目负责人或管理员才能审核任务', 403, 'FORBIDDEN');
       }
     }
@@ -702,7 +702,7 @@ export const taskService = {
     const isProjectLeader = task.project.leaderId === userId;
     if (!isProjectLeader) {
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'admin'].includes(role || '')) {
+      if (!['owner', 'director'].includes(role || '')) {
         throw new AppError('只有项目负责人或管理员才能退回任务', 403, 'FORBIDDEN');
       }
     }
@@ -830,7 +830,7 @@ export const taskService = {
       else if (oldStatus === TaskStatus.IN_PROGRESS && newStatus === 'done') {
         // 检查是否有审核权限（项目负责人或管理员）
         const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-        const canApprove = isProjectLeader || ['owner', 'admin'].includes(role || '');
+        const canApprove = isProjectLeader || ['owner', 'director'].includes(role || '');
 
         // 当前系统不强制审核，允许直接完成
         // 如果需要审核且用户无审核权限，则自动提交审核
@@ -855,7 +855,7 @@ export const taskService = {
       else if (oldStatus === TaskStatus.REVIEW && newStatus === 'in_progress') {
         if (!isProjectLeader) {
           const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-          if (!['owner', 'admin'].includes(role || '')) {
+          if (!['owner', 'director'].includes(role || '')) {
             throw new AppError('只有项目负责人可以退回任务', 403, 'FORBIDDEN');
           }
         }
@@ -869,7 +869,7 @@ export const taskService = {
       else if (oldStatus === TaskStatus.REVIEW && newStatus === 'done') {
         if (!isProjectLeader) {
           const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-          if (!['owner', 'admin'].includes(role || '')) {
+          if (!['owner', 'director'].includes(role || '')) {
             throw new AppError('只有项目负责人可以审核通过', 403, 'FORBIDDEN');
           }
         }
@@ -948,7 +948,7 @@ export const taskService = {
     // 检查权限：任务负责人或创建者
     if (task.assigneeId !== userId && task.creatorId !== userId) {
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'admin', 'leader'].includes(role || '')) {
+      if (!['owner', 'director', 'leader'].includes(role || '')) {
         throw new AppError('只有任务负责人或创建者可以开始任务', 403, 'FORBIDDEN');
       }
     }
@@ -993,7 +993,7 @@ export const taskService = {
     const isProjectLeader = task.project.leaderId === userId;
     if (!isAssignee && !isProjectLeader) {
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'admin'].includes(role || '')) {
+      if (!['owner', 'director'].includes(role || '')) {
         throw new AppError('只有任务负责人或管理员可以重新打开任务', 403, 'FORBIDDEN');
       }
     }
@@ -1040,7 +1040,7 @@ export const taskService = {
     // 检查权限：任务负责人或创建者
     if (task.assigneeId !== userId && task.creatorId !== userId) {
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'admin', 'leader'].includes(role || '')) {
+      if (!['owner', 'director', 'leader'].includes(role || '')) {
         throw new AppError('只有任务负责人或创建者可以完成任务', 403, 'FORBIDDEN');
       }
     }

@@ -30,7 +30,7 @@ export const adminService = {
       throw new AppError('需要管理员权限', 403, 'REQUIRE_ADMIN');
     }
     const mappedRole = mapRole(membership.role);
-    if (!['owner', 'admin'].includes(mappedRole)) {
+    if (!['owner', 'director'].includes(mappedRole)) {
       throw new AppError('需要管理员权限', 403, 'REQUIRE_ADMIN');
     }
   },
@@ -48,7 +48,7 @@ export const adminService = {
     const workspaceMembership = await workspaceRepository.getMembership(project.workspaceId, userId);
     if (workspaceMembership) {
       const mappedRole = mapRole(workspaceMembership.role);
-      if (['owner', 'admin', 'leader'].includes(mappedRole)) {
+      if (['owner', 'director', 'leader'].includes(mappedRole)) {
         return; // owner/admin/leader 有所有项目的权限
       }
     }
@@ -91,7 +91,7 @@ export const adminService = {
     }
 
     // 4. 验证角色值（支持新旧角色代码）
-    const validRoles = ['admin', 'leader', 'member', 'guest', 'director', 'manager', 'observer'];
+    const validRoles = ['director', 'leader', 'member', 'guest', 'director', 'manager', 'observer'];
     if (!validRoles.includes(newRole)) {
       throw new AppError('无效的角色', 400, 'INVALID_ROLE');
     }
@@ -134,7 +134,7 @@ export const adminService = {
     }
 
     // 5. owner 和 admin 可以编辑所有项目，继续检查项目管理员权限
-    if (!['owner', 'admin'].includes(mappedRole)) {
+    if (!['owner', 'director'].includes(mappedRole)) {
       await this.requireProjectAdmin(projectId, operatorId);
     }
 

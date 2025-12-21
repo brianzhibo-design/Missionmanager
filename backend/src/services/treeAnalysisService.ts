@@ -71,7 +71,7 @@ export const treeAnalysisService = {
     
     // 权限检查：owner、admin 可用；项目负责人可以分析自己的项目
     const canAnalyze = 
-      ['owner', 'admin'].includes(mappedRole) ||
+      ['owner', 'director'].includes(mappedRole) ||
       project.leaderId === userId;
 
     if (!canAnalyze) {
