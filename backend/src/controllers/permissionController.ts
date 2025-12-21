@@ -102,12 +102,12 @@ router.get('/:workspaceId/:userId', async (req: Request, res: Response) => {
 
     const isOwner = ownerMember?.userId === userId;
 
-    // 检查请求者权限（只有 owner 和 admin 可以查看其他成员权限）
+    // 检查请求者权限（只有 owner 和 director 可以查看其他成员权限）
     const requesterMember = await prisma.workspaceUser.findUnique({
       where: { userId_workspaceId: { userId: requesterId, workspaceId } },
     });
 
-    if (!requesterMember || !['owner', 'admin'].includes(requesterMember.role)) {
+    if (!requesterMember || !['owner', 'admin', 'director'].includes(requesterMember.role)) {
       // 非管理者只能查看自己的权限
       if (requesterId !== userId) {
         return res.status(403).json({ error: 'FORBIDDEN', message: '无权查看其他成员权限' });
@@ -140,13 +140,35 @@ router.put('/:workspaceId/:userId', async (req: Request, res: Response) => {
     const { permissions } = req.body;
     const operatorId = req.user!.userId;
 
+    // 调试日志
+    console.log('更新权限请求:', { 
+      workspaceId, 
+      userId, 
+      permissions, 
+      permissionsType: typeof permissions,
+      isArray: Array.isArray(permissions),
+      operatorId 
+    });
+
+    // 验证 permissions 参数
+    if (permissions === undefined || permissions === null) {
+      return res.status(400).json({ 
+        error: 'VALIDATION_ERROR', 
+        message: 'permissions 参数缺失' 
+      });
+    }
+
     if (!Array.isArray(permissions)) {
-      return res.status(400).json({ error: 'VALIDATION_ERROR', message: '权限必须是数组' });
+      return res.status(400).json({ 
+        error: 'VALIDATION_ERROR', 
+        message: `权限必须是数组，当前类型: ${typeof permissions}` 
+      });
     }
 
     // 验证权限值是否有效
     const invalidPermissions = permissions.filter(p => !AVAILABLE_PERMISSIONS.includes(p as any));
     if (invalidPermissions.length > 0) {
+      console.log('无效的权限值:', invalidPermissions);
       return res.status(400).json({
         error: 'VALIDATION_ERROR',
         message: `无效的权限值: ${invalidPermissions.join(', ')}`,
@@ -176,11 +198,15 @@ router.put('/:workspaceId/:userId', async (req: Request, res: Response) => {
     }
 
     // 更新权限
+    console.log('准备更新权限:', { userId, workspaceId, permissions });
+    
     const updated = await prisma.workspaceUser.update({
       where: { userId_workspaceId: { userId, workspaceId } },
       data: { permissions },
       include: { user: { select: { id: true, name: true, email: true, avatar: true } } },
     });
+
+    console.log('权限更新成功:', { userId, permissions: updated.permissions });
 
     res.json({
       success: true,
@@ -193,7 +219,12 @@ router.put('/:workspaceId/:userId', async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('更新用户权限失败:', error);
-    res.status(500).json({ error: 'INTERNAL_ERROR', message: '更新权限失败' });
+    console.error('错误详情:', { 
+      message: error.message, 
+      code: error.code,
+      meta: error.meta 
+    });
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: error.message || '更新权限失败' });
   }
 });
 
@@ -205,12 +236,12 @@ router.get('/:workspaceId', async (req: Request, res: Response) => {
     const { workspaceId } = req.params;
     const requesterId = req.user!.userId;
 
-    // 检查请求者权限
+    // 检查请求者权限（owner 和 director 可以查看）
     const requesterMember = await prisma.workspaceUser.findUnique({
       where: { userId_workspaceId: { userId: requesterId, workspaceId } },
     });
 
-    if (!requesterMember || !['owner', 'admin'].includes(requesterMember.role)) {
+    if (!requesterMember || !['owner', 'admin', 'director'].includes(requesterMember.role)) {
       return res.status(403).json({ error: 'FORBIDDEN', message: '无权查看成员权限列表' });
     }
 
