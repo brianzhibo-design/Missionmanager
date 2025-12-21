@@ -13,10 +13,12 @@ interface BroadcastPanelProps {
   workspaceId: string;
   onClose: () => void;
   userRole?: string; // 用户在工作区的角色
+  canCoffeeLottery?: boolean; // 是否有咖啡抽奖权限
 }
 
-export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onClose, userRole }) => {
-  const isOwner = userRole === 'owner';
+export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onClose, userRole, canCoffeeLottery }) => {
+  // 咖啡抽奖权限：如果明确传入 canCoffeeLottery，使用它；否则回退到 owner 检查
+  const hasCoffeePermission = canCoffeeLottery !== undefined ? canCoffeeLottery : userRole === 'owner';
   const [activeTab, setActiveTab] = useState<'send' | 'history' | 'coffee'>('send');
   const [members, setMembers] = useState<SelectableMember[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -33,10 +35,10 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
 
   useEffect(() => {
     loadMembers();
-    if (isOwner) {
+    if (hasCoffeePermission) {
       loadCoffeeWinner();
     }
-  }, [workspaceId, isOwner]);
+  }, [workspaceId, hasCoffeePermission]);
 
   useEffect(() => {
     if (activeTab === 'history') {
@@ -194,7 +196,7 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
         >
           <History size={16} /> 历史记录
         </button>
-        {isOwner && (
+        {hasCoffeePermission && (
           <button
             className={`tab-btn ${activeTab === 'coffee' ? 'active' : ''}`}
             onClick={() => setActiveTab('coffee')}
@@ -323,7 +325,7 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
           </div>
         )}
 
-        {activeTab === 'coffee' && isOwner && (
+        {activeTab === 'coffee' && hasCoffeePermission && (
           <div className="coffee-section">
             <div className="coffee-today">
               <div className="coffee-icon">☕</div>

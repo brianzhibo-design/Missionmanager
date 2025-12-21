@@ -28,10 +28,6 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  Megaphone,
-  Coffee,
-  Heart,
-  PartyPopper,
 } from 'lucide-react';
 import './AppLayout.css';
 
@@ -44,7 +40,6 @@ export default function AppLayout() {
     setCurrentWorkspace, 
     workspaceRole,
     canWorkspace,
-    hasCustomPermission,
   } = usePermissions();
   const navigate = useNavigate();
   const location = useLocation();
@@ -154,17 +149,6 @@ export default function AppLayout() {
     { path: '/ai-insights', icon: Brain, label: 'AI 洞察' },
   ];
 
-  // 趣味功能导航项（基于自定义权限）
-  const funNavItems = [
-    { path: '/broadcast', icon: Megaphone, label: '群发消息', permission: 'BROADCAST_MESSAGES' as const },
-    { path: '/coffee-lottery', icon: Coffee, label: '咖啡抽奖', permission: 'COFFEE_LOTTERY' as const },
-    { path: '/team-kudos', icon: Heart, label: '团队点赞', permission: 'TEAM_KUDOS' as const },
-    { path: '/fun-events', icon: PartyPopper, label: '趣味活动', permission: 'FUN_EVENTS' as const },
-  ];
-
-  // 检查是否有任何趣味功能权限
-  const hasAnyFunPermission = funNavItems.some(item => hasCustomPermission(item.permission));
-
   const getUserInitials = () => {
     if (!user?.name) return 'U';
     return user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
@@ -247,26 +231,6 @@ export default function AppLayout() {
               {aiNavItems.map(item => {
                 const Icon = item.icon;
                 return (
-                  <NavLink 
-                    key={item.path} 
-                    to={item.path} 
-                    className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                    title={sidebarCollapsed ? item.label : undefined}
-                  >
-                    <Icon size={20} className="nav-icon" />
-                    {!sidebarCollapsed && <span className="nav-label">{item.label}</span>}
-                  </NavLink>
-                );
-              })}
-            </div>
-          )}
-
-          {hasAnyFunPermission && (
-            <div className="nav-section">
-              {!sidebarCollapsed && <span className="nav-section-title">🎉 趣味</span>}
-              {funNavItems.map(item => {
-                const Icon = item.icon;
-                return hasCustomPermission(item.permission) && (
                   <NavLink 
                     key={item.path} 
                     to={item.path} 

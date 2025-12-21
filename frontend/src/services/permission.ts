@@ -8,7 +8,6 @@ export const PERMISSION_GROUPS = {
   basic: { label: '基础权限', icon: '📋' },
   management: { label: '管理权限', icon: '👔' },
   features: { label: '特殊功能', icon: '✨' },
-  fun: { label: '趣味功能', icon: '🎉' },
 } as const;
 
 export const AVAILABLE_PERMISSIONS = [
@@ -26,11 +25,7 @@ export const AVAILABLE_PERMISSIONS = [
   { id: 'EXPORT_DATA', label: '导出数据', description: '可以导出工作区的数据和报告', group: 'features' },
   { id: 'AI_ANALYSIS', label: 'AI 分析', description: '可以使用 AI 分析和优化功能', group: 'features' },
   { id: 'BROADCAST_MESSAGES', label: '群发消息', description: '可以向工作区所有成员发送通知消息', group: 'features' },
-  
-  // 趣味功能
-  { id: 'COFFEE_LOTTERY', label: '咖啡抽奖', description: '可以发起和管理咖啡抽奖活动', group: 'fun' },
-  { id: 'TEAM_KUDOS', label: '团队点赞', description: '可以给团队成员发送表扬和认可', group: 'fun' },
-  { id: 'FUN_EVENTS', label: '趣味活动', description: '可以创建和管理团队趣味活动', group: 'fun' },
+  { id: 'COFFEE_LOTTERY', label: '咖啡抽奖', description: '可以发起和管理咖啡抽奖活动', group: 'features' },
 ] as const;
 
 export type WorkspacePermission = typeof AVAILABLE_PERMISSIONS[number]['id'];
@@ -94,14 +89,13 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, WorkspacePermission[]> = {
   admin: [
     'VIEW_WORKSPACE', 'MANAGE_PROJECTS', 'MANAGE_MEMBERS', 'MANAGE_TASKS',
     'VIEW_ALL_REPORTS', 'MANAGE_SETTINGS', 'EXPORT_DATA', 'AI_ANALYSIS',
-    'BROADCAST_MESSAGES', 'COFFEE_LOTTERY', 'TEAM_KUDOS', 'FUN_EVENTS'
+    'BROADCAST_MESSAGES', 'COFFEE_LOTTERY'
   ],
   leader: [
-    'VIEW_WORKSPACE', 'VIEW_ALL_REPORTS', 'AI_ANALYSIS',
-    'COFFEE_LOTTERY', 'TEAM_KUDOS', 'FUN_EVENTS'
+    'VIEW_WORKSPACE', 'VIEW_ALL_REPORTS', 'AI_ANALYSIS', 'COFFEE_LOTTERY'
   ],
   member: [
-    'VIEW_WORKSPACE', 'COFFEE_LOTTERY', 'TEAM_KUDOS'
+    'VIEW_WORKSPACE', 'COFFEE_LOTTERY'
   ],
   guest: ['VIEW_WORKSPACE'],
 };

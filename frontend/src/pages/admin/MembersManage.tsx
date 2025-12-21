@@ -17,7 +17,7 @@ import PermissionSettingsModal from '../../components/PermissionSettingsModal';
 import './MembersManage.css';
 
 export default function MembersManage() {
-  const { currentWorkspace, workspaceRole, canWorkspace } = usePermissions();
+  const { currentWorkspace, workspaceRole, canWorkspace, hasCustomPermission } = usePermissions();
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -156,7 +156,7 @@ export default function MembersManage() {
           </div>
         </div>
         <div className="header-actions">
-          {(workspaceRole === 'owner' || workspaceRole === 'admin') && (
+          {hasCustomPermission('BROADCAST_MESSAGES') && (
             <button className="btn btn-secondary" onClick={() => setShowBroadcast(true)}>
               <Send size={16} /> 群发消息
             </button>
@@ -357,6 +357,7 @@ export default function MembersManage() {
           workspaceId={currentWorkspace.id}
           onClose={() => setShowBroadcast(false)}
           userRole={workspaceRole}
+          canCoffeeLottery={hasCustomPermission('COFFEE_LOTTERY')}
         />
       )}
 

@@ -27,11 +27,7 @@ export const AVAILABLE_PERMISSIONS = [
   'EXPORT_DATA',          // 导出数据
   'AI_ANALYSIS',          // 使用 AI 分析
   'BROADCAST_MESSAGES',   // 群发消息
-  
-  // 趣味功能
   'COFFEE_LOTTERY',       // 咖啡抽奖
-  'TEAM_KUDOS',           // 团队点赞
-  'FUN_EVENTS',           // 趣味活动
 ] as const;
 
 export type WorkspacePermission = typeof AVAILABLE_PERMISSIONS[number];
