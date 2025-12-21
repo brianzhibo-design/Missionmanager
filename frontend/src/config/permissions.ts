@@ -1,24 +1,23 @@
 // 工作区角色（从高到低）
 // owner (扛把子) = 工作区创始人
-// admin/director (大管家) = 总监/主管
+// director (大管家) = 总监/主管
 // leader (带头大哥) = 项目负责人
 // member (少侠) = 普通成员
 // guest (吃瓜) = 访客
-export type WorkspaceRole = 'owner' | 'admin' | 'director' | 'leader' | 'member' | 'guest';
+export type WorkspaceRole = 'owner' | 'director' | 'leader' | 'member' | 'guest';
 
 // 角色层级（用于权限比较）
-// admin 和 director 同级（都是大管家）
-export const WORKSPACE_ROLE_HIERARCHY = ['guest', 'member', 'leader', 'director', 'admin', 'owner'];
+export const WORKSPACE_ROLE_HIERARCHY = ['guest', 'member', 'leader', 'director', 'owner'];
 
 // 兼容旧角色代码（向后兼容）
 export const ROLE_MAPPING: Record<string, WorkspaceRole> = {
   // 旧角色 -> 新角色
+  admin: 'director',      // admin 映射到 director
   manager: 'leader',
   observer: 'guest',
-  super_admin: 'admin',
+  super_admin: 'director',
   // 角色保持不变
   owner: 'owner',
-  admin: 'admin',
   director: 'director',
   leader: 'leader',
   member: 'member',
@@ -27,7 +26,7 @@ export const ROLE_MAPPING: Record<string, WorkspaceRole> = {
 
 // 权限定义
 // owner (扛把子) = 工作区创始人，拥有所有权限
-// admin/director (大管家) = 总监/主管，管理多个项目
+// director (大管家) = 总监/主管，管理多个项目
 // leader (带头大哥) = 项目负责人，仅项目内权限
 // member (少侠) = 普通成员
 // guest (吃瓜) = 访客，只读权限
@@ -35,51 +34,51 @@ export const PERMISSIONS = {
   // 工作区级别权限
   workspace: {
     // 可以创建新工作区（任何已登录用户）
-    createWorkspace: ['owner', 'admin', 'director', 'leader', 'member', 'guest'],
+    createWorkspace: ['owner', 'director', 'leader', 'member', 'guest'],
     // 可以管理工作区设置（删除、重命名等）- 仅扛把子
     manage: ['owner'],
     // 可以管理所有成员角色
-    manageAllRoles: ['owner', 'admin', 'director'],
+    manageAllRoles: ['owner', 'director'],
     // 可以邀请成员
-    invite: ['owner', 'admin', 'director', 'leader'],
+    invite: ['owner', 'director', 'leader'],
     // 可以创建项目
-    createProject: ['owner', 'admin', 'director', 'leader', 'member'],
-    // 可以编辑项目（owner, admin, director 可以编辑所有；项目负责人可以编辑自己的项目）
-    editProject: ['owner', 'admin', 'director'],
+    createProject: ['owner', 'director', 'leader', 'member'],
+    // 可以编辑项目
+    editProject: ['owner', 'director'],
     // 可以删除项目
-    deleteProject: ['owner', 'admin', 'director'],
+    deleteProject: ['owner', 'director'],
     // 可以查看成员
-    viewMembers: ['owner', 'admin', 'director', 'leader', 'member', 'guest'],
+    viewMembers: ['owner', 'director', 'leader', 'member', 'guest'],
     // 可以管理成员（邀请、修改角色、移除）
-    manageMembers: ['owner', 'admin', 'director'],
+    manageMembers: ['owner', 'director'],
     // 可以移除成员
-    removeMember: ['owner', 'admin', 'director'],
+    removeMember: ['owner', 'director'],
     // 可以访问管理员树视图
-    adminTree: ['owner', 'admin', 'director'],
+    adminTree: ['owner', 'director'],
     // 可以使用 AI 全局分析
-    aiGlobalAnalysis: ['owner', 'admin', 'director'],
+    aiGlobalAnalysis: ['owner', 'director'],
     // 可以创建任务
-    createTask: ['owner', 'admin', 'director', 'leader', 'member'],
+    createTask: ['owner', 'director', 'leader', 'member'],
     // 可以编辑任务
-    editTask: ['owner', 'admin', 'director', 'leader', 'member'],
+    editTask: ['owner', 'director', 'leader', 'member'],
     // 可以删除任务
-    deleteTask: ['owner', 'admin', 'director', 'leader'],
+    deleteTask: ['owner', 'director', 'leader'],
     // 可以分配任务
-    assignTask: ['owner', 'admin', 'director', 'leader'],
+    assignTask: ['owner', 'director', 'leader'],
     // 可以查看统计报告
-    viewReports: ['owner', 'admin', 'director', 'leader', 'member'],
+    viewReports: ['owner', 'director', 'leader', 'member'],
     // 可以填写日报
-    writeDailyReport: ['owner', 'admin', 'director', 'leader', 'member'],
-    // 可以查看团队日报（owner, admin, director 看全部；leader 看项目内）
-    viewTeamReports: ['owner', 'admin', 'director', 'leader'],
+    writeDailyReport: ['owner', 'director', 'leader', 'member'],
+    // 可以查看团队日报（owner, director 看全部；leader 看项目内）
+    viewTeamReports: ['owner', 'director', 'leader'],
     // 可以查看 AI 洞察
-    viewAiInsights: ['owner', 'admin', 'director', 'leader'],
+    viewAiInsights: ['owner', 'director', 'leader'],
     // 可以使用 AI 项目分析
-    aiProjectAnalysis: ['owner', 'admin', 'director'],
+    aiProjectAnalysis: ['owner', 'director'],
     // 可以使用 AI 任务分析（所有非访客成员）
-    aiTaskAnalysis: ['owner', 'admin', 'director', 'leader', 'member'],
+    aiTaskAnalysis: ['owner', 'director', 'leader', 'member'],
     // 可以评论
-    comment: ['owner', 'admin', 'director', 'leader', 'member', 'guest'],
+    comment: ['owner', 'director', 'leader', 'member', 'guest'],
   },
 } as const;
 
@@ -124,25 +123,25 @@ export function hasProjectPermission(
   // 工作区角色权限
   switch (permission) {
     case 'editProject':
-      return ['owner', 'admin', 'director'].includes(mappedRole);
+      return ['owner', 'director'].includes(mappedRole);
     case 'deleteProject':
-      return ['owner', 'admin', 'director'].includes(mappedRole);
+      return ['owner', 'director'].includes(mappedRole);
     case 'addMember':
-      return ['owner', 'admin', 'director'].includes(mappedRole) || isProjectLeader;
+      return ['owner', 'director'].includes(mappedRole) || isProjectLeader;
     case 'editTask':
-      return ['owner', 'admin', 'director', 'leader', 'member'].includes(mappedRole) || isProjectLeader;
+      return ['owner', 'director', 'leader', 'member'].includes(mappedRole) || isProjectLeader;
     case 'deleteTask':
-      return ['owner', 'admin', 'director', 'leader'].includes(mappedRole) || isProjectLeader;
+      return ['owner', 'director', 'leader'].includes(mappedRole) || isProjectLeader;
     case 'assignTask':
-      return ['owner', 'admin', 'director', 'leader'].includes(mappedRole) || isProjectLeader;
+      return ['owner', 'director', 'leader'].includes(mappedRole) || isProjectLeader;
     case 'adminTree':
-      return ['owner', 'admin', 'director'].includes(mappedRole) || isProjectLeader;
+      return ['owner', 'director'].includes(mappedRole) || isProjectLeader;
     case 'viewReports':
-      return ['owner', 'admin', 'director', 'leader', 'member'].includes(mappedRole) || isProjectLeader;
+      return ['owner', 'director', 'leader', 'member'].includes(mappedRole) || isProjectLeader;
     case 'viewTeamReports':
-      return ['owner', 'admin', 'director', 'leader'].includes(mappedRole) || isProjectLeader;
+      return ['owner', 'director', 'leader'].includes(mappedRole) || isProjectLeader;
     case 'aiProjectAnalysis':
-      return ['owner', 'admin', 'director'].includes(mappedRole) || isProjectLeader;
+      return ['owner', 'director'].includes(mappedRole) || isProjectLeader;
     default:
       return false;
   }
@@ -161,12 +160,12 @@ export function compareWorkspaceRoles(role1: string, role2: string): number {
 export const ROLE_LABELS: Record<string, string> = {
   // 工作区角色
   owner: '扛把子',      // 工作区创始人
-  admin: '大管家',      // 总监/主管（同 director）
   director: '大管家',   // 总监/主管
   leader: '带头大哥',   // 项目负责人
   member: '少侠',       // 普通成员
   guest: '吃瓜群侠',    // 访客
   // 兼容旧角色代码
+  admin: '大管家',      // 映射到 director
   manager: '带头大哥',
   observer: '吃瓜群侠',
   super_admin: '大管家',
@@ -179,12 +178,12 @@ export const PROJECT_LEADER_LABEL = '🎯 项目负责人';
 export const ROLE_ICONS: Record<string, string> = {
   // 工作区角色
   owner: '💪',      // 扛把子
-  admin: '🎩',      // 大管家（同 director）
   director: '🎩',   // 大管家
   leader: '🤝',     // 带头大哥
   member: '🗡️',    // 少侠
   guest: '🍉',      // 吃瓜群侠
   // 兼容旧角色代码
+  admin: '🎩',      // 映射到 director
   manager: '🤝',
   observer: '🍉',
   super_admin: '🎩',
@@ -194,12 +193,12 @@ export const ROLE_ICONS: Record<string, string> = {
 export const ROLE_QUOTES: Record<string, string> = {
   // 工作区角色
   owner: '这事儿我兜底',       // 扛把子
-  admin: '这事儿我来安排',     // 大管家（同 director）
   director: '这事儿我来安排',  // 大管家
   leader: '兄弟们，上！',      // 带头大哥
   member: '在下初来乍到，多多关照',  // 少侠
   guest: '诸位继续，我就看看', // 吃瓜群侠
   // 兼容旧角色代码
+  admin: '这事儿我来安排',     // 映射到 director
   manager: '兄弟们，上！',
   observer: '诸位继续，我就看看',
 };
@@ -211,12 +210,12 @@ export const PROJECT_LEADER_QUOTE = '方向我来定';
 export const ROLE_DESCRIPTIONS: Record<string, string> = {
   // 工作区角色
   owner: '💪 这事儿我兜底 - 工作区创始人，拥有所有权限，可管理所有设置和成员',
-  admin: '🎩 这事儿我来安排 - 总监/主管，管理多个项目，可查看全局数据',
   director: '🎩 这事儿我来安排 - 总监/主管，管理多个项目，可查看全局数据',
   leader: '🤝 兄弟们，上！ - 项目负责人，管理项目内任务和成员',
   member: '🗡️ 在下初来乍到，多多关照 - 普通成员，完成分配的任务',
   guest: '🍉 诸位继续，我就看看 - 访客，只读权限，可查看和评论',
   // 兼容旧角色代码
+  admin: '🎩 这事儿我来安排 - 总监/主管',  // 映射到 director
   manager: '🤝 兄弟们，上！ - 项目负责人',
   observer: '🍉 诸位继续，我就看看 - 访客',
 };
@@ -225,12 +224,12 @@ export const ROLE_DESCRIPTIONS: Record<string, string> = {
 export const ROLE_COLORS: Record<string, { bg: string; color: string; border?: string }> = {
   // 工作区角色 - 扛把子使用渐变，其他使用微色背景
   owner: { bg: 'linear-gradient(135deg, #fbbf24, #f59e0b)', color: '#fff' },  // 扛把子 - 金色
-  admin: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },      // 大管家 - 橙色系
   director: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },   // 大管家 - 橙色系
   leader: { bg: '#ede9fe', color: '#7c3aed', border: '#ddd6fe' },     // 带头大哥 - 紫色系
   member: { bg: '#d1fae5', color: '#059669', border: '#a7f3d0' },     // 少侠 - 绿色系
   guest: { bg: '#f1f5f9', color: '#64748b', border: '#e2e8f0' },      // 吃瓜 - 灰色系
   // 兼容旧角色代码
+  admin: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },      // 映射到 director
   manager: { bg: '#ede9fe', color: '#7c3aed', border: '#ddd6fe' },
   observer: { bg: '#f1f5f9', color: '#64748b', border: '#e2e8f0' },
   super_admin: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },

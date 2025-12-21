@@ -86,7 +86,7 @@ export const permissionService = {
 // 默认角色权限映射
 // 角色体系：
 //   - owner (扛把子) = 工作区创始人，拥有所有权限
-//   - admin/director (大管家) = 总监/主管，管理多个项目
+//   - director (大管家) = 总监/主管，管理多个项目
 //   - leader (带头大哥) = 项目负责人，仅项目内权限
 //   - member (少侠) = 普通成员
 //   - guest (吃瓜) = 访客，只读权限
@@ -96,15 +96,15 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, WorkspacePermission[]> = {
   // 扛把子 - 工作区创始人，拥有所有权限
   owner: AVAILABLE_PERMISSIONS.map(p => p.id),
   
-  // 大管家 - 总监/主管（对应文档 director）
+  // 大管家 - 总监/主管
   // MANAGE_SETTINGS 仅扛把子可用
-  admin: [
+  director: [
     'VIEW_WORKSPACE', 'MANAGE_PROJECTS', 'MANAGE_MEMBERS', 'MANAGE_TASKS',
     'VIEW_ALL_REPORTS', 'EXPORT_DATA', 'AI_ANALYSIS'
   ],
   
-  // 兼容 director 代码
-  director: [
+  // 兼容旧 admin 代码（映射到 director）
+  admin: [
     'VIEW_WORKSPACE', 'MANAGE_PROJECTS', 'MANAGE_MEMBERS', 'MANAGE_TASKS',
     'VIEW_ALL_REPORTS', 'EXPORT_DATA', 'AI_ANALYSIS'
   ],
