@@ -1,11 +1,15 @@
 /**
  * 权限设置弹窗
  * 仅工作区创始人可见，用于配置成员的自定义权限
+ * 
+ * 设计逻辑：
+ * - 默认权限：显示为"已启用"且不可关闭（锁定状态）
+ * - 额外权限：显示为普通开关，允许手动赋予
  */
-import { useState, useEffect } from 'react';
-import { X, Shield, Loader2, Check, Crown } from 'lucide-react';
-import { permissionService, AVAILABLE_PERMISSIONS, PERMISSION_GROUPS, DEFAULT_ROLE_PERMISSIONS, UserPermissionData, WorkspacePermission } from '../services/permission';
-import { ROLE_LABELS, ROLE_ICONS } from '../config/permissions';
+import { useState, useEffect, useMemo } from 'react';
+import { X, Loader2, Crown, Info, Lock, CheckCircle2 } from 'lucide-react';
+import { permissionService, AVAILABLE_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS, UserPermissionData, WorkspacePermission } from '../services/permission';
+import { ROLE_LABELS } from '../config/permissions';
 import './PermissionSettingsModal.css';
 
 interface PermissionSettingsModalProps {
@@ -34,6 +38,14 @@ export default function PermissionSettingsModal({
   const [error, setError] = useState<string | null>(null);
   const [userInfo, setUserInfo] = useState<UserPermissionData | null>(null);
 
+  // 获取角色默认权限
+  const roleDefaultPerms = useMemo(() => {
+    return userInfo?.role ? (DEFAULT_ROLE_PERMISSIONS[userInfo.role] || []) : [];
+  }, [userInfo?.role]);
+
+  // 默认权限数量
+  const defaultPermCount = roleDefaultPerms.length;
+
   useEffect(() => {
     if (isOpen && userId && workspaceId) {
       loadPermissions();
@@ -55,20 +67,15 @@ export default function PermissionSettingsModal({
     }
   };
 
-  const togglePermission = (permissionId: WorkspacePermission) => {
+  const togglePermission = (permissionId: WorkspacePermission, isDefault: boolean) => {
+    // 默认权限不可关闭
+    if (isDefault) return;
+    
     setPermissions(prev =>
       prev.includes(permissionId)
         ? prev.filter(p => p !== permissionId)
         : [...prev, permissionId]
     );
-  };
-
-  const selectAll = () => {
-    setPermissions(AVAILABLE_PERMISSIONS.map(p => p.id));
-  };
-
-  const deselectAll = () => {
-    setPermissions([]);
   };
 
   const hasChanges = () => {
@@ -95,132 +102,111 @@ export default function PermissionSettingsModal({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="permission-settings-modal" onClick={e => e.stopPropagation()}>
-        <button className="modal-close-btn" onClick={onClose}>
-          <X size={20} />
-        </button>
-
+      <div className="perm-modal" onClick={e => e.stopPropagation()}>
         {/* 头部 */}
-        <div className="modal-header">
-          <div className="header-icon">
-            <Shield size={24} />
+        <div className="perm-header">
+          <div className="perm-header-left">
+            <h3 className="perm-title">权限设置</h3>
+            <p className="perm-subtitle">管理该成员在工作区中的访问级别</p>
           </div>
-          <div className="header-content">
-            <h3>权限设置</h3>
-            <div className="user-info">
-              <div className="user-avatar">
-                {userAvatar ? (
-                  <img src={userAvatar} alt={userName} />
-                ) : (
-                  userName.charAt(0).toUpperCase()
-                )}
-              </div>
-              <span className="user-name">{userName}</span>
+          <button className="perm-close-btn" onClick={onClose}>
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* 用户信息卡片 */}
+        <div className="perm-user-card">
+          <div className="perm-user-avatar">
+            {userAvatar ? (
+              <img src={userAvatar} alt={userName} />
+            ) : (
+              userName.charAt(0).toUpperCase()
+            )}
+          </div>
+          <div className="perm-user-info">
+            <div className="perm-user-name-row">
+              <span className="perm-user-name">{userName}</span>
               {userInfo?.role && (
-                <span className="role-badge">
-                  {ROLE_ICONS[userInfo.role] || '👤'} {ROLE_LABELS[userInfo.role] || userInfo.role}
+                <span className="perm-role-dot">
+                  <span className={`role-dot role-dot-${userInfo.role}`} />
+                  {ROLE_LABELS[userInfo.role] || userInfo.role}
                 </span>
               )}
-              {userInfo?.isOwner && (
-                <span className="owner-badge"><Crown size={12} /> 创始人</span>
-              )}
+            </div>
+            <div className="perm-user-hint">
+              <Info size={12} />
+              <span>该角色默认包含 <strong>{defaultPermCount} 项</strong> 基础权限</span>
             </div>
           </div>
         </div>
 
         {/* 内容 */}
-        <div className="modal-content">
+        <div className="perm-content">
           {loading ? (
-            <div className="loading-state">
-              <Loader2 size={32} className="spin" />
+            <div className="perm-loading">
+              <Loader2 size={28} className="spin" />
               <p>加载中...</p>
             </div>
           ) : error && !userInfo ? (
-            <div className="error-state">
+            <div className="perm-error">
               <p>{error}</p>
               <button className="btn btn-secondary" onClick={loadPermissions}>重试</button>
             </div>
           ) : userInfo?.isOwner ? (
-            <div className="owner-notice">
+            <div className="perm-owner-notice">
               <Crown size={24} />
               <p>创始人拥有所有权限，无法修改</p>
             </div>
           ) : (
             <>
-              {error && <div className="error-message">{error}</div>}
+              {error && <div className="perm-error-msg">{error}</div>}
               
-              {/* 角色默认权限说明 */}
-              {userInfo?.role && (
-                <div className="role-permissions-info">
-                  <div className="info-header">
-                    <span className="info-icon">ℹ️</span>
-                    <span className="info-title">角色默认权限</span>
-                  </div>
-                  <p className="info-desc">
-                    {ROLE_ICONS[userInfo.role]} <strong>{ROLE_LABELS[userInfo.role]}</strong> 角色默认拥有以下权限（标记为 <span className="default-tag">默认</span>），
-                    您可以额外授予或移除权限。
-                  </p>
-                </div>
-              )}
-              
-              <div className="quick-actions">
-                <button className="btn btn-sm btn-secondary" onClick={selectAll}>
-                  全选
-                </button>
-                <button className="btn btn-sm btn-secondary" onClick={deselectAll}>
-                  全不选
-                </button>
-              </div>
-
-              <div className="permission-list">
-                {Object.entries(PERMISSION_GROUPS).map(([groupId, group]) => {
-                  const groupPermissions = AVAILABLE_PERMISSIONS.filter(p => p.group === groupId);
-                  if (groupPermissions.length === 0) return null;
-                  
-                  // 获取角色默认权限
-                  const roleDefaultPerms = userInfo?.role 
-                    ? (DEFAULT_ROLE_PERMISSIONS[userInfo.role] || [])
-                    : [];
+              <div className="perm-list">
+                {AVAILABLE_PERMISSIONS.map((perm) => {
+                  const isDefault = roleDefaultPerms.includes(perm.id);
+                  const isEnabled = isDefault || permissions.includes(perm.id);
                   
                   return (
-                    <div key={groupId} className="permission-group">
-                      <div className="group-header">
-                        <span className="group-icon">{group.icon}</span>
-                        <span className="group-label">{group.label}</span>
-                        <span className="group-count">
-                          {groupPermissions.filter(p => permissions.includes(p.id)).length}/{groupPermissions.length}
-                        </span>
+                    <div 
+                      key={perm.id} 
+                      className={`perm-item ${isDefault ? 'is-default' : ''} ${isEnabled ? 'is-enabled' : ''}`}
+                      onClick={() => togglePermission(perm.id, isDefault)}
+                    >
+                      <div className="perm-item-left">
+                        {/* 图标区域 */}
+                        <div className={`perm-check-icon ${isEnabled ? 'checked' : ''} ${isDefault ? 'locked' : ''}`}>
+                          {isDefault ? (
+                            <CheckCircle2 size={18} />
+                          ) : isEnabled ? (
+                            <CheckCircle2 size={18} />
+                          ) : (
+                            <div className="perm-check-empty" />
+                          )}
+                        </div>
+                        
+                        <div className="perm-item-text">
+                          <div className="perm-item-label">
+                            {perm.label}
+                            {isDefault && (
+                              <span className="perm-default-badge">
+                                <Lock size={10} />
+                                默认
+                              </span>
+                            )}
+                          </div>
+                          <div className="perm-item-desc">{perm.description}</div>
+                        </div>
                       </div>
-                      <div className="group-items">
-                        {groupPermissions.map((perm) => {
-                          const isRoleDefault = roleDefaultPerms.includes(perm.id);
-                          const isChecked = permissions.includes(perm.id);
-                          
-                          return (
-                            <label
-                              key={perm.id}
-                              className={`permission-item ${isChecked ? 'checked' : ''} ${isRoleDefault ? 'role-default' : ''}`}
-                            >
-                              <div className="checkbox-wrapper">
-                                <input
-                                  type="checkbox"
-                                  checked={isChecked}
-                                  onChange={() => togglePermission(perm.id)}
-                                />
-                                <div className="checkbox-custom">
-                                  {isChecked && <Check size={14} />}
-                                </div>
-                              </div>
-                              <div className="permission-info">
-                                <div className="permission-label">
-                                  {perm.label}
-                                  {isRoleDefault && <span className="default-badge">默认</span>}
-                                </div>
-                                <div className="permission-desc">{perm.description}</div>
-                              </div>
-                            </label>
-                          );
-                        })}
+
+                      {/* Toggle 开关 */}
+                      <div 
+                        className={`perm-toggle ${isEnabled ? 'on' : 'off'} ${isDefault ? 'locked' : ''}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          togglePermission(perm.id, isDefault);
+                        }}
+                      >
+                        <div className="perm-toggle-thumb" />
                       </div>
                     </div>
                   );
@@ -231,20 +217,20 @@ export default function PermissionSettingsModal({
         </div>
 
         {/* 底部 */}
-        <div className="modal-footer">
-          <button className="btn btn-secondary" onClick={onClose}>
+        <div className="perm-footer">
+          <button className="perm-btn perm-btn-cancel" onClick={onClose}>
             取消
           </button>
           {!userInfo?.isOwner && (
             <button
-              className="btn btn-primary"
+              className="perm-btn perm-btn-save"
               onClick={handleSave}
               disabled={saving || loading || !hasChanges()}
             >
               {saving ? (
-                <><Loader2 size={16} className="spin" /> 保存中...</>
+                <><Loader2 size={14} className="spin" /> 保存中...</>
               ) : (
-                '保存'
+                '保存修改'
               )}
             </button>
           )}
