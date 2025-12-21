@@ -84,19 +84,44 @@ export const permissionService = {
 };
 
 // 默认角色权限映射
-// 注意：咖啡抽奖(COFFEE_LOTTERY)默认只有创始人拥有
+// 角色体系：
+//   - owner (扛把子) = 工作区创始人，拥有所有权限
+//   - admin/director (大管家) = 总监/主管，管理多个项目
+//   - leader (带头大哥) = 项目负责人，仅项目内权限
+//   - member (少侠) = 普通成员
+//   - guest (吃瓜) = 访客，只读权限
+//
+// 注意：BROADCAST_MESSAGES 和 COFFEE_LOTTERY 默认只有创始人拥有
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, WorkspacePermission[]> = {
-  owner: AVAILABLE_PERMISSIONS.map(p => p.id), // 创始人拥有所有权限
+  // 扛把子 - 工作区创始人，拥有所有权限
+  owner: AVAILABLE_PERMISSIONS.map(p => p.id),
+  
+  // 大管家 - 总监/主管（对应文档 director）
+  // MANAGE_SETTINGS 仅扛把子可用
   admin: [
     'VIEW_WORKSPACE', 'MANAGE_PROJECTS', 'MANAGE_MEMBERS', 'MANAGE_TASKS',
-    'VIEW_ALL_REPORTS', 'MANAGE_SETTINGS', 'EXPORT_DATA', 'AI_ANALYSIS',
-    'BROADCAST_MESSAGES'
+    'VIEW_ALL_REPORTS', 'EXPORT_DATA', 'AI_ANALYSIS'
   ],
+  
+  // 兼容 director 代码
+  director: [
+    'VIEW_WORKSPACE', 'MANAGE_PROJECTS', 'MANAGE_MEMBERS', 'MANAGE_TASKS',
+    'VIEW_ALL_REPORTS', 'EXPORT_DATA', 'AI_ANALYSIS'
+  ],
+  
+  // 带头大哥 - 项目负责人
+  // VIEW_ALL_REPORTS 和 MANAGE_TASKS 实际为"仅项目内"，通过项目权限控制
   leader: [
-    'VIEW_WORKSPACE', 'VIEW_ALL_REPORTS', 'AI_ANALYSIS'
+    'VIEW_WORKSPACE', 'AI_ANALYSIS'
   ],
+  
+  // 少侠 - 普通成员
   member: [
+    'VIEW_WORKSPACE', 'AI_ANALYSIS'
+  ],
+  
+  // 吃瓜 - 访客，只读
+  guest: [
     'VIEW_WORKSPACE'
   ],
-  guest: ['VIEW_WORKSPACE'],
 };
