@@ -84,18 +84,19 @@ export const permissionService = {
 };
 
 // 默认角色权限映射
+// 注意：咖啡抽奖(COFFEE_LOTTERY)默认只有创始人拥有
 export const DEFAULT_ROLE_PERMISSIONS: Record<string, WorkspacePermission[]> = {
   owner: AVAILABLE_PERMISSIONS.map(p => p.id), // 创始人拥有所有权限
   admin: [
     'VIEW_WORKSPACE', 'MANAGE_PROJECTS', 'MANAGE_MEMBERS', 'MANAGE_TASKS',
     'VIEW_ALL_REPORTS', 'MANAGE_SETTINGS', 'EXPORT_DATA', 'AI_ANALYSIS',
-    'BROADCAST_MESSAGES', 'COFFEE_LOTTERY'
+    'BROADCAST_MESSAGES'
   ],
   leader: [
-    'VIEW_WORKSPACE', 'VIEW_ALL_REPORTS', 'AI_ANALYSIS', 'COFFEE_LOTTERY'
+    'VIEW_WORKSPACE', 'VIEW_ALL_REPORTS', 'AI_ANALYSIS'
   ],
   member: [
-    'VIEW_WORKSPACE', 'COFFEE_LOTTERY'
+    'VIEW_WORKSPACE'
   ],
   guest: ['VIEW_WORKSPACE'],
 };
