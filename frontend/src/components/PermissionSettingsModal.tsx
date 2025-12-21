@@ -4,7 +4,8 @@
  */
 import { useState, useEffect } from 'react';
 import { X, Shield, Loader2, Check, Crown } from 'lucide-react';
-import { permissionService, AVAILABLE_PERMISSIONS, PERMISSION_GROUPS, UserPermissionData, WorkspacePermission } from '../services/permission';
+import { permissionService, AVAILABLE_PERMISSIONS, PERMISSION_GROUPS, DEFAULT_ROLE_PERMISSIONS, UserPermissionData, WorkspacePermission } from '../services/permission';
+import { ROLE_LABELS, ROLE_ICONS } from '../config/permissions';
 import './PermissionSettingsModal.css';
 
 interface PermissionSettingsModalProps {
@@ -115,6 +116,11 @@ export default function PermissionSettingsModal({
                 )}
               </div>
               <span className="user-name">{userName}</span>
+              {userInfo?.role && (
+                <span className="role-badge">
+                  {ROLE_ICONS[userInfo.role] || '👤'} {ROLE_LABELS[userInfo.role] || userInfo.role}
+                </span>
+              )}
               {userInfo?.isOwner && (
                 <span className="owner-badge"><Crown size={12} /> 创始人</span>
               )}
@@ -143,6 +149,20 @@ export default function PermissionSettingsModal({
             <>
               {error && <div className="error-message">{error}</div>}
               
+              {/* 角色默认权限说明 */}
+              {userInfo?.role && (
+                <div className="role-permissions-info">
+                  <div className="info-header">
+                    <span className="info-icon">ℹ️</span>
+                    <span className="info-title">角色默认权限</span>
+                  </div>
+                  <p className="info-desc">
+                    {ROLE_ICONS[userInfo.role]} <strong>{ROLE_LABELS[userInfo.role]}</strong> 角色默认拥有以下权限（标记为 <span className="default-tag">默认</span>），
+                    您可以额外授予或移除权限。
+                  </p>
+                </div>
+              )}
+              
               <div className="quick-actions">
                 <button className="btn btn-sm btn-secondary" onClick={selectAll}>
                   全选
@@ -157,6 +177,11 @@ export default function PermissionSettingsModal({
                   const groupPermissions = AVAILABLE_PERMISSIONS.filter(p => p.group === groupId);
                   if (groupPermissions.length === 0) return null;
                   
+                  // 获取角色默认权限
+                  const roleDefaultPerms = userInfo?.role 
+                    ? (DEFAULT_ROLE_PERMISSIONS[userInfo.role] || [])
+                    : [];
+                  
                   return (
                     <div key={groupId} className="permission-group">
                       <div className="group-header">
@@ -167,27 +192,35 @@ export default function PermissionSettingsModal({
                         </span>
                       </div>
                       <div className="group-items">
-                        {groupPermissions.map((perm) => (
-                          <label
-                            key={perm.id}
-                            className={`permission-item ${permissions.includes(perm.id) ? 'checked' : ''}`}
-                          >
-                            <div className="checkbox-wrapper">
-                              <input
-                                type="checkbox"
-                                checked={permissions.includes(perm.id)}
-                                onChange={() => togglePermission(perm.id)}
-                              />
-                              <div className="checkbox-custom">
-                                {permissions.includes(perm.id) && <Check size={14} />}
+                        {groupPermissions.map((perm) => {
+                          const isRoleDefault = roleDefaultPerms.includes(perm.id);
+                          const isChecked = permissions.includes(perm.id);
+                          
+                          return (
+                            <label
+                              key={perm.id}
+                              className={`permission-item ${isChecked ? 'checked' : ''} ${isRoleDefault ? 'role-default' : ''}`}
+                            >
+                              <div className="checkbox-wrapper">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  onChange={() => togglePermission(perm.id)}
+                                />
+                                <div className="checkbox-custom">
+                                  {isChecked && <Check size={14} />}
+                                </div>
                               </div>
-                            </div>
-                            <div className="permission-info">
-                              <div className="permission-label">{perm.label}</div>
-                              <div className="permission-desc">{perm.description}</div>
-                            </div>
-                          </label>
-                        ))}
+                              <div className="permission-info">
+                                <div className="permission-label">
+                                  {perm.label}
+                                  {isRoleDefault && <span className="default-badge">默认</span>}
+                                </div>
+                                <div className="permission-desc">{perm.description}</div>
+                              </div>
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
                   );

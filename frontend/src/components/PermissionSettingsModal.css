@@ -294,6 +294,98 @@
   border-top: 1px solid var(--border-secondary);
 }
 
+/* 角色徽章 */
+.permission-settings-modal .role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  background: var(--bg-surface-secondary);
+  color: var(--text-secondary);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* 角色默认权限说明 */
+.permission-settings-modal .role-permissions-info {
+  background: linear-gradient(135deg, #eff6ff, #f0f9ff);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+[data-theme="dark"] .permission-settings-modal .role-permissions-info {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.permission-settings-modal .role-permissions-info .info-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.permission-settings-modal .role-permissions-info .info-icon {
+  font-size: 16px;
+}
+
+.permission-settings-modal .role-permissions-info .info-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+[data-theme="dark"] .permission-settings-modal .role-permissions-info .info-title {
+  color: #93c5fd;
+}
+
+.permission-settings-modal .role-permissions-info .info-desc {
+  font-size: 13px;
+  color: #1e40af;
+  line-height: 1.5;
+  margin: 0;
+}
+
+[data-theme="dark"] .permission-settings-modal .role-permissions-info .info-desc {
+  color: #bfdbfe;
+}
+
+.permission-settings-modal .role-permissions-info .default-tag {
+  display: inline-block;
+  padding: 1px 6px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* 权限项角色默认标记 */
+.permission-settings-modal .permission-item.role-default {
+  background: linear-gradient(135deg, #f0f9ff, #eff6ff);
+  border-color: #bfdbfe;
+}
+
+[data-theme="dark"] .permission-settings-modal .permission-item.role-default {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.permission-settings-modal .default-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 6px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
 /* 旋转动画 */
 .spin {
   animation: spin 1s linear infinite;
