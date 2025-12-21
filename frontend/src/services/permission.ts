@@ -63,6 +63,13 @@ export const permissionService = {
   },
 
   /**
+   * 获取当前用户在工作区的权限（简化版）
+   */
+  async getMyPermissions(workspaceId: string): Promise<UserPermissionData> {
+    return api.get<UserPermissionData>(`/permissions/${workspaceId}/me`);
+  },
+
+  /**
    * 更新用户权限（仅创始人可操作）
    */
   async updateUserPermissions(
@@ -79,4 +86,22 @@ export const permissionService = {
   async getWorkspacePermissions(workspaceId: string): Promise<PermissionListData> {
     return api.get<PermissionListData>(`/permissions/${workspaceId}`);
   },
+};
+
+// 默认角色权限映射
+export const DEFAULT_ROLE_PERMISSIONS: Record<string, WorkspacePermission[]> = {
+  owner: AVAILABLE_PERMISSIONS.map(p => p.id), // 创始人拥有所有权限
+  admin: [
+    'VIEW_WORKSPACE', 'MANAGE_PROJECTS', 'MANAGE_MEMBERS', 'MANAGE_TASKS',
+    'VIEW_ALL_REPORTS', 'MANAGE_SETTINGS', 'EXPORT_DATA', 'AI_ANALYSIS',
+    'BROADCAST_MESSAGES', 'COFFEE_LOTTERY', 'TEAM_KUDOS', 'FUN_EVENTS'
+  ],
+  leader: [
+    'VIEW_WORKSPACE', 'VIEW_ALL_REPORTS', 'AI_ANALYSIS',
+    'COFFEE_LOTTERY', 'TEAM_KUDOS', 'FUN_EVENTS'
+  ],
+  member: [
+    'VIEW_WORKSPACE', 'COFFEE_LOTTERY', 'TEAM_KUDOS'
+  ],
+  guest: ['VIEW_WORKSPACE'],
 };

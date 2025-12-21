@@ -37,6 +37,41 @@ export const AVAILABLE_PERMISSIONS = [
 export type WorkspacePermission = typeof AVAILABLE_PERMISSIONS[number];
 
 /**
+ * GET /permissions/:workspaceId/me - 获取当前用户在工作区的权限
+ */
+router.get('/:workspaceId/me', async (req: Request, res: Response) => {
+  try {
+    const { workspaceId } = req.params;
+    const userId = req.user!.userId;
+
+    const workspaceMember = await prisma.workspaceUser.findUnique({
+      where: { userId_workspaceId: { userId, workspaceId } },
+      include: { user: { select: { id: true, name: true, email: true, avatar: true } } },
+    });
+
+    if (!workspaceMember) {
+      return res.status(404).json({ error: 'NOT_FOUND', message: '您不是该工作区成员' });
+    }
+
+    const isOwner = workspaceMember.role === 'owner';
+
+    res.json({
+      success: true,
+      data: {
+        userId: workspaceMember.userId,
+        user: workspaceMember.user,
+        role: workspaceMember.role,
+        isOwner,
+        permissions: isOwner ? [...AVAILABLE_PERMISSIONS] : (workspaceMember.permissions || []),
+      },
+    });
+  } catch (error: any) {
+    console.error('获取当前用户权限失败:', error);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取权限失败' });
+  }
+});
+
+/**
  * GET /permissions/:workspaceId/:userId - 获取用户在工作区的权限
  */
 router.get('/:workspaceId/:userId', async (req: Request, res: Response) => {

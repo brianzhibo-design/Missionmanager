@@ -1077,6 +1077,7 @@
 
 .team-report-item {
   padding: 16px;
+  padding-right: 120px; /* 为查看详情按钮预留空间 */
   background: var(--bg-secondary);
   border-radius: 14px;
   margin-bottom: 10px;
