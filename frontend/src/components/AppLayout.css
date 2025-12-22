@@ -860,6 +860,7 @@
   padding: 12px;
   border-top: 1px solid #f1f5f9;
   background: #fafbfc;
+  flex-shrink: 0;
 }
 
 [data-theme="dark"] .sidebar-footer-v2 {
@@ -876,6 +877,8 @@
   cursor: pointer;
   transition: all 0.2s;
   border: 1px solid transparent;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .profile-card:hover {
@@ -913,6 +916,7 @@
 .profile-info {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .profile-name {
@@ -923,6 +927,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 [data-theme="dark"] .profile-name {
@@ -933,14 +938,14 @@
   display: block;
   font-size: 11px;
   color: #94a3b8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-break: break-all;
+  line-height: 1.4;
 }
 
 .profile-settings {
   color: #94a3b8;
   transition: color 0.15s;
+  flex-shrink: 0;
 }
 
 .profile-card:hover .profile-settings {
@@ -1275,7 +1280,6 @@
   .sidebar-v2 .nav-badge,
   .sidebar-v2 .shortcut-dot + span,
   .sidebar-v2 .team-list,
-  .sidebar-v2 .sidebar-footer-v2,
   .sidebar-v2 .nav-group-header {
     display: none;
   }
@@ -1291,6 +1295,21 @@
 
   .sidebar-v2 .nav-item-left {
     gap: 0;
+  }
+
+  /* 平板模式下的用户资料卡片 - 只显示头像 */
+  .sidebar-v2 .sidebar-footer-v2 {
+    padding: 8px;
+  }
+
+  .sidebar-v2 .profile-card {
+    justify-content: center;
+    padding: 8px;
+  }
+
+  .sidebar-v2 .profile-info,
+  .sidebar-v2 .profile-settings {
+    display: none;
   }
 }
 
