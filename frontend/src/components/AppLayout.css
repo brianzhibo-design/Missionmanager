@@ -502,31 +502,357 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  margin-top: 8px;
-  padding: 8px 12px;
-  font-size: 12px;
-  color: #94a3b8;
-  border: 1px dashed #e2e8f0;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6366f1;
+  border: 1px dashed #c7d2fe;
   border-radius: 10px;
-  background: none;
+  background: #eff6ff;
   text-decoration: none;
-  transition: all 0.15s;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
 .invite-member-btn:hover {
-  color: #6366f1;
-  border-color: #c7d2fe;
-  background: #eff6ff;
+  color: white;
+  border-color: #6366f1;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 [data-theme="dark"] .invite-member-btn {
-  border-color: #475569;
+  color: #818cf8;
+  border-color: #4f46e5;
+  background: rgba(99, 102, 241, 0.1);
 }
 
 [data-theme="dark"] .invite-member-btn:hover {
+  color: white;
   border-color: #6366f1;
-  background: rgba(99, 102, 241, 0.1);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+}
+
+/* ========================================
+ * 邀请成员模态框
+ * ======================================== */
+.invite-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.invite-modal {
+  width: 480px;
+  max-width: 90vw;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+[data-theme="dark"] .invite-modal {
+  background: #1e293b;
+}
+
+.invite-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+[data-theme="dark"] .invite-modal-header {
+  border-bottom-color: #334155;
+}
+
+.invite-modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+[data-theme="dark"] .invite-modal-header h3 {
+  color: #f1f5f9;
+}
+
+.workspace-tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #3b82f6;
+  border-radius: 100px;
+  font-weight: 500;
+}
+
+[data-theme="dark"] .workspace-tag {
+  background: rgba(59, 130, 246, 0.15);
+  color: #60a5fa;
+}
+
+.invite-modal-header .close-btn {
+  margin-left: auto;
+  padding: 8px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+
+.invite-modal-header .close-btn:hover {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+[data-theme="dark"] .invite-modal-header .close-btn:hover {
+  background: #334155;
+  color: #f1f5f9;
+}
+
+.invite-tabs {
+  display: flex;
+  padding: 0 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+[data-theme="dark"] .invite-tabs {
+  border-bottom-color: #334155;
+}
+
+.invite-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.invite-tab:hover {
+  color: #1e293b;
+}
+
+.invite-tab.active {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+}
+
+[data-theme="dark"] .invite-tab {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .invite-tab:hover {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .invite-tab.active {
+  color: #818cf8;
+  border-bottom-color: #818cf8;
+}
+
+.invite-content {
+  padding: 24px;
+}
+
+.invite-form .form-group {
+  margin-bottom: 16px;
+}
+
+.invite-form .form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+[data-theme="dark"] .invite-form .form-group label {
+  color: #94a3b8;
+}
+
+.invite-form .form-group input,
+.invite-form .form-group select {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.15s;
+}
+
+.invite-form .form-group input:focus,
+.invite-form .form-group select:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+[data-theme="dark"] .invite-form .form-group input,
+[data-theme="dark"] .invite-form .form-group select {
+  color: #f1f5f9;
+  background: #0f172a;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .invite-form .form-group input:focus,
+[data-theme="dark"] .invite-form .form-group select:focus {
+  border-color: #6366f1;
+  background: #1e293b;
+}
+
+.invite-submit-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.invite-submit-btn:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
+}
+
+.invite-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.invite-link-section {
+  text-align: center;
+}
+
+.link-desc {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 16px;
+}
+
+[data-theme="dark"] .link-desc {
+  color: #94a3b8;
+}
+
+.link-box {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.link-input {
+  flex: 1;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-family: 'SF Mono', 'Monaco', monospace;
+}
+
+[data-theme="dark"] .link-input {
+  color: #94a3b8;
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.copy-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.copy-link-btn:hover {
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.link-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.invite-error {
+  margin-top: 16px;
+  padding: 12px;
+  font-size: 13px;
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: 8px;
+}
+
+[data-theme="dark"] .invite-error {
+  background: rgba(220, 38, 38, 0.1);
+  color: #f87171;
+}
+
+.invite-success {
+  margin-top: 16px;
+  padding: 12px;
+  font-size: 13px;
+  color: #16a34a;
+  background: #f0fdf4;
+  border-radius: 8px;
+}
+
+[data-theme="dark"] .invite-success {
+  background: rgba(22, 163, 74, 0.1);
+  color: #4ade80;
 }
 
 /* 底部个人资料 V2 */

@@ -10,7 +10,6 @@ import MobileNav from './MobileNav';
 import { notificationService } from '../services/notification';
 import { pushNotificationService } from '../services/pushNotification';
 import { socketService, SocketNotification } from '../services/socket';
-import { memberService, Member } from '../services/member';
 import {
   LayoutDashboard,
   CheckSquare,
@@ -28,7 +27,12 @@ import {
   LogOut,
   ChevronDown,
   Plus,
-  Inbox,
+  Mail,
+  Phone,
+  Link,
+  Copy,
+  Check,
+  X,
 } from 'lucide-react';
 import './AppLayout.css';
 
@@ -48,9 +52,8 @@ export default function AppLayout() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [teamMembers, setTeamMembers] = useState<Member[]>([]);
-  const [inboxCount] = useState(2); // 收件箱未读数
 
   // 判断是否使用新的移动端布局（简约蓝主题页面）
   // 这些页面使用独立的 MobileLayout，不需要 AppLayout 的 MobileNav
@@ -87,21 +90,6 @@ export default function AppLayout() {
     setCurrentWorkspace(ws);
     setShowWorkspaceMenu(false);
   };
-
-  // 加载团队成员
-  const loadTeamMembers = useCallback(async () => {
-    if (!currentWorkspace?.id) return;
-    try {
-      const members = await memberService.getMembers(currentWorkspace.id);
-      setTeamMembers(members.slice(0, 5)); // 只显示前5个
-    } catch (err) {
-      console.error('Failed to load team members:', err);
-    }
-  }, [currentWorkspace?.id]);
-
-  useEffect(() => {
-    loadTeamMembers();
-  }, [loadTeamMembers]);
 
   // 加载未读通知数量
   const loadUnreadCount = useCallback(async () => {
@@ -150,11 +138,10 @@ export default function AppLayout() {
   }, []);
 
   const mainNavItems = [
-    { path: '/dashboard', icon: LayoutDashboard, label: '仪表盘', badge: null },
-    { path: '/my-tasks', icon: CheckSquare, label: '我的任务', badge: null },
-    { path: '/projects', icon: FolderKanban, label: '项目', badge: null },
-    { path: '/daily-report', icon: FileText, label: '我的日报', badge: null },
-    { path: '/notifications', icon: Inbox, label: '收件箱', badge: inboxCount > 0 ? inboxCount.toString() : null },
+    { path: '/dashboard', icon: LayoutDashboard, label: '仪表盘' },
+    { path: '/my-tasks', icon: CheckSquare, label: '我的任务' },
+    { path: '/projects', icon: FolderKanban, label: '项目' },
+    { path: '/daily-report', icon: FileText, label: '我的日报' },
   ];
 
   const adminNavItems = [
@@ -166,12 +153,6 @@ export default function AppLayout() {
 
   const aiNavItems = [
     { path: '/ai-insights', icon: Brain, label: 'AI 洞察' },
-  ];
-
-  // 快捷方式（可配置）
-  const shortcuts = [
-    { label: '紧急任务', color: 'bg-rose-400', path: '/my-tasks?priority=urgent' },
-    { label: '本周计划', color: 'bg-amber-400', path: '/my-tasks?due=week' },
   ];
 
   const getUserInitials = () => {
@@ -237,7 +218,6 @@ export default function AppLayout() {
                       <Icon size={18} strokeWidth={2} />
                       <span>{item.label}</span>
                     </div>
-                    {item.badge && <span className="nav-badge">{item.badge}</span>}
                   </NavLink>
                 );
               })}
@@ -292,61 +272,17 @@ export default function AppLayout() {
             </div>
           )}
 
-          {/* 4. 快捷方式 */}
-          <div className="nav-group">
-            <div className="nav-group-header">
-              <span className="nav-group-title">快捷方式</span>
-              <Plus size={12} className="nav-group-action" />
+          {/* 邀请成员按钮 */}
+          {canWorkspace('manageMembers') && (
+            <div className="nav-group">
+              <button 
+                className="invite-member-btn"
+                onClick={() => setShowInviteModal(true)}
+              >
+                <Plus size={14} /> 邀请成员
+              </button>
             </div>
-            <div className="nav-items">
-              {shortcuts.map((shortcut, idx) => (
-                <NavLink 
-                  key={idx} 
-                  to={shortcut.path}
-                  className="nav-item-v2 shortcut"
-                >
-                  <div className="nav-item-left">
-                    <span className={`shortcut-dot ${shortcut.color}`} />
-                    <span>{shortcut.label}</span>
-                  </div>
-                </NavLink>
-              ))}
-            </div>
-          </div>
-
-          {/* 5. 团队成员 */}
-          <div className="nav-group">
-            <div className="nav-group-header">
-              <span className="nav-group-title">团队</span>
-              <span className="nav-group-count">{teamMembers.length}</span>
-            </div>
-            <div className="team-list">
-              {teamMembers.map((member) => (
-                <div key={member.id} className="team-member">
-                  <div className="member-avatar-wrapper">
-                    {member.user.avatar ? (
-                      <img src={member.user.avatar} alt={member.user.name} className="member-avatar" />
-                    ) : (
-                      <div className="member-avatar-placeholder">
-                        {member.user.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <span className="member-status online" />
-                  </div>
-                  <span className="member-name">{member.user.name}</span>
-                  <div className="member-role">
-                    <RoleBadge role={member.role} size="xs" variant="dot" />
-                  </div>
-                </div>
-              ))}
-              
-              {canWorkspace('manageMembers') && (
-                <NavLink to="/admin/members" className="invite-member-btn">
-                  <Plus size={12} /> 邀请成员
-                </NavLink>
-              )}
-            </div>
-          </div>
+          )}
         </div>
 
         {/* 6. 底部个人资料 */}
@@ -487,6 +423,184 @@ export default function AppLayout() {
 
       {/* Mobile Navigation - 隐藏于使用新布局的页面 */}
       {!useNewMobileLayout && <MobileNav />}
+
+      {/* 邀请成员模态框 */}
+      {showInviteModal && (
+        <InviteMemberModal 
+          workspaceId={currentWorkspace?.id || ''}
+          workspaceName={currentWorkspace?.name || ''}
+          onClose={() => setShowInviteModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+// 邀请成员模态框组件
+function InviteMemberModal({ 
+  workspaceId, 
+  workspaceName,
+  onClose 
+}: { 
+  workspaceId: string;
+  workspaceName: string;
+  onClose: () => void;
+}) {
+  const [activeTab, setActiveTab] = useState<'email' | 'phone' | 'link'>('email');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('member');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const inviteLink = `${window.location.origin}/workspace-setup?join=${workspaceId}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(inviteLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleInvite = async () => {
+    const contact = activeTab === 'email' ? email.trim() : phone.trim();
+    if (!contact) {
+      setError(activeTab === 'email' ? '请输入邮箱地址' : '请输入手机号');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      // 调用邀请 API
+      const { memberService } = await import('../services/member');
+      await memberService.inviteMember(workspaceId, contact, role);
+      setSuccess(`已发送邀请至 ${contact}`);
+      setEmail('');
+      setPhone('');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : '邀请失败';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="invite-modal-overlay" onClick={onClose}>
+      <div className="invite-modal" onClick={e => e.stopPropagation()}>
+        <div className="invite-modal-header">
+          <h3>邀请成员加入</h3>
+          <span className="workspace-tag">{workspaceName}</span>
+          <button className="close-btn" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+
+        <div className="invite-tabs">
+          <button 
+            className={`invite-tab ${activeTab === 'email' ? 'active' : ''}`}
+            onClick={() => setActiveTab('email')}
+          >
+            <Mail size={16} /> 邮箱邀请
+          </button>
+          <button 
+            className={`invite-tab ${activeTab === 'phone' ? 'active' : ''}`}
+            onClick={() => setActiveTab('phone')}
+          >
+            <Phone size={16} /> 手机邀请
+          </button>
+          <button 
+            className={`invite-tab ${activeTab === 'link' ? 'active' : ''}`}
+            onClick={() => setActiveTab('link')}
+          >
+            <Link size={16} /> 分享链接
+          </button>
+        </div>
+
+        <div className="invite-content">
+          {activeTab === 'email' && (
+            <div className="invite-form">
+              <div className="form-group">
+                <label>邮箱地址</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="example@company.com"
+                />
+              </div>
+              <div className="form-group">
+                <label>角色</label>
+                <select value={role} onChange={e => setRole(e.target.value)}>
+                  <option value="member">成员</option>
+                  <option value="director">管理员</option>
+                </select>
+              </div>
+              <button 
+                className="invite-submit-btn"
+                onClick={handleInvite}
+                disabled={loading}
+              >
+                {loading ? '发送中...' : '发送邀请'}
+              </button>
+            </div>
+          )}
+
+          {activeTab === 'phone' && (
+            <div className="invite-form">
+              <div className="form-group">
+                <label>手机号</label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={e => setPhone(e.target.value)}
+                  placeholder="13800138000"
+                />
+              </div>
+              <div className="form-group">
+                <label>角色</label>
+                <select value={role} onChange={e => setRole(e.target.value)}>
+                  <option value="member">成员</option>
+                  <option value="director">管理员</option>
+                </select>
+              </div>
+              <button 
+                className="invite-submit-btn"
+                onClick={handleInvite}
+                disabled={loading}
+              >
+                {loading ? '发送中...' : '发送邀请'}
+              </button>
+            </div>
+          )}
+
+          {activeTab === 'link' && (
+            <div className="invite-link-section">
+              <p className="link-desc">分享以下链接，邀请成员加入工作区</p>
+              <div className="link-box">
+                <input 
+                  type="text" 
+                  value={inviteLink} 
+                  readOnly 
+                  className="link-input"
+                />
+                <button className="copy-link-btn" onClick={handleCopyLink}>
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                  {copied ? '已复制' : '复制'}
+                </button>
+              </div>
+              <p className="link-hint">成员通过链接申请后，需要您在成员管理中审批</p>
+            </div>
+          )}
+
+          {error && <div className="invite-error">{error}</div>}
+          {success && <div className="invite-success">{success}</div>}
+        </div>
+      </div>
     </div>
   );
 }
