@@ -187,26 +187,27 @@
 }
 
 .ws-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 16px;
-  right: 16px;
+  position: fixed;
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-  z-index: 1000;
+  z-index: 9999;
   padding: 8px;
   animation: slideDown 0.2s ease-out;
+  width: 248px;
+}
+
+/* 展开状态：菜单在工作区下方 */
+.sidebar-v2:not(.collapsed) .ws-menu {
+  top: 72px;
+  left: 16px;
 }
 
 /* 收起状态下工作区菜单向右弹出 */
 .sidebar-v2.collapsed .ws-menu {
-  top: 0;
-  left: 100%;
-  right: auto;
-  margin-left: 16px;
-  width: 256px;
+  top: 16px;
+  left: 96px;
   animation: slideInFromLeft 0.2s ease-out;
 }
 
