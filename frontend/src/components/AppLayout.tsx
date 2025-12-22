@@ -159,7 +159,15 @@ export default function AppLayout() {
   return (
     <div className="app-layout" data-mobile-new-layout={useNewMobileLayout}>
       {/* Sidebar - 精美商务风格 */}
-      <aside className={`sidebar-v2 ${sidebarCollapsed ? 'collapsed' : ''}`}>
+      <aside 
+        className={`sidebar-v2 ${sidebarCollapsed ? 'collapsed' : ''}`}
+        onClick={(e) => {
+          // 点击空白区域展开（排除按钮和菜单项）
+          if (sidebarCollapsed && !e.defaultPrevented && !(e.target as HTMLElement).closest('button, a')) {
+            setSidebarCollapsed(false);
+          }
+        }}
+      >
         {/* 1. 工作区切换器 */}
         <div className="ws-header">
           <div className="ws-switcher" onClick={() => !sidebarCollapsed && setShowWorkspaceMenu(!showWorkspaceMenu)}>
@@ -222,6 +230,7 @@ export default function AppLayout() {
                     key={item.path} 
                     to={item.path} 
                     className={({ isActive }) => `nav-item-v2 ${isActive ? 'active' : ''}`}
+                    data-label={item.label}
                   >
                     <div className="nav-item-left">
                       <Icon size={18} strokeWidth={2} />
@@ -245,6 +254,7 @@ export default function AppLayout() {
                       key={item.path} 
                       to={item.path} 
                       className={({ isActive }) => `nav-item-v2 ${isActive ? 'active' : ''}`}
+                      data-label={item.label}
                     >
                       <div className="nav-item-left">
                         <Icon size={18} strokeWidth={2} />
@@ -269,6 +279,7 @@ export default function AppLayout() {
                       key={item.path} 
                       to={item.path} 
                       className={({ isActive }) => `nav-item-v2 ${isActive ? 'active' : ''}`}
+                      data-label={item.label}
                     >
                       <div className="nav-item-left">
                         <Icon size={18} strokeWidth={2} />

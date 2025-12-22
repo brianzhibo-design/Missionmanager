@@ -7,16 +7,9 @@
  * 布局容器
  * ======================================== */
 .app-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
+  display: flex;
   min-height: 100vh;
   background-color: var(--bg-base);
-  transition: grid-template-columns 0.3s ease;
-}
-
-/* 收起状态下的布局适配 */
-.app-layout:has(.sidebar-v2.collapsed) {
-  grid-template-columns: 80px 1fr;
 }
 
 /* ========================================
@@ -32,11 +25,18 @@
   top: 0;
   overflow: visible;
   width: 280px;
+  flex-shrink: 0;
   transition: width 0.3s ease;
+  z-index: 20;
 }
 
 .sidebar-v2.collapsed {
   width: 80px;
+  cursor: pointer;
+}
+
+.sidebar-v2.collapsed:hover {
+  background: rgba(248, 250, 252, 0.5);
 }
 
 [data-theme="dark"] .sidebar-v2 {
@@ -73,12 +73,12 @@
   cursor: pointer;
   transition: all 0.3s ease;
   flex: 1;
+  position: relative;
 }
 
 .sidebar-v2.collapsed .ws-switcher {
   justify-content: center;
-  padding: 6px;
-  cursor: default;
+  padding: 0;
 }
 
 .ws-switcher:hover {
@@ -144,6 +144,11 @@
 .ws-info {
   flex: 1;
   min-width: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-v2.collapsed .ws-info {
+  display: none;
 }
 
 .ws-name {
@@ -286,10 +291,24 @@
 /* 导航组 */
 .nav-group {
   margin-bottom: 24px;
+  position: relative;
 }
 
 .nav-group:last-child {
   margin-bottom: 0;
+}
+
+/* 收起状态下的分组分隔线 */
+.sidebar-v2.collapsed .nav-group:not(:first-child)::before {
+  content: '';
+  display: block;
+  height: 1px;
+  background: #f1f5f9;
+  margin: 0 8px 8px;
+}
+
+.sidebar-v2.collapsed .nav-group {
+  margin-bottom: 8px;
 }
 
 .nav-group-header {
@@ -309,6 +328,11 @@
   padding: 0 12px;
   margin-bottom: 8px;
   display: block;
+  transition: opacity 0.2s ease;
+}
+
+.sidebar-v2.collapsed .nav-group-title {
+  display: none;
 }
 
 .nav-group-header .nav-group-title {
@@ -368,6 +392,32 @@
 .sidebar-v2.collapsed .nav-item-v2 {
   justify-content: center;
   padding: 10px;
+}
+
+/* 收起状态下的 Tooltip */
+.sidebar-v2.collapsed .nav-item-v2::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 12px;
+  padding: 6px 12px;
+  background: #1e293b;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 8px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 100;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.sidebar-v2.collapsed .nav-item-v2:hover::after {
+  opacity: 1;
 }
 
 .nav-item-v2:hover {
@@ -1033,10 +1083,12 @@
  * 主容器
  * ======================================== */
 .main-container {
+  flex: 1;
   display: flex;
   flex-direction: column;
   height: 100vh;
   overflow-y: auto;
+  min-width: 0;
   transition: all 0.3s ease;
 }
 
