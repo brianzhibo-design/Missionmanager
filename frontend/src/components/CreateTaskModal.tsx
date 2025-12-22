@@ -8,21 +8,19 @@ import {
   ChevronLeft,
   ChevronRight,
   Calendar,
-  Flag,
   User,
   Folder,
   Loader2,
   Sparkles,
   Lightbulb,
-  ArrowRight,
   Clock,
   Check,
-  Plus,
   CheckCircle2,
 } from './Icons';
 import { taskService } from '../services/task';
 import { projectService, Project } from '../services/project';
 import { workspaceService, WorkspaceMember } from '../services/workspace';
+import { aiService, SuggestedTask } from '../services/ai';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import './CreateTaskModal.css';
@@ -200,7 +198,10 @@ export default function CreateTaskModal({
   const [showProjectSelect, setShowProjectSelect] = useState(false);
   const [showAssigneeSelect, setShowAssigneeSelect] = useState(false);
   const [showPrioritySelect, setShowPrioritySelect] = useState(false);
-  const [showAISuggestion, setShowAISuggestion] = useState(false);
+
+  // AI 建议状态
+  const [aiSuggestions, setAiSuggestions] = useState<SuggestedTask[]>([]);
+  const [aiLoading, setAiLoading] = useState(false);
 
   // 提交状态
   const [submitting, setSubmitting] = useState(false);
@@ -263,13 +264,58 @@ export default function CreateTaskModal({
     setAssigneeId('');
     setPriority('medium');
     setError(null);
-    setShowAISuggestion(false);
+    setAiSuggestions([]);
   };
 
   // 关闭模态框
   const handleClose = () => {
     resetForm();
     onClose();
+  };
+
+  // 获取 AI 建议
+  const handleGetAISuggestions = async () => {
+    if (!projectId) {
+      setError('请先选择项目');
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      // 获取项目现有任务
+      const existingTasks = await taskService.getTasks(projectId);
+      const taskData = existingTasks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        dueDate: t.dueDate || undefined,
+        description: t.description || undefined,
+      }));
+
+      const response = await aiService.generateNextTasks(projectId, taskData);
+      if (response && Array.isArray(response.suggestedTasks)) {
+        setAiSuggestions(response.suggestedTasks);
+      } else if (response && Array.isArray(response)) {
+        setAiSuggestions(response as unknown as SuggestedTask[]);
+      } else {
+        setAiSuggestions([]);
+      }
+    } catch (err) {
+      console.error('获取 AI 建议失败:', err);
+      setAiSuggestions([]);
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // 使用 AI 建议
+  const handleUseSuggestion = (suggestion: SuggestedTask) => {
+    setTitle(suggestion.title || '');
+    setDescription(suggestion.description || '');
+    if (suggestion.priority) {
+      setPriority(suggestion.priority);
+    }
   };
 
   // 提交表单
@@ -530,49 +576,97 @@ export default function CreateTaskModal({
                 </div>
               </div>
 
-              {/* 描述区域 */}
-              <div className="ctm-field">
-                <div className="ctm-label-row">
-                  <label className="ctm-label">描述</label>
+              {/* AI 智能建议区域 */}
+              <div className="ctm-ai-panel">
+                <div className="ctm-ai-panel-header">
+                  <span className="ctm-ai-panel-title">
+                    <Sparkles size={16} /> AI 智能建议
+                  </span>
                   <button
                     type="button"
-                    className={`ctm-ai-btn ${showAISuggestion ? 'active' : ''}`}
-                    onClick={() => setShowAISuggestion(!showAISuggestion)}
+                    className={`ctm-ai-get-btn ${aiLoading ? 'loading' : ''}`}
+                    onClick={handleGetAISuggestions}
+                    disabled={aiLoading || !projectId}
                   >
-                    <Sparkles size={12} />
-                    {showAISuggestion ? 'AI 建议中' : 'AI 建议'}
+                    {aiLoading ? (
+                      <>
+                        <Loader2 size={14} className="ctm-spinner" />
+                        生成中...
+                      </>
+                    ) : (
+                      '获取建议'
+                    )}
                   </button>
                 </div>
 
-                {/* AI 建议卡片 */}
-                {showAISuggestion && title.trim() && (
-                  <div className="ctm-ai-card">
-                    <div className="ctm-ai-header">
-                      <div className="ctm-ai-icon">
-                        <Lightbulb size={14} />
+                {/* AI 建议列表 */}
+                {aiSuggestions.length > 0 && (
+                  <div className="ctm-ai-suggestions-list">
+                    {aiSuggestions.map((suggestion, index) => (
+                      <div
+                        key={index}
+                        className="ctm-ai-suggestion-card"
+                        onClick={() => handleUseSuggestion(suggestion)}
+                      >
+                        <div className="ctm-suggestion-header">
+                          <span
+                            className="ctm-suggestion-priority"
+                            style={{
+                              backgroundColor: PRIORITY_OPTIONS.find(
+                                (p) => p.value === suggestion.priority
+                              )?.color || '#3B82F6',
+                            }}
+                          />
+                          <span className="ctm-suggestion-title">
+                            {suggestion.title || '未命名任务'}
+                          </span>
+                        </div>
+                        <p className="ctm-suggestion-desc">
+                          {suggestion.description
+                            ? suggestion.description.substring(0, 80)
+                            : '无描述'}
+                          {suggestion.description && suggestion.description.length > 80
+                            ? '...'
+                            : ''}
+                        </p>
+                        {suggestion.reason && (
+                          <div className="ctm-suggestion-reason">
+                            <Lightbulb size={12} />
+                            <span>{suggestion.reason}</span>
+                          </div>
+                        )}
+                        <span className="ctm-suggestion-hint">点击使用此建议</span>
                       </div>
-                      <div className="ctm-ai-content">
-                        <h4>AI 推荐：执行步骤</h4>
-                        <p>基于任务标题"{title}"，建议以下执行路径：</p>
-                      </div>
-                    </div>
-                    <div className="ctm-ai-suggestions">
-                      <div className="ctm-ai-suggestion-item">
-                        <ArrowRight size={12} />
-                        <span>明确任务目标和验收标准</span>
-                      </div>
-                      <div className="ctm-ai-suggestion-item">
-                        <ArrowRight size={12} />
-                        <span>拆分为可执行的子任务</span>
-                      </div>
-                      <div className="ctm-ai-suggestion-item">
-                        <ArrowRight size={12} />
-                        <span>确定关键里程碑节点</span>
+                    ))}
+                  </div>
+                )}
+
+                {/* AI 加载状态 */}
+                {aiLoading && (
+                  <div className="ctm-ai-loading">
+                    <div className="ctm-ai-loading-animation">
+                      <div className="ctm-ai-loading-spinner" />
+                      <div className="ctm-ai-loading-text">
+                        <span>AI 正在分析项目...</span>
+                        <span className="ctm-ai-loading-subtitle">正在结合已有任务生成智能建议</span>
                       </div>
                     </div>
                   </div>
                 )}
 
+                {/* 空状态提示 */}
+                {aiSuggestions.length === 0 && !aiLoading && (
+                  <p className="ctm-ai-hint">
+                    {projectId
+                      ? '点击"获取建议"让 AI 分析项目并推荐下一步任务'
+                      : '请先选择项目，再获取 AI 建议'}
+                  </p>
+                )}
+              </div>
+
+              {/* 描述区域 */}
+              <div className="ctm-field">
+                <label className="ctm-label">描述</label>
                 <textarea
                   className="ctm-textarea"
                   placeholder="添加任务详情..."
@@ -587,23 +681,6 @@ export default function CreateTaskModal({
 
         {/* 底部操作栏 */}
         <div className="ctm-footer">
-          <div className="ctm-footer-left">
-            <button
-              type="button"
-              className="ctm-icon-btn"
-              title="设置优先级"
-              onClick={() => setShowPrioritySelect(!showPrioritySelect)}
-            >
-              <Flag size={18} />
-            </button>
-            <button
-              type="button"
-              className="ctm-icon-btn"
-              title="添加子任务"
-            >
-              <Plus size={18} />
-            </button>
-          </div>
           <div className="ctm-footer-right">
             <button
               type="button"

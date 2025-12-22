@@ -199,32 +199,41 @@
 /* 标题输入框 */
 .ctm-title-input {
   width: 100%;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: #1e293b;
-  border: none;
-  border-bottom: 2px solid #e2e8f0;
-  padding: 8px 0;
-  background: transparent;
-  outline: none;
-  transition: border-color 0.2s;
+  border: 1px solid #e2e8f0;
+  padding: 12px 14px;
+  background: #f8fafc;
+  border-radius: 10px;
+  outline: none !important;
+  transition: all 0.2s;
 }
 
 .ctm-title-input::placeholder {
-  color: #cbd5e1;
+  color: #94a3b8;
+  font-weight: 400;
 }
 
 .ctm-title-input:focus {
-  border-bottom-color: #6366f1;
+  background: white;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="dark"] .ctm-title-input {
   color: #f1f5f9;
-  border-bottom-color: #334155;
+  background: #0f172a;
+  border-color: #334155;
 }
 
 [data-theme="dark"] .ctm-title-input::placeholder {
   color: #475569;
+}
+
+[data-theme="dark"] .ctm-title-input:focus {
+  background: #1e293b;
+  border-color: #475569;
 }
 
 /* 属性网格 */
@@ -769,6 +778,229 @@
   border-color: rgba(99, 102, 241, 0.15);
 }
 
+/* AI 智能建议面板 */
+.ctm-ai-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+[data-theme="dark"] .ctm-ai-panel {
+  background: #0f172a;
+  border-color: #334155;
+}
+
+.ctm-ai-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.ctm-ai-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.ctm-ai-panel-title svg {
+  color: #6366f1;
+}
+
+[data-theme="dark"] .ctm-ai-panel-title {
+  color: #94a3b8;
+}
+
+.ctm-ai-get-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6366f1;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ctm-ai-get-btn:hover:not(:disabled) {
+  background: #eff6ff;
+  border-color: #c7d2fe;
+}
+
+.ctm-ai-get-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ctm-ai-get-btn.loading {
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .ctm-ai-get-btn {
+  background: #1e293b;
+  border-color: #334155;
+  color: #818cf8;
+}
+
+[data-theme="dark"] .ctm-ai-get-btn:hover:not(:disabled) {
+  background: #334155;
+  border-color: #6366f1;
+}
+
+/* AI 建议列表 */
+.ctm-ai-suggestions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ctm-ai-suggestion-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.ctm-ai-suggestion-card:hover {
+  border-color: #c7d2fe;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+  transform: translateY(-1px);
+}
+
+[data-theme="dark"] .ctm-ai-suggestion-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+[data-theme="dark"] .ctm-ai-suggestion-card:hover {
+  border-color: #6366f1;
+}
+
+.ctm-suggestion-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.ctm-suggestion-priority {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ctm-suggestion-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+[data-theme="dark"] .ctm-suggestion-title {
+  color: #f1f5f9;
+}
+
+.ctm-suggestion-desc {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 8px;
+}
+
+[data-theme="dark"] .ctm-suggestion-desc {
+  color: #94a3b8;
+}
+
+.ctm-suggestion-reason {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #6366f1;
+  margin-bottom: 6px;
+}
+
+.ctm-suggestion-reason svg {
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .ctm-suggestion-reason {
+  color: #818cf8;
+}
+
+.ctm-suggestion-hint {
+  font-size: 10px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* AI 加载状态 */
+.ctm-ai-loading {
+  padding: 20px;
+}
+
+.ctm-ai-loading-animation {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ctm-ai-loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: ctm-spin 1s linear infinite;
+}
+
+.ctm-ai-loading-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ctm-ai-loading-text span:first-child {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.ctm-ai-loading-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .ctm-ai-loading-text span:first-child {
+  color: #f1f5f9;
+}
+
+[data-theme="dark"] .ctm-ai-loading-spinner {
+  border-color: #334155;
+  border-top-color: #6366f1;
+}
+
+/* AI 空状态提示 */
+.ctm-ai-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  text-align: center;
+  margin: 0;
+  padding: 8px 0;
+}
+
 /* 文本域 */
 .ctm-textarea {
   width: 100%;
@@ -781,6 +1013,7 @@
   line-height: 1.6;
   resize: none;
   outline: none;
+  background: #f8fafc;
   transition: all 0.2s;
 }
 
@@ -789,8 +1022,9 @@
 }
 
 .ctm-textarea:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  background: white;
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="dark"] .ctm-textarea {
@@ -803,11 +1037,17 @@
   color: #475569;
 }
 
+[data-theme="dark"] .ctm-textarea:focus {
+  background: #1e293b;
+  border-color: #475569;
+  box-shadow: none;
+}
+
 /* 底部操作栏 */
 .ctm-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   padding: 16px 24px;
   background: #f8fafc;
   border-top: 1px solid #f1f5f9;
