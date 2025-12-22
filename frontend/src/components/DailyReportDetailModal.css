@@ -410,11 +410,11 @@
   flex-shrink: 0;
 }
 
-.action-btn {
+.report-footer .report-action-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 8px 14px;
   background: #f1f5f9;
   border: none;
   border-radius: 8px;
@@ -426,31 +426,27 @@
   white-space: nowrap;
 }
 
-.action-btn:hover {
+.report-footer .report-action-btn:hover {
   background: #e2e8f0;
   color: #475569;
 }
 
-.action-btn.like-btn:hover {
+.report-footer .report-action-btn.like-btn:hover {
   background: #fef2f2;
   color: #f43f5e;
 }
 
-.action-btn.active {
+.report-footer .report-action-btn.active {
   background: #eff6ff;
   color: #3b82f6;
 }
 
-.action-btn.liked {
+.report-footer .report-action-btn.liked {
   background: #fef2f2;
   color: #f43f5e;
 }
 
-.action-btn.liked svg.filled {
-  fill: currentColor;
-}
-
-.action-btn.liked svg.filled {
+.report-footer .report-action-btn.liked svg {
   fill: #f43f5e;
 }
 

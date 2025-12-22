@@ -409,14 +409,14 @@ export default function DailyReportDetailModal({
               </div>
               <div className="footer-actions">
                 <button 
-                  className={`action-btn ${showComments ? 'active' : ''}`}
+                  className={`report-action-btn ${showComments ? 'active' : ''}`}
                   onClick={handleCommentClick}
                 >
                   <MessageSquare size={16} />
                   <span>评论{comments.length > 0 ? ` (${comments.length})` : ''}</span>
                 </button>
                 <button 
-                  className={`action-btn like-btn ${likesData?.liked ? 'liked' : ''}`}
+                  className={`report-action-btn like-btn ${likesData?.liked ? 'liked' : ''}`}
                   onClick={handleToggleLike}
                   disabled={liking}
                 >
