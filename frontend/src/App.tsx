@@ -3,10 +3,12 @@ import { ThemeProvider } from './hooks/useTheme';
 import { PermissionsProvider } from './hooks/usePermissions';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
+import WorkspaceGuard from './components/WorkspaceGuard';
 import AppLayout from './components/AppLayout';
 
 // 页面组件
 import Login from './pages/Login';
+import WorkspaceSetup from './pages/WorkspaceSetup';
 import Dashboard from './pages/Dashboard';
 import MyTasks from './pages/MyTasks';
 import Projects from './pages/Projects';
@@ -34,12 +36,26 @@ function App() {
         {/* 登录页面（无需认证，不使用 AppLayout） */}
         <Route path="/login" element={<Login />} />
 
-        {/* 受保护的路由（使用 AppLayout + Outlet） */}
+        {/* 工作区设置页面（需登录，不需要工作区） */}
+        <Route 
+          path="/workspace-setup" 
+          element={
+            <ProtectedRoute>
+              <PermissionsProvider>
+                <WorkspaceSetup />
+              </PermissionsProvider>
+            </ProtectedRoute>
+          } 
+        />
+
+        {/* 受保护的路由（使用 AppLayout + Outlet + 工作区守卫） */}
         <Route
           element={
             <ProtectedRoute>
               <PermissionsProvider>
-                <AppLayout />
+                <WorkspaceGuard>
+                  <AppLayout />
+                </WorkspaceGuard>
               </PermissionsProvider>
             </ProtectedRoute>
           }

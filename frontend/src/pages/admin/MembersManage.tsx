@@ -4,9 +4,10 @@
 import { useState, useEffect } from 'react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { memberService, Member } from '../../services/member';
+import { workspaceService, JoinRequest } from '../../services/workspace';
 import { Modal } from '../../components/Modal';
 import { Avatar } from '../../components/Avatar';
-import { Users, Send, Mail, Calendar, Shield, Eye } from 'lucide-react';
+import { Users, Send, Mail, Calendar, Shield, Eye, UserPlus, Check, X, Clock } from 'lucide-react';
 import { 
   WORKSPACE_ROLE_OPTIONS,
   WORKSPACE_ROLE_HIERARCHY 
@@ -32,10 +33,18 @@ export default function MembersManage() {
   const [profileMember, setProfileMember] = useState<Member | null>(null);
   const [showPermission, setShowPermission] = useState(false);
   const [permissionMember, setPermissionMember] = useState<Member | null>(null);
+  
+  // 加入申请
+  const [joinRequests, setJoinRequests] = useState<JoinRequest[]>([]);
+  const [, setLoadingRequests] = useState(false);
+  const [processingRequest, setProcessingRequest] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentWorkspace) {
       loadMembers();
+      if (canWorkspace('invite')) {
+        loadJoinRequests();
+      }
     }
   }, [currentWorkspace]);
 
@@ -50,6 +59,35 @@ export default function MembersManage() {
       setError(err.response?.data?.error?.message || err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadJoinRequests = async () => {
+    if (!currentWorkspace) return;
+    setLoadingRequests(true);
+    try {
+      const data = await workspaceService.getJoinRequests(currentWorkspace.id);
+      setJoinRequests(data);
+    } catch (err) {
+      console.error('加载加入申请失败:', err);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleReviewRequest = async (requestId: string, approved: boolean) => {
+    if (!currentWorkspace) return;
+    setProcessingRequest(requestId);
+    try {
+      await workspaceService.reviewJoinRequest(requestId, approved);
+      setJoinRequests(joinRequests.filter(r => r.id !== requestId));
+      if (approved) {
+        loadMembers(); // 刷新成员列表
+      }
+    } catch (err: any) {
+      setError(err.message || '处理申请失败');
+    } finally {
+      setProcessingRequest(null);
     }
   };
 
@@ -171,6 +209,53 @@ export default function MembersManage() {
 
       {error && (
         <div className="error-card">⚠️ {error}</div>
+      )}
+
+      {/* 加入申请列表 */}
+      {joinRequests.length > 0 && (
+        <div className="join-requests-section card-static">
+          <div className="section-header">
+            <UserPlus size={20} />
+            <h3>待审批申请 ({joinRequests.length})</h3>
+          </div>
+          <div className="join-requests-list">
+            {joinRequests.map(request => (
+              <div key={request.id} className="join-request-item">
+                <div className="request-user">
+                  <Avatar name={request.user.name} src={request.user.avatar ?? undefined} size="sm" />
+                  <div className="request-info">
+                    <span className="request-name">{request.user.name}</span>
+                    <span className="request-email">{request.user.email}</span>
+                    {request.message && (
+                      <span className="request-message">"{request.message}"</span>
+                    )}
+                  </div>
+                </div>
+                <div className="request-meta">
+                  <span className="request-time">
+                    <Clock size={12} /> {new Date(request.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <div className="request-actions">
+                  <button
+                    className="btn btn-success btn-sm"
+                    onClick={() => handleReviewRequest(request.id, true)}
+                    disabled={processingRequest === request.id}
+                  >
+                    <Check size={14} /> 批准
+                  </button>
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleReviewRequest(request.id, false)}
+                    disabled={processingRequest === request.id}
+                  >
+                    <X size={14} /> 拒绝
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {loading ? (

@@ -46,22 +46,25 @@ model User {
   dailyReports         DailyReport[]
   dailyReportComments  DailyReportComment[]
   dailyReportLikes     DailyReportLike[]
+  joinRequests         WorkspaceJoinRequest[] @relation("JoinRequestUser")
+  reviewedJoinRequests WorkspaceJoinRequest[] @relation("JoinRequestReviewer")
 
   @@map("users")
 }
 
 model Workspace {
-  id                String             @id @default(cuid())
+  id                String                 @id @default(cuid())
   name              String
   description       String?
-  createdAt         DateTime           @default(now()) @map("created_at")
-  updatedAt         DateTime           @updatedAt @map("updated_at")
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime               @updatedAt @map("updated_at")
   broadcastMessages BroadcastMessage[]
   coffeeLotteries   CoffeeLottery[]
   projects          Project[]
   reports           Report[]
   members           WorkspaceUser[]
   dailyReports      DailyReport[]
+  joinRequests      WorkspaceJoinRequest[]
 
   @@map("workspaces")
 }
@@ -78,6 +81,27 @@ model WorkspaceUser {
 
   @@unique([userId, workspaceId])
   @@map("workspace_users")
+}
+
+// 工作区加入申请
+model WorkspaceJoinRequest {
+  id          String   @id @default(cuid())
+  status      String   @default("pending") // pending, approved, rejected
+  message     String?  // 申请留言
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  userId      String   @map("user_id")
+  workspaceId String   @map("workspace_id")
+  reviewerId  String?  @map("reviewer_id")
+  reviewedAt  DateTime? @map("reviewed_at")
+  
+  user        User      @relation("JoinRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  reviewer    User?     @relation("JoinRequestReviewer", fields: [reviewerId], references: [id])
+  
+  @@unique([userId, workspaceId])
+  @@index([workspaceId, status])
+  @@map("workspace_join_requests")
 }
 
 model Project {

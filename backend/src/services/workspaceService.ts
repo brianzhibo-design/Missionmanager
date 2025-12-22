@@ -291,4 +291,101 @@ export const workspaceService = {
   async getMembership(workspaceId: string, userId: string) {
     return workspaceRepository.getMembership(workspaceId, userId);
   },
+
+  // ============ 加入申请相关 ============
+
+  /**
+   * 通过工作区 ID 查找工作区（公开信息）
+   */
+  async findWorkspaceById(workspaceId: string) {
+    return workspaceRepository.findById(workspaceId);
+  },
+
+  /**
+   * 申请加入工作区
+   */
+  async requestJoin(userId: string, workspaceId: string, message?: string) {
+    // 检查工作区是否存在
+    const workspace = await workspaceRepository.findById(workspaceId);
+    if (!workspace) {
+      throw new AppError('工作区不存在', 404, 'WORKSPACE_NOT_FOUND');
+    }
+
+    // 检查是否已是成员
+    const membership = await workspaceRepository.getMembership(workspaceId, userId);
+    if (membership) {
+      throw new AppError('您已是该工作区成员', 400, 'ALREADY_MEMBER');
+    }
+
+    // 检查是否已有待处理的申请
+    const existingRequest = await workspaceRepository.findJoinRequest(userId, workspaceId);
+    if (existingRequest) {
+      if (existingRequest.status === 'pending') {
+        throw new AppError('您已提交过申请，请等待审批', 400, 'REQUEST_PENDING');
+      }
+      if (existingRequest.status === 'rejected') {
+        // 更新被拒绝的申请为新的申请
+        return workspaceRepository.updateJoinRequest(existingRequest.id, {
+          status: 'pending',
+          message,
+          reviewerId: null,
+          reviewedAt: null,
+        });
+      }
+    }
+
+    // 创建新申请
+    return workspaceRepository.createJoinRequest(userId, workspaceId, message);
+  },
+
+  /**
+   * 获取工作区的待审批申请列表
+   */
+  async getJoinRequests(workspaceId: string, adminUserId: string) {
+    // 验证权限：owner 和 director 可以查看申请
+    await this.requireRole(workspaceId, adminUserId, ['owner', 'director']);
+    return workspaceRepository.getJoinRequests(workspaceId);
+  },
+
+  /**
+   * 审批加入申请
+   */
+  async reviewJoinRequest(
+    requestId: string,
+    reviewerId: string,
+    approved: boolean,
+    role: WorkspaceRole = 'member'
+  ) {
+    // 获取申请
+    const request = await workspaceRepository.getJoinRequestById(requestId);
+    if (!request) {
+      throw new AppError('申请不存在', 404, 'REQUEST_NOT_FOUND');
+    }
+
+    if (request.status !== 'pending') {
+      throw new AppError('该申请已被处理', 400, 'REQUEST_ALREADY_PROCESSED');
+    }
+
+    // 验证权限
+    await this.requireRole(request.workspaceId, reviewerId, ['owner', 'director']);
+
+    if (approved) {
+      // 添加为成员
+      await workspaceRepository.addMember(request.workspaceId, request.userId, role);
+    }
+
+    // 更新申请状态
+    return workspaceRepository.updateJoinRequest(requestId, {
+      status: approved ? 'approved' : 'rejected',
+      reviewerId,
+      reviewedAt: new Date(),
+    });
+  },
+
+  /**
+   * 获取用户的申请状态
+   */
+  async getMyJoinRequests(userId: string) {
+    return workspaceRepository.getUserJoinRequests(userId);
+  },
 };

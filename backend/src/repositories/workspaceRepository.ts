@@ -174,5 +174,88 @@ export const workspaceRepository = {
       where: { userId_workspaceId: { workspaceId, userId } },
     });
   },
+
+  // ============ 加入申请相关 ============
+
+  /**
+   * 创建加入申请
+   */
+  async createJoinRequest(userId: string, workspaceId: string, message?: string) {
+    return prisma.workspaceJoinRequest.create({
+      data: { userId, workspaceId, message },
+      include: {
+        user: { select: { id: true, name: true, email: true, avatar: true } },
+        workspace: { select: { id: true, name: true } },
+      },
+    });
+  },
+
+  /**
+   * 查找用户对工作区的申请
+   */
+  async findJoinRequest(userId: string, workspaceId: string) {
+    return prisma.workspaceJoinRequest.findUnique({
+      where: { userId_workspaceId: { userId, workspaceId } },
+    });
+  },
+
+  /**
+   * 获取申请详情
+   */
+  async getJoinRequestById(requestId: string) {
+    return prisma.workspaceJoinRequest.findUnique({
+      where: { id: requestId },
+      include: {
+        user: { select: { id: true, name: true, email: true, avatar: true } },
+        workspace: { select: { id: true, name: true } },
+      },
+    });
+  },
+
+  /**
+   * 获取工作区的待审批申请
+   */
+  async getJoinRequests(workspaceId: string) {
+    return prisma.workspaceJoinRequest.findMany({
+      where: { workspaceId, status: 'pending' },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { id: true, name: true, email: true, avatar: true } },
+      },
+    });
+  },
+
+  /**
+   * 更新申请
+   */
+  async updateJoinRequest(requestId: string, data: {
+    status?: string;
+    message?: string;
+    reviewerId?: string | null;
+    reviewedAt?: Date | null;
+  }) {
+    return prisma.workspaceJoinRequest.update({
+      where: { id: requestId },
+      data,
+      include: {
+        user: { select: { id: true, name: true, email: true, avatar: true } },
+        workspace: { select: { id: true, name: true } },
+      },
+    });
+  },
+
+  /**
+   * 获取用户的所有申请
+   */
+  async getUserJoinRequests(userId: string) {
+    return prisma.workspaceJoinRequest.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        workspace: { select: { id: true, name: true } },
+        reviewer: { select: { id: true, name: true } },
+      },
+    });
+  },
 };
 
