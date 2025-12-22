@@ -224,7 +224,7 @@ function DesktopMyDailyReport() {
           <ChevronLeft size={20} />
         </button>
         <span className="current-date">
-          📅 {formatDate(selectedDate)}
+          {formatDate(selectedDate)}
           {isToday(selectedDate) && <span className="today-badge">今天</span>}
           {!canEditDate(selectedDate) && <span className="readonly-badge">只读</span>}
         </span>

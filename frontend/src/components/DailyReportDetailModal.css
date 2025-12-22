@@ -406,45 +406,48 @@
 
 .footer-actions {
   display: flex;
-  gap: 16px;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .action-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0;
-  background: none;
+  padding: 8px 12px;
+  background: #f1f5f9;
   border: none;
-  font-size: 12px;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 600;
-  color: #94a3b8;
+  color: #64748b;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
 }
 
 .action-btn:hover {
-  color: #64748b;
-}
-
-.action-btn:hover svg {
-  transform: scale(1.1);
+  background: #e2e8f0;
+  color: #475569;
 }
 
 .action-btn.like-btn:hover {
+  background: #fef2f2;
   color: #f43f5e;
 }
 
-.action-btn.like-btn:hover svg {
-  fill: #f43f5e;
-}
-
 .action-btn.active {
+  background: #eff6ff;
   color: #3b82f6;
 }
 
 .action-btn.liked {
+  background: #fef2f2;
   color: #f43f5e;
+}
+
+.action-btn.liked svg.filled {
+  fill: currentColor;
 }
 
 .action-btn.liked svg.filled {
