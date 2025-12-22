@@ -536,8 +536,10 @@ function InviteMemberModal({
               <div className="form-group">
                 <label>角色</label>
                 <select value={role} onChange={e => setRole(e.target.value)}>
-                  <option value="member">成员</option>
-                  <option value="director">管理员</option>
+                  <option value="director">大管家（管理员）</option>
+                  <option value="leader">带头大哥（组长）</option>
+                  <option value="member">少侠（成员）</option>
+                  <option value="guest">吃瓜群侠（访客）</option>
                 </select>
               </div>
               <button 
@@ -564,8 +566,10 @@ function InviteMemberModal({
               <div className="form-group">
                 <label>角色</label>
                 <select value={role} onChange={e => setRole(e.target.value)}>
-                  <option value="member">成员</option>
-                  <option value="director">管理员</option>
+                  <option value="director">大管家（管理员）</option>
+                  <option value="leader">带头大哥（组长）</option>
+                  <option value="member">少侠（成员）</option>
+                  <option value="guest">吃瓜群侠（访客）</option>
                 </select>
               </div>
               <button 
