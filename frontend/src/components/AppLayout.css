@@ -32,11 +32,6 @@
 
 .sidebar-v2.collapsed {
   width: 80px;
-  cursor: pointer;
-}
-
-.sidebar-v2.collapsed:hover {
-  background: rgba(248, 250, 252, 0.5);
 }
 
 [data-theme="dark"] .sidebar-v2 {
