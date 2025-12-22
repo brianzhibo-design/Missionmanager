@@ -158,11 +158,10 @@ export default function Reports() {
     return date.toDateString() === today.toDateString();
   };
 
-  // 检查日期是否可以编辑（7天内）
+  // 检查日期是否可以编辑（只能编辑当天）
   const canEditDate = (date: Date) => {
     const today = new Date();
-    const diffDays = Math.floor((today.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays <= 7;
+    return date.toDateString() === today.toDateString();
   };
 
   // AI 自动填充
@@ -477,7 +476,7 @@ export default function Reports() {
 
               {!canEditDate(selectedDate) ? (
                 <div className="daily-form-placeholder">
-                  <p>该日期超过7天，已无法编辑</p>
+                  <p>只能编辑当天日报</p>
                   {currentDateReport && (
                     <div className="readonly-report">
                       <div className="report-section">
