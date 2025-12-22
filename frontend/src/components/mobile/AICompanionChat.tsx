@@ -21,8 +21,8 @@ interface AICompanionChatProps {
 
 const SUGGESTIONS = [
   '📋 帮我规划今天的任务',
-  '💡 给我一些工作建议',
-  '🎯 如何提高效率？',
+  '给我一些工作建议',
+  '如何提高效率？',
   '😊 鼓励我一下',
 ];
 

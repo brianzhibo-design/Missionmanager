@@ -56,7 +56,7 @@ export function MemberDetailPanel({ member, onClose }: MemberDetailPanelProps) {
           <p className="member-email">{member.email}</p>
           {member.isLeader && (
             <span className="member-role leader-badge">
-              🎯 项目负责人
+              项目负责人
             </span>
           )}
         </div>
@@ -67,7 +67,7 @@ export function MemberDetailPanel({ member, onClose }: MemberDetailPanelProps) {
       {!isObserver && (
         <>
           <div className="panel-section">
-            <h4>📊 任务统计</h4>
+            <h4>任务统计</h4>
             <div className="stats-grid">
               <div className="stat-card">
                 <span className="stat-value">{member.taskStats.total}</span>

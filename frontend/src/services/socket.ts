@@ -95,7 +95,7 @@ export function initSocket(): void {
 
   // 连接确认
   socket.on('connected', (data) => {
-    console.log('🎉 服务器确认:', data.message);
+    console.log('服务器确认::', data.message);
   });
 }
 

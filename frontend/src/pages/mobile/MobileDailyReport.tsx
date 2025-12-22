@@ -260,7 +260,7 @@ export default function MobileDailyReport() {
           {/* 明日计划 */}
           <div className="mm-report-section">
             <div className="mm-report-section-header">
-              <span>📅 明日计划</span>
+              <span>明日计划</span>
             </div>
             <textarea
               className="mm-report-textarea"

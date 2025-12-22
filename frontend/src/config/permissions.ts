@@ -172,7 +172,7 @@ export const ROLE_LABELS: Record<string, string> = {
 };
 
 // 项目负责人标记显示
-export const PROJECT_LEADER_LABEL = '🎯 项目负责人';
+export const PROJECT_LEADER_LABEL = '项目负责人';
 
 // 角色图标
 export const ROLE_ICONS: Record<string, string> = {

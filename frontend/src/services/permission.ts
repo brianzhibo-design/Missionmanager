@@ -7,7 +7,7 @@ import { api } from './api';
 export const PERMISSION_GROUPS = {
   basic: { label: '基础权限', icon: '📋' },
   management: { label: '管理权限', icon: '👔' },
-  features: { label: '特殊功能', icon: '✨' },
+  features: { label: '特殊功能', icon: 'sparkles' },
 } as const;
 
 export const AVAILABLE_PERMISSIONS = [

@@ -115,7 +115,7 @@ export default function MobileHome() {
       {/* 快捷入口 */}
       <div className="mm-quick-actions">
         <button className="mm-quick-action-btn" onClick={() => setChatOpen(true)}>
-          <div className="mm-quick-action-icon ai">✨</div>
+          <div className="mm-quick-action-icon ai"><span className="text-indigo-500">AI</span></div>
           <span>AI 助手</span>
         </button>
         <button className="mm-quick-action-btn" onClick={() => navigate('/daily-report')}>

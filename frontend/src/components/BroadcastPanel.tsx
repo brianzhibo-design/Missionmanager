@@ -152,7 +152,7 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
       setContent(result.optimizedContent);
       
       if (result.suggestions && result.suggestions.length > 0) {
-        alert(`✨ 优化完成！\n\n建议：\n${result.suggestions.map(s => `• ${s}`).join('\n')}`);
+        alert(`优化完成！\n\n建议：\n${result.suggestions.map(s => `• ${s}`).join('\n')}`);
       }
     } catch (error) {
       console.error('AI 优化失败:', error);

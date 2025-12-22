@@ -98,7 +98,7 @@ export function getFileIcon(mimeType: string, filename: string): string {
   if (mimeType.startsWith('audio/')) return '🎵';
   if (mimeType === 'application/pdf') return '📄';
   if (mimeType.includes('word') || filename.endsWith('.doc') || filename.endsWith('.docx')) return '📝';
-  if (mimeType.includes('excel') || mimeType.includes('spreadsheet') || filename.endsWith('.xls') || filename.endsWith('.xlsx')) return '📊';
+  if (mimeType.includes('excel') || mimeType.includes('spreadsheet') || filename.endsWith('.xls') || filename.endsWith('.xlsx')) return '';
   if (mimeType.includes('powerpoint') || mimeType.includes('presentation') || filename.endsWith('.ppt') || filename.endsWith('.pptx')) return '📽️';
   if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('7z')) return '📦';
   if (mimeType.startsWith('text/') || filename.endsWith('.txt') || filename.endsWith('.md')) return '📃';

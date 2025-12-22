@@ -92,7 +92,7 @@ export const pushNotificationService = {
       localStorage.removeItem(STORAGE_KEY); // 移除禁用标记，恢复默认开启
       // 发送测试通知
       this.show({
-        title: '通知已启用 🎉',
+        title: '通知已启用',
         body: '您现在可以接收任务和消息提醒了',
       });
       return true;

@@ -476,7 +476,7 @@ class AIService {
     return api.post<CompanionChatResult>('/ai/chat', options);
   }
 
-  // ✨ 智能任务拆解（基于标题）
+  // 智能任务拆解（基于标题）
   async breakdownTaskByTitle(
     title: string,
     options?: { maxSubtasks?: number }
