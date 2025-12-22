@@ -445,6 +445,107 @@
   cursor: not-allowed;
 }
 
+.workspace-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.workspace-share-btn {
+  padding: 8px;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workspace-share-btn:hover {
+  background-color: var(--accent-light);
+  color: var(--accent-primary);
+}
+
+/* 工作区 ID 显示 */
+.workspace-id-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.workspace-id-label {
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+.workspace-id-value {
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  color: var(--text-secondary);
+  font-size: 10px;
+  background: none;
+  padding: 0;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.copy-btn {
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.copy-btn:hover {
+  background: var(--accent-light);
+  color: var(--accent-primary);
+}
+
+/* 分享说明卡片 */
+.share-info-card {
+  display: flex;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
+.share-info-card svg {
+  color: #3b82f6;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.share-info-content h4 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.share-info-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #3b82f6;
+  line-height: 1.5;
+}
+
 /* 表单样式 */
 .settings-section .form-group {
   margin-bottom: 20px;

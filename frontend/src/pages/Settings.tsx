@@ -11,7 +11,7 @@ import { workspaceService } from '../services/workspace';
 import RoleBadge from '../components/RoleBadge';
 import { 
   User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText, Phone,
-  Settings as SettingsIcon, Sun, Moon, Monitor, FolderOpen, Bell, BellOff,
+  Settings as SettingsIcon, Sun, Moon, Monitor, FolderOpen, Bell, BellOff, Copy, Share2, Link,
   Code, PaintBucket, ClipboardList, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
 } from 'lucide-react';
 import { pushNotificationService } from '../services/pushNotification';
@@ -674,6 +674,20 @@ function DesktopSettings() {
                 {workspaces.map((ws) => {
                   const isCurrent = ws.id === currentWorkspace?.id;
                   const canDelete = ws.role === 'owner';
+                  const canShare = ws.role === 'owner' || ws.role === 'director';
+                  
+                  const handleCopyId = () => {
+                    navigator.clipboard.writeText(ws.id);
+                    setSuccess('工作区 ID 已复制');
+                    setTimeout(() => setSuccess(null), 2000);
+                  };
+                  
+                  const handleCopyLink = () => {
+                    const link = `${window.location.origin}/workspace-setup?join=${ws.id}`;
+                    navigator.clipboard.writeText(link);
+                    setSuccess('邀请链接已复制');
+                    setTimeout(() => setSuccess(null), 2000);
+                  };
                   
                   return (
                     <div 
@@ -689,20 +703,52 @@ function DesktopSettings() {
                         <div className="workspace-meta">
                           <RoleBadge role={ws.role} size="xs" variant="dot" />
                         </div>
+                        {canShare && (
+                          <div className="workspace-id-row">
+                            <span className="workspace-id-label">ID:</span>
+                            <code className="workspace-id-value">{ws.id}</code>
+                            <button className="copy-btn" onClick={handleCopyId} title="复制 ID">
+                              <Copy size={12} />
+                            </button>
+                            <button className="copy-btn" onClick={handleCopyLink} title="复制邀请链接">
+                              <Link size={12} />
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      {canDelete && (
-                        <button
-                          className="workspace-delete-btn"
-                          onClick={() => handleDeleteWorkspace(ws.id, ws.name)}
-                          disabled={deleting}
-                          title="删除工作区"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
+                      <div className="workspace-actions">
+                        {canShare && (
+                          <button
+                            className="workspace-share-btn"
+                            onClick={handleCopyLink}
+                            title="分享邀请链接"
+                          >
+                            <Share2 size={16} />
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            className="workspace-delete-btn"
+                            onClick={() => handleDeleteWorkspace(ws.id, ws.name)}
+                            disabled={deleting}
+                            title="删除工作区"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
+              </div>
+              
+              {/* 分享说明 */}
+              <div className="share-info-card">
+                <Share2 size={18} />
+                <div className="share-info-content">
+                  <h4>邀请新成员</h4>
+                  <p>复制工作区 ID 或邀请链接，分享给需要加入的成员。成员提交申请后，您将在成员管理页面看到待审批申请。</p>
+                </div>
               </div>
             </div>
           )}

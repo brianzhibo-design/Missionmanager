@@ -2,8 +2,8 @@
  * 工作区设置页面
  * 新用户选择创建工作区或加入现有工作区
  */
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { workspaceService } from '../services/workspace';
 import { useAuth } from '../hooks/useAuth';
 import { 
@@ -15,7 +15,10 @@ import './WorkspaceSetup.css';
 type Mode = 'select' | 'create' | 'join';
 
 export default function WorkspaceSetup() {
-  const [mode, setMode] = useState<Mode>('select');
+  const [searchParams] = useSearchParams();
+  const joinId = searchParams.get('join'); // 从 URL 获取工作区 ID
+
+  const [mode, setMode] = useState<Mode>(joinId ? 'join' : 'select');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -25,13 +28,39 @@ export default function WorkspaceSetup() {
   const [workspaceDesc, setWorkspaceDesc] = useState('');
   
   // 加入工作区
-  const [workspaceId, setWorkspaceId] = useState('');
+  const [workspaceId, setWorkspaceId] = useState(joinId || '');
   const [foundWorkspace, setFoundWorkspace] = useState<{ id: string; name: string; description: string | null } | null>(null);
   const [joinMessage, setJoinMessage] = useState('');
   const [searching, setSearching] = useState(false);
   
   const navigate = useNavigate();
   const { refreshUser } = useAuth();
+
+  // 如果 URL 中有工作区 ID，自动搜索
+  useEffect(() => {
+    if (joinId) {
+      handleSearchWorkspaceById(joinId);
+    }
+  }, [joinId]);
+
+  const handleSearchWorkspaceById = async (id: string) => {
+    setSearching(true);
+    setError('');
+    setFoundWorkspace(null);
+    
+    try {
+      const workspace = await workspaceService.lookupWorkspace(id);
+      if (workspace) {
+        setFoundWorkspace(workspace);
+      } else {
+        setError('未找到该工作区，请检查链接是否正确');
+      }
+    } catch {
+      setError('查找失败');
+    } finally {
+      setSearching(false);
+    }
+  };
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,23 +87,7 @@ export default function WorkspaceSetup() {
       setError('请输入工作区 ID');
       return;
     }
-
-    setSearching(true);
-    setError('');
-    setFoundWorkspace(null);
-    
-    try {
-      const workspace = await workspaceService.lookupWorkspace(workspaceId.trim());
-      if (workspace) {
-        setFoundWorkspace(workspace);
-      } else {
-        setError('未找到该工作区，请检查 ID 是否正确');
-      }
-    } catch {
-      setError('查找失败');
-    } finally {
-      setSearching(false);
-    }
+    await handleSearchWorkspaceById(workspaceId.trim());
   };
 
   const handleJoinRequest = async () => {
