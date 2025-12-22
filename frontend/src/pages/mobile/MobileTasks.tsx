@@ -46,7 +46,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; className: string }> = {
-  urgent: { label: '紧急', className: 'danger' },
+  critical: { label: '紧急', className: 'danger' },
   high: { label: '高', className: 'warning' },
   medium: { label: '中', className: '' },
   low: { label: '低', className: '' },
@@ -429,7 +429,7 @@ export default function MobileTasks() {
           <div className="m-filter-options">
             {[
               { key: 'all', label: '全部' },
-              { key: 'urgent', label: '紧急' },
+              { key: 'critical', label: '紧急' },
               { key: 'high', label: '高' },
               { key: 'medium', label: '中' },
               { key: 'low', label: '低' },

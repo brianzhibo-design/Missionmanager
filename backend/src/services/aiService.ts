@@ -336,10 +336,10 @@ export async function recommendPriority(
   if (!project) throw new AIError('项目不存在', AIErrorCodes.NOT_FOUND);
 
   const stats = {
-    URGENT: project.tasks.filter(t => t.priority === 'URGENT').length,
-    HIGH: project.tasks.filter(t => t.priority === 'HIGH').length,
-    MEDIUM: project.tasks.filter(t => t.priority === 'MEDIUM').length,
-    LOW: project.tasks.filter(t => t.priority === 'LOW').length,
+    CRITICAL: project.tasks.filter(t => t.priority === 'critical').length,
+    HIGH: project.tasks.filter(t => t.priority === 'high').length,
+    MEDIUM: project.tasks.filter(t => t.priority === 'medium').length,
+    LOW: project.tasks.filter(t => t.priority === 'low').length,
   };
 
   const systemPrompt = `你是优先级评估专家。返回纯JSON：
@@ -348,7 +348,7 @@ export async function recommendPriority(
   const userPrompt = `推荐优先级：${title}
 描述：${description || '无'}
 截止：${dueDate ? new Date(dueDate).toLocaleDateString('zh-CN') : '未设置'}
-项目现有：紧急${stats.URGENT}，高${stats.HIGH}，中${stats.MEDIUM}，低${stats.LOW}`;
+项目现有：紧急${stats.CRITICAL}，高${stats.HIGH}，中${stats.MEDIUM}，低${stats.LOW}`;
 
   const result = await callAI(systemPrompt, userPrompt, 'priority_recommendation', {
     userId,

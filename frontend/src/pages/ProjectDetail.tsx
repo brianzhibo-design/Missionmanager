@@ -39,7 +39,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  urgent: { label: '紧急', color: 'var(--color-danger)' },
+  critical: { label: '紧急', color: 'var(--color-danger)' },
   high: { label: '高', color: 'var(--color-warning)' },
   medium: { label: '中', color: 'var(--color-info)' },
   low: { label: '低', color: 'var(--text-tertiary)' },
@@ -47,7 +47,7 @@ const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
 
 // 优先级权重（用于排序）
 const PRIORITY_WEIGHT: Record<string, number> = {
-  urgent: 4,
+  critical: 4,
   high: 3,
   medium: 2,
   low: 1,

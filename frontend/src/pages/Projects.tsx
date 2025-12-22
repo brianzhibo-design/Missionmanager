@@ -723,7 +723,7 @@ function DesktopProjects() {
                         <div className="task-header">
                           <span className="task-title">{task.title}</span>
                           <span className={`priority-badge priority-${task.priority.toLowerCase()}`}>
-                            {task.priority === 'URGENT' ? '紧急' : 
+                            {task.priority === 'CRITICAL' ? '紧急' : 
                              task.priority === 'HIGH' ? '高' : 
                              task.priority === 'MEDIUM' ? '中' : '低'}
                           </span>

@@ -21,7 +21,7 @@ const statusLabels: Record<string, { label: string; color: string }> = {
 };
 
 const priorityLabels: Record<string, { label: string; color: string }> = {
-  urgent: { label: '紧急', color: 'var(--color-danger)' },
+  critical: { label: '紧急', color: 'var(--color-danger)' },
   high: { label: '高', color: 'var(--color-warning)' },
   medium: { label: '中', color: 'var(--color-info)' },
   low: { label: '低', color: 'var(--color-muted)' },

@@ -85,7 +85,7 @@ function wrapTemplate(content: string): string {
       margin-bottom: 10px;
       border-radius: 0 8px 8px 0;
     }
-    .task-item.urgent {
+    .task-item.critical {
       border-left-color: #EF4444;
       background: #FEF2F2;
     }
@@ -147,7 +147,7 @@ function wrapTemplate(content: string): string {
       font-weight: 500;
       margin-right: 8px;
     }
-    .badge-urgent { background: #FEE2E2; color: #DC2626; }
+    .badge-critical { background: #FEE2E2; color: #DC2626; }
     .badge-high { background: #FFEDD5; color: #EA580C; }
     .badge-medium { background: #DBEAFE; color: #2563EB; }
     .badge-low { background: #F3F4F6; color: #6B7280; }
@@ -172,7 +172,7 @@ interface TaskReminderData {
     title: string;
     projectName: string;
     dueDate: string;
-    priority: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+    priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
     daysLeft: number;
   }>;
   appUrl: string;
@@ -180,14 +180,14 @@ interface TaskReminderData {
 
 export function getTaskReminderTemplate(data: TaskReminderData): string {
   const priorityClass: Record<string, string> = {
-    URGENT: 'urgent',
+    CRITICAL: 'critical',
     HIGH: 'warning',
     MEDIUM: '',
     LOW: ''
   };
 
   const priorityLabel: Record<string, string> = {
-    URGENT: '紧急',
+    CRITICAL: '紧急',
     HIGH: '高',
     MEDIUM: '中',
     LOW: '低'

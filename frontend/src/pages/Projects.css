@@ -1170,7 +1170,7 @@
   text-transform: uppercase;
 }
 
-.priority-badge.priority-urgent {
+.priority-badge.priority-critical {
   background: rgba(239, 68, 68, 0.1);
   color: #EF4444;
 }

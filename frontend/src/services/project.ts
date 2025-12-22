@@ -43,7 +43,7 @@ export interface Project {
 export interface SuggestedTask {
   title: string;
   description: string;
-  priority: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   estimatedDays?: number;
   order: number;
 }
@@ -52,7 +52,7 @@ export interface SuggestedTask {
 export interface InitialTask {
   title: string;
   description?: string;
-  priority?: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priority?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   order?: number;
 }
 

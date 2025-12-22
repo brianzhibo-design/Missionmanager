@@ -25,7 +25,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  urgent: { label: '紧急', color: '#ef4444' },
+  critical: { label: '紧急', color: '#ef4444' },
   high: { label: '高', color: '#f97316' },
   medium: { label: '中', color: '#3b82f6' },
   low: { label: '低', color: '#9ca3af' },

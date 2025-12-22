@@ -36,7 +36,7 @@ interface RecentTask {
 
 // 优先级中文映射
 const PRIORITY_LABELS: Record<string, string> = {
-  URGENT: '紧急',
+  CRITICAL: '紧急',
   HIGH: '高',
   MEDIUM: '中',
   LOW: '低',

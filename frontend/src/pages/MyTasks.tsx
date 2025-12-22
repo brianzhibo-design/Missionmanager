@@ -42,7 +42,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string; border: string }> = {
-  urgent: { label: '紧急', color: 'var(--color-danger)', border: 'var(--color-danger)' },
+  critical: { label: '紧急', color: 'var(--color-danger)', border: 'var(--color-danger)' },
   high: { label: '高', color: 'var(--color-warning)', border: 'var(--color-warning)' },
   medium: { label: '中', color: 'var(--color-info)', border: 'var(--color-info)' },
   low: { label: '低', color: 'var(--text-tertiary)', border: 'var(--text-tertiary)' },

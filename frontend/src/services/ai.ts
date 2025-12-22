@@ -43,7 +43,7 @@ export interface SubTask {
   title: string;
   description: string;
   estimatedHours: number;
-  priority: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   skills: string[];
   dependencies: number[];
 }
@@ -74,7 +74,7 @@ export interface RiskPredictionResult {
 
 // 优先级推荐
 export interface PriorityRecommendation {
-  recommendedPriority: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  recommendedPriority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   confidence: number;
   reasoning: string;
   factors: { factor: string; impact: string; weight: number }[];
@@ -136,7 +136,7 @@ export interface TaskOptimizationResult {
 export interface SuggestedTask {
   title: string;
   description: string;
-  priority: 'urgent' | 'high' | 'medium' | 'low';
+  priority: 'critical' | 'high' | 'medium' | 'low';
   estimatedHours?: number;
   reason: string;
 }
@@ -390,7 +390,7 @@ class AIService {
     // 分析任务状态
     const todoTasks = tasks.filter(t => t.status === '待办');
     const inProgressTasks = tasks.filter(t => t.status === '进行中');
-    const urgentTasks = tasks.filter(t => t.priority === '紧急');
+    const urgentTasks = tasks.filter(t => t.priority === 'critical');
     const highPriorityTasks = tasks.filter(t => t.priority === '高');
     
     // 检查紧急任务

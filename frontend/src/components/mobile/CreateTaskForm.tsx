@@ -13,6 +13,7 @@ interface CreateTaskFormProps {
 }
 
 const PRIORITY_OPTIONS = [
+  { value: 'critical', label: '紧急', className: 'critical' },
   { value: 'high', label: '高', className: 'high' },
   { value: 'medium', label: '中', className: 'medium' },
   { value: 'low', label: '低', className: 'low' },

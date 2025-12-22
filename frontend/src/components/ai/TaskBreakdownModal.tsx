@@ -13,7 +13,7 @@ interface Props {
 }
 
 const priorityColors: Record<string, string> = {
-  URGENT: '#EF4444', HIGH: '#F97316', MEDIUM: '#3B82F6', LOW: '#6B7280',
+  CRITICAL: '#EF4444', HIGH: '#F97316', MEDIUM: '#3B82F6', LOW: '#6B7280',
 };
 
 // 预设的拆解方向

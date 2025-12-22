@@ -11,7 +11,7 @@ import { AppError } from '../middleware/errorHandler';
 interface InitialTask {
   title: string;
   description?: string;
-  priority?: 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW';
+  priority?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
   order?: number;
 }
 

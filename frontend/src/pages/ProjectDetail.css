@@ -655,7 +655,7 @@
   flex-shrink: 0;
 }
 
-.priority-dot.priority-urgent { background: var(--color-danger); }
+.priority-dot.priority-critical { background: var(--color-danger); }
 .priority-dot.priority-high { background: var(--color-warning); }
 .priority-dot.priority-medium { background: var(--color-info); }
 .priority-dot.priority-low { background: var(--text-tertiary); }
@@ -689,7 +689,7 @@
   font-weight: 500;
 }
 
-.priority-badge.priority-urgent {
+.priority-badge.priority-critical {
   background: rgba(239, 68, 68, 0.1);
   color: #ef4444;
 }

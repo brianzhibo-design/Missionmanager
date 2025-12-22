@@ -338,7 +338,7 @@
   text-transform: uppercase;
 }
 
-.task-priority.priority-urgent { background: #FEE2E2; color: #DC2626; }
+.task-priority.priority-critical { background: #FEE2E2; color: #DC2626; }
 .task-priority.priority-high { background: #FFEDD5; color: #EA580C; }
 .task-priority.priority-medium { background: #DBEAFE; color: #2563EB; }
 .task-priority.priority-low { background: #F3F4F6; color: #6B7280; }

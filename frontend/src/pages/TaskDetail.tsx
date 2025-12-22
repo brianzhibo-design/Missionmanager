@@ -22,7 +22,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
 };
 
 const PRIORITY_CONFIG: Record<string, { label: string; color: string }> = {
-  urgent: { label: '紧急', color: 'var(--color-danger)' },
+  critical: { label: '紧急', color: 'var(--color-danger)' },
   high: { label: '高', color: 'var(--color-warning)' },
   medium: { label: '中', color: 'var(--color-info)' },
   low: { label: '低', color: 'var(--text-tertiary)' },
@@ -1416,7 +1416,7 @@ function DesktopTaskDetail() {
           try {
             // 为每个子任务创建新任务
             const priorityMap: Record<string, string> = {
-              'URGENT': 'urgent',
+              'CRITICAL': 'critical',
               'HIGH': 'high',
               'MEDIUM': 'medium',
               'LOW': 'low',

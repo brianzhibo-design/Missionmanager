@@ -70,7 +70,7 @@ export async function sendTaskReminders(): Promise<void> {
         title: task.title,
         projectName: task.project.name,
         dueDate: dueDate.toLocaleDateString('zh-CN'),
-        priority: task.priority as 'URGENT' | 'HIGH' | 'MEDIUM' | 'LOW',
+        priority: task.priority as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',
         daysLeft,
       };
     });
