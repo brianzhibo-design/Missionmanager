@@ -15,6 +15,7 @@ import {
 import RoleBadge from '../../components/RoleBadge';
 import BroadcastPanel from '../../components/BroadcastPanel';
 import PermissionSettingsModal from '../../components/PermissionSettingsModal';
+import InviteMemberModal from '../../components/InviteMemberModal';
 import './MembersManage.css';
 
 export default function MembersManage() {
@@ -88,29 +89,6 @@ export default function MembersManage() {
       setError(err.message || '处理申请失败');
     } finally {
       setProcessingRequest(null);
-    }
-  };
-
-  const handleInvite = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!currentWorkspace) return;
-    
-    const formData = new FormData(e.currentTarget);
-    const email = (formData.get('email') as string || '').trim();
-    const role = formData.get('role') as string;
-
-    if (!email) return;
-
-    setSubmitting(true);
-    setError(null);
-    try {
-      const newMember = await memberService.inviteMember(currentWorkspace.id, email, role);
-      setMembers([...members, newMember]);
-      setShowInvite(false);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.message);
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -333,53 +311,14 @@ export default function MembersManage() {
       )}
 
       {/* 邀请成员 Modal */}
-      <Modal
-        isOpen={showInvite}
-        onClose={() => setShowInvite(false)}
-        title="邀请成员"
-        size="sm"
-      >
-        <form onSubmit={handleInvite}>
-          <div className="form-group">
-            <label className="form-label">邮箱地址 *</label>
-            <input
-              type="email"
-              name="email"
-              className="form-input"
-              placeholder="输入成员邮箱"
-              required
-              autoFocus
-            />
-            <p className="form-hint">被邀请的用户需要已注册账号</p>
-          </div>
-          <div className="form-group">
-            <label className="form-label">角色</label>
-            <select name="role" className="form-select" defaultValue="member">
-              {getAvailableRoles().map((role) => (
-                <option key={role.value} value={role.value}>
-                  {role.label} - {role.description}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="form-actions">
-            <button 
-              type="button" 
-              className="btn btn-secondary"
-              onClick={() => setShowInvite(false)}
-            >
-              取消
-            </button>
-            <button 
-              type="submit" 
-              className="btn btn-primary"
-              disabled={submitting}
-            >
-              {submitting ? '邀请中...' : '发送邀请'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+      {showInvite && currentWorkspace && (
+        <InviteMemberModal
+          workspaceId={currentWorkspace.id}
+          workspaceName={currentWorkspace.name}
+          onClose={() => setShowInvite(false)}
+          onSuccess={loadMembers}
+        />
+      )}
 
       {/* 修改角色 Modal */}
       <Modal
