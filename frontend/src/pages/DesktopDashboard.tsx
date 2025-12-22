@@ -15,6 +15,7 @@ import { aiService, DailySuggestions } from '../services/ai';
 import { taskService } from '../services/task';
 import { projectService } from '../services/project';
 import { usePermissions } from '../hooks/usePermissions';
+import CreateTaskModal from '../components/CreateTaskModal';
 import './Dashboard.css';
 
 interface DashboardStats {
@@ -36,7 +37,7 @@ interface RecentTask {
 
 // 优先级中文映射
 const PRIORITY_LABELS: Record<string, string> = {
-  CRITICAL: '紧急',
+  URGENT: '紧急',
   HIGH: '高',
   MEDIUM: '中',
   LOW: '低',
@@ -51,6 +52,7 @@ export default function DesktopDashboard() {
   const [aiSuggestions, setAiSuggestions] = useState<DailySuggestions | null>(null);
   const [loading, setLoading] = useState(true);
   const [aiLoading, setAiLoading] = useState(false);
+  const [showCreateTask, setShowCreateTask] = useState(false);
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? '早上好' : hour < 18 ? '下午好' : '晚上好';
@@ -181,7 +183,7 @@ export default function DesktopDashboard() {
             <ArrowRight size={16} />
           </button>
           {canWorkspace('createTask') && (
-            <button className="btn-primary" onClick={() => navigate('/projects')}>
+            <button className="btn-primary" onClick={() => setShowCreateTask(true)}>
               <Plus size={16} />
               新建任务
             </button>
@@ -299,6 +301,16 @@ export default function DesktopDashboard() {
           )}
         </div>
       </section>
+
+      {/* 新建任务模态框 */}
+      <CreateTaskModal
+        isOpen={showCreateTask}
+        onClose={() => setShowCreateTask(false)}
+        onSuccess={() => {
+          setShowCreateTask(false);
+          loadDashboard();
+        }}
+      />
     </div>
   );
 }
