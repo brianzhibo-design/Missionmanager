@@ -384,10 +384,9 @@ export default function Reports() {
     return `${date.getFullYear()}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getDate().toString().padStart(2, '0')} (${weekdays[date.getDay()]})`;
   };
 
-  // 点击日报列表项
+  // 点击日报列表项 - 打开详情弹窗
   const handleReportItemClick = (report: DailyReport) => {
-    const reportDate = new Date(report.date);
-    setSelectedDate(reportDate);
+    setSelectedDailyReport(report);
   };
 
   return (

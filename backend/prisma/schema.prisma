@@ -44,6 +44,8 @@ model User {
   projectFiles         ProjectFile[]               @relation("ProjectFileUploader")
   reportAttachments    ReportAttachment[]          @relation("ReportAttachmentUploader")
   dailyReports         DailyReport[]
+  dailyReportComments  DailyReportComment[]
+  dailyReportLikes     DailyReportLike[]
 
   @@map("users")
 }
@@ -373,9 +375,40 @@ model DailyReport {
 
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  comments    DailyReportComment[]
+  likes       DailyReportLike[]
 
   @@unique([userId, workspaceId, date])
   @@index([workspaceId, date])
   @@index([userId, date])
   @@map("daily_reports")
+}
+
+// 日报评论
+model DailyReportComment {
+  id            String      @id @default(cuid())
+  content       String      @db.Text
+  createdAt     DateTime    @default(now()) @map("created_at")
+  dailyReportId String      @map("daily_report_id")
+  userId        String      @map("user_id")
+  
+  dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([dailyReportId, createdAt])
+  @@map("daily_report_comments")
+}
+
+// 日报点赞
+model DailyReportLike {
+  id            String      @id @default(cuid())
+  createdAt     DateTime    @default(now()) @map("created_at")
+  dailyReportId String      @map("daily_report_id")
+  userId        String      @map("user_id")
+  
+  dailyReport   DailyReport @relation(fields: [dailyReportId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([dailyReportId, userId])
+  @@map("daily_report_likes")
 }

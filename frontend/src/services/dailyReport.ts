@@ -55,6 +55,23 @@ export interface TeamReportsResult {
   notSubmitted: { id: string; name: string; avatar: string | null }[];
 }
 
+export interface DailyReportComment {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    avatar: string | null;
+  };
+}
+
+export interface LikesResult {
+  users: { id: string; name: string; avatar: string | null }[];
+  count: number;
+  liked: boolean;
+}
+
 export const dailyReportService = {
   /**
    * 创建或更新日报
@@ -120,6 +137,45 @@ export const dailyReportService = {
    */
   async delete(id: string): Promise<void> {
     return api.delete(`/daily-reports/${id}`);
+  },
+
+  // ============ 评论 API ============
+
+  /**
+   * 获取日报评论列表
+   */
+  async getComments(reportId: string): Promise<DailyReportComment[]> {
+    return api.get<DailyReportComment[]>(`/daily-reports/${reportId}/comments`);
+  },
+
+  /**
+   * 添加评论
+   */
+  async addComment(reportId: string, content: string): Promise<DailyReportComment> {
+    return api.post<DailyReportComment>(`/daily-reports/${reportId}/comments`, { content });
+  },
+
+  /**
+   * 删除评论
+   */
+  async deleteComment(commentId: string): Promise<void> {
+    return api.delete(`/daily-reports/comments/${commentId}`);
+  },
+
+  // ============ 点赞 API ============
+
+  /**
+   * 获取点赞信息
+   */
+  async getLikes(reportId: string): Promise<LikesResult> {
+    return api.get<LikesResult>(`/daily-reports/${reportId}/likes`);
+  },
+
+  /**
+   * 点赞/取消点赞
+   */
+  async toggleLike(reportId: string): Promise<{ liked: boolean; count: number }> {
+    return api.post<{ liked: boolean; count: number }>(`/daily-reports/${reportId}/like`, {});
   },
 };
 
