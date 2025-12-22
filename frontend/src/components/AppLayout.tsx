@@ -170,7 +170,13 @@ export default function AppLayout() {
       >
         {/* 1. 工作区切换器 */}
         <div className="ws-header">
-          <div className="ws-switcher" onClick={() => !sidebarCollapsed && setShowWorkspaceMenu(!showWorkspaceMenu)}>
+          <div 
+            className="ws-switcher" 
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowWorkspaceMenu(!showWorkspaceMenu);
+            }}
+          >
             <div className="ws-logo">
               {currentWorkspace?.name?.charAt(0).toUpperCase() || 'W'}
             </div>
