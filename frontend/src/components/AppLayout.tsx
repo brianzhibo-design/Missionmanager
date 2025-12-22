@@ -7,6 +7,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import RoleBadge from './RoleBadge';
 import NotificationCenter from './NotificationCenter';
 import MobileNav from './MobileNav';
+import UserMenu from './UserMenu';
 import { notificationService } from '../services/notification';
 import { pushNotificationService } from '../services/pushNotification';
 import { socketService, SocketNotification } from '../services/socket';
@@ -266,23 +267,8 @@ export default function AppLayout() {
 
         </div>
 
-        {/* 6. 底部个人资料 */}
-        <div className="sidebar-footer-v2">
-          <div className="profile-card" onClick={() => navigate('/settings')}>
-            <div className="profile-avatar">
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user?.name} />
-              ) : (
-                getUserInitials()
-              )}
-            </div>
-            <div className="profile-info">
-              <span className="profile-name">{user?.name}</span>
-              <span className="profile-email">{user?.email}</span>
-            </div>
-            <Settings size={16} className="profile-settings" />
-          </div>
-        </div>
+        {/* 6. 底部用户菜单 */}
+        <UserMenu />
       </aside>
 
       {/* Main Content */}

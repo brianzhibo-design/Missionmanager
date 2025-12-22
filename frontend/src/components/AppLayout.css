@@ -24,7 +24,7 @@
   border-right: 1px solid #e2e8f0;
   position: sticky;
   top: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 [data-theme="dark"] .sidebar-v2 {
