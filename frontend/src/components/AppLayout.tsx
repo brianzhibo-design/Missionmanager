@@ -27,6 +27,8 @@ import {
   Monitor,
   LogOut,
   ChevronDown,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from './Icons';
 import './AppLayout.css';
 
@@ -47,6 +49,7 @@ export default function AppLayout() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showWorkspaceMenu, setShowWorkspaceMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // 判断是否使用新的移动端布局（简约蓝主题页面）
   // 这些页面使用独立的 MobileLayout，不需要 AppLayout 的 MobileNav
@@ -156,19 +159,32 @@ export default function AppLayout() {
   return (
     <div className="app-layout" data-mobile-new-layout={useNewMobileLayout}>
       {/* Sidebar - 精美商务风格 */}
-      <aside className="sidebar-v2">
+      <aside className={`sidebar-v2 ${sidebarCollapsed ? 'collapsed' : ''}`}>
         {/* 1. 工作区切换器 */}
         <div className="ws-header">
-          <div className="ws-switcher" onClick={() => setShowWorkspaceMenu(!showWorkspaceMenu)}>
+          <div className="ws-switcher" onClick={() => !sidebarCollapsed && setShowWorkspaceMenu(!showWorkspaceMenu)}>
             <div className="ws-logo">
               {currentWorkspace?.name?.charAt(0).toUpperCase() || 'W'}
             </div>
-            <div className="ws-info">
-              <span className="ws-name">{currentWorkspace?.name || 'Workspace'}</span>
-              <span className="ws-plan">{workspaceRole === 'owner' ? '创始人' : workspaceRole === 'director' ? '管理员' : '成员'}</span>
-            </div>
-            <ChevronDown size={14} className="ws-chevron" />
+            {!sidebarCollapsed && (
+              <>
+                <div className="ws-info">
+                  <span className="ws-name">{currentWorkspace?.name || 'Workspace'}</span>
+                  <span className="ws-plan">{workspaceRole === 'owner' ? '创始人' : workspaceRole === 'director' ? '管理员' : '成员'}</span>
+                </div>
+                <ChevronDown size={14} className="ws-chevron" />
+              </>
+            )}
           </div>
+
+          {/* 折叠/展开按钮 */}
+          <button 
+            className="sidebar-toggle-btn"
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            title={sidebarCollapsed ? '展开侧边栏' : '收起侧边栏'}
+          >
+            {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          </button>
 
           {/* 工作区下拉菜单 */}
           {showWorkspaceMenu && (
@@ -268,7 +284,7 @@ export default function AppLayout() {
         </div>
 
         {/* 6. 底部用户菜单 */}
-        <UserMenu />
+        <UserMenu collapsed={sidebarCollapsed} />
       </aside>
 
       {/* Main Content */}

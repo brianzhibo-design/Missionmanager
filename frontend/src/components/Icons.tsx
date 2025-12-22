@@ -87,6 +87,8 @@ export const SortAsc = wrapIcon(HeroIcons.BarsArrowUpIcon);
 export const Grid = wrapIcon(HeroIcons.Squares2X2Icon);
 export const List = wrapIcon(HeroIcons.Bars3Icon);
 export const Kanban = wrapIcon(HeroIcons.ViewColumnsIcon);
+export const PanelLeftClose = wrapIcon(HeroIcons.ChevronDoubleLeftIcon);
+export const PanelLeftOpen = wrapIcon(HeroIcons.ChevronDoubleRightIcon);
 
 // 状态图标
 export const Loader2 = wrapIcon(HeroIcons.ArrowPathIcon);

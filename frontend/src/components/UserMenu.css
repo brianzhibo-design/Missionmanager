@@ -4,8 +4,8 @@
   width: 100%;
 }
 
-/* 向上弹出菜单 */
-.user-menu-popup {
+/* 向上弹出菜单（展开状态） */
+.user-menu-popup.popup-top {
   position: absolute;
   bottom: 100%;
   left: 0;
@@ -16,6 +16,17 @@
   animation: slideInFromBottom 200ms ease-out forwards, fadeIn 200ms ease-out forwards;
 }
 
+/* 向右弹出菜单（收起状态） */
+.user-menu-popup.popup-right {
+  position: absolute;
+  left: 100%;
+  bottom: 0;
+  width: 256px;
+  margin-left: 16px;
+  z-index: 50;
+  animation: slideInFromLeft 200ms ease-out forwards, fadeIn 200ms ease-out forwards;
+}
+
 @keyframes slideInFromBottom {
   from {
     opacity: 0;
@@ -24,6 +35,17 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -150,6 +172,11 @@
   padding: 12px;
   background: #fff;
   border-top: 1px solid #f1f5f9;
+  transition: padding 0.3s ease;
+}
+
+.user-menu-trigger-wrapper.collapsed {
+  padding: 8px;
 }
 
 /* 触发按钮 */
@@ -163,9 +190,17 @@
   border: 1px solid transparent;
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   position: relative;
   user-select: none;
+}
+
+.user-menu-trigger.collapsed {
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0 auto;
+  padding: 0;
 }
 
 .user-menu-trigger:hover {
@@ -199,7 +234,13 @@
   font-weight: 700;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   ring: 2px solid #fff;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+}
+
+.user-menu-avatar.collapsed {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
 }
 
 .user-menu-avatar img {

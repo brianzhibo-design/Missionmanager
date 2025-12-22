@@ -25,6 +25,12 @@
   position: sticky;
   top: 0;
   overflow: visible;
+  width: 280px;
+  transition: width 0.3s ease;
+}
+
+.sidebar-v2.collapsed {
+  width: 80px;
 }
 
 [data-theme="dark"] .sidebar-v2 {
@@ -37,6 +43,15 @@
   padding: 16px;
   border-bottom: 1px solid #f1f5f9;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sidebar-v2.collapsed .ws-header {
+  flex-direction: column;
+  padding: 12px 8px;
 }
 
 [data-theme="dark"] .ws-header {
@@ -50,14 +65,54 @@
   padding: 8px;
   border-radius: 12px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.sidebar-v2.collapsed .ws-switcher {
+  justify-content: center;
+  padding: 6px;
+  cursor: default;
 }
 
 .ws-switcher:hover {
   background: #f8fafc;
 }
 
+.sidebar-v2.collapsed .ws-switcher:hover {
+  background: transparent;
+}
+
 [data-theme="dark"] .ws-switcher:hover {
+  background: #334155;
+}
+
+[data-theme="dark"] .sidebar-v2.collapsed .ws-switcher:hover {
+  background: transparent;
+}
+
+/* 侧边栏切换按钮 */
+.sidebar-toggle-btn {
+  padding: 8px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.sidebar-toggle-btn:hover {
+  background: #f1f5f9;
+  color: #6366f1;
+}
+
+.sidebar-v2.collapsed .sidebar-toggle-btn {
+  margin-top: 8px;
+}
+
+[data-theme="dark"] .sidebar-toggle-btn:hover {
   background: #334155;
 }
 
@@ -300,7 +355,13 @@
   font-weight: 500;
   color: #475569;
   text-decoration: none;
-  transition: all 0.15s;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.sidebar-v2.collapsed .nav-item-v2 {
+  justify-content: center;
+  padding: 10px;
 }
 
 .nav-item-v2:hover {
@@ -331,11 +392,21 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  transition: gap 0.3s ease;
+}
+
+.sidebar-v2.collapsed .nav-item-left {
+  gap: 0;
+}
+
+.sidebar-v2.collapsed .nav-item-left span {
+  display: none;
 }
 
 .nav-item-v2 svg {
   color: #94a3b8;
   transition: color 0.15s;
+  flex-shrink: 0;
 }
 
 .nav-item-v2:hover svg {

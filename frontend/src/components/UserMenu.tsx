@@ -5,10 +5,11 @@ import { ChevronDown, User, Settings, CreditCard, LogOut } from './Icons';
 import './UserMenu.css';
 
 interface UserMenuProps {
+  collapsed?: boolean;
   onLogout?: () => void;
 }
 
-const UserMenu: React.FC<UserMenuProps> = ({ onLogout }) => {
+const UserMenu: React.FC<UserMenuProps> = ({ collapsed = false, onLogout }) => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
@@ -60,9 +61,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ onLogout }) => {
   return (
     <div className="user-menu-wrapper" ref={menuRef}>
       
-      {/* 向上弹出的菜单 */}
+      {/* 弹出菜单：展开时向上，收起时向右侧 */}
       {isOpen && (
-        <div className="user-menu-popup">
+        <div className={`user-menu-popup ${collapsed ? 'popup-right' : 'popup-top'}`}>
           <div className="user-menu-content">
             {/* 用户信息摘要 */}
             <div className="user-menu-header">
@@ -110,14 +111,14 @@ const UserMenu: React.FC<UserMenuProps> = ({ onLogout }) => {
       )}
 
       {/* 底部触发按钮 */}
-      <div className="user-menu-trigger-wrapper">
+      <div className={`user-menu-trigger-wrapper ${collapsed ? 'collapsed' : ''}`}>
         <button 
           onClick={() => setIsOpen(!isOpen)}
-          className={`user-menu-trigger ${isOpen ? 'active' : ''}`}
+          className={`user-menu-trigger ${isOpen ? 'active' : ''} ${collapsed ? 'collapsed' : ''}`}
         >
           {/* 头像容器 */}
           <div className="user-menu-avatar-wrapper">
-            <div className={`user-menu-avatar ${isOpen ? 'active' : ''}`}>
+            <div className={`user-menu-avatar ${isOpen ? 'active' : ''} ${collapsed ? 'collapsed' : ''}`}>
               {user?.avatar ? (
                 <img src={user.avatar} alt={user.name} />
               ) : (
@@ -128,20 +129,24 @@ const UserMenu: React.FC<UserMenuProps> = ({ onLogout }) => {
             <div className="user-menu-status-dot"></div>
           </div>
           
-          {/* 文本信息 */}
-          <div className="user-menu-info">
-            <span className={`user-menu-name ${isOpen ? 'active' : ''}`}>
-              {user?.name || '用户'}
-            </span>
-            <span className="user-menu-role">
-              {user?.email?.split('@')[0] || 'User'}
-            </span>
-          </div>
+          {/* 文本信息 - 仅在展开时显示 */}
+          {!collapsed && (
+            <div className="user-menu-info">
+              <span className={`user-menu-name ${isOpen ? 'active' : ''}`}>
+                {user?.name || '用户'}
+              </span>
+              <span className="user-menu-role">
+                {user?.email?.split('@')[0] || 'User'}
+              </span>
+            </div>
+          )}
 
-          {/* 箭头图标 */}
-          <div className={`user-menu-chevron ${isOpen ? 'rotated' : ''}`}>
-            <ChevronDown size={16} />
-          </div>
+          {/* 箭头图标 - 仅在展开时显示 */}
+          {!collapsed && (
+            <div className={`user-menu-chevron ${isOpen ? 'rotated' : ''}`}>
+              <ChevronDown size={16} />
+            </div>
+          )}
         </button>
       </div>
     </div>
