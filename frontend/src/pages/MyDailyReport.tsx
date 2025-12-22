@@ -8,7 +8,8 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { dailyReportService, DailyReport } from '../services/dailyReport';
 import { 
   FileText, Calendar, AlertTriangle, CheckCircle2, 
-  ChevronLeft, ChevronRight, Zap, Save, Edit2, Trash2, Clock
+  ChevronLeft, ChevronRight, Zap, Save, Edit2, Trash2, Clock,
+  Activity, Circle, AlertCircle, Lock
 } from 'lucide-react';
 import MobileDailyReport from './mobile/MobileDailyReport';
 import './MyDailyReport.css';
@@ -266,30 +267,94 @@ function DesktopMyDailyReport() {
           </div>
 
           {!canEditDate(selectedDate) ? (
-            <div className="daily-form-placeholder">
-              <p>只能编辑当天日报</p>
-              {currentDateReport && (
-                <div className="readonly-report">
-                  <div className="report-section">
-                    <h4>今日完成</h4>
-                    <p>{currentDateReport.completed}</p>
+            <div className="readonly-report-view">
+              <div className="readonly-header">
+                <Lock size={14} />
+                <span>只能编辑当天日报</span>
+              </div>
+              {currentDateReport ? (
+                <div className="readonly-content">
+                  {/* 今日完成 */}
+                  <div className="readonly-section">
+                    <h4 className="readonly-section-title">
+                      <Activity size={14} className="icon-completed" />
+                      今日完成
+                    </h4>
+                    <ul className="readonly-list">
+                      {currentDateReport.completed.split('\n').filter(line => line.trim()).map((line, i) => (
+                        <li key={i} className="readonly-list-item">
+                          <div className="readonly-item-icon completed">
+                            <CheckCircle2 size={16} />
+                          </div>
+                          <span>{line.replace(/^[-•]\s*/, '')}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <div className="report-section">
-                    <h4>明日计划</h4>
-                    <p>{currentDateReport.planned}</p>
+
+                  {/* 任务统计 */}
+                  {currentDateReport.taskStats && (
+                    <div className="readonly-task-stats">
+                      <div className="readonly-stat-item stat-completed">
+                        <span className="stat-value">{currentDateReport.taskStats.completedCount}</span>
+                        <span className="stat-label">已完成</span>
+                      </div>
+                      <div className="readonly-stat-item stat-progress">
+                        <span className="stat-value">{currentDateReport.taskStats.inProgressCount}</span>
+                        <span className="stat-label">进行中</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 明日计划 */}
+                  <div className="readonly-section">
+                    <h4 className="readonly-section-title">
+                      <Zap size={14} className="icon-planned" />
+                      明日计划
+                    </h4>
+                    <ul className="readonly-list">
+                      {currentDateReport.planned.split('\n').filter(line => line.trim()).map((line, i) => (
+                        <li key={i} className="readonly-list-item">
+                          <div className="readonly-item-icon planned">
+                            <Circle size={16} />
+                          </div>
+                          <span>{line.replace(/^[-•]\s*/, '')}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
+
+                  {/* 问题与风险 */}
                   {currentDateReport.issues && (
-                    <div className="report-section">
-                      <h4>问题/风险</h4>
-                      <p>{currentDateReport.issues}</p>
+                    <div className="readonly-section">
+                      <h4 className="readonly-section-title">
+                        <AlertCircle size={14} className="icon-issues" />
+                        问题与风险
+                      </h4>
+                      <ul className="readonly-list issues">
+                        {currentDateReport.issues.split('\n').filter(line => line.trim()).map((line, i) => (
+                          <li key={i} className="readonly-list-item">
+                            <div className="readonly-item-icon issues">
+                              <AlertCircle size={16} />
+                            </div>
+                            <span>{line.replace(/^[-•]\s*/, '')}</span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
                   )}
+
+                  {/* 工时 */}
                   {currentDateReport.workHours && (
-                    <div className="report-section">
-                      <h4>工时</h4>
-                      <p>{currentDateReport.workHours} 小时</p>
+                    <div className="readonly-work-hours">
+                      <Clock size={14} />
+                      <span>工作时长：{currentDateReport.workHours} 小时</span>
                     </div>
                   )}
+                </div>
+              ) : (
+                <div className="readonly-empty">
+                  <p>该日期未填写日报</p>
                 </div>
               )}
             </div>

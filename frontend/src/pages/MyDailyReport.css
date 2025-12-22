@@ -259,35 +259,151 @@
   box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
 }
 
-/* 只读报告 */
-.my-daily-report-page .readonly-report {
-  padding: 20px;
-  background: var(--bg-secondary);
+/* 只读日报 - 卡片式 UI */
+.my-daily-report-page .readonly-report-view {
+  padding: 0;
+}
+
+.my-daily-report-page .readonly-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   border-radius: 12px;
-  margin-top: 20px;
-}
-
-.my-daily-report-page .readonly-report .report-section {
-  margin-bottom: 16px;
-}
-
-.my-daily-report-page .readonly-report .report-section:last-child {
-  margin-bottom: 0;
-}
-
-.my-daily-report-page .readonly-report h4 {
+  margin-bottom: 20px;
+  color: #92400e;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-secondary);
-  margin: 0 0 8px 0;
 }
 
-.my-daily-report-page .readonly-report p {
+.my-daily-report-page .readonly-content {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.my-daily-report-page .readonly-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.my-daily-report-page .readonly-section:last-child {
+  border-bottom: none;
+}
+
+.my-daily-report-page .readonly-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
-  color: var(--text-primary);
-  line-height: 1.6;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 16px 0;
+}
+
+.my-daily-report-page .readonly-section-title .icon-completed { color: #10b981; }
+.my-daily-report-page .readonly-section-title .icon-planned { color: #f59e0b; }
+.my-daily-report-page .readonly-section-title .icon-issues { color: #ef4444; }
+
+.my-daily-report-page .readonly-list {
+  list-style: none;
   margin: 0;
-  white-space: pre-wrap;
+  padding: 0;
+}
+
+.my-daily-report-page .readonly-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.my-daily-report-page .readonly-list-item:first-child { padding-top: 0; }
+.my-daily-report-page .readonly-list-item:last-child { padding-bottom: 0; }
+
+.my-daily-report-page .readonly-item-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.my-daily-report-page .readonly-item-icon.completed {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+.my-daily-report-page .readonly-item-icon.planned {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.my-daily-report-page .readonly-item-icon.issues {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.my-daily-report-page .readonly-task-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 16px 24px;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.my-daily-report-page .readonly-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.my-daily-report-page .readonly-stat-item .stat-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.my-daily-report-page .readonly-stat-item .stat-label {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.my-daily-report-page .readonly-stat-item.stat-completed .stat-value { color: #10b981; }
+.my-daily-report-page .readonly-stat-item.stat-progress .stat-value { color: #3b82f6; }
+
+.my-daily-report-page .readonly-work-hours {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.my-daily-report-page .readonly-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.my-daily-report-page .readonly-empty p {
+  margin: 0;
+  font-size: 14px;
 }
 
 /* 历史列表 */
