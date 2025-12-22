@@ -12,7 +12,7 @@ import {
   Folder,
   User,
   Loader2,
-} from 'lucide-react';
+} from '../../components/Icons';
 import { taskService } from '../../services/task';
 import { projectService } from '../../services/project';
 import { memberService } from '../../services/member';

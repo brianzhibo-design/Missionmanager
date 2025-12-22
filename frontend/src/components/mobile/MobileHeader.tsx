@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { 
   ArrowLeft, Bell, Search, SlidersHorizontal, 
   MoreHorizontal, ChevronDown 
-} from 'lucide-react';
+} from '../Icons';
 import '../../styles/mobile-minimal.css';
 
 interface MobileHeaderProps {

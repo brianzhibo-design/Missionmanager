@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Folder, Users, ChevronRight } from 'lucide-react';
+import { Search, Folder, Users, ChevronRight } from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import { projectService, Project } from '../../services/project';
 import { usePermissions } from '../../hooks/usePermissions';

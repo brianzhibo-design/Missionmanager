@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp } from '../Icons';
 import SheetModal from './SheetModal';
 import { aiService } from '../../services/ai';
 

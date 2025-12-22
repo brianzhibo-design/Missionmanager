@@ -7,7 +7,7 @@
  * - 额外权限：显示为普通开关，允许手动赋予
  */
 import { useState, useEffect, useMemo } from 'react';
-import { X, Loader2, Crown, Info, Lock, CheckCircle2 } from 'lucide-react';
+import { X, Loader2, Crown, Info, Lock, CheckCircle2 } from './Icons';
 import { permissionService, AVAILABLE_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS, UserPermissionData, WorkspacePermission } from '../services/permission';
 import { ROLE_LABELS } from '../config/permissions';
 import './PermissionSettingsModal.css';

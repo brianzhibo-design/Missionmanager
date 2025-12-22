@@ -3,7 +3,7 @@
  * 温暖、鼓励型的生产力伙伴
  */
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Bot, Send, X, Sparkles } from 'lucide-react';
+import { Bot, Send, X, Sparkles } from '../Icons';
 import { aiService } from '../../services/ai';
 import { useAuth } from '../../hooks/useAuth';
 

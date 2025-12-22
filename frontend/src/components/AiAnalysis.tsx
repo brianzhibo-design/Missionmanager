@@ -2,7 +2,7 @@
  * AI 分析组件 - Zenith 风格
  */
 import { useState, useEffect, useCallback } from 'react';
-import { Sparkles, AlertTriangle, Lightbulb, CheckCircle2, BarChart3, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Sparkles, AlertTriangle, Lightbulb, CheckCircle2, BarChart3, Clock, ChevronDown, ChevronUp } from './Icons';
 import { aiService, AiAnalysis, AiAnalysisResult } from '../services/ai';
 import './AiAnalysis.css';
 

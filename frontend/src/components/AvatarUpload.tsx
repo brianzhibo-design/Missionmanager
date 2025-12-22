@@ -3,7 +3,7 @@
  */
 
 import React, { useRef, useState } from 'react';
-import { Camera, Loader2, User } from 'lucide-react';
+import { Camera, Loader2, User } from './Icons';
 import { uploadAvatar, validateFile } from '../services/upload';
 import './AvatarUpload.css';
 

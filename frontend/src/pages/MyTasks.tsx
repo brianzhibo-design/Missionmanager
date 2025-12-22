@@ -9,7 +9,7 @@ import {
   CheckSquare,
   Circle,
   Inbox
-} from 'lucide-react';
+} from '../components/Icons';
 import { taskService } from '../services/task';
 import { useIsMobile } from '../hooks/useIsMobile';
 import MobileTaskList from './mobile/MobileTaskList';

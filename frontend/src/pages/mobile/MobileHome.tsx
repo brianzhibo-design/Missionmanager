@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, FileText } from 'lucide-react';
+import { CheckCircle, FileText } from '../../components/Icons';
 import { useAuth } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
 import MobileLayout from '../../components/mobile/MobileLayout';

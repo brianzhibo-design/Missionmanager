@@ -2,7 +2,7 @@
  * 任务评论组件
  */
 import React, { useState, useEffect, useRef } from 'react';
-import { MessageCircle, Send, Trash2, Heart, AtSign, Image, X, Loader2, Smile } from 'lucide-react';
+import { MessageCircle, Send, Trash2, Heart, AtSign, Image, X, Loader2, Smile } from './Icons';
 import { commentService, Comment } from '../services/comment';
 import { uploadCommentImage } from '../services/upload';
 import { useAuth } from '../hooks/useAuth';

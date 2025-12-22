@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Flag, User, Folder, AlignLeft, Loader2 } from 'lucide-react';
+import { Calendar, Flag, User, Folder, AlignLeft, Loader2 } from '../Icons';
 import { taskService } from '../../services/task';
 import { projectService, Project } from '../../services/project';
 import { workspaceService, WorkspaceMember } from '../../services/workspace';

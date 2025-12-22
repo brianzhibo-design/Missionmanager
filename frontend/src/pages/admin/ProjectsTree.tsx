@@ -4,7 +4,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, FolderOpen, RefreshCw, Bot } from 'lucide-react';
+import { Building2, FolderOpen, RefreshCw, Bot } from '../../components/Icons';
 import { treeService, ProjectTreeResponse, ProjectNode, TaskStats } from '../../services/tree';
 import { treeAnalysisService, ProjectsOverviewResult } from '../../services/treeAnalysis';
 import { usePermissions } from '../../hooks/usePermissions';

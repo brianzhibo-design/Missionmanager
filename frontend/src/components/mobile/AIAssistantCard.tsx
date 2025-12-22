@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+import { Sparkles } from '../Icons';
 
 interface AIAssistantCardProps {
   message?: string;

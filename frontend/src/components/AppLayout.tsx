@@ -26,7 +26,7 @@ import {
   Monitor,
   LogOut,
   ChevronDown,
-} from 'lucide-react';
+} from './Icons';
 import './AppLayout.css';
 
 export default function AppLayout() {

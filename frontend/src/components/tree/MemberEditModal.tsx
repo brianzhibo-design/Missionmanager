@@ -2,7 +2,7 @@
  * 成员编辑弹窗 - 编辑成员在项目中的角色和描述
  */
 import { useState, useEffect } from 'react';
-import { X, Crown, FileText, Save } from 'lucide-react';
+import { X, Crown, FileText, Save } from '../Icons';
 import { MemberNode } from '../../services/tree';
 import { Avatar } from '../Avatar';
 import './MemberEditModal.css';

@@ -10,7 +10,7 @@ import { authService, UserProfile } from '../services/auth';
 import { 
   Mail, Lock, Phone, ClipboardList, User, Building2, MapPin,
   Code, PaintBucket, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
-} from 'lucide-react';
+} from '../components/Icons';
 import './Login.css';
 
 // 职业选项 - 使用Lucide图标组件

@@ -15,7 +15,7 @@ import {
   MessageSquare,
   CheckCircle2,
   Circle
-} from 'lucide-react';
+} from '../components/Icons';
 import { treeAnalysisService, ProjectsOverviewResult } from '../services/treeAnalysis';
 import { usePermissions } from '../hooks/usePermissions';
 import './AiInsights.css';

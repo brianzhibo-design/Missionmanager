@@ -3,7 +3,7 @@
  * 只显示当前工作区的项目和成员
  */
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User, FolderOpen } from 'lucide-react';
+import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User, FolderOpen } from '../../components/Icons';
 import { treeService, MemberNode, MemberTreeResponse } from '../../services/tree';
 import { projectService, Project } from '../../services/project';
 import { treeAnalysisService, TeamAnalysisResult } from '../../services/treeAnalysis';

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Sparkles, Loader2, Clock } from 'lucide-react';
+import { Sparkles, Loader2, Clock } from '../Icons';
 import { Modal } from '../Modal';
 import { aiService, TaskBreakdownResult, SubTask } from '../../services/ai';
 import './AIComponents.css';

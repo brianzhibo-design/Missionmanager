@@ -12,7 +12,7 @@ import {
   BarChart3, Calendar, CalendarRange, AlertTriangle, CheckCircle2, Bot, 
   Sparkles, FileText, TrendingUp, FolderOpen, Mail, ChevronLeft, ChevronRight,
   Users, Clock, Zap, Save, Edit2, Trash2, Eye, Activity, Circle, AlertCircle, Lock
-} from 'lucide-react';
+} from '../components/Icons';
 import DailyReportDetailModal from '../components/DailyReportDetailModal';
 import './Reports.css';
 

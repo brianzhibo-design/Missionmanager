@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { 
   Download, Trash2, Eye, X, File, Image, Video, Music, 
   FileText, Archive, ExternalLink, ZoomIn, ZoomOut 
-} from 'lucide-react';
+} from './Icons';
 import { Attachment, formatFileSize, isImageFile, isVideoFile, isPreviewable } from '../services/upload';
 import './AttachmentList.css';
 

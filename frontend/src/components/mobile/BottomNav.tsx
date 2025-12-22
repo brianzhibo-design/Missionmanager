@@ -3,7 +3,7 @@
  * 5个Tab：首页、任务、+新建、项目、我的
  */
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, CheckSquare, Plus, Folder, User } from 'lucide-react';
+import { Home, CheckSquare, Plus, Folder, User } from '../Icons';
 
 interface BottomNavProps {
   onAddClick?: () => void;

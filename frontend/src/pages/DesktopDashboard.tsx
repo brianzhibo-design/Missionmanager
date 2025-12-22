@@ -10,7 +10,7 @@ import {
   TrendingUp,
   FolderKanban,
   Loader2
-} from 'lucide-react';
+} from '../components/Icons';
 import { aiService, DailySuggestions } from '../services/ai';
 import { taskService } from '../services/task';
 import { projectService } from '../services/project';

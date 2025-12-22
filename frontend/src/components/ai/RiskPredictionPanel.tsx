@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Shield, Loader2, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Shield, Loader2, AlertTriangle, RefreshCw } from '../Icons';
 import { aiService, RiskPredictionResult } from '../../services/ai';
 import './AIComponents.css';
 

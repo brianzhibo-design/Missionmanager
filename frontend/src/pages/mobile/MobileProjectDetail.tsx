@@ -13,7 +13,7 @@ import {
   Share2,
   Loader2,
   Sparkles,
-} from 'lucide-react';
+} from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import SheetModal from '../../components/mobile/SheetModal';
 import CreateTaskForm from '../../components/mobile/CreateTaskForm';

@@ -7,7 +7,7 @@ import { memberService, Member } from '../../services/member';
 import { workspaceService, JoinRequest } from '../../services/workspace';
 import { Modal } from '../../components/Modal';
 import { Avatar } from '../../components/Avatar';
-import { Users, Send, Mail, Calendar, Shield, Eye, UserPlus, Check, X, Clock } from 'lucide-react';
+import { Users, Send, Mail, Calendar, Shield, Eye, UserPlus, Check, X, Clock } from '../../components/Icons';
 import { 
   WORKSPACE_ROLE_OPTIONS,
   WORKSPACE_ROLE_HIERARCHY 

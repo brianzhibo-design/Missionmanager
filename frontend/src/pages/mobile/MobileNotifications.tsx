@@ -10,7 +10,7 @@ import {
   CheckSquare,
   AlertCircle,
   Loader2,
-} from 'lucide-react';
+} from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import { notificationService, Notification } from '../../services/notification';
 import '../../styles/mobile-minimal.css';

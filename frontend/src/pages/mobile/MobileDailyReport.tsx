@@ -13,7 +13,7 @@ import {
   ChevronRight,
   Loader2,
   Sparkles,
-} from 'lucide-react';
+} from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import {
   dailyReportService,

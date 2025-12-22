@@ -4,7 +4,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Task } from '../services/task';
-import { ChevronRight, ChevronDown, Check } from 'lucide-react';
+import { ChevronRight, ChevronDown, Check } from './Icons';
 import './TaskList.css';
 
 interface TaskListProps {

@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Folder, Upload, Grid, List, Search } from 'lucide-react';
+import { Folder, Upload, Grid, List, Search } from './Icons';
 import { FileUpload } from './FileUpload';
 import { AttachmentList } from './AttachmentList';
 import { 

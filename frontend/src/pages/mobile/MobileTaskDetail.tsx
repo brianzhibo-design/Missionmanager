@@ -15,7 +15,7 @@ import {
   Plus,
   Loader2,
   Sparkles,
-} from 'lucide-react';
+} from '../../components/Icons';
 import { taskService, Task } from '../../services/task';
 import { commentService, Comment } from '../../services/comment';
 import MobileLayout from '../../components/mobile/MobileLayout';

@@ -1,7 +1,7 @@
 /**
  * 任务统计徽章组件
  */
-import { CheckCircle, Circle, Clock } from 'lucide-react';
+import { CheckCircle, Circle, Clock } from '../Icons';
 import { TaskStats } from '../../services/tree';
 import './TaskStatsBadge.css';
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Inbox, Calendar, AlertCircle, Clock, CalendarDays } from 'lucide-react';
+import { Check, Inbox, Calendar, AlertCircle, Clock, CalendarDays } from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import { taskService, TaskWithProject } from '../../services/task';
 import '../../styles/mobile-minimal.css';

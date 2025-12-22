@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react';
+import { Check } from '../Icons';
 
 interface Task {
   id: string;

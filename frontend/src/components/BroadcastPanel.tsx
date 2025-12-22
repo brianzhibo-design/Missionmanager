@@ -2,7 +2,7 @@
  * 群发消息面板组件
  */
 import React, { useState, useEffect } from 'react';
-import { Send, Mail, Coffee, History, X, Users, Wand2, Loader2 } from 'lucide-react';
+import { Send, Mail, Coffee, History, X, Users, Wand2, Loader2 } from './Icons';
 import { broadcastService, BroadcastMessage, CoffeeWinner, CoffeeLottery } from '../services/broadcast';
 import { workspaceService } from '../services/workspace';
 import { aiService } from '../services/ai';

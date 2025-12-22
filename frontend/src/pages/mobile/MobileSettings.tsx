@@ -23,7 +23,7 @@ import {
   Users,
   Folder,
   FileText,
-} from 'lucide-react';
+} from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import SheetModal from '../../components/mobile/SheetModal';
 import { useAuth } from '../../hooks/useAuth';

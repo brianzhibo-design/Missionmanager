@@ -3,7 +3,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { Paperclip, Plus } from 'lucide-react';
+import { Paperclip, Plus } from './Icons';
 import { FileUpload, UploadButton } from './FileUpload';
 import { AttachmentList } from './AttachmentList';
 import { 

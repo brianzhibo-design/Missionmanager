@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, LayoutGrid, List, Crown, Sparkles, Check, X, Loader2, Eye, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
+import { FolderOpen, Search, AlertTriangle, ClipboardList, CheckCircle2, LayoutGrid, List, Crown, Sparkles, Check, X, Loader2, Eye, EyeOff, ChevronDown, ChevronRight } from '../components/Icons';
 import { usePermissions } from '../hooks/usePermissions';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { projectService, SuggestedTask, InitialTask } from '../services/project';

@@ -3,7 +3,7 @@
  */
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Bell, CheckCircle, Trash2, MessageCircle, ClipboardList, Clock, AlertTriangle, BarChart3, Send, Coffee, Check } from 'lucide-react';
+import { Bell, CheckCircle2 as CheckCircle, Trash2, MessageCircle, ClipboardList, Clock, AlertTriangle, BarChart3, Send, Coffee, Check } from './Icons';
 import { notificationService, NotificationResponse } from '../services/notification';
 import './NotificationCenter.css';
 

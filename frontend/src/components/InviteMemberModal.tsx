@@ -2,7 +2,7 @@
  * 邀请成员模态框组件
  */
 import { useState } from 'react';
-import { Mail, Phone, Link, Copy, Check, X } from 'lucide-react';
+import { Mail, Phone, Link, Copy, Check, X } from './Icons';
 import { memberService } from '../services/member';
 import './InviteMemberModal.css';
 

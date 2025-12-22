@@ -13,7 +13,7 @@ import {
   User, Palette, Briefcase, Lock, Check, X, Loader2, Trash2, MapPin, Building2, FileText, Phone,
   Settings as SettingsIcon, Sun, Moon, Monitor, FolderOpen, Bell, BellOff, Copy, Share2, Link,
   Code, PaintBucket, ClipboardList, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
-} from 'lucide-react';
+} from '../components/Icons';
 import { pushNotificationService } from '../services/pushNotification';
 import { AvatarUpload } from '../components/AvatarUpload';
 import MobileSettings from './mobile/MobileSettings';

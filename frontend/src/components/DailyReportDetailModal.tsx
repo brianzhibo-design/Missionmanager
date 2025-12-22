@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react';
 import { 
   X, Calendar, CheckCircle2, Circle, AlertCircle, Clock, Loader2,
   Sparkles, Zap, Activity, MessageSquare, Heart, Send, Trash2
-} from 'lucide-react';
+} from './Icons';
 import { dailyReportService, DailyReport, DailyReportComment, LikesResult } from '../services/dailyReport';
 import './DailyReportDetailModal.css';
 

@@ -8,7 +8,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { useAuth } from '../hooks/useAuth';
 import Modal from '../components/Modal';
 import { TaskBreakdownModal, RiskPredictionPanel } from '../components/ai';
-import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle, Circle, AlertTriangle, FileText, ClipboardList, Activity, Bot, Lightbulb, Package } from 'lucide-react';
+import { GitBranch, Shield, Sparkles, Edit, RefreshCw, Trash2, User, Wand2, Plus, CheckSquare, X, Send, MessageCircle, Circle, AlertTriangle, FileText, ClipboardList, Activity, Bot, Lightbulb, Package } from '../components/Icons';
 import TaskComments from '../components/TaskComments';
 import { TaskAttachments } from '../components/TaskAttachments';
 import MobileTaskDetail from './mobile/MobileTaskDetail';

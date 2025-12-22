@@ -15,8 +15,10 @@ import {
   Brain,
   Settings,
   FolderKanban,
-  LucideIcon,
-} from 'lucide-react';
+  HeroIcon,
+} from './Icons';
+
+type LucideIcon = HeroIcon;
 import './MobileNav.css';
 
 interface NavItem {

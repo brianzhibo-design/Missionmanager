@@ -15,7 +15,7 @@ import {
   Eye,
   Trash2,
   Loader2,
-} from 'lucide-react';
+} from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import SheetModal from '../../components/mobile/SheetModal';
 import { treeService, ProjectNode, ProjectTreeResponse } from '../../services/tree';

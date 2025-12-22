@@ -10,7 +10,7 @@ import {
   FileText, Calendar, AlertTriangle, CheckCircle2, 
   ChevronLeft, ChevronRight, Zap, Save, Edit2, Trash2, Clock,
   Activity, Circle, AlertCircle, Lock
-} from 'lucide-react';
+} from '../components/Icons';
 import MobileDailyReport from './mobile/MobileDailyReport';
 import './MyDailyReport.css';
 

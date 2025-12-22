@@ -1,5 +1,5 @@
 import { useEffect, useCallback } from 'react';
-import { X } from 'lucide-react';
+import { X } from '../Icons';
 
 interface SheetModalProps {
   isOpen: boolean;

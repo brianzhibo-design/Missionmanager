@@ -3,7 +3,7 @@
  * 用于群发消息、项目成员选择等场景
  */
 import React, { useState, useMemo } from 'react';
-import { Search, Check, Users, Crown, X } from 'lucide-react';
+import { Search, Check, Users, Crown, X } from './Icons';
 import RoleBadge from './RoleBadge';
 import './MemberSelector.css';
 

@@ -9,7 +9,7 @@ import {
   CheckCircle,
   AlertTriangle,
   TrendingUp,
-} from 'lucide-react';
+} from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import { aiService, RiskPredictionResult, ProgressEstimation, DailySuggestions } from '../../services/ai';
 import '../../styles/mobile-minimal.css';

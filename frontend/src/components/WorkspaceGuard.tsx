@@ -4,7 +4,7 @@
  */
 import { Navigate, useLocation } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from './Icons';
 
 interface WorkspaceGuardProps {
   children: React.ReactNode;

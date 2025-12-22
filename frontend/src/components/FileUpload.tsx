@@ -3,7 +3,7 @@
  */
 
 import React, { useRef, useState, useCallback } from 'react';
-import { Upload, X, File, Image, Video, Music, FileText, Archive, Loader2 } from 'lucide-react';
+import { Upload, X, File, Image, Video, Music, FileText, Archive, Loader2 } from './Icons';
 import { validateFile, formatFileSize, FILE_CONFIG, FileType } from '../services/upload';
 import './FileUpload.css';
 

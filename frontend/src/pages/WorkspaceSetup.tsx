@@ -9,7 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 import { 
   Building2, Users, Plus, Search, ArrowRight, CheckCircle2, 
   Clock, AlertCircle, Loader2
-} from 'lucide-react';
+} from '../components/Icons';
 import './WorkspaceSetup.css';
 
 type Mode = 'select' | 'create' | 'join';

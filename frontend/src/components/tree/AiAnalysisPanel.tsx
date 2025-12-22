@@ -5,7 +5,7 @@
 import { 
   Bot, X, BarChart3, AlertTriangle, Moon, Construction, Lightbulb, Search,
   Flame, Circle, Package, Target, CheckCircle2
-} from 'lucide-react';
+} from '../Icons';
 import { TeamAnalysisResult, ProjectsOverviewResult } from '../../services/treeAnalysis';
 import './AiAnalysisPanel.css';
 
