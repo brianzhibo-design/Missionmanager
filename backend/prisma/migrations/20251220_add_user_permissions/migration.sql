@@ -8,3 +8,4 @@ CREATE INDEX IF NOT EXISTS "workspace_users_permissions_idx" ON "workspace_users
 
 
 
+

@@ -6,11 +6,11 @@ import rateLimit from 'express-rate-limit';
 
 /**
  * 通用 API 限制
- * 每个 IP 每 15 分钟最多 200 次请求
+ * 每个 IP 每 15 分钟最多 1000 次请求（放宽限制）
  */
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 分钟
-  max: 200, // 每个 IP 最多 200 次请求
+  max: 1000, // 每个 IP 最多 1000 次请求
   message: {
     success: false,
     error: {
@@ -21,24 +21,27 @@ export const generalLimiter = rateLimit({
   standardHeaders: true, // 返回 RateLimit-* headers
   legacyHeaders: false, // 禁用 X-RateLimit-* headers
   skip: (req) => {
-    // 健康检查端点跳过限制
-    return req.path === '/health' || req.path === '/api/health';
+    // 健康检查端点和 token 刷新跳过限制
+    return req.path === '/health' || 
+           req.path === '/api/health' ||
+           req.path === '/auth/refresh' ||
+           req.path === '/api/auth/refresh';
   },
 });
 
 /**
- * 登录/注册限制（更严格）
- * 每个 IP 每小时最多 10 次尝试
- * 防止暴力破解密码
+ * 登录/注册限制
+ * 每个 IP 每 15 分钟最多 30 次尝试
+ * 防止暴力破解密码，但允许正常使用
  */
 export const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 小时
-  max: 10, // 每个 IP 最多 10 次尝试
+  windowMs: 15 * 60 * 1000, // 15 分钟
+  max: 30, // 每个 IP 最多 30 次尝试
   message: {
     success: false,
     error: {
       code: 'AUTH_RATE_LIMIT_EXCEEDED',
-      message: '登录尝试过多，请 1 小时后再试',
+      message: '登录尝试过多，请 15 分钟后再试',
     },
   },
   standardHeaders: true,
@@ -100,3 +103,4 @@ export const notificationLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
