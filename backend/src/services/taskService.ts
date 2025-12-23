@@ -29,9 +29,9 @@ const DELETE_ROLES = ['owner', 'director', 'manager'] as const;
 /**
  * 检查用户是否有任务编辑权限
  * 权限条件:
- * 1. owner, admin, leader: 可以编辑所有任务
- * 2. member: 只能编辑自己创建或被分配的任务
- * 3. guest: 无编辑权限
+ * 1. owner, director, manager: 可以编辑所有任务
+ * 2. member: 创建任务时可以创建，编辑时只能编辑自己创建或被分配的任务
+ * 3. observer: 无编辑权限
  * 4. 项目负责人: 可以编辑项目内所有任务
  */
 async function canEditTask(
@@ -39,7 +39,8 @@ async function canEditTask(
   workspaceId: string, 
   userId: string, 
   task?: { creatorId: string; assigneeId: string | null },
-  isProjectLeader?: boolean
+  isProjectLeader?: boolean,
+  isCreating?: boolean  // 是否是创建任务操作
 ): Promise<boolean> {
   // 1. 检查工作区角色（owner, director, manager 可以编辑所有任务）
   const hasAdminRole = await workspaceService.hasRole(workspaceId, userId, ['owner', 'director', 'manager']);
@@ -48,19 +49,29 @@ async function canEditTask(
   // 2. 项目负责人可以编辑项目内所有任务
   if (isProjectLeader) return true;
 
-  // 3. member 只能编辑自己创建或被分配的任务
-  if (task) {
+  // 3. 检查工作区成员资格
+  const membership = await workspaceService.getMembership(workspaceId, userId);
+  if (!membership) return false;
+  
+  const mappedRole = mapRole(membership.role);
+  
+  // observer 无编辑权限
+  if (mappedRole === 'observer') return false;
+
+  // 4. 创建任务时，member 作为项目成员或工作区成员可以创建
+  if (isCreating && mappedRole === 'member') {
+    // 检查是否是项目成员（使用 projectRepository 避免循环依赖）
+    const projectMember = await projectRepository.findProjectMember(projectId, userId);
+    // 项目成员或工作区 member 都可以创建任务
+    return !!projectMember || true;
+  }
+
+  // 5. 编辑任务时，member 只能编辑自己创建或被分配的任务
+  if (task && mappedRole === 'member') {
     const isCreator = task.creatorId === userId;
     const isAssignee = task.assigneeId === userId;
     if (isCreator || isAssignee) {
-      // 验证用户是工作区成员且角色为member
-      const membership = await workspaceService.getMembership(workspaceId, userId);
-      if (membership) {
-        const mappedRole = mapRole(membership.role);
-        if (mappedRole === 'member') {
-          return true;
-        }
-      }
+      return true;
     }
   }
 
@@ -127,8 +138,8 @@ export const taskService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    // 2. 检查用户是否有权限创建任务
-    const hasPermission = await canEditTask(data.projectId, project.workspaceId, userId);
+    // 2. 检查用户是否有权限创建任务（isCreating = true）
+    const hasPermission = await canEditTask(data.projectId, project.workspaceId, userId, undefined, undefined, true);
     if (!hasPermission) {
       throw new AppError('没有权限创建任务', 403, 'FORBIDDEN');
     }
