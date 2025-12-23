@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { usePermissions } from '../hooks/usePermissions';
 import { PERMISSIONS } from '../config/permissions';
 import './AdminRoute.css';
@@ -26,7 +27,7 @@ export default function AdminRoute({ children, permission = 'adminTree' }: Admin
         <h2>无权访问</h2>
         <p>您没有权限访问此页面</p>
         <p className="denied-hint">请联系工作区管理员获取访问权限</p>
-        <a href="/dashboard" className="btn btn-primary">返回首页</a>
+        <Link to="/dashboard" className="btn btn-primary">返回首页</Link>
       </div>
     );
   }

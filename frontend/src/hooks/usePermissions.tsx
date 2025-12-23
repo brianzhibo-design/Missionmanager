@@ -49,7 +49,10 @@ const PermissionsContext = createContext<PermissionsContextType | undefined>(und
 export function PermissionsProvider({ children }: { children: ReactNode }) {
   const [workspaces, setWorkspaces] = useState<WorkspaceWithRole[]>([]);
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(true);
-  const [currentWorkspaceId, setCurrentWorkspaceIdState] = useState<string>('');
+  // 从 localStorage 读取初始工作区ID，避免刷新后丢失
+  const [currentWorkspaceId, setCurrentWorkspaceIdState] = useState<string>(() => {
+    return localStorage.getItem('currentWorkspaceId') || '';
+  });
   const [projectLeaders, setProjectLeaders] = useState<Record<string, boolean>>({});
   const [customPermissions, setCustomPermissions] = useState<WorkspacePermission[]>([]);
 
@@ -65,12 +68,22 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
       
       setWorkspaces(workspacesWithRole);
       
-      // 如果没有选中工作区，选择第一个
+      // 验证当前工作区ID是否有效，无效则选择第一个
       setCurrentWorkspaceIdState(prev => {
-        if (!prev && workspacesWithRole.length > 0) {
-          return workspacesWithRole[0].id;
+        // 如果有之前的 ID，检查是否在新列表中存在
+        if (prev) {
+          const exists = workspacesWithRole.some(ws => ws.id === prev);
+          if (exists) {
+            return prev; // 保持当前选择
+          }
         }
-        return prev;
+        // 没有有效的选择，选择第一个工作区
+        if (workspacesWithRole.length > 0) {
+          const firstId = workspacesWithRole[0].id;
+          localStorage.setItem('currentWorkspaceId', firstId);
+          return firstId;
+        }
+        return '';
       });
     } catch (err) {
       console.error('Failed to load workspaces:', err);
@@ -139,14 +152,20 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
     setProjectLeaders(prev => ({ ...prev, [projectId]: isLeader }));
   };
 
-  // 设置当前工作区 ID
+  // 设置当前工作区 ID，同时保存到 localStorage
   const setCurrentWorkspaceId = (id: string) => {
     setCurrentWorkspaceIdState(id);
+    if (id) {
+      localStorage.setItem('currentWorkspaceId', id);
+    } else {
+      localStorage.removeItem('currentWorkspaceId');
+    }
   };
 
   // 设置当前工作区（接受完整工作区对象）
   const setCurrentWorkspace = (workspace: WorkspaceWithRole) => {
     setCurrentWorkspaceIdState(workspace.id);
+    localStorage.setItem('currentWorkspaceId', workspace.id);
   };
 
   return (
