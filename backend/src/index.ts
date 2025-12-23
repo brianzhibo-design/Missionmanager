@@ -8,6 +8,13 @@ import { log } from './lib/logger';
 import { initSocketService } from './lib/socketService';
 import { metricsMiddleware, metricsEndpoint } from './lib/metrics';
 import { requestLogger } from './middleware/requestLogger';
+import { 
+  generalLimiter, 
+  authLimiter, 
+  aiLimiter, 
+  uploadLimiter, 
+  notificationLimiter 
+} from './middleware/rateLimit';
 import { healthRouter } from './controllers/healthController';
 import { authRouter } from './controllers/authController';
 import { workspaceRouter } from './controllers/workspaceController';
@@ -42,23 +49,26 @@ app.use(metricsMiddleware);
 // 监控端点
 app.get('/metrics', metricsEndpoint);
 
-// 路由
+// 通用 API 限速（应用到所有路由）
+app.use(generalLimiter);
+
+// 路由（带特定限速的路由使用各自的 limiter）
 app.use('/health', healthRouter);
-app.use('/auth', authRouter);
+app.use('/auth', authLimiter, authRouter); // 登录限制更严格
 app.use('/workspaces', workspaceRouter);
 app.use('/projects', projectRouter);
 app.use('/tasks', taskRouter);
-app.use('/ai', aiRouter);
+app.use('/ai', aiLimiter, aiRouter); // AI 请求限制
 app.use('/admin', adminRouter);
 app.use('/tree', treeRouter);
-app.use('/tree-analysis', treeAnalysisRouter);
+app.use('/tree-analysis', aiLimiter, treeAnalysisRouter); // AI 分析使用 AI 限制
 app.use('/members', memberRouter);
-app.use('/notifications', notificationRouter);
+app.use('/notifications', notificationLimiter, notificationRouter); // 通知限制
 app.use('/reports', reportRouter);
 app.use('/comments', commentRouter);
-app.use('/broadcast', broadcastRouter);
+app.use('/broadcast', notificationLimiter, broadcastRouter); // 广播使用通知限制
 app.use('/daily-reports', dailyReportRouter);
-app.use('/upload', uploadRouter);
+app.use('/upload', uploadLimiter, uploadRouter); // 上传限制
 app.use('/permissions', permissionRouter);
 
 // 测试错误处理的路由（开发用）
