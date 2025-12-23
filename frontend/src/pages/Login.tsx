@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { authService, UserProfile } from '../services/auth';
 import { 
-  Mail, Lock, Phone, ClipboardList, User, UserCircle, Building2, MapPin,
+  Mail, Phone, ClipboardList,
   Code, PaintBucket, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles,
   Eye, EyeOff
 } from '../components/Icons';
