@@ -6,7 +6,7 @@
  * - 默认权限：显示为"已启用"且不可关闭（锁定状态）
  * - 额外权限：显示为普通开关，允许手动赋予
  */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { X, Loader2, Crown, Info, Lock, CheckCircle2 } from './Icons';
 import { permissionService, AVAILABLE_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS, PERMISSION_GROUPS, UserPermissionData, WorkspacePermission } from '../services/permission';
 import { ROLE_LABELS } from '../config/permissions';
@@ -46,13 +46,7 @@ export default function PermissionSettingsModal({
   // 默认权限数量
   const defaultPermCount = roleDefaultPerms.length;
 
-  useEffect(() => {
-    if (isOpen && userId && workspaceId) {
-      loadPermissions();
-    }
-  }, [isOpen, userId, workspaceId]);
-
-  const loadPermissions = async () => {
+  const loadPermissions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -65,7 +59,13 @@ export default function PermissionSettingsModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [workspaceId, userId]);
+
+  useEffect(() => {
+    if (isOpen && userId && workspaceId) {
+      loadPermissions();
+    }
+  }, [isOpen, userId, workspaceId, loadPermissions]);
 
   const togglePermission = (permissionId: WorkspacePermission, isDefault: boolean) => {
     // 默认权限不可关闭

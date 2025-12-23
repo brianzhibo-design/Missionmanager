@@ -1,7 +1,7 @@
 /**
  * 成员管理页面
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePermissions } from '../../hooks/usePermissions';
 import { memberService, Member } from '../../services/member';
 import { workspaceService, JoinRequest } from '../../services/workspace';
@@ -40,30 +40,22 @@ export default function MembersManage() {
   const [, setLoadingRequests] = useState(false);
   const [processingRequest, setProcessingRequest] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (currentWorkspace) {
-      loadMembers();
-      if (canWorkspace('invite')) {
-        loadJoinRequests();
-      }
-    }
-  }, [currentWorkspace]);
-
-  const loadMembers = async () => {
+  const loadMembers = useCallback(async () => {
     if (!currentWorkspace) return;
     setLoading(true);
     setError(null);
     try {
       const data = await memberService.getMembers(currentWorkspace.id);
       setMembers(data);
-    } catch (err: any) {
-      setError(err.response?.data?.error?.message || err.message);
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: { message?: string } } }; message?: string };
+      setError(error.response?.data?.error?.message || error.message || '加载失败');
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentWorkspace]);
 
-  const loadJoinRequests = async () => {
+  const loadJoinRequests = useCallback(async () => {
     if (!currentWorkspace) return;
     setLoadingRequests(true);
     try {
@@ -74,7 +66,16 @@ export default function MembersManage() {
     } finally {
       setLoadingRequests(false);
     }
-  };
+  }, [currentWorkspace]);
+
+  useEffect(() => {
+    if (currentWorkspace) {
+      loadMembers();
+      if (canWorkspace('invite')) {
+        loadJoinRequests();
+      }
+    }
+  }, [currentWorkspace, loadMembers, loadJoinRequests, canWorkspace]);
 
   const handleReviewRequest = async (requestId: string, approved: boolean) => {
     if (!currentWorkspace) return;

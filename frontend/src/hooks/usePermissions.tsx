@@ -54,27 +54,30 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   const [customPermissions, setCustomPermissions] = useState<WorkspacePermission[]>([]);
 
   // 加载工作区列表
-  const loadWorkspaces = async () => {
+  const loadWorkspaces = useCallback(async () => {
     setLoadingWorkspaces(true);
     try {
       const data = await workspaceService.getWorkspaces();
       const workspacesWithRole = data.map(ws => ({
         ...ws,
-        role: (ws as any).role || 'member',
+        role: ((ws as { role?: string }).role || 'member') as WorkspaceRole,
       })) as WorkspaceWithRole[];
       
       setWorkspaces(workspacesWithRole);
       
       // 如果没有选中工作区，选择第一个
-      if (!currentWorkspaceId && workspacesWithRole.length > 0) {
-        setCurrentWorkspaceIdState(workspacesWithRole[0].id);
-      }
+      setCurrentWorkspaceIdState(prev => {
+        if (!prev && workspacesWithRole.length > 0) {
+          return workspacesWithRole[0].id;
+        }
+        return prev;
+      });
     } catch (err) {
       console.error('Failed to load workspaces:', err);
     } finally {
       setLoadingWorkspaces(false);
     }
-  };
+  }, []);
 
   // 加载当前用户的自定义权限
   const loadMyPermissions = useCallback(async (workspaceId: string) => {
@@ -94,7 +97,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     loadWorkspaces();
-  }, []);
+  }, [loadWorkspaces]);
 
   // 当工作区变化时，加载自定义权限
   useEffect(() => {

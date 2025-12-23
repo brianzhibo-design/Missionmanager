@@ -2,7 +2,7 @@
  * 日报详情弹窗
  * 优化版：现代化 UI，支持评论和点赞互动
  */
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   X, Calendar, CheckCircle2, Circle, AlertCircle, Clock, Loader2,
   Sparkles, Zap, Activity, MessageSquare, Heart, Send, Trash2
@@ -41,30 +41,7 @@ export default function DailyReportDetailModal({
   
   const commentInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (isOpen && reportId && !initialReport) {
-      loadReport();
-    } else if (initialReport) {
-      setReport(initialReport);
-    }
-  }, [isOpen, reportId, initialReport]);
-
-  // 加载评论和点赞数据
-  useEffect(() => {
-    if (isOpen && report?.id) {
-      loadInteractions();
-    }
-  }, [isOpen, report?.id]);
-
-  // 重置状态当弹窗关闭时
-  useEffect(() => {
-    if (!isOpen) {
-      setShowComments(false);
-      setNewComment('');
-    }
-  }, [isOpen]);
-
-  const loadReport = async () => {
+  const loadReport = useCallback(async () => {
     if (!reportId) return;
     setLoading(true);
     setError(null);
@@ -76,21 +53,43 @@ export default function DailyReportDetailModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [reportId]);
 
-  const loadInteractions = async () => {
-    if (!report?.id) return;
+  const loadInteractions = useCallback(async (targetReportId: string) => {
     try {
       const [commentsData, likes] = await Promise.all([
-        dailyReportService.getComments(report.id),
-        dailyReportService.getLikes(report.id),
+        dailyReportService.getComments(targetReportId),
+        dailyReportService.getLikes(targetReportId),
       ]);
       setComments(commentsData);
       setLikesData(likes);
     } catch (err) {
       console.error('加载互动数据失败:', err);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && reportId && !initialReport) {
+      loadReport();
+    } else if (initialReport) {
+      setReport(initialReport);
+    }
+  }, [isOpen, reportId, initialReport, loadReport]);
+
+  // 加载评论和点赞数据
+  useEffect(() => {
+    if (isOpen && report?.id) {
+      loadInteractions(report.id);
+    }
+  }, [isOpen, report?.id, loadInteractions]);
+
+  // 重置状态当弹窗关闭时
+  useEffect(() => {
+    if (!isOpen) {
+      setShowComments(false);
+      setNewComment('');
+    }
+  }, [isOpen]);
 
   const handleToggleLike = async () => {
     if (!report?.id || liking) return;

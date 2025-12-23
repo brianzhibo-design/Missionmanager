@@ -1,7 +1,7 @@
 /**
  * 群发消息面板组件
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Send, Mail, Coffee, History, X, Users, Wand2, Loader2 } from './Icons';
 import { broadcastService, BroadcastMessage, CoffeeWinner, CoffeeLottery } from '../services/broadcast';
 import { workspaceService } from '../services/workspace';
@@ -33,22 +33,7 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
   const [aiOptimizing, setAiOptimizing] = useState(false);
   const [messageContext, setMessageContext] = useState<'announcement' | 'reminder' | 'notification' | 'general'>('general');
 
-  useEffect(() => {
-    loadMembers();
-    if (hasCoffeePermission) {
-      loadCoffeeWinner();
-    }
-  }, [workspaceId, hasCoffeePermission]);
-
-  useEffect(() => {
-    if (activeTab === 'history') {
-      loadHistory();
-    } else if (activeTab === 'coffee') {
-      loadCoffeeHistory();
-    }
-  }, [activeTab, workspaceId]);
-
-  const loadMembers = async () => {
+  const loadMembers = useCallback(async () => {
     try {
       const data = await workspaceService.getMembers(workspaceId);
       setMembers(data.map(m => ({
@@ -61,34 +46,51 @@ export const BroadcastPanel: React.FC<BroadcastPanelProps> = ({ workspaceId, onC
     } catch (error) {
       console.error('加载成员失败:', error);
     }
-  };
+  }, [workspaceId]);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       const data = await broadcastService.getHistory(workspaceId);
       setHistory(data.messages);
     } catch (error) {
       console.error('加载历史失败:', error);
     }
-  };
+  }, [workspaceId]);
 
-  const loadCoffeeWinner = async () => {
+  const loadCoffeeWinner = useCallback(async () => {
     try {
       const winner = await broadcastService.getTodayCoffeeWinner(workspaceId);
       setCoffeeWinner(winner);
     } catch (error) {
       console.error('获取咖啡获奖者失败:', error);
     }
-  };
+  }, [workspaceId]);
 
-  const loadCoffeeHistory = async () => {
+  const loadCoffeeHistory = useCallback(async () => {
     try {
       const data = await broadcastService.getCoffeeHistory(workspaceId);
       setCoffeeHistory(data);
     } catch (error) {
       console.error('加载咖啡历史失败:', error);
     }
-  };
+  }, [workspaceId]);
+
+  // 初始加载成员和咖啡获奖者
+  useEffect(() => {
+    loadMembers();
+    if (hasCoffeePermission) {
+      loadCoffeeWinner();
+    }
+  }, [loadMembers, loadCoffeeWinner, hasCoffeePermission]);
+
+  // 切换标签页时加载对应数据
+  useEffect(() => {
+    if (activeTab === 'history') {
+      loadHistory();
+    } else if (activeTab === 'coffee') {
+      loadCoffeeHistory();
+    }
+  }, [activeTab, loadHistory, loadCoffeeHistory]);
 
   const handleSend = async () => {
     if (!title.trim() || !content.trim() || selectedIds.length === 0) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Calendar,
@@ -61,13 +61,7 @@ export default function MobileTaskDetail() {
   const [addingSubtask, setAddingSubtask] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  useEffect(() => {
-    if (taskId) {
-      loadTaskDetail();
-    }
-  }, [taskId]);
-
-  const loadTaskDetail = async () => {
+  const loadTaskDetail = useCallback(async () => {
     if (!taskId) return;
 
     try {
@@ -83,7 +77,13 @@ export default function MobileTaskDetail() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [taskId]);
+
+  useEffect(() => {
+    if (taskId) {
+      loadTaskDetail();
+    }
+  }, [taskId, loadTaskDetail]);
 
   const handleBack = () => {
     navigate(-1);

@@ -2,7 +2,7 @@
  * 成员任务树页面
  * 只显示当前工作区的项目和成员
  */
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Network, Brain, RefreshCw, AlertTriangle, Edit2, Users, Crown, User, FolderOpen } from '../../components/Icons';
 import { treeService, MemberNode, MemberTreeResponse } from '../../services/tree';
 import { projectService, Project } from '../../services/project';
@@ -58,6 +58,37 @@ function DesktopMembersTree() {
   const [editingMember, setEditingMember] = useState<MemberNode | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // 使用 ref 来跟踪是否是初始加载
+  const isInitialLoad = useRef(true);
+
+  // 加载函数定义（使用 useCallback）
+  const loadProjects = useCallback(async (workspaceId: string) => {
+    try {
+      setError(null);
+      const data = await projectService.getProjects(workspaceId);
+      setProjects(data);
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || '加载项目失败');
+    }
+  }, []);
+
+  const loadMemberTree = useCallback(async (projectId: string) => {
+    setLoading(true);
+    setError(null);
+    setShowAnalysis(false);
+    setAnalysisResult(null);
+    try {
+      const data = await treeService.getMemberTree(projectId);
+      setTreeData(data);
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || '加载成员树失败');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   // 当工作区变化时，加载项目列表
   useEffect(() => {
     if (currentWorkspace?.id) {
@@ -67,12 +98,9 @@ function DesktopMembersTree() {
       setSelectedProject('');
       setTreeData(null);
     }
-  }, [currentWorkspace?.id]);
+  }, [currentWorkspace?.id, loadProjects]);
 
   // 当项目变化时，保存到 localStorage 并加载数据
-  // 使用 ref 来跟踪是否是初始加载
-  const isInitialLoad = useRef(true);
-  
   useEffect(() => {
     if (selectedProject) {
       localStorage.setItem('membersTree_selectedProject', selectedProject);
@@ -84,7 +112,7 @@ function DesktopMembersTree() {
       localStorage.removeItem('membersTree_selectedProject');
       setTreeData(null);
     }
-  }, [selectedProject]);
+  }, [selectedProject, projects.length, loadMemberTree]);
 
   // 当项目列表加载完成后，验证并加载保存的项目
   useEffect(() => {
@@ -101,33 +129,7 @@ function DesktopMembersTree() {
       // 标记初始加载完成
       isInitialLoad.current = false;
     }
-  }, [projects]); // 只在 projects 变化时执行
-
-  const loadProjects = async (workspaceId: string) => {
-    try {
-      setError(null);
-      const data = await projectService.getProjects(workspaceId);
-      setProjects(data);
-      // 不再重置 selectedProject 和 treeData，让 useEffect 处理验证和加载逻辑
-    } catch (err: any) {
-      setError(err.message);
-    }
-  };
-
-  const loadMemberTree = async (projectId: string) => {
-    setLoading(true);
-    setError(null);
-    setShowAnalysis(false);
-    setAnalysisResult(null);
-    try {
-      const data = await treeService.getMemberTree(projectId);
-      setTreeData(data);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [projects, selectedProject, loadMemberTree]);
 
   // AI 分析团队
   const handleAnalyze = async () => {

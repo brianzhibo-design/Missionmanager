@@ -1,7 +1,7 @@
 /**
  * 任务评论组件
  */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, Send, Trash2, Heart, AtSign, Image, X, Loader2, Smile } from './Icons';
 import { commentService, Comment } from '../services/comment';
 import { uploadCommentImage } from '../services/upload';
@@ -42,9 +42,21 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
   const mentionListRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
+  const loadComments = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await commentService.getByTaskId(taskId);
+      setComments(data);
+    } catch (error) {
+      console.error('加载评论失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [taskId]);
+
   useEffect(() => {
     loadComments();
-  }, [taskId]);
+  }, [loadComments]);
 
   // 点击外部关闭表情选择器
   useEffect(() => {
@@ -80,18 +92,6 @@ export const TaskComments: React.FC<TaskCommentsProps> = ({ taskId, projectMembe
       const newCursorPos = cursorPos + emoji.length;
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
-  };
-
-  const loadComments = async () => {
-    try {
-      setLoading(true);
-      const data = await commentService.getByTaskId(taskId);
-      setComments(data);
-    } catch (error) {
-      console.error('加载评论失败:', error);
-    } finally {
-      setLoading(false);
-    }
   };
 
   // 提取@提及的用户ID（支持带空格的用户名）

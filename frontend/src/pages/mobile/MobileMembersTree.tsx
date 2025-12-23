@@ -64,21 +64,8 @@ export default function MobileMembersTree() {
   const [showRoleEdit, setShowRoleEdit] = useState(false);
   const [updatingRole, setUpdatingRole] = useState(false);
 
-  // 加载项目列表
-  useEffect(() => {
-    if (currentWorkspace?.id) {
-      loadProjects();
-    }
-  }, [currentWorkspace?.id]);
-
-  // 加载成员树
-  useEffect(() => {
-    if (selectedProjectId) {
-      loadMemberTree();
-    }
-  }, [selectedProjectId]);
-
-  const loadProjects = async () => {
+  // 加载函数定义
+  const loadProjects = useCallback(async () => {
     if (!currentWorkspace?.id) return;
 
     try {
@@ -86,13 +73,13 @@ export default function MobileMembersTree() {
       setProjects(data);
 
       // 自动选择第一个项目
-      if (data.length > 0 && !selectedProjectId) {
-        setSelectedProjectId(data[0].id);
+      if (data.length > 0) {
+        setSelectedProjectId(prev => prev || data[0].id);
       }
     } catch (err) {
       console.error('Failed to load projects:', err);
     }
-  };
+  }, [currentWorkspace?.id]);
 
   const loadMemberTree = useCallback(async () => {
     if (!selectedProjectId) return;
@@ -102,12 +89,27 @@ export default function MobileMembersTree() {
       setError(null);
       const data = await treeService.getMemberTree(selectedProjectId);
       setTreeData(data);
-    } catch (err: any) {
-      setError(err.message || '加载失败');
+    } catch (err: unknown) {
+      const error = err as { message?: string };
+      setError(error.message || '加载失败');
     } finally {
       setLoading(false);
     }
   }, [selectedProjectId]);
+
+  // 加载项目列表
+  useEffect(() => {
+    if (currentWorkspace?.id) {
+      loadProjects();
+    }
+  }, [currentWorkspace?.id, loadProjects]);
+
+  // 加载成员树
+  useEffect(() => {
+    if (selectedProjectId) {
+      loadMemberTree();
+    }
+  }, [selectedProjectId, loadMemberTree]);
 
   // 展开/折叠成员
   const toggleMemberExpand = (userId: string) => {

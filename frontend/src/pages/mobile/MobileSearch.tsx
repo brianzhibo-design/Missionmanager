@@ -55,6 +55,14 @@ export default function MobileSearch() {
     }
   }, []);
 
+  const saveToHistory = useCallback((term: string) => {
+    setHistory(prevHistory => {
+      const newHistory = [term, ...prevHistory.filter(h => h !== term)].slice(0, 10);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+      return newHistory;
+    });
+  }, []);
+
   const performSearch = useCallback(async (searchQuery: string, type: SearchType) => {
     if (!currentWorkspace?.id || searchQuery.length < 2) return;
 
@@ -125,7 +133,7 @@ export default function MobileSearch() {
     } finally {
       setLoading(false);
     }
-  }, [currentWorkspace?.id]);
+  }, [currentWorkspace?.id, saveToHistory]);
 
   // 防抖搜索
   useEffect(() => {
@@ -139,12 +147,6 @@ export default function MobileSearch() {
       setHasSearched(false);
     }
   }, [query, searchType, performSearch]);
-
-  const saveToHistory = (term: string) => {
-    const newHistory = [term, ...history.filter(h => h !== term)].slice(0, 10);
-    setHistory(newHistory);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
-  };
 
   const clearHistory = () => {
     setHistory([]);
