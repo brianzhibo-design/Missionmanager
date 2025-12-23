@@ -183,12 +183,12 @@ function DesktopMembersTree() {
     if (!workspaceRole || !treeData) return false;
     
     // owner 和 admin 可以编辑所有项目
-    if (['owner', 'admin'].includes(workspaceRole)) {
+    if (['owner', 'director', 'admin'].includes(workspaceRole)) {
       return true;
     }
     
     // leader 只能编辑自己负责的项目（需要检查项目负责人）
-    if (workspaceRole === 'leader' && treeData.leader && currentUser) {
+    if ((workspaceRole === 'manager' || workspaceRole === 'leader') && treeData.leader && currentUser) {
       return treeData.leader.id === currentUser.id;
     }
     
@@ -200,7 +200,7 @@ function DesktopMembersTree() {
     if (!workspaceRole || !treeData || !currentUser) return false;
     
     // owner 和 admin 可以运行 AI 分析
-    if (['owner', 'admin'].includes(workspaceRole)) {
+    if (['owner', 'director', 'admin'].includes(workspaceRole)) {
       return true;
     }
     

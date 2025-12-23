@@ -8,7 +8,7 @@
  */
 import { useState, useEffect, useMemo } from 'react';
 import { X, Loader2, Crown, Info, Lock, CheckCircle2 } from './Icons';
-import { permissionService, AVAILABLE_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS, UserPermissionData, WorkspacePermission } from '../services/permission';
+import { permissionService, AVAILABLE_PERMISSIONS, DEFAULT_ROLE_PERMISSIONS, PERMISSION_GROUPS, UserPermissionData, WorkspacePermission } from '../services/permission';
 import { ROLE_LABELS } from '../config/permissions';
 import './PermissionSettingsModal.css';
 
@@ -162,51 +162,66 @@ export default function PermissionSettingsModal({
               {error && <div className="perm-error-msg">{error}</div>}
               
               <div className="perm-list">
-                {AVAILABLE_PERMISSIONS.map((perm) => {
-                  const isDefault = roleDefaultPerms.includes(perm.id);
-                  const isEnabled = isDefault || permissions.includes(perm.id);
+                {Object.entries(PERMISSION_GROUPS).map(([groupKey, groupInfo]) => {
+                  const groupPerms = AVAILABLE_PERMISSIONS.filter(p => p.group === groupKey);
+                  if (groupPerms.length === 0) return null;
                   
                   return (
-                    <div 
-                      key={perm.id} 
-                      className={`perm-item ${isDefault ? 'is-default' : ''} ${isEnabled ? 'is-enabled' : ''}`}
-                      onClick={() => togglePermission(perm.id, isDefault)}
-                    >
-                      <div className="perm-item-left">
-                        {/* 图标区域 */}
-                        <div className={`perm-check-icon ${isEnabled ? 'checked' : ''} ${isDefault ? 'locked' : ''}`}>
-                          {isDefault ? (
-                            <CheckCircle2 size={18} />
-                          ) : isEnabled ? (
-                            <CheckCircle2 size={18} />
-                          ) : (
-                            <div className="perm-check-empty" />
-                          )}
-                        </div>
-                        
-                        <div className="perm-item-text">
-                          <div className="perm-item-label">
-                            {perm.label}
-                            {isDefault && (
-                              <span className="perm-default-badge">
-                                <Lock size={10} />
-                                默认
-                              </span>
-                            )}
-                          </div>
-                          <div className="perm-item-desc">{perm.description}</div>
-                        </div>
+                    <div key={groupKey} className="perm-group">
+                      <div className="perm-group-header">
+                        <span className="perm-group-icon">{groupInfo.icon}</span>
+                        <span className="perm-group-label">{groupInfo.label}</span>
                       </div>
+                      <div className="perm-group-items">
+                        {groupPerms.map((perm) => {
+                          const isDefault = roleDefaultPerms.includes(perm.id);
+                          const isEnabled = isDefault || permissions.includes(perm.id);
+                          
+                          return (
+                            <div 
+                              key={perm.id} 
+                              className={`perm-item ${isDefault ? 'is-default' : ''} ${isEnabled ? 'is-enabled' : ''}`}
+                              onClick={() => togglePermission(perm.id, isDefault)}
+                            >
+                              <div className="perm-item-left">
+                                {/* 图标区域 */}
+                                <div className={`perm-check-icon ${isEnabled ? 'checked' : ''} ${isDefault ? 'locked' : ''}`}>
+                                  {isDefault ? (
+                                    <CheckCircle2 size={18} />
+                                  ) : isEnabled ? (
+                                    <CheckCircle2 size={18} />
+                                  ) : (
+                                    <div className="perm-check-empty" />
+                                  )}
+                                </div>
+                                
+                                <div className="perm-item-text">
+                                  <div className="perm-item-label">
+                                    {perm.label}
+                                    {isDefault && (
+                                      <span className="perm-default-badge">
+                                        <Lock size={10} />
+                                        默认
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="perm-item-desc">{perm.description}</div>
+                                </div>
+                              </div>
 
-                      {/* Toggle 开关 */}
-                      <div 
-                        className={`perm-toggle ${isEnabled ? 'on' : 'off'} ${isDefault ? 'locked' : ''}`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          togglePermission(perm.id, isDefault);
-                        }}
-                      >
-                        <div className="perm-toggle-thumb" />
+                              {/* Toggle 开关 */}
+                              <div 
+                                className={`perm-toggle ${isEnabled ? 'on' : 'off'} ${isDefault ? 'locked' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  togglePermission(perm.id, isDefault);
+                                }}
+                              >
+                                <div className="perm-toggle-thumb" />
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -239,3 +254,5 @@ export default function PermissionSettingsModal({
     </div>
   );
 }
+
+

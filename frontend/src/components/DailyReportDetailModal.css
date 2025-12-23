@@ -125,11 +125,14 @@
   background: #94a3b8;
 }
 
-.role-dot-badge.role-owner .role-dot { background: #f59e0b; }
-.role-dot-badge.role-director .role-dot { background: #8b5cf6; }
-.role-dot-badge.role-leader .role-dot { background: #3b82f6; }
-.role-dot-badge.role-member .role-dot { background: #22c55e; }
-.role-dot-badge.role-guest .role-dot { background: #94a3b8; }
+.role-dot-badge.role-owner .role-dot { background: #f59e0b; }    /* 扛把子 */
+.role-dot-badge.role-director .role-dot { background: #d97706; } /* 大管家 */
+.role-dot-badge.role-admin .role-dot { background: #d97706; }    /* 兼容旧代码 */
+.role-dot-badge.role-manager .role-dot { background: #7c3aed; }  /* 堂主 */
+.role-dot-badge.role-leader .role-dot { background: #7c3aed; }   /* 兼容旧代码 */
+.role-dot-badge.role-member .role-dot { background: #22c55e; }   /* 少侠 */
+.role-dot-badge.role-observer .role-dot { background: #94a3b8; } /* 吃瓜群侠 */
+.role-dot-badge.role-guest .role-dot { background: #94a3b8; }    /* 兼容旧代码 */
 
 .report-meta {
   display: flex;
@@ -645,3 +648,5 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+

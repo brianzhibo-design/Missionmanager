@@ -32,7 +32,7 @@ export const projectService = {
       initialTasks?: InitialTask[];
     }
   ) {
-    await workspaceService.requireRole(workspaceId, userId, ['owner', 'director', 'leader', 'member']);
+    await workspaceService.requireRole(workspaceId, userId, ['owner', 'director', 'manager', 'member']);
 
     // 如果指定了负责人，验证是否是工作区成员
     if (data.leaderId) {
@@ -112,7 +112,7 @@ export const projectService = {
 
     // owner, admin, leader, member 都可以查看所有项目
     // 只有 guest 限制只能看参与的项目
-    if (['owner', 'director', 'leader', 'member'].includes(mappedRole)) {
+    if (['owner', 'director', 'manager', 'member'].includes(mappedRole)) {
       return projectRepository.findByWorkspaceId(workspaceId);
     }
 
@@ -131,7 +131,7 @@ export const projectService = {
     }
 
     // 所有角色都可以查看项目详情
-    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director', 'leader', 'member', 'guest']);
+    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director', 'manager', 'member', 'observer']);
 
     return project;
   },
@@ -208,7 +208,7 @@ export const projectService = {
       throw new AppError('项目不存在', 404, 'PROJECT_NOT_FOUND');
     }
 
-    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director', 'leader', 'member', 'guest']);
+    await workspaceService.requireRole(project.workspaceId, userId, ['owner', 'director', 'manager', 'member', 'observer']);
 
     return projectRepository.findProjectMembers(projectId);
   },

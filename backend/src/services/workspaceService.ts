@@ -65,7 +65,7 @@ export const workspaceService = {
    * 权限：所有成员都可以查看成员列表
    */
   async getMembers(workspaceId: string, userId: string) {
-    await this.requireRole(workspaceId, userId, ['owner', 'director', 'leader', 'member', 'guest']);
+    await this.requireRole(workspaceId, userId, ['owner', 'director', 'manager', 'member', 'observer']);
     return workspaceRepository.getMembers(workspaceId);
   },
 
@@ -74,7 +74,7 @@ export const workspaceService = {
    * 权限：owner, admin, leader 可以邀请成员
    */
   async inviteMember(workspaceId: string, adminUserId: string, targetUserId: string, role: WorkspaceRole) {
-    await this.requireRole(workspaceId, adminUserId, ['owner', 'director', 'leader']);
+    await this.requireRole(workspaceId, adminUserId, ['owner', 'director', 'manager']);
 
     // 检查是否已是成员
     const existing = await workspaceRepository.getMembership(workspaceId, targetUserId);
@@ -106,7 +106,7 @@ export const workspaceService = {
       throw new AppError('无权邀请成员', 403, 'PERMISSION_DENIED');
     }
     const mappedRole = mapRole(adminMembership.role);
-    if (!['owner', 'director', 'leader'].includes(mappedRole)) {
+    if (!['owner', 'director', 'manager'].includes(mappedRole)) {
       throw new AppError('无权邀请成员', 403, 'PERMISSION_DENIED');
     }
 
@@ -187,7 +187,7 @@ export const workspaceService = {
     }
 
     // 6. 验证新角色有效（支持新旧角色代码）
-    const validRoles = ['director', 'leader', 'member', 'guest', 'director', 'manager', 'observer'];
+    const validRoles = ['director', 'manager', 'member', 'observer', 'leader', 'guest'];
     if (!validRoles.includes(newRole)) {
       throw new AppError('无效的角色', 400, 'INVALID_ROLE');
     }

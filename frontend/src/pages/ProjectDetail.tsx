@@ -3,12 +3,13 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { projectService, ProjectMember } from '../services/project';
 import { taskService, Task } from '../services/task';
 import { memberService, Member } from '../services/member';
-import { aiService, ProjectOptimizationResult, SuggestedTask } from '../services/ai';
+import { aiService, ProjectOptimizationResult } from '../services/ai';
 import { usePermissions } from '../hooks/usePermissions';
 import { useAuth } from '../hooks/useAuth';
 import { useIsMobile } from '../hooks/useIsMobile';
 import Modal from '../components/Modal';
 import TaskList from '../components/TaskList';
+import CreateTaskModal from '../components/CreateTaskModal';
 import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle, FolderOpen, Trash2 } from '../components/Icons';
 import { ProjectFiles } from '../components/ProjectFiles';
 import MobileProjectDetail from './mobile/MobileProjectDetail';
@@ -91,12 +92,8 @@ function DesktopProjectDetail() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<SortOption>('created_desc');
   
-  // 新建任务 AI 建议状态
-  const [newTaskAiLoading, setNewTaskAiLoading] = useState(false);
-  const [newTaskSuggestions, setNewTaskSuggestions] = useState<SuggestedTask[]>([]);
-  
+  // 新建任务弹窗
   const [showCreateTask, setShowCreateTask] = useState(false);
-  const [creating, setCreating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editName, setEditName] = useState('');
@@ -133,7 +130,7 @@ function DesktopProjectDetail() {
   const canBatchDelete = useMemo(() => {
     if (!currentUser) return false;
     // 工作区 owner 或 admin 可以批量删除
-    if (['owner', 'admin'].includes(workspaceRole || '')) return true;
+    if (['owner', 'director', 'admin'].includes(workspaceRole || '')) return true;
     // 项目负责人可以批量删除
     if (project?.leaderId === currentUser.id) return true;
     return false;
@@ -267,36 +264,6 @@ function DesktopProjectDetail() {
       loadTasks();
     }
   }, [id, loadProject, loadTasks]);
-
-  const handleCreateTask = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const priority = formData.get('priority') as string;
-    const dueDate = formData.get('dueDate') as string;
-    const assigneeId = formData.get('assigneeId') as string;
-
-    if (!title?.trim()) return;
-
-    try {
-      setCreating(true);
-      await taskService.createTask({
-        projectId: id!,
-        title,
-        description,
-        priority,
-        dueDate: dueDate || undefined,
-        assigneeId: assigneeId || undefined,
-      });
-      setShowCreateTask(false);
-      loadTasks();
-    } catch (err) {
-      alert('创建任务失败');
-    } finally {
-      setCreating(false);
-    }
-  };
 
   const handleTaskStatusChange = async (taskId: string, newStatus: string) => {
     try {
@@ -521,53 +488,6 @@ function DesktopProjectDetail() {
     } finally {
       setApplyingProjectOptimization(false);
     }
-  };
-
-  // 在新建任务弹窗中获取 AI 建议
-  const handleGetNewTaskSuggestions = async () => {
-    setNewTaskAiLoading(true);
-    try {
-      const taskData = tasks.map(t => ({
-        id: t.id,
-        title: t.title,
-        status: t.status,
-        priority: t.priority,
-        dueDate: t.dueDate,
-        description: t.description,
-      }));
-
-      const response = await aiService.generateNextTasks(id!, taskData);
-      // 防御性检查：确保 suggestedTasks 存在且为数组
-      if (response && Array.isArray(response.suggestedTasks)) {
-        setNewTaskSuggestions(response.suggestedTasks);
-      } else if (response && Array.isArray(response)) {
-        // 如果返回的直接是数组（兼容旧格式）
-        setNewTaskSuggestions(response as unknown as typeof newTaskSuggestions);
-      } else {
-        console.warn('AI 返回数据格式不正确:', response);
-        setNewTaskSuggestions([]);
-      }
-    } catch (err) {
-      console.error('获取 AI 建议失败:', err);
-      setNewTaskSuggestions([]);
-    } finally {
-      setNewTaskAiLoading(false);
-    }
-  };
-
-  // 使用 AI 建议填充新建任务表单
-  const handleUseSuggestion = (suggestion: SuggestedTask) => {
-    const form = document.querySelector('form[data-create-task]') as HTMLFormElement;
-    if (form) {
-      const titleInput = form.querySelector('input[name="title"]') as HTMLInputElement;
-      const descInput = form.querySelector('textarea[name="description"]') as HTMLTextAreaElement;
-      const prioritySelect = form.querySelector('select[name="priority"]') as HTMLSelectElement;
-      
-      if (titleInput) titleInput.value = suggestion.title;
-      if (descInput) descInput.value = suggestion.description;
-      if (prioritySelect) prioritySelect.value = suggestion.priority;
-    }
-    setNewTaskSuggestions([]); // 清空建议列表
   };
 
   // 计算统计
@@ -947,141 +867,13 @@ function DesktopProjectDetail() {
         </div>
       </Modal>
 
-      {/* Create Task Modal */}
-      <Modal
+      {/* Create Task Modal - 使用精美 UI 组件 */}
+      <CreateTaskModal
         isOpen={showCreateTask}
-        onClose={() => {
-          setShowCreateTask(false);
-          setNewTaskSuggestions([]);
-        }}
-        title="新建任务"
-      >
-        <div className="create-task-container">
-          {/* AI 建议区域 */}
-          <div className="ai-suggestions-panel">
-            <div className="ai-panel-header">
-              <span><Sparkles size={16} /> AI 智能建议</span>
-              <button
-                type="button"
-                className={`btn btn-sm btn-secondary ${newTaskAiLoading ? 'btn-loading' : ''}`}
-                onClick={handleGetNewTaskSuggestions}
-                disabled={newTaskAiLoading}
-              >
-                {newTaskAiLoading ? '生成中...' : '获取建议'}
-              </button>
-            </div>
-            {newTaskSuggestions.length > 0 && (
-              <div className="ai-suggestions-list">
-                {newTaskSuggestions.map((suggestion, index) => (
-                  <div 
-                    key={index} 
-                    className="ai-suggestion-item"
-                    onClick={() => handleUseSuggestion(suggestion)}
-                  >
-                    <div className="suggestion-item-header">
-                      <span className={`priority-dot priority-${suggestion.priority || 'medium'}`} />
-                      <span className="suggestion-item-title">{suggestion.title || '未命名任务'}</span>
-                    </div>
-                    <p className="suggestion-item-desc">
-                      {suggestion.description ? suggestion.description.substring(0, 100) : '无描述'}
-                      {suggestion.description && suggestion.description.length > 100 ? '...' : ''}
-                    </p>
-                    <div className="suggestion-item-footer">
-                      {suggestion.reason && (
-                        <span className="suggestion-reason"><Lightbulb size={12} /> {suggestion.reason}</span>
-                      )}
-                      <span className="suggestion-item-hint">点击使用此建议 →</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            {newTaskAiLoading && (
-              <div className="ai-loading-state">
-                <div className="ai-loading-animation">
-                  <div className="ai-loading-spinner"></div>
-                  <div className="ai-loading-text">
-                    <span className="loading-title">AI 正在分析项目...</span>
-                    <span className="loading-subtitle">正在结合已有任务生成智能建议</span>
-                  </div>
-                </div>
-                <div className="ai-loading-progress">
-                  <div className="progress-bar">
-                    <div className="progress-fill"></div>
-                  </div>
-                </div>
-              </div>
-            )}
-            {newTaskSuggestions.length === 0 && !newTaskAiLoading && (
-              <p className="ai-panel-hint">点击"获取建议"让 AI 分析项目并推荐下一步任务</p>
-            )}
-          </div>
-
-          {/* 创建任务表单 */}
-          <form onSubmit={handleCreateTask} data-create-task>
-            <div className="form-group">
-              <label className="form-label">任务标题 *</label>
-              <input 
-                name="title"
-                type="text" 
-                className="form-input" 
-                placeholder="输入任务标题"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">描述</label>
-              <textarea 
-                name="description"
-                className="form-textarea" 
-                placeholder="可选：添加任务描述"
-                rows={3}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">负责人</label>
-              <select name="assigneeId" className="form-select" defaultValue="">
-                <option value="">未分配</option>
-                {members.map((member) => (
-                  <option key={member.userId} value={member.userId}>
-                    {member.user.name} ({member.user.email})
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-row">
-              <div className="form-group">
-                <label className="form-label">优先级</label>
-                <select name="priority" className="form-select" defaultValue="medium">
-                  {Object.entries(PRIORITY_CONFIG).map(([key, config]) => (
-                    <option key={key} value={key}>{config.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="form-label">截止日期</label>
-                <input name="dueDate" type="date" className="form-input" />
-              </div>
-            </div>
-          <div className="form-actions">
-            <button 
-              type="button" 
-              className="btn btn-secondary"
-              onClick={() => setShowCreateTask(false)}
-            >
-              取消
-            </button>
-            <button 
-              type="submit" 
-              className={`btn btn-primary ${creating ? 'btn-loading' : ''}`}
-              disabled={creating}
-            >
-              创建任务
-            </button>
-          </div>
-        </form>
-        </div>
-      </Modal>
+        onClose={() => setShowCreateTask(false)}
+        onSuccess={loadTasks}
+        defaultProjectId={id}
+      />
 
       {/* Project Settings Modal */}
       <Modal

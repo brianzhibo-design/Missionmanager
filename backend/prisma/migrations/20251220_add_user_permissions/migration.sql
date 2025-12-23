@@ -5,3 +5,5 @@ ALTER TABLE "workspace_users" ADD COLUMN IF NOT EXISTS "permissions" TEXT[] DEFA
 
 -- 创建索引以加速权限查询
 CREATE INDEX IF NOT EXISTS "workspace_users_permissions_idx" ON "workspace_users" USING GIN ("permissions");
+
+

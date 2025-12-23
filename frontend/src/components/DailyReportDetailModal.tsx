@@ -431,3 +431,5 @@ export default function DailyReportDetailModal({
     </div>
   );
 }
+
+

@@ -20,11 +20,11 @@ import { AppError } from '../middleware/errorHandler';
 import { notificationService } from './notificationService';
 
 // 所有角色（可查看）
-const ALL_ROLES = ['owner', 'director', 'leader', 'member', 'guest'] as const;
+const ALL_ROLES = ['owner', 'director', 'manager', 'member', 'observer'] as const;
 // 可编辑角色（工作区级别）
-const EDIT_ROLES = ['owner', 'director', 'leader', 'member'] as const;
+const EDIT_ROLES = ['owner', 'director', 'manager', 'member'] as const;
 // 可删除角色
-const DELETE_ROLES = ['owner', 'director', 'leader'] as const;
+const DELETE_ROLES = ['owner', 'director', 'manager'] as const;
 
 /**
  * 检查用户是否有任务编辑权限
@@ -41,8 +41,8 @@ async function canEditTask(
   task?: { creatorId: string; assigneeId: string | null },
   isProjectLeader?: boolean
 ): Promise<boolean> {
-  // 1. 检查工作区角色（owner, admin, leader 可以编辑所有任务）
-  const hasAdminRole = await workspaceService.hasRole(workspaceId, userId, ['owner', 'director', 'leader']);
+  // 1. 检查工作区角色（owner, director, manager 可以编辑所有任务）
+  const hasAdminRole = await workspaceService.hasRole(workspaceId, userId, ['owner', 'director', 'manager']);
   if (hasAdminRole) return true;
   
   // 2. 项目负责人可以编辑项目内所有任务
@@ -589,7 +589,7 @@ export const taskService = {
     if (task.assigneeId !== userId && task.creatorId !== userId) {
       // 检查是否是管理员
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'director', 'leader'].includes(role || '')) {
+      if (!['owner', 'director', 'manager'].includes(role || '')) {
         throw new AppError('只有任务负责人才能提交审核', 403, 'FORBIDDEN');
       }
     }
@@ -948,7 +948,7 @@ export const taskService = {
     // 检查权限：任务负责人或创建者
     if (task.assigneeId !== userId && task.creatorId !== userId) {
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'director', 'leader'].includes(role || '')) {
+      if (!['owner', 'director', 'manager'].includes(role || '')) {
         throw new AppError('只有任务负责人或创建者可以开始任务', 403, 'FORBIDDEN');
       }
     }
@@ -1040,7 +1040,7 @@ export const taskService = {
     // 检查权限：任务负责人或创建者
     if (task.assigneeId !== userId && task.creatorId !== userId) {
       const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-      if (!['owner', 'director', 'leader'].includes(role || '')) {
+      if (!['owner', 'director', 'manager'].includes(role || '')) {
         throw new AppError('只有任务负责人或创建者可以完成任务', 403, 'FORBIDDEN');
       }
     }

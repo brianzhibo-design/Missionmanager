@@ -17,12 +17,12 @@ interface RoleBadgeProps {
 // 角色名称映射（江湖风格）
 const roleLabels: Record<string, string> = {
   owner: '扛把子',
-  admin: '大管家',
+  admin: '大管家',      // 兼容旧代码
   director: '大管家',
-  leader: '带头大哥',
-  manager: '带头大哥',
+  leader: '堂主',       // 兼容旧代码
+  manager: '堂主',
   member: '少侠',
-  guest: '吃瓜群侠',
+  guest: '吃瓜群侠',    // 兼容旧代码
   observer: '吃瓜群侠',
 };
 
@@ -129,5 +129,7 @@ export const getRoleName = (role: string): string => {
 
 // 导出类型供其他组件使用
 export type { Role, RoleBadgeProps };
+
+
 
 

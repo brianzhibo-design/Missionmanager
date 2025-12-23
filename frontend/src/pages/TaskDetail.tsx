@@ -124,7 +124,7 @@ function DesktopTaskDetail() {
     const isAssignee = task.assigneeId === currentUser.id;
     const isCreator = task.creatorId === currentUser.id;
     // 管理员也可以
-    const isAdmin = ['owner', 'admin', 'leader'].includes(workspaceRole || '');
+    const isAdmin = ['owner', 'director', 'manager', 'admin', 'leader'].includes(workspaceRole || '');
     return isAssignee || isCreator || isAdmin;
   }, [task, currentUser, workspaceRole]);
 
@@ -135,7 +135,7 @@ function DesktopTaskDetail() {
     // 是项目负责人
     const isProjectLeader = task.project?.leaderId === currentUser.id;
     // 是工作区管理员
-    const isAdmin = ['owner', 'admin'].includes(workspaceRole || '');
+    const isAdmin = ['owner', 'director', 'admin'].includes(workspaceRole || '');
     return isProjectLeader || isAdmin;
   }, [task, currentUser, workspaceRole]);
 
@@ -145,7 +145,7 @@ function DesktopTaskDetail() {
     if (task.status !== 'todo') return false;
     const isAssignee = task.assigneeId === currentUser.id;
     const isCreator = task.creatorId === currentUser.id;
-    const isAdmin = ['owner', 'admin', 'leader'].includes(workspaceRole || '');
+    const isAdmin = ['owner', 'director', 'manager', 'admin', 'leader'].includes(workspaceRole || '');
     return isAssignee || isCreator || isAdmin;
   }, [task, currentUser, workspaceRole]);
 
@@ -155,7 +155,7 @@ function DesktopTaskDetail() {
     if (task.status !== 'in_progress') return false;
     const isAssignee = task.assigneeId === currentUser.id;
     const isCreator = task.creatorId === currentUser.id;
-    const isAdmin = ['owner', 'admin', 'leader'].includes(workspaceRole || '');
+    const isAdmin = ['owner', 'director', 'manager', 'admin', 'leader'].includes(workspaceRole || '');
     return isAssignee || isCreator || isAdmin;
   }, [task, currentUser, workspaceRole]);
 
@@ -165,7 +165,7 @@ function DesktopTaskDetail() {
     if (task.status !== 'done') return false;
     const isAssignee = task.assigneeId === currentUser.id;
     const isProjectLeader = task.project?.leaderId === currentUser.id;
-    const isAdmin = ['owner', 'admin'].includes(workspaceRole || '');
+    const isAdmin = ['owner', 'director', 'admin'].includes(workspaceRole || '');
     return isAssignee || isProjectLeader || isAdmin;
   }, [task, currentUser, workspaceRole]);
 
@@ -175,7 +175,7 @@ function DesktopTaskDetail() {
     // 项目负责人
     const isProjectLeader = task.project?.leaderId === currentUser.id;
     // 工作区管理员 (owner, admin)
-    const isAdmin = ['owner', 'admin'].includes(workspaceRole || '');
+    const isAdmin = ['owner', 'director', 'admin'].includes(workspaceRole || '');
     // 主任务创建者（可以删除自己任务的子任务）
     const isTaskCreator = task.creatorId === currentUser.id;
     return isProjectLeader || isAdmin || isTaskCreator;

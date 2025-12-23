@@ -39,7 +39,7 @@ export const treeService = {
 
     // 映射角色代码
     const mappedRole = mapRole(workspaceMembership.role);
-    const isObserver = mappedRole === 'guest';
+    const isObserver = mappedRole === 'observer';
     const isMember = mappedRole === 'member';
 
     // 3. 构建项目团队成员列表

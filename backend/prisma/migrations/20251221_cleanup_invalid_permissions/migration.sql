@@ -5,3 +5,5 @@
 UPDATE "workspace_users" 
 SET permissions = array_remove(array_remove(permissions, 'TEAM_KUDOS'), 'FUN_EVENTS')
 WHERE permissions @> ARRAY['TEAM_KUDOS'] OR permissions @> ARRAY['FUN_EVENTS'];
+
+

@@ -5,3 +5,5 @@
 UPDATE "workspace_users" SET role = 'director' WHERE role = 'admin';
 UPDATE "workspace_users" SET role = 'leader' WHERE role = 'manager';
 UPDATE "workspace_users" SET role = 'guest' WHERE role = 'observer';
+
+

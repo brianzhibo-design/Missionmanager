@@ -127,7 +127,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
     // 检查自定义权限列表
     if (customPermissions.includes(permission)) return true;
     // 回退到默认角色权限
-    const defaultPerms = DEFAULT_ROLE_PERMISSIONS[workspaceRole || 'guest'] || [];
+    const defaultPerms = DEFAULT_ROLE_PERMISSIONS[workspaceRole || 'observer'] || [];
     return defaultPerms.includes(permission);
   }, [workspaceRole, customPermissions]);
 

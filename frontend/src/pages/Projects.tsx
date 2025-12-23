@@ -79,7 +79,6 @@ function DesktopProjects() {
 
   // Modals
   const [showCreateProject, setShowCreateProject] = useState(false);
-  const [showCreateWorkspace, setShowCreateWorkspace] = useState(false);
   const [creating, setCreating] = useState(false);
 
   // 创建项目表单
@@ -123,27 +122,6 @@ function DesktopProjects() {
       setLoading(false);
     }
   }, [currentWorkspace, loadProjects]);
-
-  const handleCreateWorkspace = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
-
-    if (!name?.trim()) return;
-
-    try {
-      setCreating(true);
-      await workspaceService.createWorkspace(name, description);
-      setShowCreateWorkspace(false);
-      window.location.reload();
-    } catch (err) {
-      console.error('Failed to create workspace:', err);
-      alert('创建工作区失败');
-    } finally {
-      setCreating(false);
-    }
-  };
 
   // AI 优化项目并推荐任务
   const handleAiOptimize = async () => {
@@ -292,7 +270,7 @@ function DesktopProjects() {
     );
   }
 
-  // 没有工作区时显示创建提示
+  // 没有工作区时显示提示
   if (!currentWorkspace) {
     return (
       <div className="projects-page">
@@ -304,65 +282,12 @@ function DesktopProjects() {
               <p>管理您的所有项目</p>
             </div>
           </div>
-          <div className="page-actions">
-            <button 
-              className="btn btn-primary"
-              onClick={() => setShowCreateWorkspace(true)}
-            >
-              + 新建工作区
-            </button>
-          </div>
         </div>
         <div className="empty-state">
           <FolderOpen size={48} className="empty-state-icon" />
           <h3 className="empty-state-title">您还没有加入任何工作区</h3>
-          <p className="empty-state-description">请先创建一个工作区来管理您的项目和任务。</p>
-          <button 
-            className="btn btn-primary"
-            onClick={() => setShowCreateWorkspace(true)}
-          >
-            + 新建工作区
-          </button>
+          <p className="empty-state-description">请从左侧导航栏创建或加入一个工作区来管理您的项目和任务。</p>
         </div>
-
-        {/* Create Workspace Modal */}
-        <Modal
-          isOpen={showCreateWorkspace}
-          onClose={() => setShowCreateWorkspace(false)}
-          title="新建工作区"
-          size="sm"
-        >
-          <form onSubmit={handleCreateWorkspace}>
-            <div className="form-group">
-              <label htmlFor="workspaceName" className="form-label">工作区名称</label>
-              <input
-                type="text"
-                id="workspaceName"
-                name="name"
-                className="form-input"
-                placeholder="输入工作区名称"
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="workspaceDescription" className="form-label">描述 (可选)</label>
-              <textarea
-                id="workspaceDescription"
-                name="description"
-                className="form-textarea"
-                placeholder="输入工作区描述"
-              />
-            </div>
-            <div className="modal-actions">
-              <button type="button" className="btn btn-secondary" onClick={() => setShowCreateWorkspace(false)}>
-                取消
-              </button>
-              <button type="submit" className="btn btn-primary" disabled={creating}>
-                {creating ? '创建中...' : '创建'}
-              </button>
-            </div>
-          </form>
-        </Modal>
       </div>
     );
   }
@@ -379,14 +304,6 @@ function DesktopProjects() {
           </div>
         </div>
         <div className="page-actions">
-          {canWorkspace('createWorkspace') && (
-            <button 
-              className="btn btn-secondary"
-              onClick={() => setShowCreateWorkspace(true)}
-            >
-              + 新建工作区
-            </button>
-          )}
           {canWorkspace('createProject') && (
             <button 
               className="btn btn-primary"
@@ -586,52 +503,6 @@ function DesktopProjects() {
           )}
         </div>
       )}
-
-      {/* Create Workspace Modal */}
-      <Modal
-        isOpen={showCreateWorkspace}
-        onClose={() => setShowCreateWorkspace(false)}
-        title="新建工作区"
-        size="sm"
-      >
-        <form onSubmit={handleCreateWorkspace}>
-          <div className="form-group">
-            <label className="form-label">工作区名称 *</label>
-            <input 
-              name="name"
-              type="text" 
-              className="form-input" 
-              placeholder="输入工作区名称"
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label className="form-label">描述</label>
-            <textarea 
-              name="description"
-              className="form-textarea" 
-              placeholder="可选：添加工作区描述"
-              rows={3}
-            />
-          </div>
-          <div className="form-actions">
-            <button 
-              type="button" 
-              className="btn btn-secondary"
-              onClick={() => setShowCreateWorkspace(false)}
-            >
-              取消
-            </button>
-            <button 
-              type="submit" 
-              className={`btn btn-primary ${creating ? 'btn-loading' : ''}`}
-              disabled={creating}
-            >
-              创建工作区
-            </button>
-          </div>
-        </form>
-      </Modal>
 
       {/* Create Project Modal */}
       <Modal

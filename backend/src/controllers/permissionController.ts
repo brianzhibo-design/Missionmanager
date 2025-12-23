@@ -13,21 +13,50 @@ router.use(requireAuth);
 
 // 可配置的权限列表
 export const AVAILABLE_PERMISSIONS = [
-  // 基础权限
+  // === 组织管理 ===
   'VIEW_WORKSPACE',       // 查看工作区
-  'VIEW_ALL_REPORTS',     // 查看所有日报
+  'MANAGE_SETTINGS',      // 工作区设置
+  'DISSOLVE_WORKSPACE',   // 解散工作区
   
-  // 管理权限
-  'MANAGE_PROJECTS',      // 管理项目（创建、编辑、删除）
+  // === 人事管理 ===
+  'INVITE_MEMBERS',       // 邀请成员
+  'MANAGE_ROLES',         // 设置角色
+  'REMOVE_MEMBERS',       // 移除成员
   'MANAGE_MEMBERS',       // 管理成员（邀请、移除、修改角色）
-  'MANAGE_TASKS',         // 管理所有任务
-  'MANAGE_SETTINGS',      // 管理工作区设置
   
-  // 特殊功能
-  'EXPORT_DATA',          // 导出数据
-  'AI_ANALYSIS',          // 使用 AI 分析
+  // === 项目管理 ===
+  'CREATE_PROJECTS',      // 创建项目
+  'EDIT_PROJECTS',        // 编辑项目
+  'DELETE_PROJECTS',      // 删除项目
+  'MANAGE_PROJECTS',      // 管理项目（创建、编辑、删除）
+  
+  // === 任务管理 ===
+  'CREATE_TASKS',         // 创建任务
+  'EDIT_TASKS',           // 编辑任务
+  'DELETE_TASKS',         // 删除任务
+  'ASSIGN_TASKS',         // 分配任务
+  'MANAGE_TASKS',         // 管理所有任务
+  
+  // === 数据访问 ===
+  'VIEW_ADMIN_TREE',      // 管理员视图
+  'VIEW_REPORTS',         // 查看统计报告
+  'VIEW_ALL_REPORTS',     // 查看所有日报
+  'VIEW_TEAM_REPORTS',    // 查看团队日报
+  
+  // === AI 功能 ===
+  'AI_GLOBAL_ANALYSIS',   // 全局分析
+  'AI_PROJECT_ANALYSIS',  // 项目分析
+  'AI_TASK_ANALYSIS',     // 任务分析
+  'AI_ANALYSIS',          // AI 分析（通用）
+  
+  // === 日常操作 ===
+  'WRITE_DAILY_REPORT',   // 填写日报
+  'COMMENT',              // 评论
+  
+  // === 特殊功能 ===
   'BROADCAST_MESSAGES',   // 群发消息
   'COFFEE_LOTTERY',       // 咖啡抽奖
+  'EXPORT_DATA',          // 导出数据
 ] as const;
 
 export type WorkspacePermission = typeof AVAILABLE_PERMISSIONS[number];
@@ -275,3 +304,5 @@ router.get('/:workspaceId', async (req: Request, res: Response) => {
 });
 
 export default router;
+
+

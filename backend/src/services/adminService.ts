@@ -48,7 +48,7 @@ export const adminService = {
     const workspaceMembership = await workspaceRepository.getMembership(project.workspaceId, userId);
     if (workspaceMembership) {
       const mappedRole = mapRole(workspaceMembership.role);
-      if (['owner', 'director', 'leader'].includes(mappedRole)) {
+      if (['owner', 'director', 'manager'].includes(mappedRole)) {
         return; // owner/admin/leader 有所有项目的权限
       }
     }
@@ -91,7 +91,7 @@ export const adminService = {
     }
 
     // 4. 验证角色值（支持新旧角色代码）
-    const validRoles = ['director', 'leader', 'member', 'guest', 'director', 'manager', 'observer'];
+    const validRoles = ['director', 'manager', 'member', 'observer', 'leader', 'guest'];
     if (!validRoles.includes(newRole)) {
       throw new AppError('无效的角色', 400, 'INVALID_ROLE');
     }
@@ -129,7 +129,7 @@ export const adminService = {
     const mappedRole = mapRole(workspaceMembership.role);
     
     // 4. 如果是 leader，只能编辑自己负责的项目
-    if (mappedRole === 'leader' && project.leaderId !== operatorId) {
+    if (mappedRole === 'manager' && project.leaderId !== operatorId) {
       throw new AppError('只能编辑自己负责的项目', 403, 'CAN_ONLY_EDIT_OWN_PROJECT');
     }
 

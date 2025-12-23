@@ -33,3 +33,5 @@ ALTER TABLE "daily_report_comments" ADD CONSTRAINT "daily_report_comments_user_i
 ALTER TABLE "daily_report_likes" ADD CONSTRAINT "daily_report_likes_daily_report_id_fkey" FOREIGN KEY ("daily_report_id") REFERENCES "daily_reports"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE "daily_report_likes" ADD CONSTRAINT "daily_report_likes_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+
