@@ -74,8 +74,8 @@ export const PERMISSIONS = {
     // === 数据访问 ===
     // 可以访问管理员视图 (owner/director 完整, manager 只读)
     adminTree: ['owner', 'director', 'manager'],
-    // 可以查看统计报告 (owner/director 全部, manager 团队, member 自己)
-    viewReports: ['owner', 'director', 'manager', 'member'],
+    // 可以查看统计报告 - 仅 owner/director
+    viewReports: ['owner', 'director'],
     // 可以查看团队日报 (owner/director 全部, manager 下属)
     viewTeamReports: ['owner', 'director', 'manager'],
     
@@ -163,8 +163,8 @@ export function hasProjectPermission(
       // owner/director 完整，manager 只读
       return ['owner', 'director', 'manager'].includes(mappedRole) || isProjectLeader;
     case 'viewReports':
-      // owner/director 全部，manager 团队，member 自己
-      return ['owner', 'director', 'manager', 'member'].includes(mappedRole) || isProjectLeader;
+      // 仅 owner/director 可以查看统计报告
+      return ['owner', 'director'].includes(mappedRole);
     case 'viewTeamReports':
       // owner/director 全部，manager 下属
       return ['owner', 'director', 'manager'].includes(mappedRole) || isProjectLeader;

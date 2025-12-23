@@ -13,6 +13,30 @@ import {
   sendTaskReminders, 
   sendDailySummaries 
 } from '../services/notificationEmailService';
+import { prisma } from '../lib/prisma';
+import { AppError } from '../middleware/errorHandler';
+
+/**
+ * 检查报告查看权限
+ * 只有 owner 和 director 可以查看统计报告
+ */
+async function checkReportViewPermission(userId: string, workspaceId: string): Promise<void> {
+  const membership = await prisma.workspaceUser.findUnique({
+    where: {
+      userId_workspaceId: { userId, workspaceId }
+    }
+  });
+
+  if (!membership) {
+    throw new AppError('您不是此工作区的成员', 403, 'NOT_MEMBER');
+  }
+
+  // 只允许 owner 和 director
+  const allowedRoles = ['owner', 'director'];
+  if (!allowedRoles.includes(membership.role.toLowerCase())) {
+    throw new AppError('只有扛把子和大管家可以查看统计报告', 403, 'PERMISSION_DENIED');
+  }
+}
 
 export const reportRouter = Router();
 
@@ -25,6 +49,9 @@ reportRouter.post(
     try {
       const { workspaceId } = req.params;
       const userId = req.user!.userId;
+
+      // 权限检查：只有 owner/director 可以生成报告
+      await checkReportViewPermission(userId, workspaceId);
 
       const report = await reportService.generateWeeklyReport(workspaceId, userId);
 
@@ -54,6 +81,9 @@ reportRouter.post(
       const { workspaceId } = req.params;
       const userId = req.user!.userId;
 
+      // 权限检查：只有 owner/director 可以生成报告
+      await checkReportViewPermission(userId, workspaceId);
+
       const report = await reportService.generateMonthlyReport(workspaceId, userId);
 
       await notificationService.create({
@@ -80,6 +110,10 @@ reportRouter.get(
     try {
       const { workspaceId } = req.params;
       const { type } = req.query;
+      const userId = req.user!.userId;
+
+      // 权限检查：只有 owner/director 可以查看统计报告
+      await checkReportViewPermission(userId, workspaceId);
 
       const reports = await reportService.getReports(workspaceId, type as string);
 
