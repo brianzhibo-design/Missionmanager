@@ -188,7 +188,7 @@ function DesktopMembersTree() {
     }
     
     // leader 只能编辑自己负责的项目（需要检查项目负责人）
-    if ((workspaceRole === 'manager' || workspaceRole === 'leader') && treeData.leader && currentUser) {
+    if (workspaceRole === 'manager' && treeData.leader && currentUser) {
       return treeData.leader.id === currentUser.id;
     }
     

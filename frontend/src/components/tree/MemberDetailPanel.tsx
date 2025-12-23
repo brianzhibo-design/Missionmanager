@@ -29,7 +29,7 @@ const priorityLabels: Record<string, { label: string; color: string }> = {
 
 export function MemberDetailPanel({ member, onClose }: MemberDetailPanelProps) {
   const { workspaceRole } = usePermissions();
-  const isObserver = workspaceRole === 'observer' || workspaceRole === 'guest';
+  const isObserver = workspaceRole === 'observer';
 
   if (!member) {
     return (

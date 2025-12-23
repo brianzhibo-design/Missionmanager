@@ -10,7 +10,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import Modal from '../components/Modal';
 import TaskList from '../components/TaskList';
 import CreateTaskModal from '../components/CreateTaskModal';
-import { ArrowUpDown, CheckSquare, X, Wand2, Sparkles, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle, FolderOpen, Trash2 } from '../components/Icons';
+import { ArrowUpDown, CheckSquare, X, Wand2, UserPlus, UserMinus, Crown, Settings, ClipboardList, AlertTriangle, FileText, Users, Lightbulb, MessageCircle, FolderOpen, Trash2 } from '../components/Icons';
 import { ProjectFiles } from '../components/ProjectFiles';
 import MobileProjectDetail from './mobile/MobileProjectDetail';
 import './ProjectDetail.css';
