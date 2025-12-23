@@ -5,6 +5,7 @@ import { Router, Request, Response } from 'express';
 import { requireAuth } from '../middleware/authMiddleware';
 import { dailyReportService } from '../services/dailyReportService';
 import { prisma } from '../infra/database';
+import type { DailyReportComment, DailyReportLikeInfo, UserBasic } from '../types';
 
 const router = Router();
 
@@ -37,8 +38,15 @@ router.post('/', async (req: Request, res: Response) => {
     });
 
     res.json({ success: true, data: report });
-  } catch (error: any) {
+  } catch (error) {
     console.error('创建日报失败:', error);
+    const message = error instanceof Error ? error.message : '创建日报失败';
+    if (message === 'NOT_WORKSPACE_MEMBER') {
+      return res.status(403).json({ error: 'FORBIDDEN', message: '您不是此工作区的成员' });
+    }
+    if (message === 'OBSERVER_CANNOT_CREATE_REPORT') {
+      return res.status(403).json({ error: 'FORBIDDEN', message: '观察者不能创建日报' });
+    }
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '创建日报失败' });
   }
 });
@@ -66,7 +74,7 @@ router.get('/my', async (req: Request, res: Response) => {
     );
 
     res.json({ success: true, data: reports });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取日报列表失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取日报列表失败' });
   }
@@ -87,7 +95,7 @@ router.get('/today', async (req: Request, res: Response) => {
     const report = await dailyReportService.getTodayReport(userId, workspaceId as string);
 
     res.json({ success: true, data: report });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取今日日报失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取今日日报失败' });
   }
@@ -122,7 +130,7 @@ router.get('/by-date', async (req: Request, res: Response) => {
     });
 
     res.json({ success: true, data: report });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取日报失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取日报失败' });
   }
@@ -147,7 +155,7 @@ router.get('/team', async (req: Request, res: Response) => {
     );
 
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取团队日报失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取团队日报失败' });
   }
@@ -172,7 +180,7 @@ router.get('/ai-fill', async (req: Request, res: Response) => {
     );
 
     res.json({ success: true, data: content });
-  } catch (error: any) {
+  } catch (error) {
     console.error('AI填充失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: 'AI填充失败' });
   }
@@ -191,7 +199,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     }
 
     res.json({ success: true, data: report });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取日报失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取日报失败' });
   }
@@ -207,12 +215,13 @@ router.delete('/:id', async (req: Request, res: Response) => {
 
     await dailyReportService.delete(id, userId);
     res.json({ success: true, message: '日报已删除' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('删除日报失败:', error);
-    if (error.message === 'REPORT_NOT_FOUND') {
+    const message = error instanceof Error ? error.message : '';
+    if (message === 'REPORT_NOT_FOUND') {
       return res.status(404).json({ error: 'NOT_FOUND', message: '日报不存在' });
     }
-    if (error.message === 'FORBIDDEN') {
+    if (message === 'FORBIDDEN') {
       return res.status(403).json({ error: 'FORBIDDEN', message: '无权删除此日报' });
     }
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '删除日报失败' });
@@ -236,8 +245,8 @@ router.get('/:id/comments', async (req: Request, res: Response) => {
       },
     });
 
-    res.json({ success: true, data: comments });
-  } catch (error: any) {
+    res.json({ success: true, data: comments as DailyReportComment[] });
+  } catch (error) {
     console.error('获取评论失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取评论失败' });
   }
@@ -273,8 +282,8 @@ router.post('/:id/comments', async (req: Request, res: Response) => {
       },
     });
 
-    res.status(201).json({ success: true, data: comment });
-  } catch (error: any) {
+    res.status(201).json({ success: true, data: comment as DailyReportComment });
+  } catch (error) {
     console.error('添加评论失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '添加评论失败' });
   }
@@ -304,7 +313,7 @@ router.delete('/comments/:commentId', async (req: Request, res: Response) => {
     await prisma.dailyReportComment.delete({ where: { id: commentId } });
 
     res.json({ success: true, message: '评论已删除' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('删除评论失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '删除评论失败' });
   }
@@ -328,15 +337,13 @@ router.get('/:id/likes', async (req: Request, res: Response) => {
 
     const liked = likes.some(l => l.userId === userId);
 
-    res.json({
-      success: true,
-      data: {
-        users: likes.map(l => l.user),
-        count: likes.length,
-        liked,
-      },
-    });
-  } catch (error: any) {
+    const likeInfo: DailyReportLikeInfo = {
+      users: likes.map(l => l.user as UserBasic),
+      count: likes.length,
+      liked,
+    };
+    res.json({ success: true, data: likeInfo });
+  } catch (error) {
     console.error('获取点赞失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取点赞失败' });
   }
@@ -391,7 +398,7 @@ router.post('/:id/like', async (req: Request, res: Response) => {
     });
 
     res.json({ success: true, data: { liked, count } });
-  } catch (error: any) {
+  } catch (error) {
     console.error('点赞操作失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '点赞操作失败' });
   }

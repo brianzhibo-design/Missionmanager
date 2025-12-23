@@ -24,7 +24,7 @@ router.get('/', async (req: Request, res: Response) => {
 
     const result = await notificationService.getByUserId(userId, { limit, offset, unreadOnly });
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取通知失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取通知失败' });
   }
@@ -41,7 +41,7 @@ router.patch('/:notificationId/read', async (req: Request, res: Response) => {
 
     await notificationService.markAsRead(notificationId, userId);
     res.json({ success: true, data: null });
-  } catch (error: any) {
+  } catch (error) {
     console.error('标记已读失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '标记已读失败' });
   }
@@ -56,7 +56,7 @@ router.post('/read-all', async (req: Request, res: Response) => {
     const userId = req.user!.userId;
     const count = await notificationService.markAllAsRead(userId);
     res.json({ success: true, data: { count } });
-  } catch (error: any) {
+  } catch (error) {
     console.error('标记全部已读失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '标记全部已读失败' });
   }
@@ -73,7 +73,7 @@ router.delete('/:notificationId', async (req: Request, res: Response) => {
 
     await notificationService.delete(notificationId, userId);
     res.status(204).send();
-  } catch (error: any) {
+  } catch (error) {
     console.error('删除通知失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '删除通知失败' });
   }
@@ -88,7 +88,7 @@ router.delete('/clear-read', async (req: Request, res: Response) => {
     const userId = req.user!.userId;
     const count = await notificationService.clearRead(userId);
     res.json({ success: true, data: { count } });
-  } catch (error: any) {
+  } catch (error) {
     console.error('清空已读通知失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '清空已读通知失败' });
   }
@@ -111,7 +111,7 @@ router.post('/test', async (req: Request, res: Response) => {
     });
 
     res.json({ success: true, data: notification });
-  } catch (error: any) {
+  } catch (error) {
     console.error('发送测试通知失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '发送测试通知失败' });
   }

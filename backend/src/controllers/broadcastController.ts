@@ -80,9 +80,10 @@ router.post('/workspaces/:workspaceId/send', async (req: Request, res: Response)
     });
 
     res.status(201).json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     console.error('发送群发消息失败:', error);
-    if (error.message === 'FORBIDDEN') {
+    const message = error instanceof Error ? error.message : '';
+    if (message === 'FORBIDDEN') {
       return res.status(403).json({ error: 'FORBIDDEN', message: '无权限发送群发消息' });
     }
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '发送失败' });
@@ -101,7 +102,7 @@ router.get('/workspaces/:workspaceId/history', async (req: Request, res: Respons
 
     const result = await broadcastService.getHistory(workspaceId, { limit, offset });
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取群发消息历史失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取失败' });
   }
@@ -123,7 +124,7 @@ router.get('/workspaces/:workspaceId/coffee-winner', async (req: Request, res: R
 
     const winner = await coffeeService.getTodayWinner(workspaceId);
     res.json({ success: true, data: { winner } });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取咖啡获奖者失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取失败' });
   }
@@ -145,9 +146,10 @@ router.post('/workspaces/:workspaceId/draw-coffee', async (req: Request, res: Re
 
     const result = await coffeeService.drawLottery(workspaceId);
     res.json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     console.error('咖啡抽奖失败:', error);
-    if (error.message === 'NO_MEMBERS') {
+    const message = error instanceof Error ? error.message : '';
+    if (message === 'NO_MEMBERS') {
       return res.status(400).json({ error: 'NO_MEMBERS', message: '工作区没有成员' });
     }
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '抽奖失败' });
@@ -171,7 +173,7 @@ router.get('/workspaces/:workspaceId/coffee-history', async (req: Request, res: 
     const limit = parseInt(req.query.limit as string) || 30;
     const history = await coffeeService.getHistory(workspaceId, { limit });
     res.json({ success: true, data: history });
-  } catch (error: any) {
+  } catch (error) {
     console.error('获取咖啡历史失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '获取失败' });
   }
@@ -185,7 +187,7 @@ router.post('/trigger-daily-reminder', async (req: Request, res: Response) => {
   try {
     await schedulerService.triggerDailyReminders();
     res.json({ success: true, message: '已触发每日提醒' });
-  } catch (error: any) {
+  } catch (error) {
     console.error('触发每日提醒失败:', error);
     res.status(500).json({ error: 'INTERNAL_ERROR', message: '触发失败' });
   }

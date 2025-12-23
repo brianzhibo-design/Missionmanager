@@ -3,8 +3,67 @@
  * 支持周报/月报生成，自动汇总日报数据
  */
 import { prisma } from '../infra/database';
+import { Prisma } from '@prisma/client';
 import { getProvider } from '../ai/aiService';
 import { logger } from '../infra/logger';
+
+// ============ 类型定义 ============
+
+interface DailyReportInput {
+  id: string;
+  date: Date;
+  completed: string;
+  planned: string;
+  issues: string | null;
+  workHours: number | null;
+  userId: string;
+  user: { id: string; name: string; avatar: string | null };
+}
+
+interface ProjectTaskStats {
+  name: string;
+  total: number;
+  created: number;
+  completed: number;
+  inProgress: number;
+  blocked: number;
+  completionRate: number;
+}
+
+interface MemberReportStats {
+  name: string;
+  avatar: string | null;
+  count: number;
+  hours: number;
+}
+
+interface DailySummary {
+  reportCount: number;
+  totalWorkHours: number;
+  avgWorkHoursPerDay: number;
+  memberReports: Record<string, MemberReportStats>;
+  completedItems: string[];
+  issueItems: string[];
+  dailyDetails: Array<{ date: string; count: number; hours: number }>;
+}
+
+interface ReportStats {
+  totalProjects: number;
+  totalTasks: number;
+  tasksCreated: number;
+  tasksCompleted: number;
+  tasksInProgress: number;
+  tasksBlocked: number;
+  tasksByPriority: { critical: number; high: number; medium: number; low: number };
+  projectStats: ProjectTaskStats[];
+  dailySummary?: DailySummary;
+}
+
+interface AISummaryResult {
+  summary: string;
+  highlights: string[];
+  concerns: string[];
+}
 
 export const reportService = {
   /**
@@ -123,7 +182,7 @@ export const reportService = {
     type: 'weekly' | 'monthly',
     startDate: Date,
     endDate: Date,
-    dailyReports?: any[]
+    dailyReports?: DailyReportInput[]
   ) {
     // 获取工作区信息
     const workspace = await prisma.workspace.findUnique({
@@ -150,7 +209,7 @@ export const reportService = {
     }
 
     // 收集统计数据
-    const stats: any = {
+    const stats: ReportStats = {
       totalProjects: workspace.projects.length,
       totalTasks: 0,
       tasksCreated: 0,
@@ -158,7 +217,7 @@ export const reportService = {
       tasksInProgress: 0,
       tasksBlocked: 0,
       tasksByPriority: { critical: 0, high: 0, medium: 0, low: 0 },
-      projectStats: [] as any[],
+      projectStats: [],
     };
 
     for (const project of workspace.projects) {
@@ -202,14 +261,14 @@ export const reportService = {
 
     // 汇总日报内容
     if (dailyReports && dailyReports.length > 0) {
-      const dailySummary = {
+      const dailySummary: DailySummary = {
         reportCount: dailyReports.length,
         totalWorkHours: dailyReports.reduce((sum, r) => sum + (r.workHours || 0), 0),
         avgWorkHoursPerDay: 0,
-        memberReports: {} as Record<string, { name: string; avatar: string | null; count: number; hours: number }>,
-        completedItems: [] as string[],
-        issueItems: [] as string[],
-        dailyDetails: [] as { date: string; count: number; hours: number }[],
+        memberReports: {},
+        completedItems: [],
+        issueItems: [],
+        dailyDetails: [],
       };
 
       // 按日期统计
@@ -296,7 +355,7 @@ export const reportService = {
         title: `${workspace.name} ${type === 'weekly' ? '周报' : '月报'} - ${periodStr}`,
         startDate,
         endDate,
-        content: stats,
+        content: stats as unknown as Prisma.InputJsonValue,
         summary,
         highlights,
         concerns,
@@ -319,7 +378,7 @@ export const reportService = {
   /**
    * 生成备用摘要（AI失败时）
    */
-  generateFallbackSummary(type: 'weekly' | 'monthly', stats: any): string {
+  generateFallbackSummary(type: 'weekly' | 'monthly', stats: ReportStats): string {
     const period = type === 'weekly' ? '周' : '月';
     const parts = [];
     
@@ -346,14 +405,14 @@ export const reportService = {
   async generateAISummary(
     workspaceName: string,
     type: 'weekly' | 'monthly',
-    stats: any,
-    dailyReports?: any[]
-  ) {
+    stats: ReportStats,
+    _dailyReports?: DailyReportInput[]
+  ): Promise<AISummaryResult> {
     let dailySection = '';
     if (stats.dailySummary) {
       const ds = stats.dailySummary;
       const memberList = Object.values(ds.memberReports)
-        .map((m: any) => `${m.name}(${m.count}份/${m.hours.toFixed(1)}h)`)
+        .map((m: MemberReportStats) => `${m.name}(${m.count}份/${m.hours.toFixed(1)}h)`)
         .join('、');
 
       dailySection = `
@@ -381,7 +440,7 @@ ${ds.issueItems.length > 0 ? `- 反馈的问题（${ds.issueItems.length}条）�
 
 各项目情况：
 ${stats.projectStats.length > 0 
-  ? stats.projectStats.map((p: any) => `- ${p.name}：完成率 ${p.completionRate}%，完成 ${p.completed}/${p.total}，阻塞 ${p.blocked}`).join('\n')
+  ? stats.projectStats.map((p: ProjectTaskStats) => `- ${p.name}：完成率 ${p.completionRate}%，完成 ${p.completed}/${p.total}，阻塞 ${p.blocked}`).join('\n')
   : '- 暂无活跃项目'}${dailySection}
 
 请以 JSON 格式返回，要求：
@@ -397,7 +456,7 @@ ${stats.projectStats.length > 0
 
     try {
       const provider = getProvider();
-      const result = await provider.analyzeWithPrompt<any>(prompt);
+      const result = await provider.analyzeWithPrompt<AISummaryResult>(prompt);
       
       return {
         summary: result.summary || '',
@@ -441,7 +500,7 @@ ${stats.projectStats.length > 0
    * 获取报告列表
    */
   async getReports(workspaceId: string, type?: string, limit = 20) {
-    const where: any = { workspaceId };
+    const where: { workspaceId: string; type?: string } = { workspaceId };
     if (type) where.type = type;
 
     return prisma.report.findMany({
