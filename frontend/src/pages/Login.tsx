@@ -8,7 +8,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { authService, UserProfile } from '../services/auth';
 import { 
-  Mail, Lock, Phone, ClipboardList, User, Building2, MapPin,
+  Mail, Lock, Phone, ClipboardList, User, UserCircle, Building2, MapPin,
   Code, PaintBucket, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles,
   Eye, EyeOff
 } from '../components/Icons';
@@ -373,8 +373,7 @@ function Login() {
         <form onSubmit={handleLogin}>
           <div className="form-group">
             <label htmlFor="email">邮箱地址</label>
-            <div className="input-wrapper">
-              <span className="input-icon"><Mail size={18} /></span>
+            <div className="input-wrapper no-icon">
               <input
                 id="email"
                 type="email"
@@ -387,8 +386,7 @@ function Login() {
 
           <div className="form-group">
             <label htmlFor="password">密码</label>
-            <div className="input-wrapper password-wrapper">
-              <span className="input-icon"><Lock size={18} /></span>
+            <div className="input-wrapper password-wrapper no-icon">
               <input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -425,8 +423,7 @@ function Login() {
         <form onSubmit={handlePhoneLogin}>
           <div className="form-group">
             <label htmlFor="phone">手机号</label>
-            <div className="input-wrapper">
-              <span className="input-icon">📱</span>
+            <div className="input-wrapper no-icon">
               <input
                 id="phone"
                 type="tel"
@@ -441,8 +438,7 @@ function Login() {
 
           <div className="form-group">
             <label htmlFor="code">验证码</label>
-            <div className="input-wrapper code-input-wrapper">
-              <span className="input-icon">🔢</span>
+            <div className="input-wrapper code-input-wrapper no-icon">
               <input
                 id="code"
                 type="text"
@@ -498,8 +494,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="name">您的姓名</label>
-        <div className="input-wrapper">
-          <span className="input-icon"><User size={18} /></span>
+        <div className="input-wrapper no-icon">
           <input
             id="name"
             type="text"
@@ -513,8 +508,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="email">邮箱地址</label>
-        <div className="input-wrapper">
-          <span className="input-icon"><Mail size={18} /></span>
+        <div className="input-wrapper no-icon">
           <input
             id="email"
             type="email"
@@ -527,8 +521,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="reg-password">设置密码</label>
-        <div className="input-wrapper password-wrapper">
-          <span className="input-icon"><Lock size={18} /></span>
+        <div className="input-wrapper password-wrapper no-icon">
           <input
             id="reg-password"
             type={showPassword ? 'text' : 'password'}
@@ -591,8 +584,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="confirmPassword">确认密码</label>
-        <div className="input-wrapper password-wrapper">
-          <span className="input-icon"><Lock size={18} /></span>
+        <div className="input-wrapper password-wrapper no-icon">
           <input
             id="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
@@ -644,8 +636,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="email">邮箱地址</label>
-        <div className="input-wrapper">
-          <span className="input-icon"><Mail size={18} /></span>
+        <div className="input-wrapper no-icon">
           <input
             id="email"
             type="email"
@@ -677,8 +668,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="reset-password">新密码</label>
-        <div className="input-wrapper password-wrapper">
-          <span className="input-icon"><Lock size={18} /></span>
+        <div className="input-wrapper password-wrapper no-icon">
           <input
             id="reset-password"
             type={showPassword ? 'text' : 'password'}
@@ -721,8 +711,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="reset-confirmPassword">确认新密码</label>
-        <div className="input-wrapper password-wrapper">
-          <span className="input-icon"><Lock size={18} /></span>
+        <div className="input-wrapper password-wrapper no-icon">
           <input
             id="reset-confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
@@ -779,8 +768,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="company">公司/组织</label>
-        <div className="input-wrapper">
-          <span className="input-icon"><Building2 size={18} /></span>
+        <div className="input-wrapper no-icon">
           <input
             id="company"
             type="text"
@@ -794,8 +782,7 @@ function Login() {
 
       <div className="form-group">
         <label htmlFor="location">所在地</label>
-        <div className="input-wrapper">
-          <span className="input-icon"><MapPin size={18} /></span>
+        <div className="input-wrapper no-icon">
           <input
             id="location"
             type="text"

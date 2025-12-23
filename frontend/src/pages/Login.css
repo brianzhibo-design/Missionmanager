@@ -200,18 +200,22 @@
   color: #ef4444;
 }
 
-/* 输入框包装器 */
-.input-wrapper {
+/* 输入框包装器 - 使用更具体的选择器防止被覆盖 */
+.login-page .input-wrapper,
+.auth-card .input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
+.login-page .input-icon,
+.auth-card .input-icon {
   position: absolute;
-  left: 1rem;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 1rem;
-  z-index: 1;
+  z-index: 2;
   color: #64748b;
   display: flex;
   align-items: center;
@@ -219,9 +223,10 @@
   pointer-events: none;
 }
 
-.form-group input {
+.login-page .form-group input,
+.auth-card .form-group input {
   width: 100%;
-  padding: 0.875rem 1rem 0.875rem 2.75rem;
+  padding: 14px 16px 14px 44px;
   background: #f8fafc;
   border: 2px solid #e2e8f0;
   border-radius: 12px;
@@ -230,16 +235,32 @@
   transition: all 0.2s ease;
 }
 
-.form-group input::placeholder {
+/* 无图标输入框 - 减少左侧 padding */
+.login-page .input-wrapper.no-icon input,
+.auth-card .input-wrapper.no-icon input {
+  padding-left: 16px;
+}
+
+/* 无图标密码框 - 右侧留出眼睛图标空间 */
+.login-page .input-wrapper.password-wrapper.no-icon input,
+.auth-card .input-wrapper.password-wrapper.no-icon input {
+  padding-left: 16px;
+  padding-right: 48px;
+}
+
+.login-page .form-group input::placeholder,
+.auth-card .form-group input::placeholder {
   color: #94a3b8;
 }
 
-.form-group input:hover {
+.login-page .form-group input:hover,
+.auth-card .form-group input:hover {
   border-color: #cbd5e1;
   background: #fff;
 }
 
-.form-group input:focus {
+.login-page .form-group input:focus,
+.auth-card .form-group input:focus {
   outline: none;
   border-color: #3b82f6;
   background: #fff;
