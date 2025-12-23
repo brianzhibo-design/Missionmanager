@@ -21,6 +21,7 @@
 @import './components/buttons.css';
 @import './components/inputs.css';
 @import './components/cards.css';
+@import '../components/common/common.css';
 
 /* ========================================
  * 3. 工具类

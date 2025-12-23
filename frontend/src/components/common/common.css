@@ -1,0 +1,163 @@
+/**
+ * 通用组件样式
+ */
+
+/* ===== 状态徽章 ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.status-badge-sm {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.status-badge-md {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.status-badge-lg {
+  font-size: 14px;
+  padding: 6px 14px;
+}
+
+/* ===== 优先级徽章 ===== */
+.priority-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.priority-badge-sm {
+  font-size: 11px;
+}
+
+.priority-badge-md {
+  font-size: 12px;
+}
+
+.priority-badge-lg {
+  font-size: 14px;
+}
+
+.priority-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.priority-badge-sm .priority-dot {
+  width: 5px;
+  height: 5px;
+}
+
+.priority-badge-lg .priority-dot {
+  width: 8px;
+  height: 8px;
+}
+
+/* ===== 确认弹窗 ===== */
+.confirm-modal {
+  padding: 24px;
+  text-align: center;
+}
+
+.confirm-modal-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.confirm-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.confirm-modal-body {
+  margin-bottom: 24px;
+}
+
+.confirm-message {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.confirm-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.confirm-modal-footer .btn {
+  min-width: 100px;
+}
+
+/* 按钮变体 */
+.btn-danger {
+  background: var(--color-danger);
+  color: white;
+  border: none;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: var(--color-danger-dark, #dc2626);
+}
+
+.btn-warning {
+  background: var(--color-warning);
+  color: white;
+  border: none;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: var(--color-warning-dark, #d97706);
+}
+
+.btn-info {
+  background: var(--color-info);
+  color: white;
+  border: none;
+}
+
+.btn-info:hover:not(:disabled) {
+  background: var(--color-info-dark, #2563eb);
+}
+
+/* 加载动画 */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
