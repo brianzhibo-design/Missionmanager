@@ -32,7 +32,7 @@ export async function sendTaskReminders(): Promise<void> {
         lte: in3Days,
       },
       status: {
-        notIn: ['DONE'],
+        notIn: ['done'],
       },
       assigneeId: {
         not: null,
@@ -165,7 +165,7 @@ export async function sendDailySummaries(): Promise<void> {
       prisma.task.count({
         where: {
           assigneeId: user.id,
-          status: 'DONE',
+          status: 'done',
           updatedAt: {
             gte: yesterday,
             lt: today,
@@ -175,7 +175,7 @@ export async function sendDailySummaries(): Promise<void> {
       prisma.task.count({
         where: {
           assigneeId: user.id,
-          status: { in: ['TODO', 'IN_PROGRESS'] },
+          status: { in: ['todo', 'in_progress'] },
           dueDate: {
             gte: today,
             lt: tomorrow,
@@ -185,20 +185,20 @@ export async function sendDailySummaries(): Promise<void> {
       prisma.task.count({
         where: {
           assigneeId: user.id,
-          status: { notIn: ['DONE'] },
+          status: { notIn: ['done'] },
           dueDate: { lt: today },
         },
       }),
       prisma.task.count({
         where: {
           assigneeId: user.id,
-          status: 'IN_PROGRESS',
+          status: 'in_progress',
         },
       }),
       prisma.task.findMany({
         where: {
           assigneeId: user.id,
-          status: { in: ['TODO', 'IN_PROGRESS'] },
+          status: { in: ['todo', 'in_progress'] },
           dueDate: {
             gte: today,
             lt: tomorrow,

@@ -81,8 +81,8 @@ export const projectService = {
         await taskRepository.create({
           title: task.title,
           description: task.description || '',
-          priority: task.priority || 'MEDIUM',
-          status: 'TODO',
+          priority: task.priority || 'medium',
+          status: 'todo',
           projectId: project.id,
           creatorId: userId,
           order: task.order || 0,

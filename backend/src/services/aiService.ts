@@ -275,7 +275,7 @@ export async function predictTaskRisk(taskId: string, userId: string): Promise<R
   const task = await prisma.task.findUnique({
     where: { id: taskId },
     include: {
-      project: { include: { tasks: { where: { status: { not: 'DONE' } } }, workspace: true } },
+      project: { include: { tasks: { where: { status: { not: 'done' } } }, workspace: true } },
       assignee: true,
     },
   });
@@ -285,7 +285,7 @@ export async function predictTaskRisk(taskId: string, userId: string): Promise<R
   let assigneeWorkload = 0;
   if (task.assigneeId) {
     assigneeWorkload = await prisma.task.count({
-      where: { assigneeId: task.assigneeId, status: { in: ['TODO', 'IN_PROGRESS'] } },
+      where: { assigneeId: task.assigneeId, status: { in: ['todo', 'in_progress'] } },
     });
   }
 
@@ -328,7 +328,7 @@ export async function recommendPriority(
   const project = await prisma.project.findUnique({
     where: { id: projectId },
     include: {
-      tasks: { where: { status: { not: 'DONE' } }, select: { priority: true } },
+      tasks: { where: { status: { not: 'done' } }, select: { priority: true } },
       workspace: true,
     },
   });
@@ -388,7 +388,7 @@ export async function recommendAssignment(
   const memberWorkloads = await Promise.all(
     members.map(async (m) => {
       const count = await prisma.task.count({
-        where: { assigneeId: m.userId, status: { in: ['TODO', 'IN_PROGRESS'] } },
+        where: { assigneeId: m.userId, status: { in: ['todo', 'in_progress'] } },
       });
       return { id: m.userId, name: m.user.name, tasks: count, availability: Math.max(0, 100 - count * 15) };
     })
