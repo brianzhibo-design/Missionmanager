@@ -178,18 +178,18 @@ function DesktopMembersTree() {
     return { label: '成员', color: '#6b7280' };
   };
 
-  // 检查是否可以编辑成员（owner、admin 可以编辑所有；leader 只能编辑自己负责的项目）
+  // 检查是否可以编辑成员（owner/director/admin 可以编辑所有；项目负责人可以编辑自己负责的项目）
   const canEditMembers = useMemo(() => {
-    if (!workspaceRole || !treeData) return false;
+    if (!treeData || !currentUser) return false;
     
-    // owner 和 admin 可以编辑所有项目
-    if (['owner', 'director', 'admin'].includes(workspaceRole)) {
+    // owner、director、admin 可以编辑所有项目
+    if (workspaceRole && ['owner', 'director', 'admin'].includes(workspaceRole)) {
       return true;
     }
     
-    // leader 只能编辑自己负责的项目（需要检查项目负责人）
-    if (workspaceRole === 'manager' && treeData.leader && currentUser) {
-      return treeData.leader.id === currentUser.id;
+    // 项目负责人可以编辑自己负责的项目（无论工作区角色是什么）
+    if (treeData.leader && treeData.leader.id === currentUser.id) {
+      return true;
     }
     
     return false;
