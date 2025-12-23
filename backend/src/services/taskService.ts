@@ -19,6 +19,28 @@ import {
 import { AppError } from '../middleware/errorHandler';
 import { notificationService } from './notificationService';
 
+/**
+ * 规范化状态值（统一转为小写）
+ * 兼容大写、小写、混合大小写输入
+ */
+function normalizeStatus(status?: string): TaskStatusType {
+  if (!status) return TaskStatus.TODO;
+  const normalized = status.toLowerCase() as TaskStatusType;
+  // 验证是否是有效状态
+  if (isValidStatus(normalized)) return normalized;
+  return TaskStatus.TODO;
+}
+
+/**
+ * 规范化优先级值（统一转为小写）
+ */
+function normalizePriority(priority?: string): string {
+  if (!priority) return 'medium';
+  const normalized = priority.toLowerCase();
+  const validPriorities = ['low', 'medium', 'high', 'critical'];
+  return validPriorities.includes(normalized) ? normalized : 'medium';
+}
+
 // 所有角色（可查看）
 const ALL_ROLES = ['owner', 'director', 'manager', 'member', 'observer'] as const;
 // 可编辑角色（工作区级别）
@@ -170,12 +192,14 @@ export const taskService = {
     }
 
     // 6. 禁止在创建时设置状态（新任务必须为 todo）
-    if (data.status && data.status !== TaskStatus.TODO) {
+    // 使用规范化后的状态进行比较，兼容大小写输入
+    if (data.status && normalizeStatus(data.status) !== TaskStatus.TODO) {
       throw new AppError('新创建的任务状态必须为「待办」，请使用状态转换 API 修改状态', 400, 'INVALID_INITIAL_STATUS');
     }
 
-    // 7. 验证优先级
-    if (data.priority && !isValidPriority(data.priority)) {
+    // 7. 验证并规范化优先级（兼容大小写）
+    const normalizedPriority = data.priority ? normalizePriority(data.priority) : undefined;
+    if (normalizedPriority && !isValidPriority(normalizedPriority)) {
       throw new AppError(`无效的优先级: ${data.priority}`, 400, 'INVALID_PRIORITY');
     }
 
@@ -302,13 +326,20 @@ export const taskService = {
       }
     }
 
-    // 7. 验证优先级
-    if (data.priority && !isValidPriority(data.priority)) {
-      throw new AppError(`无效的优先级: ${data.priority}`, 400, 'INVALID_PRIORITY');
+    // 7. 验证并规范化优先级（兼容大小写）
+    if (data.priority) {
+      const normalizedUpdatePriority = normalizePriority(data.priority);
+      if (!isValidPriority(normalizedUpdatePriority)) {
+        throw new AppError(`无效的优先级: ${data.priority}`, 400, 'INVALID_PRIORITY');
+      }
+      // 使用规范化后的优先级
+      data.priority = normalizedUpdatePriority;
     }
 
     // 8. 如果要更新状态，使用专门的状态变更方法
-    if (data.status && data.status !== task.status) {
+    const normalizedTaskStatus = normalizeStatus(task.status);
+    const normalizedDataStatus = data.status ? normalizeStatus(data.status) : undefined;
+    if (normalizedDataStatus && normalizedDataStatus !== normalizedTaskStatus) {
       throw new AppError('请使用 PATCH /tasks/:id/status 接口变更状态', 400, 'USE_STATUS_ENDPOINT');
     }
 
@@ -811,7 +842,9 @@ export const taskService = {
       throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
     }
 
-    const oldStatus = (task.status || 'todo') as TaskStatusType;
+    // 规范化状态值（兼容大小写输入）
+    const oldStatus = normalizeStatus(task.status);
+    newStatus = normalizeStatus(newStatus);
 
     // 2. 权限检查
     const isProjectLeader = task.project.leaderId === userId;
