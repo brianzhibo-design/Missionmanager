@@ -446,7 +446,7 @@ export default function AppLayout() {
     pushNotificationService.init();
     socketService.init();
     
-    const unsubscribe = socketService.addListener((_notification: SocketNotification) => {
+    const unsubscribe = socketService.addListener(() => {
       setUnreadCount(prev => prev + 1);
     });
     

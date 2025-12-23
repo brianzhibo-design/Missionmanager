@@ -302,7 +302,7 @@ function DesktopProjectDetail() {
 
   // 过滤和排序任务
   const filteredTasks = useMemo(() => {
-    let result = tasks.filter(task => {
+    const result = tasks.filter(task => {
       if (statusFilter !== 'all' && task.status !== statusFilter) return false;
       if (priorityFilter !== 'all' && task.priority !== priorityFilter) return false;
       return true;
