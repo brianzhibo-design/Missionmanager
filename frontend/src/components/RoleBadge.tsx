@@ -19,8 +19,8 @@ const roleLabels: Record<string, string> = {
   owner: '扛把子',
   admin: '大管家',      // 兼容旧代码
   director: '大管家',
-  leader: '堂主',       // 兼容旧代码
-  manager: '堂主',
+  leader: '带头大哥',   // 兼容旧代码
+  manager: '带头大哥',
   member: '少侠',
   guest: '吃瓜群侠',    // 兼容旧代码
   observer: '吃瓜群侠',

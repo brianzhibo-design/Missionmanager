@@ -31,7 +31,7 @@ async function isWorkspaceOwner(userId: string, workspaceId: string): Promise<bo
 
 /**
  * 检查用户是否有咖啡抽奖权限
- * 创始人默认有权限，或者用户有 COFFEE_LOTTERY 自定义权限
+ * owner 和 director 默认有权限，或者用户有 COFFEE_LOTTERY 自定义权限
  */
 async function hasCoffeeLotteryPermission(userId: string, workspaceId: string): Promise<boolean> {
   const membership = await prisma.workspaceUser.findUnique({
@@ -45,8 +45,8 @@ async function hasCoffeeLotteryPermission(userId: string, workspaceId: string): 
   
   if (!membership) return false;
   
-  // 创始人默认有权限
-  if (membership.role === 'owner') return true;
+  // owner 和 director 默认有权限
+  if (['owner', 'director', 'admin'].includes(membership.role)) return true;
   
   // 检查自定义权限
   const permissions = membership.permissions as string[] || [];

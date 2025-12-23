@@ -80,11 +80,10 @@ async function canEditTask(
 
 /**
  * 检查用户是否有权限删除任务
- * 删除权限比编辑权限更严格：
- * 1. 工作区创始人（owner）
- * 2. 大管家（admin）
- * 3. 项目负责人（leaderId 或 members.isLeader）
- * 4. 任务创建者
+ * 删除权限（严格）：
+ * 1. 工作区 owner, director, manager 可以删除
+ * 2. 项目负责人可以删除项目内任务
+ * 注意：member 不能删除任务（包括自己创建的）
  */
 async function canDeleteTask(
   task: {
@@ -98,29 +97,27 @@ async function canDeleteTask(
   },
   userId: string
 ): Promise<boolean> {
-  // 1. 任务创建者可以删除自己的任务
-  if (task.creatorId === userId) return true;
-
-  // 2. 项目负责人（通过 leaderId）
+  // 1. 项目负责人可以删除项目内任务
   if (task.project.leaderId === userId) return true;
 
-  // 3. 项目成员中标记为 leader 的用户
+  // 2. 项目成员中标记为 leader 的用户
   if (task.project.members?.some(m => m.userId === userId && m.isLeader)) {
     return true;
   }
 
-  // 4. 工作区 owner 或 admin
+  // 3. 工作区 owner, director, manager 可以删除
   if (task.project.workspace?.members) {
-    const isOwnerOrAdmin = task.project.workspace.members.some(
-      m => m.userId === userId && ['owner', 'director'].includes(m.role)
+    const canDelete = task.project.workspace.members.some(
+      m => m.userId === userId && ['owner', 'director', 'manager'].includes(mapRole(m.role))
     );
-    if (isOwnerOrAdmin) return true;
+    if (canDelete) return true;
   } else {
     // 如果 workspace.members 未加载，使用 workspaceService 查询
     const role = await workspaceService.getUserRole(task.project.workspaceId, userId);
-    if (['owner', 'director'].includes(role || '')) return true;
+    if (role && ['owner', 'director', 'manager'].includes(mapRole(role))) return true;
   }
 
+  // member 和 observer 不能删除任务
   return false;
 }
 
@@ -130,6 +127,9 @@ export const taskService = {
   /**
    * 创建任务
    * 权限：工作区编辑角色、项目负责人、项目团队成员 可以创建
+   * 规则：
+   * - member 创建任务时自动成为负责人，不能分配给他人
+   * - observer 不能创建任务，也不能被分配任务
    */
   async create(userId: string, data: Omit<CreateTaskInput, 'creatorId'>) {
     // 1. 检查项目是否存在并获取 workspaceId
@@ -144,17 +144,42 @@ export const taskService = {
       throw new AppError('没有权限创建任务', 403, 'FORBIDDEN');
     }
 
-    // 3. 禁止在创建时设置状态（新任务必须为 todo）
+    // 3. 获取创建者的工作区角色
+    const creatorMembership = await workspaceService.getMembership(project.workspaceId, userId);
+    const creatorRole = creatorMembership ? mapRole(creatorMembership.role) : 'observer';
+
+    // 4. member 创建任务时，必须分配给自己（不能分配给他人）
+    let finalAssigneeId = data.assigneeId;
+    if (creatorRole === 'member') {
+      if (data.assigneeId && data.assigneeId !== userId) {
+        throw new AppError('您只能创建分配给自己的任务', 403, 'MEMBER_CANNOT_ASSIGN_OTHERS');
+      }
+      // member 创建任务时自动成为负责人
+      finalAssigneeId = userId;
+    }
+
+    // 5. 检查被分配者不能是 observer
+    if (finalAssigneeId) {
+      const assigneeMembership = await workspaceService.getMembership(project.workspaceId, finalAssigneeId);
+      if (assigneeMembership) {
+        const assigneeRole = mapRole(assigneeMembership.role);
+        if (assigneeRole === 'observer') {
+          throw new AppError('不能将任务分配给观察者', 400, 'CANNOT_ASSIGN_TO_OBSERVER');
+        }
+      }
+    }
+
+    // 6. 禁止在创建时设置状态（新任务必须为 todo）
     if (data.status && data.status !== TaskStatus.TODO) {
       throw new AppError('新创建的任务状态必须为「待办」，请使用状态转换 API 修改状态', 400, 'INVALID_INITIAL_STATUS');
     }
 
-    // 4. 验证优先级
+    // 7. 验证优先级
     if (data.priority && !isValidPriority(data.priority)) {
       throw new AppError(`无效的优先级: ${data.priority}`, 400, 'INVALID_PRIORITY');
     }
 
-    // 5. 如果指定了父任务，检查父任务是否存在且属于同一项目
+    // 8. 如果指定了父任务，检查父任务是否存在且属于同一项目
     if (data.parentId) {
       const parentTask = await taskRepository.findById(data.parentId);
       if (!parentTask) {
@@ -165,9 +190,10 @@ export const taskService = {
       }
     }
 
-    // 6. 创建任务（强制状态为 todo）
+    // 9. 创建任务（强制状态为 todo，使用处理后的 assigneeId）
     const task = await taskRepository.create({
       ...data,
+      assigneeId: finalAssigneeId,
       status: TaskStatus.TODO, // 强制新任务为 todo
       creatorId: userId,
     });
@@ -228,6 +254,9 @@ export const taskService = {
   /**
    * 更新任务
    * 权限：owner, admin, leader 可以编辑所有任务；member 只能编辑自己创建或被分配的任务；项目负责人可以编辑项目内所有任务
+   * 规则：
+   * - member 不能将任务分配给他人
+   * - observer 不能被分配任务
    */
   async update(userId: string, taskId: string, data: UpdateTaskInput) {
     // 1. 获取原任务
@@ -251,17 +280,39 @@ export const taskService = {
       throw new AppError('没有权限编辑任务', 403, 'FORBIDDEN');
     }
 
-    // 3. 验证优先级
+    // 4. 获取操作者的工作区角色
+    const operatorMembership = await workspaceService.getMembership(task.project.workspaceId, userId);
+    const operatorRole = operatorMembership ? mapRole(operatorMembership.role) : 'observer';
+
+    // 5. member 不能将任务分配给他人（只能分配给自己或不改变）
+    if (operatorRole === 'member' && data.assigneeId !== undefined) {
+      if (data.assigneeId !== null && data.assigneeId !== userId && data.assigneeId !== task.assigneeId) {
+        throw new AppError('您没有权限将任务分配给他人', 403, 'MEMBER_CANNOT_ASSIGN_OTHERS');
+      }
+    }
+
+    // 6. 检查被分配者不能是 observer
+    if (data.assigneeId) {
+      const assigneeMembership = await workspaceService.getMembership(task.project.workspaceId, data.assigneeId);
+      if (assigneeMembership) {
+        const assigneeRole = mapRole(assigneeMembership.role);
+        if (assigneeRole === 'observer') {
+          throw new AppError('不能将任务分配给观察者', 400, 'CANNOT_ASSIGN_TO_OBSERVER');
+        }
+      }
+    }
+
+    // 7. 验证优先级
     if (data.priority && !isValidPriority(data.priority)) {
       throw new AppError(`无效的优先级: ${data.priority}`, 400, 'INVALID_PRIORITY');
     }
 
-    // 4. 如果要更新状态，使用专门的状态变更方法
+    // 8. 如果要更新状态，使用专门的状态变更方法
     if (data.status && data.status !== task.status) {
       throw new AppError('请使用 PATCH /tasks/:id/status 接口变更状态', 400, 'USE_STATUS_ENDPOINT');
     }
 
-    // 5. 更新任务
+    // 9. 更新任务
     const updatedTask = await taskRepository.update(taskId, data);
 
     // 6. 记录变更事件

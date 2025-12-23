@@ -94,11 +94,10 @@ export const projectService = {
   },
 
   /**
-   * 获取工作区下的所有项目
+   * 获取工作区下的项目列表（带权限过滤）
    * 权限：
-   * - owner, admin, leader: 可以查看所有项目
-   * - member: 只能查看自己参与的项目（是负责人或团队成员）
-   * - guest: 只能查看自己参与的项目
+   * - owner, director: 可以查看所有项目
+   * - manager, member, observer: 只能查看自己参与的项目（是负责人、团队成员或有分配任务）
    */
   async getByWorkspace(userId: string, workspaceId: string) {
     // 验证用户是工作区成员
@@ -110,13 +109,12 @@ export const projectService = {
     // 映射角色代码
     const mappedRole = mapRole(membership.role);
 
-    // owner, admin, leader, member 都可以查看所有项目
-    // 只有 guest 限制只能看参与的项目
-    if (['owner', 'director', 'manager', 'member'].includes(mappedRole)) {
+    // owner, director 可以查看所有项目
+    if (['owner', 'director'].includes(mappedRole)) {
       return projectRepository.findByWorkspaceId(workspaceId);
     }
 
-    // guest 只能查看自己参与的项目
+    // manager, member, observer 只能查看自己参与的项目
     return projectRepository.findByWorkspaceIdForMember(workspaceId, userId);
   },
 

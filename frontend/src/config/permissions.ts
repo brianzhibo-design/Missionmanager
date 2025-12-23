@@ -187,14 +187,14 @@ export function compareWorkspaceRoles(role1: string, role2: string): number {
 // 角色显示名称（江湖风格命名）
 export const ROLE_LABELS: Record<string, string> = {
   // 工作区角色
-  owner: '扛把子',      // 工作区创始人
-  director: '大管家',   // 总监/主管
-  manager: '堂主',      // 项目经理/组长
-  member: '少侠',       // 普通成员
-  observer: '吃瓜群侠', // 观察者
+  owner: '扛把子',      // 工作区创始人，最高权限
+  director: '大管家',   // 高管/VP，全局管理
+  manager: '带头大哥',  // 经理/主管，团队管理
+  member: '少侠',       // 普通员工，执行任务
+  observer: '吃瓜群侠', // 观察者，只读权限
   // 兼容旧角色代码
   admin: '大管家',      // 映射到 director
-  leader: '堂主',       // 映射到 manager
+  leader: '带头大哥',   // 映射到 manager
   guest: '吃瓜群侠',    // 映射到 observer
   super_admin: '大管家',
 };
@@ -206,15 +206,15 @@ export const PROJECT_LEADER_LABEL = '项目负责人';
 export const ROLE_ICONS: Record<string, string> = {
   // 工作区角色
   owner: '💪',       // 扛把子
-  director: '🎩',    // 大管家
-  manager: '🤝',     // 堂主
+  director: '🐕',    // 大管家
+  manager: '🤝',     // 带头大哥
   member: '🗡️',     // 少侠
   observer: '🍉',    // 吃瓜群侠
   // 兼容旧角色代码
-  admin: '🎩',       // 映射到 director
+  admin: '🐕',       // 映射到 director
   leader: '🤝',      // 映射到 manager
   guest: '🍉',       // 映射到 observer
-  super_admin: '🎩',
+  super_admin: '🐕',
 };
 
 // 角色语录（可用于 tooltip 或欢迎语）
@@ -222,7 +222,7 @@ export const ROLE_QUOTES: Record<string, string> = {
   // 工作区角色
   owner: '这事儿我兜底',       // 扛把子
   director: '这事儿我来安排',  // 大管家
-  manager: '兄弟们，上！',     // 堂主
+  manager: '兄弟们，上！',     // 带头大哥
   member: '在下初来乍到，多多关照',  // 少侠
   observer: '诸位继续，我就看看', // 吃瓜群侠
   // 兼容旧角色代码
@@ -237,14 +237,14 @@ export const PROJECT_LEADER_QUOTE = '方向我来定';
 // 角色描述（用于选择时显示）
 export const ROLE_DESCRIPTIONS: Record<string, string> = {
   // 工作区角色
-  owner: '💪 这事儿我兜底 - 工作区创始人，拥有所有权限，可管理所有设置和成员',
-  director: '🎩 这事儿我来安排 - 总监/主管，管理多个项目，可查看全局数据',
-  manager: '🤝 兄弟们，上！ - 堂主，管理项目内任务和成员',
-  member: '🗡️ 在下初来乍到，多多关照 - 普通成员，完成分配的任务',
-  observer: '🍉 诸位继续，我就看看 - 观察者，只读权限，可查看和评论',
+  owner: '💪 这事儿我兜底 - 工作区创建者，最高权限',
+  director: '🐕 这事儿我来安排 - 高管/VP，全局管理',
+  manager: '🤝 兄弟们，上！ - 经理/主管，团队管理',
+  member: '🗡️ 在下初来乍到，多多关照 - 普通员工，执行任务',
+  observer: '🍉 诸位继续，我就看看 - 观察者，只读权限',
   // 兼容旧角色代码
-  admin: '🎩 这事儿我来安排 - 总监/主管',  // 映射到 director
-  leader: '🤝 兄弟们，上！ - 堂主',         // 映射到 manager
+  admin: '🐕 这事儿我来安排 - 高管/VP',  // 映射到 director
+  leader: '🤝 兄弟们，上！ - 带头大哥',   // 映射到 manager
   guest: '🍉 诸位继续，我就看看 - 观察者',  // 映射到 observer
 };
 
@@ -253,7 +253,7 @@ export const ROLE_COLORS: Record<string, { bg: string; color: string; border?: s
   // 工作区角色 - 扛把子使用渐变，其他使用微色背景
   owner: { bg: 'linear-gradient(135deg, #fbbf24, #f59e0b)', color: '#fff' },  // 扛把子 - 金色
   director: { bg: '#fef3c7', color: '#d97706', border: '#fde68a' },   // 大管家 - 橙色系
-  manager: { bg: '#ede9fe', color: '#7c3aed', border: '#ddd6fe' },    // 堂主 - 紫色系
+  manager: { bg: '#ede9fe', color: '#7c3aed', border: '#ddd6fe' },    // 带头大哥 - 紫色系
   member: { bg: '#d1fae5', color: '#059669', border: '#a7f3d0' },     // 少侠 - 绿色系
   observer: { bg: '#f1f5f9', color: '#64748b', border: '#e2e8f0' },   // 吃瓜 - 灰色系
   // 兼容旧角色代码
@@ -267,7 +267,7 @@ export const ROLE_COLORS: Record<string, { bg: string; color: string; border?: s
 // 注意：owner(扛把子) 不在选项中，只能通过创建工作区获得
 export const WORKSPACE_ROLE_OPTIONS = [
   { value: 'observer', label: '🍉 吃瓜群侠', description: '诸位继续，我就看看 - 观察者，只读权限' },
-  { value: 'member', label: '🗡️ 少侠', description: '在下初来乍到，多多关照 - 普通成员，完成分配的任务' },
-  { value: 'manager', label: '🤝 堂主', description: '兄弟们，上！ - 管理项目内任务和成员' },
-  { value: 'director', label: '🎩 大管家', description: '这事儿我来安排 - 总监/主管，管理多个项目' },
+  { value: 'member', label: '🗡️ 少侠', description: '在下初来乍到，多多关照 - 普通员工，执行任务' },
+  { value: 'manager', label: '🤝 带头大哥', description: '兄弟们，上！ - 经理/主管，团队管理' },
+  { value: 'director', label: '🐕 大管家', description: '这事儿我来安排 - 高管/VP，全局管理' },
 ];

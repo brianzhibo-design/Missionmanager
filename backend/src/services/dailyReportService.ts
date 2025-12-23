@@ -35,9 +35,25 @@ export interface DailyReportWithUser {
 export const dailyReportService = {
   /**
    * 创建或更新日报
+   * 注意：observer 不能创建日报
    */
   async createOrUpdate(input: CreateDailyReportInput): Promise<DailyReportWithUser> {
     const { userId, workspaceId, date, completed, planned, issues, workHours } = input;
+
+    // 检查用户角色，observer 不能创建日报
+    const { mapRole } = await import('../repositories/workspaceRepository');
+    const membership = await prisma.workspaceUser.findUnique({
+      where: { userId_workspaceId: { userId, workspaceId } },
+    });
+    
+    if (!membership) {
+      throw new Error('NOT_WORKSPACE_MEMBER');
+    }
+    
+    const userRole = mapRole(membership.role);
+    if (userRole === 'observer') {
+      throw new Error('OBSERVER_CANNOT_CREATE_REPORT');
+    }
 
     // 标准化日期
     const normalizedDate = new Date(date);
