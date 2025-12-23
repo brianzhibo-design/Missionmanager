@@ -10,7 +10,7 @@ import NotificationCenter from './NotificationCenter';
 import MobileNav from './MobileNav';
 import { notificationService } from '../services/notification';
 import { pushNotificationService } from '../services/pushNotification';
-import { socketService, SocketNotification } from '../services/socket';
+import { socketService } from '../services/socket';
 import { workspaceService } from '../services/workspace';
 import {
   DashboardIcon,
