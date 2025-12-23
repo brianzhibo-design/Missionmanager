@@ -7,3 +7,4 @@ ALTER TABLE "workspace_users" ADD COLUMN IF NOT EXISTS "permissions" TEXT[] DEFA
 CREATE INDEX IF NOT EXISTS "workspace_users_permissions_idx" ON "workspace_users" USING GIN ("permissions");
 
 
+

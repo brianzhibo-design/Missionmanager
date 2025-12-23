@@ -21,3 +21,4 @@ ALTER TABLE "coffee_lotteries" ADD CONSTRAINT "coffee_lotteries_workspace_id_fke
 ALTER TABLE "coffee_lotteries" ADD CONSTRAINT "coffee_lotteries_winner_id_fkey" FOREIGN KEY ("winner_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 
+

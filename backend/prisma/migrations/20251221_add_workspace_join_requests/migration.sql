@@ -23,3 +23,4 @@ ALTER TABLE "workspace_join_requests" ADD CONSTRAINT "workspace_join_requests_wo
 ALTER TABLE "workspace_join_requests" ADD CONSTRAINT "workspace_join_requests_reviewer_id_fkey" FOREIGN KEY ("reviewer_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 
+
