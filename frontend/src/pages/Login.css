@@ -755,3 +755,164 @@
   }
 }
 
+/* ===== 密码输入样式 ===== */
+.password-wrapper {
+  position: relative;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.password-toggle:hover {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.password-wrapper input {
+  padding-right: 48px;
+}
+
+/* 密码强度指示器 */
+.password-strength-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.strength-bar-bg {
+  flex: 1;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.strength-bar {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-bar.strength-weak {
+  background: #ef4444;
+}
+
+.strength-bar.strength-medium {
+  background: #f59e0b;
+}
+
+.strength-bar.strength-strong {
+  background: #10b981;
+}
+
+.strength-text {
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 20px;
+}
+
+.strength-text.strength-weak {
+  color: #ef4444;
+}
+
+.strength-text.strength-medium {
+  color: #f59e0b;
+}
+
+.strength-text.strength-strong {
+  color: #10b981;
+}
+
+/* 密码要求列表 */
+.password-requirements {
+  list-style: none;
+  margin: 8px 0 0 0;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.password-requirements li {
+  font-size: 12px;
+  color: #9ca3af;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.15s ease;
+}
+
+.password-requirements li.passed {
+  color: #10b981;
+}
+
+/* 字段级错误/成功提示 */
+.field-error {
+  font-size: 12px;
+  color: #ef4444;
+  margin: 6px 0 0 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.field-success {
+  font-size: 12px;
+  color: #10b981;
+  margin: 6px 0 0 0;
+}
+
+/* 响应式 */
+@media (max-width: 480px) {
+  .password-requirements {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 暗色模式 - 密码样式 */
+@media (prefers-color-scheme: dark) {
+  .password-toggle {
+    color: #94a3b8;
+  }
+  
+  .password-toggle:hover {
+    color: #cbd5e1;
+    background: #334155;
+  }
+  
+  .strength-bar-bg {
+    background: #334155;
+  }
+  
+  .password-requirements {
+    background: #1e293b;
+  }
+  
+  .password-requirements li {
+    color: #64748b;
+  }
+  
+  .password-requirements li.passed {
+    color: #34d399;
+  }
+}
+

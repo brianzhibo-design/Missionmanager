@@ -9,7 +9,8 @@ import { useAuth } from '../hooks/useAuth';
 import { authService, UserProfile } from '../services/auth';
 import { 
   Mail, Lock, Phone, ClipboardList, User, Building2, MapPin,
-  Code, PaintBucket, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles
+  Code, PaintBucket, Megaphone, TrendingUp, Users, Wallet, Handshake, BookOpen, Sparkles,
+  Eye, EyeOff
 } from '../components/Icons';
 import './Login.css';
 
@@ -30,6 +31,35 @@ const PROFESSIONS = [
 type ViewMode = 'login' | 'register' | 'forgot' | 'reset' | 'profile';
 type LoginType = 'email' | 'phone';
 
+// 密码强度检查
+interface PasswordStrength {
+  strength: 'weak' | 'medium' | 'strong';
+  score: number;
+  checks: {
+    minLength: boolean;
+    hasLowercase: boolean;
+    hasUppercase: boolean;
+    hasNumber: boolean;
+    hasSpecialChar: boolean;
+  };
+}
+
+function checkPasswordStrength(pwd: string): PasswordStrength {
+  const checks = {
+    minLength: pwd.length >= 8,
+    hasLowercase: /[a-z]/.test(pwd),
+    hasUppercase: /[A-Z]/.test(pwd),
+    hasNumber: /[0-9]/.test(pwd),
+    hasSpecialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`]/.test(pwd),
+  };
+  const score = Object.values(checks).filter(Boolean).length;
+  let strength: 'weak' | 'medium' | 'strong';
+  if (score <= 2) strength = 'weak';
+  else if (score <= 4) strength = 'medium';
+  else strength = 'strong';
+  return { strength, score, checks };
+}
+
 function Login() {
   const [viewMode, setViewMode] = useState<ViewMode>('login');
   const [loginType, setLoginType] = useState<LoginType>('email');
@@ -45,10 +75,15 @@ function Login() {
   const [countdown, setCountdown] = useState(0);
   const [devCode, setDevCode] = useState(''); // 开发环境显示验证码
   
+  // 密码相关状态
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  
   // 表单引用
   const emailRef = useRef<HTMLInputElement>(null);
-  const passwordRef = useRef<HTMLInputElement>(null);
-  const confirmPasswordRef = useRef<HTMLInputElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   
   // 个人信息表单（支持职业多选）
@@ -101,7 +136,6 @@ function Login() {
 
     try {
       const email = emailRef.current?.value || '';
-      const password = passwordRef.current?.value || '';
       await login(email, password);
     } catch (err) {
       setError(err instanceof Error ? err.message : '登录失败');
@@ -172,9 +206,13 @@ function Login() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
-
-    const password = passwordRef.current?.value || '';
-    const confirmPassword = confirmPasswordRef.current?.value || '';
+    
+    // 检查密码强度
+    const strength = checkPasswordStrength(password);
+    if (strength.score < 5) {
+      setError('密码必须包含大小写字母、数字和特殊字符，且至少8位');
+      return;
+    }
     
     if (password !== confirmPassword) {
       setError('两次输入的密码不一致');
@@ -222,9 +260,13 @@ function Login() {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     clearMessages();
-
-    const password = passwordRef.current?.value || '';
-    const confirmPassword = confirmPasswordRef.current?.value || '';
+    
+    // 检查密码强度
+    const strength = checkPasswordStrength(password);
+    if (strength.score < 5) {
+      setError('密码必须包含大小写字母、数字和特殊字符，且至少8位');
+      return;
+    }
     
     if (password !== confirmPassword) {
       setError('两次输入的密码不一致');
@@ -235,6 +277,8 @@ function Login() {
     try {
       await authService.resetPassword(resetToken, password);
       setSuccess('密码重置成功，请登录');
+      setPassword('');
+      setConfirmPassword('');
       setTimeout(() => {
         setViewMode('login');
         setResetToken('');
@@ -343,16 +387,26 @@ function Login() {
 
           <div className="form-group">
             <label htmlFor="password">密码</label>
-            <div className="input-wrapper">
+            <div className="input-wrapper password-wrapper">
               <span className="input-icon"><Lock size={18} /></span>
               <input
                 id="password"
-                type="password"
-                ref={passwordRef}
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="输入密码"
                 required
-                minLength={6}
+                minLength={8}
               />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                aria-label={showPassword ? '隐藏密码' : '显示密码'}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
           </div>
 
@@ -472,33 +526,97 @@ function Login() {
       </div>
 
       <div className="form-group">
-        <label htmlFor="password">设置密码</label>
-        <div className="input-wrapper">
+        <label htmlFor="reg-password">设置密码</label>
+        <div className="input-wrapper password-wrapper">
           <span className="input-icon"><Lock size={18} /></span>
           <input
-            id="password"
-            type="password"
-            ref={passwordRef}
-            placeholder="至少6位字符"
+            id="reg-password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onFocus={() => setPasswordFocused(true)}
+            onBlur={() => setPasswordFocused(false)}
+            placeholder="8位以上，含大小写+数字+特殊字符"
             required
-            minLength={6}
+            minLength={8}
           />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </div>
+        {/* 密码强度指示器 */}
+        {password && (
+          <div className="password-strength-container">
+            <div className="strength-bar-bg">
+              <div 
+                className={`strength-bar strength-${checkPasswordStrength(password).strength}`}
+                style={{ 
+                  width: checkPasswordStrength(password).strength === 'weak' ? '33%' : 
+                         checkPasswordStrength(password).strength === 'medium' ? '66%' : '100%' 
+                }}
+              />
+            </div>
+            <span className={`strength-text strength-${checkPasswordStrength(password).strength}`}>
+              {checkPasswordStrength(password).strength === 'weak' ? '弱' : 
+               checkPasswordStrength(password).strength === 'medium' ? '中' : '强'}
+            </span>
+          </div>
+        )}
+        {/* 密码要求列表 */}
+        {passwordFocused && password && (
+          <ul className="password-requirements">
+            <li className={checkPasswordStrength(password).checks.minLength ? 'passed' : ''}>
+              {checkPasswordStrength(password).checks.minLength ? '✓' : '✗'} 至少8个字符
+            </li>
+            <li className={checkPasswordStrength(password).checks.hasLowercase ? 'passed' : ''}>
+              {checkPasswordStrength(password).checks.hasLowercase ? '✓' : '✗'} 包含小写字母
+            </li>
+            <li className={checkPasswordStrength(password).checks.hasUppercase ? 'passed' : ''}>
+              {checkPasswordStrength(password).checks.hasUppercase ? '✓' : '✗'} 包含大写字母
+            </li>
+            <li className={checkPasswordStrength(password).checks.hasNumber ? 'passed' : ''}>
+              {checkPasswordStrength(password).checks.hasNumber ? '✓' : '✗'} 包含数字
+            </li>
+            <li className={checkPasswordStrength(password).checks.hasSpecialChar ? 'passed' : ''}>
+              {checkPasswordStrength(password).checks.hasSpecialChar ? '✓' : '✗'} 包含特殊字符
+            </li>
+          </ul>
+        )}
       </div>
 
       <div className="form-group">
         <label htmlFor="confirmPassword">确认密码</label>
-        <div className="input-wrapper">
+        <div className="input-wrapper password-wrapper">
           <span className="input-icon"><Lock size={18} /></span>
           <input
             id="confirmPassword"
-            type="password"
-            ref={confirmPasswordRef}
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="再次输入密码"
             required
-            minLength={6}
+            minLength={8}
           />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            tabIndex={-1}
+          >
+            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </div>
+        {confirmPassword && password !== confirmPassword && (
+          <p className="field-error">两次输入的密码不一致</p>
+        )}
+        {confirmPassword && password === confirmPassword && (
+          <p className="field-success">✓ 密码一致</p>
+        )}
       </div>
 
       <button type="submit" className="submit-btn" disabled={isLoading}>
@@ -558,33 +676,74 @@ function Login() {
       {success && <div className="success-message">{success}</div>}
 
       <div className="form-group">
-        <label htmlFor="password">新密码</label>
-        <div className="input-wrapper">
+        <label htmlFor="reset-password">新密码</label>
+        <div className="input-wrapper password-wrapper">
           <span className="input-icon"><Lock size={18} /></span>
           <input
-            id="password"
-            type="password"
-            ref={passwordRef}
-            placeholder="至少6位字符"
+            id="reset-password"
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onFocus={() => setPasswordFocused(true)}
+            onBlur={() => setPasswordFocused(false)}
+            placeholder="8位以上，含大小写+数字+特殊字符"
             required
-            minLength={6}
+            minLength={8}
           />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </div>
+        {/* 密码强度指示器 */}
+        {password && (
+          <div className="password-strength-container">
+            <div className="strength-bar-bg">
+              <div 
+                className={`strength-bar strength-${checkPasswordStrength(password).strength}`}
+                style={{ 
+                  width: checkPasswordStrength(password).strength === 'weak' ? '33%' : 
+                         checkPasswordStrength(password).strength === 'medium' ? '66%' : '100%' 
+                }}
+              />
+            </div>
+            <span className={`strength-text strength-${checkPasswordStrength(password).strength}`}>
+              {checkPasswordStrength(password).strength === 'weak' ? '弱' : 
+               checkPasswordStrength(password).strength === 'medium' ? '中' : '强'}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="form-group">
-        <label htmlFor="confirmPassword">确认新密码</label>
-        <div className="input-wrapper">
+        <label htmlFor="reset-confirmPassword">确认新密码</label>
+        <div className="input-wrapper password-wrapper">
           <span className="input-icon"><Lock size={18} /></span>
           <input
-            id="confirmPassword"
-            type="password"
-            ref={confirmPasswordRef}
+            id="reset-confirmPassword"
+            type={showConfirmPassword ? 'text' : 'password'}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="再次输入新密码"
             required
-            minLength={6}
+            minLength={8}
           />
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            tabIndex={-1}
+          >
+            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </div>
+        {confirmPassword && password !== confirmPassword && (
+          <p className="field-error">两次输入的密码不一致</p>
+        )}
       </div>
 
       <button type="submit" className="submit-btn" disabled={isLoading}>

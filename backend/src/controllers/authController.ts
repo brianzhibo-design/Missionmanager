@@ -6,6 +6,11 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { authService } from '../services/authService';
 import { requireAuth } from '../middleware/authMiddleware';
 import { AppError } from '../middleware/errorHandler';
+import { 
+  validatePasswordStrength, 
+  validateEmail, 
+  validateName 
+} from '../utils/validators';
 
 export const authRouter = Router();
 
@@ -22,8 +27,31 @@ authRouter.post('/register', async (req: Request, res: Response, next: NextFunct
       throw new AppError('请提供 email、password 和 name', 400, 'MISSING_FIELDS');
     }
 
-    if (password.length < 6) {
-      throw new AppError('密码长度至少 6 位', 400, 'PASSWORD_TOO_SHORT');
+    // 验证邮箱格式
+    const emailValidation = validateEmail(email);
+    if (!emailValidation.isValid) {
+      throw new AppError(emailValidation.error || '邮箱格式不正确', 400, 'INVALID_EMAIL');
+    }
+
+    // 验证用户名
+    const nameValidation = validateName(name);
+    if (!nameValidation.isValid) {
+      throw new AppError(nameValidation.error || '用户名格式不正确', 400, 'INVALID_NAME');
+    }
+
+    // 验证密码强度
+    const passwordValidation = validatePasswordStrength(password, email, name);
+    if (!passwordValidation.isValid) {
+      throw new AppError(
+        passwordValidation.errors[0] || '密码不符合要求', 
+        400, 
+        'WEAK_PASSWORD',
+        { 
+          strength: passwordValidation.strength,
+          checks: passwordValidation.checks,
+          errors: passwordValidation.errors,
+        }
+      );
     }
 
     const result = await authService.register(email, password, name);
@@ -167,6 +195,21 @@ authRouter.patch('/password', requireAuth, async (req: Request, res: Response, n
       throw new AppError('请提供当前密码和新密码', 400, 'MISSING_FIELDS');
     }
 
+    // 验证新密码强度
+    const passwordValidation = validatePasswordStrength(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new AppError(
+        passwordValidation.errors[0] || '新密码不符合要求', 
+        400, 
+        'WEAK_PASSWORD',
+        { 
+          strength: passwordValidation.strength,
+          checks: passwordValidation.checks,
+          errors: passwordValidation.errors,
+        }
+      );
+    }
+
     const result = await authService.updatePassword(req.user!.userId, currentPassword, newPassword);
 
     res.json({
@@ -234,6 +277,21 @@ authRouter.post('/reset-password', async (req: Request, res: Response, next: Nex
 
     if (!token || !newPassword) {
       throw new AppError('请提供重置令牌和新密码', 400, 'MISSING_FIELDS');
+    }
+
+    // 验证新密码强度
+    const passwordValidation = validatePasswordStrength(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new AppError(
+        passwordValidation.errors[0] || '新密码不符合要求', 
+        400, 
+        'WEAK_PASSWORD',
+        { 
+          strength: passwordValidation.strength,
+          checks: passwordValidation.checks,
+          errors: passwordValidation.errors,
+        }
+      );
     }
 
     const result = await authService.resetPassword(token, newPassword);
