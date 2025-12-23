@@ -27,9 +27,34 @@ export interface UpdateTaskInput {
   completedAt?: Date | null;
 }
 
+/**
+ * 规范化状态值（统一转为小写）
+ * 兼容大写、小写、混合大小写输入
+ */
+function normalizeStatus(status?: string): string {
+  if (!status) return 'todo';
+  const normalized = status.toLowerCase();
+  // 验证是否是有效状态
+  const validStatuses = ['todo', 'in_progress', 'review', 'done', 'blocked'];
+  return validStatuses.includes(normalized) ? normalized : 'todo';
+}
+
+/**
+ * 规范化优先级值（统一转为小写）
+ * 兼容大写、小写、混合大小写输入
+ */
+function normalizePriority(priority?: string): string {
+  if (!priority) return 'medium';
+  const normalized = priority.toLowerCase();
+  // 验证是否是有效优先级
+  const validPriorities = ['low', 'medium', 'high', 'critical'];
+  return validPriorities.includes(normalized) ? normalized : 'medium';
+}
+
 export const taskRepository = {
   /**
    * 创建任务
+   * 自动规范化 status 和 priority 为小写
    */
   async create(data: CreateTaskInput): Promise<Task> {
     return prisma.task.create({
@@ -38,8 +63,8 @@ export const taskRepository = {
         description: data.description,
         projectId: data.projectId,
         creatorId: data.creatorId,
-        status: data.status || 'todo',
-        priority: data.priority || 'medium',
+        status: normalizeStatus(data.status),
+        priority: normalizePriority(data.priority),
         assigneeId: data.assigneeId,
         parentId: data.parentId,
         dueDate: data.dueDate,
@@ -75,13 +100,14 @@ export const taskRepository = {
 
   /**
    * 查找项目下的所有任务
+   * 自动规范化 status 过滤条件为小写
    */
   async findByProjectId(projectId: string, options?: { status?: string; assigneeId?: string }) {
     return prisma.task.findMany({
       where: {
         projectId,
         parentId: null, // 只查顶级任务
-        ...(options?.status && { status: options.status }),
+        ...(options?.status && { status: normalizeStatus(options.status) }),
         ...(options?.assigneeId && { assigneeId: options.assigneeId }),
       },
       include: {
@@ -95,11 +121,21 @@ export const taskRepository = {
 
   /**
    * 更新任务
+   * 自动规范化 status 和 priority 为小写
    */
   async update(id: string, data: UpdateTaskInput): Promise<Task> {
+    // 规范化 status 和 priority
+    const normalizedData = { ...data };
+    if (data.status !== undefined) {
+      normalizedData.status = normalizeStatus(data.status);
+    }
+    if (data.priority !== undefined) {
+      normalizedData.priority = normalizePriority(data.priority);
+    }
+    
     return prisma.task.update({
       where: { id },
-      data,
+      data: normalizedData,
     });
   },
 
