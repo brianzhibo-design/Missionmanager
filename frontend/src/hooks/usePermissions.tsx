@@ -21,6 +21,7 @@ interface PermissionsContextType {
   // 工作区列表（带角色）
   workspaces: WorkspaceWithRole[];
   loadingWorkspaces: boolean;
+  loadError: string | null;
   
   // 当前工作区角色
   workspaceRole: WorkspaceRole | undefined;
@@ -49,6 +50,7 @@ const PermissionsContext = createContext<PermissionsContextType | undefined>(und
 export function PermissionsProvider({ children }: { children: ReactNode }) {
   const [workspaces, setWorkspaces] = useState<WorkspaceWithRole[]>([]);
   const [loadingWorkspaces, setLoadingWorkspaces] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   // 从 localStorage 读取初始工作区ID，避免刷新后丢失
   const [currentWorkspaceId, setCurrentWorkspaceIdState] = useState<string>(() => {
     return localStorage.getItem('currentWorkspaceId') || '';
@@ -59,6 +61,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
   // 加载工作区列表
   const loadWorkspaces = useCallback(async () => {
     setLoadingWorkspaces(true);
+    setLoadError(null);
     try {
       const data = await workspaceService.getWorkspaces();
       const workspacesWithRole = data.map(ws => ({
@@ -87,6 +90,8 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
       });
     } catch (err) {
       console.error('Failed to load workspaces:', err);
+      setLoadError(err instanceof Error ? err.message : '加载工作区失败');
+      // 不要在加载失败时清空工作区列表，保持之前的状态
     } finally {
       setLoadingWorkspaces(false);
     }
@@ -176,6 +181,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
         setCurrentWorkspace,
         workspaces,
         loadingWorkspaces,
+        loadError,
         workspaceRole,
         projectLeaders,
         setProjectLeader,
