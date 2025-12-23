@@ -9,6 +9,7 @@ import { userRepository } from '../repositories/userRepository';
 import { config } from '../infra/config';
 import { AppError } from '../middleware/errorHandler';
 import { smsService, isValidPhone } from './smsService';
+import { loginLockService } from './loginLockService';
 
 /**
  * JWT Payload 类型
@@ -16,6 +17,15 @@ import { smsService, isValidPhone } from './smsService';
 export interface JwtPayload {
   userId: string;
   email: string;
+}
+
+/**
+ * Token 对响应类型
+ */
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number; // Access Token 过期时间（秒）
 }
 
 /**
@@ -29,7 +39,10 @@ export interface AuthResponse {
     phone?: string | null;
     profileCompleted: boolean;
   };
-  token: string;
+  token: string; // 兼容旧版，同 accessToken
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
 }
 
 /**
@@ -64,12 +77,15 @@ export const authService = {
       password: hashedPassword,
     });
 
-    // 4. 生成 JWT
-    const token = this.generateToken({ userId: user.id, email: user.email });
+    // 4. 生成 Token 对
+    const tokens = this.generateTokenPair({ userId: user.id, email: user.email });
 
     return {
       user: { id: user.id, email: user.email, name: user.name, profileCompleted: user.profileCompleted },
-      token,
+      token: tokens.accessToken, // 兼容旧版
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn,
     };
   },
 
@@ -77,24 +93,68 @@ export const authService = {
    * 用户登录（邮箱/手机号 + 密码）
    */
   async login(emailOrPhone: string, password: string): Promise<AuthResponse> {
-    // 1. 查找用户（支持邮箱或手机号）
-    const user = await userRepository.findByEmailOrPhone(emailOrPhone);
-    if (!user) {
-      throw new AppError('账号或密码错误', 401, 'INVALID_CREDENTIALS');
+    // 1. 检查账户是否被锁定
+    const lockStatus = loginLockService.isLocked(emailOrPhone);
+    if (lockStatus.locked) {
+      throw new AppError(
+        `账户已锁定，请 ${lockStatus.remainingTime} 分钟后再试`,
+        429,
+        'ACCOUNT_LOCKED',
+        { remainingTime: lockStatus.remainingTime }
+      );
     }
 
-    // 2. 验证密码（手机号用户可能没有密码）
+    // 2. 查找用户（支持邮箱或手机号）
+    const user = await userRepository.findByEmailOrPhone(emailOrPhone);
+    if (!user) {
+      // 记录失败（即使用户不存在也要记录，防止枚举攻击）
+      const failInfo = loginLockService.recordFailure(emailOrPhone);
+      if (failInfo.locked) {
+        throw new AppError(
+          `登录失败次数过多，账户已锁定 ${failInfo.lockDuration} 分钟`,
+          429,
+          'ACCOUNT_LOCKED',
+          { lockDuration: failInfo.lockDuration }
+        );
+      }
+      throw new AppError(
+        `账号或密码错误，还剩 ${failInfo.remaining} 次尝试机会`,
+        401,
+        'INVALID_CREDENTIALS',
+        { remaining: failInfo.remaining }
+      );
+    }
+
+    // 3. 验证密码（手机号用户可能没有密码）
     if (!user.password) {
       throw new AppError('该账号未设置密码，请使用验证码登录', 401, 'NO_PASSWORD');
     }
     
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
-      throw new AppError('账号或密码错误', 401, 'INVALID_CREDENTIALS');
+      // 记录失败
+      const failInfo = loginLockService.recordFailure(emailOrPhone);
+      if (failInfo.locked) {
+        throw new AppError(
+          `登录失败次数过多，账户已锁定 ${failInfo.lockDuration} 分钟`,
+          429,
+          'ACCOUNT_LOCKED',
+          { lockDuration: failInfo.lockDuration }
+        );
+      }
+      throw new AppError(
+        `账号或密码错误，还剩 ${failInfo.remaining} 次尝试机会`,
+        401,
+        'INVALID_CREDENTIALS',
+        { remaining: failInfo.remaining }
+      );
     }
 
-    // 3. 生成 JWT
-    const token = this.generateToken({ userId: user.id, email: user.email });
+    // 4. 登录成功，重置计数
+    loginLockService.recordSuccess(emailOrPhone);
+
+    // 5. 生成 Token 对
+    const tokens = this.generateTokenPair({ userId: user.id, email: user.email });
 
     return {
       user: { 
@@ -104,7 +164,10 @@ export const authService = {
         phone: user.phone,
         profileCompleted: user.profileCompleted 
       },
-      token,
+      token: tokens.accessToken, // 兼容旧版
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn,
     };
   },
 
@@ -148,8 +211,8 @@ export const authService = {
       });
     }
 
-    // 4. 生成 JWT
-    const token = this.generateToken({ userId: user.id, email: user.email });
+    // 4. 生成 Token 对
+    const tokens = this.generateTokenPair({ userId: user.id, email: user.email });
 
     return {
       user: { 
@@ -159,7 +222,10 @@ export const authService = {
         phone: user.phone,
         profileCompleted: isNewUser ? false : user.profileCompleted // 新用户未完善资料
       },
-      token,
+      token: tokens.accessToken, // 兼容旧版
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      expiresIn: tokens.expiresIn,
     };
   },
 
@@ -253,17 +319,64 @@ export const authService = {
   },
 
   /**
-   * 生成 JWT Token
+   * 生成 Access Token（短期有效）
    */
-  generateToken(payload: JwtPayload): string {
-    // 使用 @ts-ignore 忽略类型检查，因为 jsonwebtoken 的类型定义有问题
+  generateAccessToken(payload: JwtPayload): string {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - expiresIn accepts string like '7d'
+    // @ts-ignore - expiresIn accepts string like '15m'
     return jwt.sign(payload, config.jwtSecret, { expiresIn: config.jwtExpiresIn });
   },
 
   /**
-   * 验证 JWT Token
+   * 生成 Refresh Token（长期有效）
+   */
+  generateRefreshToken(payload: JwtPayload): string {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - expiresIn accepts string like '7d'
+    return jwt.sign(payload, config.jwtRefreshSecret, { expiresIn: config.jwtRefreshExpiresIn });
+  },
+
+  /**
+   * 生成 Token 对（Access + Refresh）
+   */
+  generateTokenPair(payload: JwtPayload): TokenPair {
+    const accessToken = this.generateAccessToken(payload);
+    const refreshToken = this.generateRefreshToken(payload);
+    
+    // 解析过期时间为秒数
+    const expiresIn = this.parseExpiresIn(config.jwtExpiresIn);
+    
+    return { accessToken, refreshToken, expiresIn };
+  },
+
+  /**
+   * 解析过期时间字符串为秒数
+   */
+  parseExpiresIn(expiresIn: string): number {
+    const match = expiresIn.match(/^(\d+)([smhd])$/);
+    if (!match) return 900; // 默认15分钟
+    
+    const value = parseInt(match[1], 10);
+    const unit = match[2];
+    
+    switch (unit) {
+      case 's': return value;
+      case 'm': return value * 60;
+      case 'h': return value * 60 * 60;
+      case 'd': return value * 60 * 60 * 24;
+      default: return 900;
+    }
+  },
+
+  /**
+   * 兼容旧版：生成单个 Token
+   */
+  generateToken(payload: JwtPayload): string {
+    return this.generateAccessToken(payload);
+  },
+
+  /**
+   * 验证 Access Token
    */
   verifyToken(token: string): JwtPayload {
     try {
@@ -271,6 +384,35 @@ export const authService = {
     } catch {
       throw new AppError('Token 无效或已过期', 401, 'INVALID_TOKEN');
     }
+  },
+
+  /**
+   * 验证 Refresh Token
+   */
+  verifyRefreshToken(token: string): JwtPayload {
+    try {
+      return jwt.verify(token, config.jwtRefreshSecret) as JwtPayload;
+    } catch {
+      throw new AppError('Refresh Token 无效或已过期', 401, 'INVALID_REFRESH_TOKEN');
+    }
+  },
+
+  /**
+   * 刷新 Token
+   * 使用 Refresh Token 获取新的 Token 对
+   */
+  async refreshTokens(refreshToken: string): Promise<TokenPair> {
+    // 1. 验证 Refresh Token
+    const payload = this.verifyRefreshToken(refreshToken);
+    
+    // 2. 检查用户是否存在
+    const user = await userRepository.findById(payload.userId);
+    if (!user) {
+      throw new AppError('用户不存在', 404, 'USER_NOT_FOUND');
+    }
+    
+    // 3. 生成新的 Token 对
+    return this.generateTokenPair({ userId: user.id, email: user.email });
   },
 
   /**

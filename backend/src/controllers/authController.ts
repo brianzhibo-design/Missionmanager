@@ -334,3 +334,31 @@ authRouter.patch('/complete-profile', requireAuth, async (req: Request, res: Res
   }
 });
 
+/**
+ * POST /auth/refresh
+ * 刷新 Token
+ * 使用 Refresh Token 获取新的 Access Token
+ */
+authRouter.post('/refresh', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      throw new AppError('请提供 Refresh Token', 400, 'MISSING_REFRESH_TOKEN');
+    }
+
+    const tokens = await authService.refreshTokens(refreshToken);
+
+    res.json({
+      success: true,
+      data: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresIn: tokens.expiresIn,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+

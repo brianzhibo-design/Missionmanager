@@ -27,7 +27,9 @@ export const config = {
   
   // JWT
   jwtSecret: requireEnv('JWT_SECRET'),
-  jwtExpiresIn: optionalEnv('JWT_EXPIRES_IN', '7d'),
+  jwtExpiresIn: optionalEnv('JWT_EXPIRES_IN', '15m'), // Access Token 15分钟
+  jwtRefreshSecret: optionalEnv('JWT_REFRESH_SECRET', requireEnv('JWT_SECRET') + '_refresh'),
+  jwtRefreshExpiresIn: optionalEnv('JWT_REFRESH_EXPIRES_IN', '7d'), // Refresh Token 7天
   
   // AI
   aiProvider: optionalEnv('AI_PROVIDER', 'mock') as 'mock' | 'deepseek' | 'openai' | 'anthropic',
