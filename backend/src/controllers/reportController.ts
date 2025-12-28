@@ -21,20 +21,29 @@ import { AppError } from '../middleware/errorHandler';
  * 只有 owner 和 director 可以查看统计报告
  */
 async function checkReportViewPermission(userId: string, workspaceId: string): Promise<void> {
-  const membership = await prisma.workspaceUser.findUnique({
-    where: {
-      userId_workspaceId: { userId, workspaceId }
+  console.log(`[Permission Check] 查询成员关系: userId=${userId}, workspaceId=${workspaceId}`);
+  
+  try {
+    const membership = await prisma.workspaceUser.findUnique({
+      where: {
+        userId_workspaceId: { userId, workspaceId }
+      }
+    });
+
+    console.log(`[Permission Check] 查询结果:`, membership ? `role=${membership.role}` : 'null');
+
+    if (!membership) {
+      throw new AppError('您不是此工作区的成员', 403, 'NOT_MEMBER');
     }
-  });
 
-  if (!membership) {
-    throw new AppError('您不是此工作区的成员', 403, 'NOT_MEMBER');
-  }
-
-  // 只允许 owner 和 director
-  const allowedRoles = ['owner', 'director'];
-  if (!allowedRoles.includes(membership.role.toLowerCase())) {
-    throw new AppError('只有扛把子和大管家可以查看统计报告', 403, 'PERMISSION_DENIED');
+    // 只允许 owner 和 director
+    const allowedRoles = ['owner', 'director'];
+    if (!allowedRoles.includes(membership.role.toLowerCase())) {
+      throw new AppError('只有扛把子和大管家可以查看统计报告', 403, 'PERMISSION_DENIED');
+    }
+  } catch (error) {
+    console.error('[Permission Check] 错误:', error);
+    throw error;
   }
 }
 
@@ -48,12 +57,23 @@ reportRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { workspaceId } = req.params;
-      const userId = req.user!.userId;
+      const userId = req.user?.userId;
+
+      // 检查用户是否已认证
+      if (!userId) {
+        throw new AppError('用户未认证', 401, 'UNAUTHORIZED');
+      }
+
+      console.log(`[Weekly Report] userId: ${userId}, workspaceId: ${workspaceId}`);
 
       // 权限检查：只有 owner/director 可以生成报告
       await checkReportViewPermission(userId, workspaceId);
 
+      console.log('[Weekly Report] 权限检查通过，开始生成报告...');
+
       const report = await reportService.generateWeeklyReport(workspaceId, userId);
+
+      console.log('[Weekly Report] 报告生成成功:', report.id);
 
       // 通知用户
       await notificationService.create({
@@ -68,6 +88,7 @@ reportRouter.post(
         data: report,
       });
     } catch (error) {
+      console.error('[Weekly Report] 错误:', error);
       next(error);
     }
   }
@@ -79,12 +100,23 @@ reportRouter.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { workspaceId } = req.params;
-      const userId = req.user!.userId;
+      const userId = req.user?.userId;
+
+      // 检查用户是否已认证
+      if (!userId) {
+        throw new AppError('用户未认证', 401, 'UNAUTHORIZED');
+      }
+
+      console.log(`[Monthly Report] userId: ${userId}, workspaceId: ${workspaceId}`);
 
       // 权限检查：只有 owner/director 可以生成报告
       await checkReportViewPermission(userId, workspaceId);
 
+      console.log('[Monthly Report] 权限检查通过，开始生成报告...');
+
       const report = await reportService.generateMonthlyReport(workspaceId, userId);
+
+      console.log('[Monthly Report] 报告生成成功:', report.id);
 
       await notificationService.create({
         userId,
@@ -98,6 +130,7 @@ reportRouter.post(
         data: report,
       });
     } catch (error) {
+      console.error('[Monthly Report] 错误:', error);
       next(error);
     }
   }

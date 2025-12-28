@@ -6,6 +6,7 @@ import { prisma } from '../infra/database';
 import { Prisma } from '@prisma/client';
 import { getProvider } from '../ai/aiService';
 import { logger } from '../infra/logger';
+import { AppError } from '../middleware/errorHandler';
 
 // ============ 类型定义 ============
 
@@ -123,7 +124,7 @@ export const reportService = {
     if (!options?.forceRegenerate) {
       const exists = await this.checkExistingReport(workspaceId, 'weekly', startDate, endDate);
       if (exists) {
-        throw new Error('本周周报已生成。如需重新生成，请先删除现有周报。');
+        throw new AppError('本周周报已生成。如需重新生成，请先删除现有周报。', 409, 'REPORT_EXISTS');
       }
     }
 
