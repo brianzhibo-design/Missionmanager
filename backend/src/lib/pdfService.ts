@@ -62,14 +62,18 @@ function generateReportHTML(report: ReportData): string {
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
+  <!-- 引入 Google 字体确保中文支持 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap');
+    
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
     body {
-      font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", sans-serif;
+      font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", "WenQuanYi Micro Hei", sans-serif;
       line-height: 1.6;
       color: #1a1a2e;
       padding: 40px;
@@ -253,18 +257,31 @@ function generateReportHTML(report: ReportData): string {
 
 /**
  * 生成报告 PDF
+ * 支持中文字体渲染
  */
 export async function generateReportPDF(report: ReportData): Promise<Buffer> {
   const html = generateReportHTML(report);
   
   const browser = await puppeteer.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    args: [
+      '--no-sandbox', 
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--font-render-hinting=none', // 改善字体渲染
+    ],
   });
   
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    
+    // 设置页面内容，等待字体和样式加载完成
+    await page.setContent(html, { 
+      waitUntil: ['networkidle0', 'domcontentloaded'] 
+    });
+    
+    // 等待字体加载
+    await page.evaluateHandle('document.fonts.ready');
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -275,6 +292,7 @@ export async function generateReportPDF(report: ReportData): Promise<Buffer> {
         bottom: '20px',
         left: '20px',
       },
+      preferCSSPageSize: true,
     });
     
     return Buffer.from(pdfBuffer);

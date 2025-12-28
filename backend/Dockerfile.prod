@@ -21,7 +21,7 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# 安装运行时依赖（Chromium 用于 PDF 生成）
+# 安装运行时依赖（Chromium 用于 PDF 生成）+ 中文字体
 RUN apk add --no-cache \
     chromium \
     nss \
@@ -29,6 +29,7 @@ RUN apk add --no-cache \
     harfbuzz \
     ca-certificates \
     ttf-freefont \
+    font-noto-cjk \
     openssl
 
 # 设置 Puppeteer 环境变量

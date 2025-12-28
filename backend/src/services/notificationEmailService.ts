@@ -66,11 +66,17 @@ export async function sendTaskReminders(): Promise<void> {
       const dueDate = new Date(task.dueDate!);
       const daysLeft = Math.ceil((dueDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
       
+      // 标准化优先级为大写，防止 undefined
+      const priority = (task.priority || 'medium').toUpperCase();
+      const validPriority = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].includes(priority) 
+        ? priority as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+        : 'MEDIUM';
+      
       return {
-        title: task.title,
-        projectName: task.project.name,
+        title: task.title || '未命名任务',
+        projectName: task.project?.name || '未知项目',
         dueDate: dueDate.toLocaleDateString('zh-CN'),
-        priority: task.priority as 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW',
+        priority: validPriority,
         daysLeft,
       };
     });
@@ -119,17 +125,26 @@ export async function sendTaskAssignedNotification(
   });
 
   try {
+    // 标准化优先级显示
+    const priorityLabels: Record<string, string> = {
+      critical: '紧急',
+      high: '高',
+      medium: '中',
+      low: '低',
+    };
+    const priorityLabel = priorityLabels[task.priority?.toLowerCase()] || '中';
+
     await sendEmail({
       to: task.assignee.email,
       subject: `[TaskFlow] ${assigner?.name || '有人'} 给您分配了新任务`,
       html: getTaskAssignedTemplate({
-        userName: task.assignee.name,
+        userName: task.assignee.name || '用户',
         assignerName: assigner?.name || '未知用户',
         task: {
-          title: task.title,
+          title: task.title || '未命名任务',
           description: task.description || undefined,
-          projectName: task.project.name,
-          priority: task.priority,
+          projectName: task.project?.name || '未知项目',
+          priority: priorityLabel,
           dueDate: task.dueDate?.toLocaleDateString('zh-CN'),
         },
         appUrl: APP_URL,
@@ -222,7 +237,7 @@ export async function sendDailySummaries(): Promise<void> {
         to: user.email,
         subject: `[TaskFlow] ${today.toLocaleDateString('zh-CN')} 每日工作摘要`,
         html: getDailySummaryTemplate({
-          userName: user.name,
+          userName: user.name || '用户',
           date: today.toLocaleDateString('zh-CN', { 
             weekday: 'long', 
             year: 'numeric', 
@@ -236,9 +251,9 @@ export async function sendDailySummaries(): Promise<void> {
             inProgressCount,
           },
           todayTasks: todayTasks.map(t => ({
-            title: t.title,
-            projectName: t.project.name,
-            priority: t.priority,
+            title: t.title || '未命名任务',
+            projectName: t.project?.name || '未知项目',
+            priority: t.priority || 'medium',
           })),
           appUrl: APP_URL,
         }),
