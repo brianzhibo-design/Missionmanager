@@ -447,6 +447,23 @@ export const taskService = {
       },
     });
 
+    // 8. 状态联动
+    const originalStatus = task.status as string; // 原始状态（用于比较）
+    if (targetStatus === TaskStatus.DONE) {
+      // 向下联动：父任务完成时，所有子任务自动完成
+      await this.triggerChildrenComplete(taskId, userId);
+      // 向上联动：子任务完成时，检查父任务
+      if (task.parentId) {
+        await this.triggerParentStatusUpdate(taskId, userId);
+      }
+    } else if (targetStatus === TaskStatus.IN_PROGRESS && originalStatus === 'todo' && task.parentId) {
+      // 子任务开始时，触发父任务开始
+      await this.triggerParentStart(taskId, userId);
+    } else if (originalStatus === 'done' && task.parentId) {
+      // 子任务被重新打开时（从 done 变回其他状态），检查父任务
+      await this.triggerParentStatusRevert(taskId, userId);
+    }
+
     return {
       ...updatedTask,
       availableTransitions: getAvailableTransitions(targetStatus),
@@ -800,6 +817,9 @@ export const taskService = {
         projectId: task.projectId,
       });
     }
+
+    // 向下联动：父任务完成时，所有子任务自动完成
+    await this.triggerChildrenComplete(taskId, userId);
 
     return updatedTask;
   },
@@ -1212,6 +1232,9 @@ export const taskService = {
         newValue: TaskStatus.DONE,
       },
     });
+
+    // 向下联动：父任务完成时，所有子任务自动完成
+    await this.triggerChildrenComplete(taskId, userId);
 
     return updatedTask;
   },
