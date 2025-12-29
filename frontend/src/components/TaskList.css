@@ -346,6 +346,43 @@
   color: var(--text-tertiary);
 }
 
+/* 子任务进度指示器 */
+.subtask-progress {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  background: var(--bg-surface-secondary);
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  min-width: 50px;
+}
+
+.subtask-progress.all-completed {
+  background: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
+}
+
+.subtask-progress-text {
+  position: relative;
+  z-index: 1;
+}
+
+.subtask-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  opacity: 0.2;
+  transition: width 0.3s ease;
+}
+
+/* 兼容旧版 subtask-badge */
 .subtask-badge {
   display: inline-flex;
   align-items: center;

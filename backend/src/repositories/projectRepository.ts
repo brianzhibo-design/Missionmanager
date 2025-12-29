@@ -33,6 +33,7 @@ export const projectRepository = {
 
   /**
    * 查找工作区下的所有项目（带任务统计和团队信息）
+   * 注意：任务统计只计算主任务（parentId 为 null），不包含子任务
    */
   async findByWorkspaceId(workspaceId: string) {
     const projects = await prisma.project.findMany({
@@ -40,6 +41,7 @@ export const projectRepository = {
       orderBy: { createdAt: 'desc' },
       include: {
         tasks: {
+          where: { parentId: null }, // 只查询主任务
           select: { status: true },
         },
         leader: {
@@ -55,16 +57,16 @@ export const projectRepository = {
       },
     });
     
-    // 计算每个项目的任务统计
+    // 计算每个项目的主任务统计
     return projects.map(project => {
-      const tasks = project.tasks;
+      const mainTasks = project.tasks; // 已经只包含主任务
       const taskStats = {
-        total: tasks.length,
-        todo: tasks.filter(t => t.status === 'todo').length,
-        inProgress: tasks.filter(t => t.status === 'in_progress').length,
-        review: tasks.filter(t => t.status === 'review').length,
-        blocked: tasks.filter(t => t.status === 'blocked').length,
-        done: tasks.filter(t => t.status === 'done').length,
+        total: mainTasks.length,
+        todo: mainTasks.filter(t => t.status === 'todo').length,
+        inProgress: mainTasks.filter(t => t.status === 'in_progress').length,
+        review: mainTasks.filter(t => t.status === 'review').length,
+        blocked: mainTasks.filter(t => t.status === 'blocked').length,
+        done: mainTasks.filter(t => t.status === 'done').length,
       };
       
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -78,6 +80,7 @@ export const projectRepository = {
 
   /**
    * 查找成员参与的项目（作为负责人、团队成员或有分配任务）
+   * 注意：任务统计只计算主任务（parentId 为 null），不包含子任务
    */
   async findByWorkspaceIdForMember(workspaceId: string, userId: string) {
     const projects = await prisma.project.findMany({
@@ -93,6 +96,7 @@ export const projectRepository = {
       orderBy: { createdAt: 'desc' },
       include: {
         tasks: {
+          where: { parentId: null }, // 只查询主任务
           select: { status: true },
         },
         leader: {
@@ -108,16 +112,16 @@ export const projectRepository = {
       },
     });
     
-    // 计算每个项目的任务统计
+    // 计算每个项目的主任务统计
     return projects.map(project => {
-      const tasks = project.tasks;
+      const mainTasks = project.tasks; // 已经只包含主任务
       const taskStats = {
-        total: tasks.length,
-        todo: tasks.filter(t => t.status === 'todo').length,
-        inProgress: tasks.filter(t => t.status === 'in_progress').length,
-        review: tasks.filter(t => t.status === 'review').length,
-        blocked: tasks.filter(t => t.status === 'blocked').length,
-        done: tasks.filter(t => t.status === 'done').length,
+        total: mainTasks.length,
+        todo: mainTasks.filter(t => t.status === 'todo').length,
+        inProgress: mainTasks.filter(t => t.status === 'in_progress').length,
+        review: mainTasks.filter(t => t.status === 'review').length,
+        blocked: mainTasks.filter(t => t.status === 'blocked').length,
+        done: mainTasks.filter(t => t.status === 'done').length,
       };
       
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -147,19 +151,42 @@ export const projectRepository = {
   },
 
   /**
-   * 带统计信息的项目查询
+   * 带统计信息的项目查询（只统计主任务）
    */
   async findByIdWithStats(id: string) {
     const project = await prisma.project.findUnique({
       where: { id },
       include: {
-        _count: { select: { tasks: true } },
+        tasks: {
+          where: { parentId: null }, // 只查询主任务
+          select: { status: true },
+        },
         leader: {
           select: { id: true, name: true, email: true, avatar: true },
         },
       },
     });
-    return project;
+    
+    if (!project) return null;
+    
+    // 计算主任务统计
+    const mainTasks = project.tasks;
+    const taskStats = {
+      total: mainTasks.length,
+      todo: mainTasks.filter(t => t.status === 'todo').length,
+      inProgress: mainTasks.filter(t => t.status === 'in_progress').length,
+      review: mainTasks.filter(t => t.status === 'review').length,
+      blocked: mainTasks.filter(t => t.status === 'blocked').length,
+      done: mainTasks.filter(t => t.status === 'done').length,
+    };
+    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { tasks: _, ...projectWithoutTasks } = project;
+    return {
+      ...projectWithoutTasks,
+      taskStats,
+      _count: { tasks: mainTasks.length }, // 兼容旧接口
+    };
   },
 
   /**
@@ -219,12 +246,16 @@ export const projectRepository = {
   },
 
   /**
-   * 获取项目详情（包含负责人和团队成员）
+   * 获取项目详情（包含负责人和团队成员，只统计主任务）
    */
   async findByIdWithTeam(id: string) {
-    return prisma.project.findUnique({
+    const project = await prisma.project.findUnique({
       where: { id },
       include: {
+        tasks: {
+          where: { parentId: null }, // 只查询主任务
+          select: { status: true },
+        },
         leader: {
           select: { id: true, name: true, email: true, avatar: true },
         },
@@ -236,9 +267,29 @@ export const projectRepository = {
           },
           orderBy: { createdAt: 'asc' },
         },
-        _count: { select: { tasks: true } },
       },
     });
+    
+    if (!project) return null;
+    
+    // 计算主任务统计
+    const mainTasks = project.tasks;
+    const taskStats = {
+      total: mainTasks.length,
+      todo: mainTasks.filter(t => t.status === 'todo').length,
+      inProgress: mainTasks.filter(t => t.status === 'in_progress').length,
+      review: mainTasks.filter(t => t.status === 'review').length,
+      blocked: mainTasks.filter(t => t.status === 'blocked').length,
+      done: mainTasks.filter(t => t.status === 'done').length,
+    };
+    
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { tasks: _, ...projectWithoutTasks } = project;
+    return {
+      ...projectWithoutTasks,
+      taskStats,
+      _count: { tasks: mainTasks.length },
+    };
   },
 };
 

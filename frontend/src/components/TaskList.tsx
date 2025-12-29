@@ -258,7 +258,6 @@ export default function TaskList({
   const renderTaskRow = (task: Task, isSubtask: boolean = false) => {
     const hasSubtasks = !isSubtask && (subtasksByMain[task.id]?.length || 0) > 0;
     const isExpanded = expandedTasks.has(task.id);
-    const subtaskCount = subtasksByMain[task.id]?.length || 0;
     const isTitleSubtask = task.title.startsWith('[子任务]');
     const displayTitle = isTitleSubtask ? task.title.replace('[子任务] ', '').replace('[子任务]', '') : task.title;
     const priorityColor = PRIORITY_CONFIG[task.priority]?.color || '#9ca3af';
@@ -370,7 +369,24 @@ export default function TaskList({
           <div className="col-title">
             {isTitleSubtask && <span className="subtask-tag">子任务</span>}
             <span className="title-text">{displayTitle}</span>
-            {hasSubtasks && <span className="subtask-badge">{subtaskCount}</span>}
+            {/* 子任务进度指示器：显示 完成数/总数 */}
+            {hasSubtasks && (() => {
+              const subtasks = subtasksByMain[task.id] || [];
+              const completedCount = subtasks.filter(s => s.status === 'done').length;
+              const allCompleted = completedCount === subtasks.length;
+              return (
+                <span className={`subtask-progress ${allCompleted ? 'all-completed' : ''}`}>
+                  <span className="subtask-progress-text">{completedCount}/{subtasks.length}</span>
+                  <span 
+                    className="subtask-progress-bar"
+                    style={{ 
+                      width: `${(completedCount / subtasks.length) * 100}%`,
+                      backgroundColor: allCompleted ? '#22c55e' : '#3b82f6'
+                    }}
+                  />
+                </span>
+              );
+            })()}
           </div>
 
           {/* 创建日期 */}

@@ -92,15 +92,16 @@ export default function MobileProjectDetail() {
     return name.slice(0, 1).toUpperCase();
   };
 
-  // 统计数据
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(t => t.status === 'done').length;
+  // 只统计主任务（不含子任务），符合行业标准
+  const mainTasks = tasks.filter(t => !t.parentId);
+  const totalTasks = mainTasks.length;
+  const completedTasks = mainTasks.filter(t => t.status === 'done').length;
   const memberCount = members.length;
 
-  // 按状态分组任务
-  const todoTasks = tasks.filter(t => t.status === 'todo');
-  const progressTasks = tasks.filter(t => ['in_progress', 'review'].includes(t.status));
-  const doneTasks = tasks.filter(t => t.status === 'done');
+  // 按状态分组任务（只显示主任务）
+  const todoTasks = mainTasks.filter(t => t.status === 'todo');
+  const progressTasks = mainTasks.filter(t => ['in_progress', 'review'].includes(t.status));
+  const doneTasks = mainTasks.filter(t => t.status === 'done');
 
   if (loading) {
     return (
@@ -380,6 +381,8 @@ export default function MobileProjectDetail() {
     </MobileLayout>
   );
 }
+
+
 
 
 

@@ -490,13 +490,14 @@ function DesktopProjectDetail() {
     }
   };
 
-  // 计算统计
+  // 只统计主任务（不含子任务），符合行业标准（Jira/Asana/Linear）
+  const mainTasks = tasks.filter(t => !t.parentId);
   const stats = {
-    total: tasks.length,
-    todo: tasks.filter(t => t.status === 'todo').length,
-    inProgress: tasks.filter(t => t.status === 'in_progress').length,
-    review: tasks.filter(t => t.status === 'review').length,
-    done: tasks.filter(t => t.status === 'done').length,
+    total: mainTasks.length,
+    todo: mainTasks.filter(t => t.status === 'todo').length,
+    inProgress: mainTasks.filter(t => t.status === 'in_progress').length,
+    review: mainTasks.filter(t => t.status === 'review').length,
+    done: mainTasks.filter(t => t.status === 'done').length,
   };
 
   if (loading && !project) {
