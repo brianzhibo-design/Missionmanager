@@ -48,10 +48,47 @@ function buildHeaders(customHeaders?: Record<string, string>): Headers {
   return headers;
 }
 
+// 是否正在刷新 token
+let isRefreshing = false;
+// 等待刷新的请求队列
+let refreshQueue: Array<() => void> = [];
+
+// 刷新 token
+async function refreshToken(): Promise<boolean> {
+  const refreshTokenStr = localStorage.getItem('refreshToken');
+  if (!refreshTokenStr) return false;
+  
+  try {
+    const response = await fetch(`${config.apiBaseUrl}/auth/refresh`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: refreshTokenStr }),
+    });
+    
+    if (!response.ok) return false;
+    
+    const data = await response.json();
+    if (!data.success || !data.data) return false;
+    
+    // 保存新 token
+    const { accessToken, refreshToken: newRefreshToken, expiresIn } = data.data;
+    const expiresAt = Date.now() + expiresIn * 1000;
+    
+    localStorage.setItem(config.storageKeys.token, accessToken);
+    localStorage.setItem('refreshToken', newRefreshToken);
+    localStorage.setItem('tokenExpiresAt', expiresAt.toString());
+    
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // 统一请求方法
 async function request<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  retry = true
 ): Promise<T> {
   const url = `${config.apiBaseUrl}${endpoint}`;
   
@@ -59,6 +96,33 @@ async function request<T>(
     ...options,
     headers: buildHeaders(options.headers as Record<string, string>),
   });
+
+  // 处理 401 错误 - 尝试刷新 token
+  if (response.status === 401 && retry && !endpoint.includes('/auth/')) {
+    if (!isRefreshing) {
+      isRefreshing = true;
+      const success = await refreshToken();
+      isRefreshing = false;
+      
+      if (success) {
+        // 刷新成功，重试原请求
+        refreshQueue.forEach(cb => cb());
+        refreshQueue = [];
+        return request<T>(endpoint, options, false);
+      } else {
+        // 刷新失败，清除登录状态
+        localStorage.removeItem(config.storageKeys.token);
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('tokenExpiresAt');
+        localStorage.removeItem(config.storageKeys.user);
+        // 不自动跳转，让 ProtectedRoute 处理
+      }
+    } else {
+      // 等待刷新完成
+      await new Promise<void>(resolve => refreshQueue.push(resolve));
+      return request<T>(endpoint, options, false);
+    }
+  }
 
   const data: ApiResponse<T> = await response.json();
 
