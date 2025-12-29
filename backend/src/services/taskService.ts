@@ -1038,17 +1038,22 @@ export const taskService = {
       // 5. 状态联动触发
       const normalizedActualStatus = (actualStatus || 'todo').toLowerCase() as TaskStatusType;
       
-      // 5.1 子任务完成时，检查是否需要更新父任务
+      // 5.1 父任务完成时，所有子任务自动完成（向下联动）
+      if (normalizedActualStatus === TaskStatus.DONE) {
+        await this.triggerChildrenComplete(taskId, userId);
+      }
+      
+      // 5.2 子任务完成时，检查是否需要更新父任务（向上联动）
       if (normalizedActualStatus === TaskStatus.DONE && task.parentId) {
         await this.triggerParentStatusUpdate(taskId, userId);
       }
       
-      // 5.2 子任务开始时，触发父任务开始
+      // 5.3 子任务开始时，触发父任务开始
       if (normalizedActualStatus === TaskStatus.IN_PROGRESS && oldStatus === TaskStatus.TODO && task.parentId) {
         await this.triggerParentStart(taskId, userId);
       }
       
-      // 5.3 子任务被重新打开时（从 done 变回其他状态），检查父任务
+      // 5.4 子任务被重新打开时（从 done 变回其他状态），检查父任务
       if (oldStatus === TaskStatus.DONE && normalizedActualStatus !== TaskStatus.DONE && task.parentId) {
         await this.triggerParentStatusRevert(taskId, userId);
       }
@@ -1377,6 +1382,45 @@ export const taskService = {
       // 继续向上检查
       currentParentId = parentTask.parentId || '';
       if (!currentParentId) break;
+    }
+  },
+
+  /**
+   * 向下联动：父任务完成时，所有子任务自动完成
+   * 规则：父任务 → done 时，所有未完成的子任务自动变为 done
+   */
+  async triggerChildrenComplete(taskId: string, userId: string): Promise<void> {
+    // 获取所有直接子任务
+    const children = await prisma.task.findMany({
+      where: { 
+        parentId: taskId,
+        status: { not: 'done' }, // 只处理未完成的子任务
+      },
+    });
+
+    if (children.length === 0) return;
+
+    // 批量完成所有子任务
+    for (const child of children) {
+      await taskRepository.update(child.id, { 
+        status: TaskStatus.DONE,
+        completedAt: new Date(),
+      });
+      
+      await taskEventRepository.create({
+        taskId: child.id,
+        userId,
+        type: 'status_changed',
+        data: {
+          description: '父任务完成，自动完成子任务',
+          oldValue: child.status,
+          newValue: 'done',
+          autoTriggered: true,
+        },
+      });
+
+      // 递归处理子任务的子任务
+      await this.triggerChildrenComplete(child.id, userId);
     }
   },
 
