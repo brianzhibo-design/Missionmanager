@@ -116,17 +116,24 @@ function DesktopTaskDetail() {
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // ===== 审核权限判断 =====
-  // 是否可以提交审核（任务负责人/创建者）
+  // 是否是子任务（L2/L3）- 子任务无需审核
+  const isSubtask = useMemo(() => {
+    return task?.parentId != null;
+  }, [task]);
+
+  // 是否可以提交审核（任务负责人/创建者，且仅限主任务 L1）
   const canSubmitReview = useMemo(() => {
     if (!task || !currentUser) return false;
     if (task.status !== 'in_progress') return false;
+    // 子任务（L2/L3）不需要审核，直接完成
+    if (isSubtask) return false;
     // 是任务负责人或创建者
     const isAssignee = task.assigneeId === currentUser.id;
     const isCreator = task.creatorId === currentUser.id;
     // 管理员也可以
     const isAdmin = ['owner', 'director', 'manager', 'admin', 'leader'].includes(workspaceRole || '');
     return isAssignee || isCreator || isAdmin;
-  }, [task, currentUser, workspaceRole]);
+  }, [task, currentUser, workspaceRole, isSubtask]);
 
   // 是否可以审核（项目负责人/管理员）
   const canApproveReject = useMemo(() => {
@@ -242,16 +249,29 @@ function DesktopTaskDetail() {
     }
   };
 
-  // 删除任务
+  // 删除任务（支持级联删除子任务，显示子任务数量提示）
   const handleDeleteTask = async () => {
-    if (!window.confirm('确定要删除此任务吗？此操作不可恢复。')) {
-      return;
-    }
-    
     try {
       setDeleting(true);
-      await taskService.deleteTask(id!);
-      alert('任务已删除');
+      
+      // 先获取子任务数量
+      const subtaskCount = await taskService.getSubtaskCount(id!);
+      
+      // 构建确认消息
+      const confirmMessage = subtaskCount > 0
+        ? `确定要删除此任务吗？将同时删除下属的 ${subtaskCount} 个子任务，此操作不可恢复。`
+        : '确定要删除此任务吗？此操作不可恢复。';
+      
+      if (!window.confirm(confirmMessage)) {
+        setDeleting(false);
+        return;
+      }
+      
+      const result = await taskService.deleteTask(id!);
+      const successMessage = result.subtaskCount > 0
+        ? `任务及其 ${result.subtaskCount} 个子任务已删除`
+        : '任务已删除';
+      alert(successMessage);
       navigate(`/projects/${task?.projectId}`);
     } catch (err) {
       console.error('删除任务失败:', err);

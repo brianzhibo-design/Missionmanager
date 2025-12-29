@@ -331,7 +331,12 @@ export default function TaskList({
                   minWidth: '130px',
                 }}
               >
-                {STATUS_ORDER.map(s => (
+                {/* 子任务（L2/L3）不显示 review 选项 */}
+                {STATUS_ORDER.filter(s => {
+                  // 如果是子任务，过滤掉 review 选项
+                  if (isSubtask && s === 'review') return false;
+                  return true;
+                }).map(s => (
                   <button
                     key={s}
                     className={`dropdown-item ${task.status === s ? 'active' : ''}`}

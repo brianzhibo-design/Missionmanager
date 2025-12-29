@@ -257,15 +257,37 @@ taskRouter.patch('/:id/status', async (req: Request, res: Response, next: NextFu
 });
 
 /**
- * DELETE /tasks/:id - 删除任务
+ * GET /tasks/:id/subtask-count - 获取任务的子任务数量（用于删除确认弹窗）
+ */
+taskRouter.get('/:id/subtask-count', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const count = await taskService.getSubtaskCount(req.params.id);
+    
+    res.json({
+      success: true,
+      data: { count },
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * DELETE /tasks/:id - 删除任务（支持级联删除子任务）
  */
 taskRouter.delete('/:id', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    await taskService.delete(req.user!.userId, req.params.id);
+    const result = await taskService.delete(req.user!.userId, req.params.id);
 
     res.json({
       success: true,
-      message: '任务已删除',
+      message: result.subtaskCount > 0 
+        ? `任务及其 ${result.subtaskCount} 个子任务已删除` 
+        : '任务已删除',
+      data: {
+        deletedCount: result.deletedCount,
+        subtaskCount: result.subtaskCount,
+      },
     });
   } catch (error) {
     next(error);

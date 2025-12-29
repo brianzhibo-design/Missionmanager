@@ -187,9 +187,16 @@ export const taskService = {
     return api.get<MyTasksResponse>(`/tasks/my?${params.toString()}`);
   },
 
-  // 删除任务
-  async deleteTask(taskId: string): Promise<void> {
-    await api.delete(`/tasks/${taskId}`);
+  // 获取任务的子任务数量（用于删除确认弹窗）
+  async getSubtaskCount(taskId: string): Promise<number> {
+    const response = await api.get<{ count: number }>(`/tasks/${taskId}/subtask-count`);
+    return response.count;
+  },
+
+  // 删除任务（支持级联删除子任务）
+  async deleteTask(taskId: string): Promise<{ deletedCount: number; subtaskCount: number }> {
+    const response = await api.delete<{ deletedCount: number; subtaskCount: number }>(`/tasks/${taskId}`);
+    return response;
   },
 
   // 批量完成任务（智能实现 - 遵循审核流程）

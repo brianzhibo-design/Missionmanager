@@ -204,6 +204,7 @@ export const taskService = {
     }
 
     // 8. 如果指定了父任务，检查父任务是否存在且属于同一项目
+    // 同时校验层级深度（最多支持3级任务嵌套）
     if (data.parentId) {
       const parentTask = await taskRepository.findById(data.parentId);
       if (!parentTask) {
@@ -211,6 +212,12 @@ export const taskService = {
       }
       if (parentTask.projectId !== data.projectId) {
         throw new AppError('子任务必须与父任务属于同一项目', 400, 'INVALID_PARENT');
+      }
+      
+      // 计算父任务的层级（通过递归查找 parentId 链）
+      const parentLevel = await this.getTaskLevel(data.parentId);
+      if (parentLevel >= 3) {
+        throw new AppError('最多支持3级任务嵌套，无法创建更深层级的子任务', 400, 'MAX_DEPTH_EXCEEDED');
       }
     }
 
@@ -447,10 +454,11 @@ export const taskService = {
   },
 
   /**
-   * 删除任务
+   * 删除任务（支持级联删除子任务）
    * 权限：owner, admin, leader 可以删除；项目负责人可以删除项目内任务
+   * 返回：删除的子任务数量
    */
-  async delete(userId: string, taskId: string) {
+  async delete(userId: string, taskId: string): Promise<{ deletedCount: number; subtaskCount: number }> {
     const task = await taskRepository.findByIdWithDetails(taskId);
     if (!task) {
       throw new AppError('任务不存在', 404, 'TASK_NOT_FOUND');
@@ -464,7 +472,28 @@ export const taskService = {
       await workspaceService.requireRole(task.project.workspaceId, userId, [...DELETE_ROLES]);
     }
 
+    // 获取所有后代子任务（用于级联删除）
+    const descendants = await this.getAllDescendants(taskId);
+    const subtaskCount = descendants.length;
+
+    // 删除所有后代子任务（从叶子节点开始）
+    // 使用数据库级联删除或逐个删除
+    for (const descendantId of descendants.reverse()) {
+      await taskRepository.delete(descendantId);
+    }
+
+    // 删除主任务
     await taskRepository.delete(taskId);
+
+    return { deletedCount: 1 + subtaskCount, subtaskCount };
+  },
+
+  /**
+   * 获取任务的子任务数量（用于删除确认弹窗）
+   */
+  async getSubtaskCount(taskId: string): Promise<number> {
+    const descendants = await this.getAllDescendants(taskId);
+    return descendants.length;
   },
 
   /**
@@ -865,6 +894,12 @@ export const taskService = {
       throw new AppError('无效的状态', 400, 'INVALID_STATUS');
     }
 
+    // 3.5 子任务（L2/L3）禁止进入 review 状态
+    const taskLevel = await this.getTaskLevel(taskId);
+    if (taskLevel > 1 && newStatus === 'review') {
+      throw new AppError('子任务无需审核，请直接完成', 400, 'SUBTASK_NO_REVIEW');
+    }
+
     // 4. 智能转换逻辑
     let actualStatus = newStatus as TaskStatusType;
     let message = '';
@@ -1000,20 +1035,35 @@ export const taskService = {
         );
       }
 
-      // 5. 获取更新后的任务
-      const updatedTask = await taskRepository.findByIdWithDetails(taskId);
+      // 5. 状态联动触发
+      const normalizedActualStatus = (actualStatus || 'todo').toLowerCase() as TaskStatusType;
+      
+      // 5.1 子任务完成时，检查是否需要更新父任务
+      if (normalizedActualStatus === TaskStatus.DONE && task.parentId) {
+        await this.triggerParentStatusUpdate(taskId, userId);
+      }
+      
+      // 5.2 子任务开始时，触发父任务开始
+      if (normalizedActualStatus === TaskStatus.IN_PROGRESS && oldStatus === TaskStatus.TODO && task.parentId) {
+        await this.triggerParentStart(taskId, userId);
+      }
+      
+      // 5.3 子任务被重新打开时（从 done 变回其他状态），检查父任务
+      if (oldStatus === TaskStatus.DONE && normalizedActualStatus !== TaskStatus.DONE && task.parentId) {
+        await this.triggerParentStatusRevert(taskId, userId);
+      }
 
-      // 确保返回的状态值是小写字符串
-      const normalizedStatus = (actualStatus || 'todo').toLowerCase() as TaskStatusType;
+      // 6. 获取更新后的任务
+      const updatedTask = await taskRepository.findByIdWithDetails(taskId);
 
       return {
         task: {
           ...updatedTask,
-          status: normalizedStatus, // 确保状态值是小写
+          status: normalizedActualStatus, // 确保状态值是小写
         },
-        actualStatus: normalizedStatus,
+        actualStatus: normalizedActualStatus,
         message,
-        statusChanged: oldStatus !== normalizedStatus,
+        statusChanged: oldStatus !== normalizedActualStatus,
       };
     } catch (error) {
       if (error instanceof AppError) {
@@ -1159,5 +1209,205 @@ export const taskService = {
     });
 
     return updatedTask;
+  },
+
+  // ========================================
+  // 三级任务体系辅助方法
+  // ========================================
+
+  /**
+   * 获取任务的层级（Level 1/2/3）
+   * Level 1 = 主任务（无 parentId）
+   * Level 2 = 子任务（父任务是 Level 1）
+   * Level 3 = 子子任务（父任务是 Level 2）
+   */
+  async getTaskLevel(taskId: string): Promise<number> {
+    let level = 1;
+    let currentId: string | null = taskId;
+    
+    while (currentId) {
+      const task = await taskRepository.findById(currentId);
+      if (!task || !task.parentId) break;
+      level++;
+      currentId = task.parentId;
+    }
+    
+    return level;
+  },
+
+  /**
+   * 检查任务是否是子任务（Level 2 或 Level 3）
+   */
+  async isSubtask(taskId: string): Promise<boolean> {
+    const task = await taskRepository.findById(taskId);
+    return task?.parentId != null;
+  },
+
+  /**
+   * 获取任务的所有子任务（直接子任务，不递归）
+   */
+  async getDirectChildren(taskId: string) {
+    return prisma.task.findMany({
+      where: { parentId: taskId },
+    });
+  },
+
+  /**
+   * 获取任务的所有后代子任务（递归）
+   */
+  async getAllDescendants(taskId: string): Promise<string[]> {
+    const descendants: string[] = [];
+    const queue = [taskId];
+    
+    while (queue.length > 0) {
+      const currentId = queue.shift()!;
+      const children = await prisma.task.findMany({
+        where: { parentId: currentId },
+        select: { id: true },
+      });
+      
+      for (const child of children) {
+        descendants.push(child.id);
+        queue.push(child.id);
+      }
+    }
+    
+    return descendants;
+  },
+
+  /**
+   * 状态联动：检查并更新父任务状态
+   * 规则：
+   * - 如果所有子任务都完成，父任务自动进入下一状态
+   * - L3 全完成 → L2 自动 done
+   * - L2 全完成 → L1 自动 review（需要审核）
+   */
+  async triggerParentStatusUpdate(taskId: string, userId: string): Promise<void> {
+    const task = await taskRepository.findById(taskId);
+    if (!task?.parentId) return;
+
+    const parentTask = await taskRepository.findByIdWithDetails(task.parentId);
+    if (!parentTask) return;
+
+    // 获取所有兄弟任务（包括自己）
+    const siblings = await prisma.task.findMany({
+      where: { parentId: task.parentId },
+      select: { status: true },
+    });
+
+    // 检查是否所有子任务都已完成
+    const allCompleted = siblings.every(s => s.status === 'done');
+    if (!allCompleted) return;
+
+    // 获取父任务层级
+    const parentLevel = await this.getTaskLevel(task.parentId);
+
+    if (parentLevel === 1) {
+      // L1 主任务：子任务全完成 → 自动进入 review（需要审核）
+      if (parentTask.status === 'in_progress') {
+        await taskRepository.update(task.parentId, { status: TaskStatus.REVIEW });
+        await taskEventRepository.create({
+          taskId: task.parentId,
+          userId,
+          type: 'status_changed',
+          data: {
+            description: '所有子任务已完成，自动提交审核',
+            oldValue: 'in_progress',
+            newValue: 'review',
+            autoTriggered: true,
+          },
+        });
+      }
+    } else {
+      // L2/L3 子任务：子任务全完成 → 自动完成（不需要审核）
+      if (parentTask.status !== 'done') {
+        await taskRepository.update(task.parentId, { 
+          status: TaskStatus.DONE,
+          completedAt: new Date(),
+        });
+        await taskEventRepository.create({
+          taskId: task.parentId,
+          userId,
+          type: 'status_changed',
+          data: {
+            description: '所有子任务已完成，自动完成',
+            oldValue: parentTask.status,
+            newValue: 'done',
+            autoTriggered: true,
+          },
+        });
+        
+        // 递归检查更上层的父任务
+        await this.triggerParentStatusUpdate(task.parentId, userId);
+      }
+    }
+  },
+
+  /**
+   * 逆向联动：子任务被重新打开时，检查父任务状态
+   * 规则：
+   * - 如果 L1 主任务在 review 状态，子任务被重新打开 → L1 自动退回 in_progress
+   */
+  async triggerParentStatusRevert(taskId: string, userId: string): Promise<void> {
+    const task = await taskRepository.findById(taskId);
+    if (!task?.parentId) return;
+
+    // 递归查找顶层父任务（L1）
+    let currentParentId = task.parentId;
+    while (currentParentId) {
+      const parentTask = await taskRepository.findById(currentParentId);
+      if (!parentTask) break;
+      
+      // 如果父任务在 review 状态，退回 in_progress
+      if (parentTask.status === 'review') {
+        await taskRepository.update(currentParentId, { status: TaskStatus.IN_PROGRESS });
+        await taskEventRepository.create({
+          taskId: currentParentId,
+          userId,
+          type: 'status_changed',
+          data: {
+            description: '子任务被重新打开，自动退回进行中',
+            oldValue: 'review',
+            newValue: 'in_progress',
+            autoTriggered: true,
+          },
+        });
+      }
+      
+      // 继续向上检查
+      currentParentId = parentTask.parentId || '';
+      if (!currentParentId) break;
+    }
+  },
+
+  /**
+   * 子任务开始时，触发父任务状态更新
+   * 规则：父任务 todo → in_progress
+   */
+  async triggerParentStart(taskId: string, userId: string): Promise<void> {
+    const task = await taskRepository.findById(taskId);
+    if (!task?.parentId) return;
+
+    const parentTask = await taskRepository.findById(task.parentId);
+    if (!parentTask) return;
+
+    // 如果父任务还是 todo，自动开始
+    if (parentTask.status === 'todo') {
+      await taskRepository.update(task.parentId, { status: TaskStatus.IN_PROGRESS });
+      await taskEventRepository.create({
+        taskId: task.parentId,
+        userId,
+        type: 'status_changed',
+        data: {
+          description: '子任务开始，自动开始父任务',
+          oldValue: 'todo',
+          newValue: 'in_progress',
+          autoTriggered: true,
+        },
+      });
+      
+      // 递归向上触发
+      await this.triggerParentStart(task.parentId, userId);
+    }
   },
 };
