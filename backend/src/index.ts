@@ -63,10 +63,10 @@ app.use('/admin', adminRouter);
 app.use('/tree', treeRouter);
 app.use('/tree-analysis', aiLimiter, treeAnalysisRouter); // AI 分析使用 AI 限制
 app.use('/members', memberRouter);
-app.use('/notifications', notificationLimiter, notificationRouter); // 通知限制
+app.use('/notifications', notificationRouter); // 获取通知使用通用限制
 app.use('/reports', reportRouter);
 app.use('/comments', commentRouter);
-app.use('/broadcast', notificationLimiter, broadcastRouter); // 广播使用通知限制
+app.use('/broadcast', broadcastRouter); // 广播使用通用限制
 app.use('/daily-reports', dailyReportRouter);
 app.use('/upload', uploadLimiter, uploadRouter); // 上传限制
 app.use('/permissions', permissionRouter);

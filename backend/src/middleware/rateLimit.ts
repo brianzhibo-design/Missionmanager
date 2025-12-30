@@ -6,11 +6,11 @@ import rateLimit from 'express-rate-limit';
 
 /**
  * 通用 API 限制
- * 每个 IP 每 15 分钟最多 1000 次请求（放宽限制）
+ * 每个 IP 每 15 分钟最多 3000 次请求（大幅放宽限制）
  */
 export const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 分钟
-  max: 1000, // 每个 IP 最多 1000 次请求
+  max: 3000, // 每个 IP 最多 3000 次请求
   message: {
     success: false,
     error: {
@@ -87,12 +87,12 @@ export const uploadLimiter = rateLimit({
 });
 
 /**
- * 发送邮件/通知限制
- * 每个 IP 每小时最多 20 次
+ * 发送邮件/广播限制
+ * 每个 IP 每小时最多 100 次（仅限发送操作）
  */
 export const notificationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 小时
-  max: 20, // 每个 IP 最多 20 次
+  max: 100, // 每个 IP 最多 100 次
   message: {
     success: false,
     error: {
