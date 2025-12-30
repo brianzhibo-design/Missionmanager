@@ -827,7 +827,7 @@ function DesktopProjectDetail() {
               )}
 
               {/* 其他建议 */}
-              {projectOptimizationResult.suggestions.length > 0 && (
+              {projectOptimizationResult.suggestions && projectOptimizationResult.suggestions.length > 0 && (
                 <div className="optimization-section">
                   <h4><Lightbulb size={16} /> 其他建议</h4>
                   <ul className="other-suggestions">

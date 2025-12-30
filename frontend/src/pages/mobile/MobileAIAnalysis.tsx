@@ -186,7 +186,7 @@ export default function MobileAIAnalysis() {
           </div>
 
           {/* 亮点 */}
-          {analysis.highlights.length > 0 && (
+          {analysis.highlights && analysis.highlights.length > 0 && (
             <div className="mm-ai-section">
               <div className="mm-ai-section-header mm-success">
                 <CheckCircle size={18} />
@@ -201,7 +201,7 @@ export default function MobileAIAnalysis() {
           )}
 
           {/* 需要关注 */}
-          {analysis.concerns.length > 0 && (
+          {analysis.concerns && analysis.concerns.length > 0 && (
             <div className="mm-ai-section">
               <div className="mm-ai-section-header mm-warning">
                 <AlertTriangle size={18} />
@@ -216,7 +216,7 @@ export default function MobileAIAnalysis() {
           )}
 
           {/* 建议 */}
-          {analysis.suggestions.length > 0 && (
+          {analysis.suggestions && analysis.suggestions.length > 0 && (
             <div className="mm-ai-section">
               <div className="mm-ai-section-header mm-primary">
                 <TrendingUp size={18} />
@@ -234,6 +234,10 @@ export default function MobileAIAnalysis() {
     </MobileLayout>
   );
 }
+
+
+
+
 
 
 

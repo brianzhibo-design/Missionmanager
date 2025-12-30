@@ -9,3 +9,7 @@ WHERE permissions @> ARRAY['TEAM_KUDOS'] OR permissions @> ARRAY['FUN_EVENTS'];
 
 
 
+
+
+
+

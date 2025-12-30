@@ -1511,7 +1511,7 @@ function DesktopTaskDetail() {
               </div>
 
               {/* 优化建议 */}
-              {optimizationResult.suggestions.length > 0 && (
+              {optimizationResult.suggestions && optimizationResult.suggestions.length > 0 && (
                 <div className="optimize-section">
                   <h4><Lightbulb size={16} /> 其他建议</h4>
                   <ul className="suggestions-list">

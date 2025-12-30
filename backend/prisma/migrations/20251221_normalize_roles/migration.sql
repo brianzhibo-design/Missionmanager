@@ -9,3 +9,7 @@ UPDATE "workspace_users" SET role = 'guest' WHERE role = 'observer';
 
 
 
+
+
+
+
