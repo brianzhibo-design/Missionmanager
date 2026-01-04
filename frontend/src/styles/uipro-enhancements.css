@@ -1,0 +1,519 @@
+/**
+ * UI UX Pro Max Enhancements
+ * 基于 Swiss Modernism 2.0 + Minimalism 风格优化
+ * 
+ * 配色方案：
+ * - Primary: #2563EB (Trust Blue)
+ * - Secondary: #3B82F6
+ * - CTA: #F97316 (Orange)
+ * - Background: #F8FAFC
+ * - Text: #1E293B
+ * - Border: #E2E8F0
+ */
+
+/* ========================================
+ * 1. 增强色彩系统
+ * ======================================== */
+:root {
+  /* Pro Max 主色调 - Trust Blue */
+  --pm-primary: #2563EB;
+  --pm-primary-hover: #1D4ED8;
+  --pm-primary-active: #1E40AF;
+  --pm-primary-light: #EFF6FF;
+  --pm-primary-50: #EFF6FF;
+  --pm-primary-100: #DBEAFE;
+  --pm-primary-500: #3B82F6;
+  --pm-primary-600: #2563EB;
+  --pm-primary-700: #1D4ED8;
+
+  /* CTA 橙色强调 */
+  --pm-cta: #F97316;
+  --pm-cta-hover: #EA580C;
+  --pm-cta-light: #FFF7ED;
+
+  /* 中性色（高对比度） */
+  --pm-text-primary: #0F172A;    /* slate-900 */
+  --pm-text-secondary: #334155;  /* slate-700 */
+  --pm-text-muted: #64748B;      /* slate-500 */
+  --pm-text-disabled: #94A3B8;   /* slate-400 */
+  
+  --pm-bg-base: #F8FAFC;
+  --pm-bg-card: #FFFFFF;
+  --pm-bg-elevated: #FFFFFF;
+  --pm-bg-hover: #F1F5F9;
+  --pm-bg-active: #E2E8F0;
+  
+  --pm-border: #E2E8F0;
+  --pm-border-light: #F1F5F9;
+  --pm-border-focus: var(--pm-primary);
+  
+  /* 语义色 */
+  --pm-success: #10B981;
+  --pm-success-light: #ECFDF5;
+  --pm-warning: #F59E0B;
+  --pm-warning-light: #FFFBEB;
+  --pm-danger: #EF4444;
+  --pm-danger-light: #FEF2F2;
+  --pm-info: #3B82F6;
+  --pm-info-light: #EFF6FF;
+
+  /* 阴影（极轻，瑞士风格） */
+  --pm-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --pm-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --pm-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --pm-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+  --pm-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+  --pm-shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+  
+  /* 动画时长（Swiss 风格：精确、快速） */
+  --pm-duration-fast: 150ms;
+  --pm-duration-normal: 200ms;
+  --pm-duration-slow: 300ms;
+  --pm-ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 深色模式 */
+[data-theme="dark"] {
+  --pm-text-primary: #F8FAFC;
+  --pm-text-secondary: #CBD5E1;
+  --pm-text-muted: #94A3B8;
+  --pm-text-disabled: #64748B;
+  
+  --pm-bg-base: #0F172A;
+  --pm-bg-card: #1E293B;
+  --pm-bg-elevated: #334155;
+  --pm-bg-hover: #334155;
+  --pm-bg-active: #475569;
+  
+  --pm-border: #334155;
+  --pm-border-light: #475569;
+  
+  --pm-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --pm-shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ========================================
+ * 2. 字体系统 - Poppins + Inter
+ * ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+
+:root {
+  --pm-font-heading: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --pm-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+/* ========================================
+ * 3. 增强按钮样式
+ * ======================================== */
+.pm-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-family: var(--pm-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--pm-duration-fast) var(--pm-ease);
+  white-space: nowrap;
+}
+
+.pm-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 主要按钮 */
+.pm-btn-primary {
+  background: var(--pm-primary);
+  color: white;
+  border-color: var(--pm-primary);
+}
+
+.pm-btn-primary:hover:not(:disabled) {
+  background: var(--pm-primary-hover);
+  border-color: var(--pm-primary-hover);
+}
+
+.pm-btn-primary:active:not(:disabled) {
+  background: var(--pm-primary-active);
+  transform: scale(0.98);
+}
+
+/* CTA 按钮（橙色） */
+.pm-btn-cta {
+  background: var(--pm-cta);
+  color: white;
+  border-color: var(--pm-cta);
+}
+
+.pm-btn-cta:hover:not(:disabled) {
+  background: var(--pm-cta-hover);
+  border-color: var(--pm-cta-hover);
+}
+
+/* 次要按钮 */
+.pm-btn-secondary {
+  background: var(--pm-bg-card);
+  color: var(--pm-text-primary);
+  border-color: var(--pm-border);
+}
+
+.pm-btn-secondary:hover:not(:disabled) {
+  background: var(--pm-bg-hover);
+  border-color: var(--pm-text-muted);
+}
+
+/* 幽灵按钮 */
+.pm-btn-ghost {
+  background: transparent;
+  color: var(--pm-text-secondary);
+  border-color: transparent;
+}
+
+.pm-btn-ghost:hover:not(:disabled) {
+  background: var(--pm-bg-hover);
+  color: var(--pm-text-primary);
+}
+
+/* ========================================
+ * 4. 增强卡片样式
+ * ======================================== */
+.pm-card {
+  background: var(--pm-bg-card);
+  border: 1px solid var(--pm-border);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: var(--pm-shadow-card);
+  transition: box-shadow var(--pm-duration-normal) var(--pm-ease),
+              border-color var(--pm-duration-normal) var(--pm-ease);
+}
+
+.pm-card-interactive {
+  cursor: pointer;
+}
+
+.pm-card-interactive:hover {
+  box-shadow: var(--pm-shadow-card-hover);
+  border-color: var(--pm-border-light);
+}
+
+.pm-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.pm-card-title {
+  font-family: var(--pm-font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--pm-text-primary);
+  margin: 0;
+}
+
+/* ========================================
+ * 5. 增强输入框样式
+ * ======================================== */
+.pm-input {
+  width: 100%;
+  padding: 10px 14px;
+  font-family: var(--pm-font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--pm-text-primary);
+  background: var(--pm-bg-card);
+  border: 1px solid var(--pm-border);
+  border-radius: 8px;
+  transition: border-color var(--pm-duration-fast) var(--pm-ease),
+              box-shadow var(--pm-duration-fast) var(--pm-ease);
+}
+
+.pm-input::placeholder {
+  color: var(--pm-text-disabled);
+}
+
+.pm-input:hover:not(:disabled) {
+  border-color: var(--pm-text-muted);
+}
+
+.pm-input:focus {
+  outline: none;
+  border-color: var(--pm-primary);
+  box-shadow: 0 0 0 3px var(--pm-primary-50);
+}
+
+.pm-input:disabled {
+  background: var(--pm-bg-base);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ========================================
+ * 6. 骨架屏加载效果
+ * ======================================== */
+.pm-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--pm-bg-hover) 25%,
+    var(--pm-border-light) 50%,
+    var(--pm-bg-hover) 75%
+  );
+  background-size: 200% 100%;
+  animation: pm-skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes pm-skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.pm-skeleton-text {
+  height: 16px;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.pm-skeleton-text:last-child {
+  width: 60%;
+}
+
+.pm-skeleton-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.pm-skeleton-card {
+  height: 120px;
+  width: 100%;
+}
+
+/* ========================================
+ * 7. 增强状态标签
+ * ======================================== */
+.pm-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.pm-badge-todo {
+  background: var(--pm-bg-hover);
+  color: var(--pm-text-secondary);
+}
+
+.pm-badge-progress {
+  background: var(--pm-info-light);
+  color: #1D4ED8;
+}
+
+.pm-badge-review {
+  background: var(--pm-warning-light);
+  color: #B45309;
+}
+
+.pm-badge-done {
+  background: var(--pm-success-light);
+  color: #047857;
+}
+
+.pm-badge-critical {
+  background: var(--pm-danger-light);
+  color: #B91C1C;
+}
+
+/* ========================================
+ * 8. 微动效增强
+ * ======================================== */
+/* 淡入动画 */
+@keyframes pm-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pm-animate-in {
+  animation: pm-fade-in var(--pm-duration-normal) var(--pm-ease);
+}
+
+/* 缩放进入 */
+@keyframes pm-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.pm-animate-scale {
+  animation: pm-scale-in var(--pm-duration-normal) var(--pm-ease);
+}
+
+/* 滑入动画 */
+@keyframes pm-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pm-animate-slide-up {
+  animation: pm-slide-up var(--pm-duration-slow) var(--pm-ease);
+}
+
+/* ========================================
+ * 9. 数据可视化增强
+ * ======================================== */
+.pm-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: var(--pm-bg-card);
+  border: 1px solid var(--pm-border);
+  border-radius: 12px;
+}
+
+.pm-stat-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pm-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pm-stat-value {
+  font-family: var(--pm-font-heading);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--pm-text-primary);
+  line-height: 1;
+}
+
+.pm-stat-change {
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pm-stat-change-up {
+  color: var(--pm-success);
+}
+
+.pm-stat-change-down {
+  color: var(--pm-danger);
+}
+
+/* 进度条 */
+.pm-progress {
+  height: 6px;
+  background: var(--pm-bg-hover);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.pm-progress-bar {
+  height: 100%;
+  background: var(--pm-primary);
+  border-radius: 3px;
+  transition: width var(--pm-duration-slow) var(--pm-ease);
+}
+
+.pm-progress-bar-success {
+  background: var(--pm-success);
+}
+
+.pm-progress-bar-warning {
+  background: var(--pm-warning);
+}
+
+.pm-progress-bar-danger {
+  background: var(--pm-danger);
+}
+
+/* ========================================
+ * 10. 移动端优化
+ * ======================================== */
+@media (max-width: 768px) {
+  .pm-btn {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+  
+  .pm-card {
+    padding: 16px;
+    border-radius: 10px;
+  }
+  
+  .pm-input {
+    padding: 12px 14px;
+    font-size: 16px; /* 防止 iOS 缩放 */
+  }
+  
+  .pm-stat-value {
+    font-size: 24px;
+  }
+}
+
+/* ========================================
+ * 11. 可访问性增强
+ * ======================================== */
+/* 减少动画（用户偏好） */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 焦点样式 */
+.pm-btn:focus-visible,
+.pm-input:focus-visible,
+.pm-card-interactive:focus-visible {
+  outline: 2px solid var(--pm-primary);
+  outline-offset: 2px;
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+  .pm-btn-primary {
+    border: 2px solid currentColor;
+  }
+  
+  .pm-card {
+    border-width: 2px;
+  }
+}
