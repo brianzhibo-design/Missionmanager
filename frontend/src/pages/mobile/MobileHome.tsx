@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, FileText } from '../../components/Icons';
+import { CheckCircle, FileText, Check, Plus } from '../../components/Icons';
 import { useAuth } from '../../hooks/useAuth';
 import { usePermissions } from '../../hooks/usePermissions';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import WelcomeCard from '../../components/mobile/WelcomeCard';
 import TaskTimeline from '../../components/mobile/TaskTimeline';
 import ChatModal from '../../components/mobile/ChatModal';
+import SheetModal from '../../components/mobile/SheetModal';
 import { taskService, TaskWithProject } from '../../services/task';
+import { workspaceService, Workspace } from '../../services/workspace';
 
 type TimelineStatus = 'todo' | 'in_progress' | 'done';
 type TimelinePriority = 'high' | 'medium' | 'low';
@@ -29,11 +31,16 @@ const mapPriority = (priority: string): TimelinePriority => {
 export default function MobileHome() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { currentWorkspace } = usePermissions();
+  const { currentWorkspace, setCurrentWorkspace } = usePermissions();
   const [tasks, setTasks] = useState<TaskWithProject[]>([]);
   const [totalPending, setTotalPending] = useState(0);
   const [loading, setLoading] = useState(true);
   const [chatOpen, setChatOpen] = useState(false);
+  
+  // 工作区切换相关状态
+  const [workspaceSwitcherOpen, setWorkspaceSwitcherOpen] = useState(false);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [loadingWorkspaces, setLoadingWorkspaces] = useState(false);
 
   useEffect(() => {
     loadTodayTasks();
@@ -95,11 +102,34 @@ export default function MobileHome() {
     }
   };
 
+  // 打开工作区切换弹窗
+  const handleOpenWorkspaceSwitcher = async () => {
+    setWorkspaceSwitcherOpen(true);
+    setLoadingWorkspaces(true);
+    try {
+      const data = await workspaceService.getWorkspaces();
+      setWorkspaces(data);
+    } catch (error) {
+      console.error('Failed to load workspaces:', error);
+    } finally {
+      setLoadingWorkspaces(false);
+    }
+  };
+
+  // 切换工作区
+  const handleSwitchWorkspace = (workspace: Workspace) => {
+    setCurrentWorkspace(workspace);
+    setWorkspaceSwitcherOpen(false);
+    // 刷新页面数据
+    loadTodayTasks();
+  };
+
   return (
     <MobileLayout
       headerType="home"
       headerProps={{
         workspaceName: currentWorkspace?.name || '我的工作区',
+        onWorkspaceClick: handleOpenWorkspaceSwitcher,
         onNotificationClick: () => navigate('/notifications'),
         onSearchClick: () => navigate('/search'),
       }}
@@ -159,6 +189,75 @@ export default function MobileHome() {
       )}
 
       <ChatModal isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+
+      {/* 工作区切换弹窗 */}
+      <SheetModal
+        isOpen={workspaceSwitcherOpen}
+        onClose={() => setWorkspaceSwitcherOpen(false)}
+        title="切换工作区"
+        height="50vh"
+      >
+        <div className="mm-workspace-switcher">
+          {loadingWorkspaces ? (
+            <div className="mm-loading">
+              <div className="mm-spinner" />
+            </div>
+          ) : (
+            <>
+              <div className="mm-workspace-list">
+                {workspaces.map((ws) => (
+                  <button
+                    key={ws.id}
+                    className={`mm-workspace-item ${ws.id === currentWorkspace?.id ? 'active' : ''}`}
+                    onClick={() => handleSwitchWorkspace(ws)}
+                  >
+                    <div 
+                      className="mm-workspace-avatar"
+                      style={{
+                        background: `linear-gradient(135deg, ${
+                          ['#6366f1', '#ec4899', '#10b981', '#f97316', '#06b6d4'][
+                            ws.name.charCodeAt(0) % 5
+                          ]
+                        }, ${
+                          ['#8b5cf6', '#f43f5e', '#14b8a6', '#f59e0b', '#3b82f6'][
+                            ws.name.charCodeAt(0) % 5
+                          ]
+                        })`
+                      }}
+                    >
+                      {ws.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="mm-workspace-info">
+                      <span className="mm-workspace-name">{ws.name}</span>
+                      <span className="mm-workspace-role">
+                        {ws.role === 'owner' ? '创始人' : 
+                         ws.role === 'director' ? '管理员' : 
+                         ws.role === 'manager' ? '组长' : '成员'}
+                      </span>
+                    </div>
+                    {ws.id === currentWorkspace?.id && (
+                      <Check size={20} className="mm-workspace-check" />
+                    )}
+                  </button>
+                ))}
+              </div>
+              
+              <button 
+                className="mm-workspace-create"
+                onClick={() => {
+                  setWorkspaceSwitcherOpen(false);
+                  navigate('/workspace-setup');
+                }}
+              >
+                <div className="mm-workspace-create-icon">
+                  <Plus size={18} />
+                </div>
+                创建新工作区
+              </button>
+            </>
+          )}
+        </div>
+      </SheetModal>
     </MobileLayout>
   );
 }

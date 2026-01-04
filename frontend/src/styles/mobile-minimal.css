@@ -2226,6 +2226,85 @@
     opacity: 0.5;
   }
 
+  /* 工作区切换弹窗 */
+  .mm-workspace-switcher {
+    padding: 8px 0;
+  }
+
+  .mm-workspace-item {
+    width: 100%;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .mm-workspace-item:active {
+    background: var(--min-bg);
+  }
+
+  .mm-workspace-item.active {
+    background: var(--min-primary-light);
+  }
+
+  .mm-workspace-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .mm-workspace-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .mm-workspace-role {
+    font-size: 13px;
+    color: var(--min-text-secondary);
+    margin-top: 2px;
+  }
+
+  .mm-workspace-check {
+    color: var(--min-primary);
+    flex-shrink: 0;
+  }
+
+  .mm-workspace-create {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-top: 1px solid var(--min-border);
+    margin-top: 8px;
+    font-size: 15px;
+    color: var(--min-primary);
+  }
+
+  .mm-workspace-create:active {
+    background: var(--min-bg);
+  }
+
+  .mm-workspace-create-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--min-primary-light);
+    color: var(--min-primary);
+    display: grid;
+    place-items: center;
+  }
+
   /* ----- 任务详情页增强 ----- */
   
   /* 状态按钮可点击 */
