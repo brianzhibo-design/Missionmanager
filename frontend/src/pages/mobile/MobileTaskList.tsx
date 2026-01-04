@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Check, Inbox, Calendar, AlertCircle, Clock, CalendarDays } from '../../components/Icons';
+import { Check, Inbox, Calendar, AlertCircle, Clock, CalendarDays, X } from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
+import SheetModal from '../../components/mobile/SheetModal';
 import { taskService, TaskWithProject } from '../../services/task';
 import '../../styles/mobile-minimal.css';
 
@@ -187,6 +188,11 @@ export default function MobileTaskList() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('all');
+  
+  // 筛选弹窗状态
+  const [showFilterSheet, setShowFilterSheet] = useState(false);
+  const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<string>('all');
 
   const loadTasks = useCallback(async (isRefresh = false) => {
     try {
@@ -219,9 +225,47 @@ export default function MobileTaskList() {
 
   // 筛选任务
   const filteredTasks = useMemo(() => {
-    if (activeFilter === 'all') return tasks;
-    return tasks.filter((t) => t.status === activeFilter);
-  }, [tasks, activeFilter]);
+    let result = tasks;
+    
+    // 状态筛选
+    if (activeFilter !== 'all') {
+      result = result.filter((t) => t.status === activeFilter);
+    }
+    
+    // 优先级筛选
+    if (priorityFilter !== 'all') {
+      result = result.filter((t) => t.priority === priorityFilter);
+    }
+    
+    // 日期筛选
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const weekEnd = new Date(today);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      
+      result = result.filter((t) => {
+        if (!t.dueDate) return dateFilter === 'nodate';
+        const dueDate = new Date(t.dueDate);
+        const dueDateOnly = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+        
+        switch (dateFilter) {
+          case 'overdue':
+            return t.status !== 'done' && dueDateOnly < today;
+          case 'today':
+            return dueDateOnly.getTime() === today.getTime();
+          case 'week':
+            return dueDateOnly >= today && dueDateOnly < weekEnd;
+          default:
+            return true;
+        }
+      });
+    }
+    
+    return result;
+  }, [tasks, activeFilter, priorityFilter, dateFilter]);
 
   // 按日期范围分组
   const dateGroups = useMemo(() => groupTasksByDateRange(filteredTasks), [filteredTasks]);
@@ -261,13 +305,22 @@ export default function MobileTaskList() {
     loadTasks(true);
   };
 
+  // 检查是否有活跃的筛选
+  const hasActiveFilters = priorityFilter !== 'all' || dateFilter !== 'all';
+
+  // 清除所有筛选
+  const clearFilters = () => {
+    setPriorityFilter('all');
+    setDateFilter('all');
+  };
+
   return (
     <MobileLayout
       headerType="list"
       headerTitle="我的任务"
       headerProps={{
-        onSearchClick: () => {/* TODO: 搜索功能 */},
-        onFilterClick: () => {/* TODO: 筛选功能 */},
+        onSearchClick: () => navigate('/search'),
+        onFilterClick: () => setShowFilterSheet(true),
       }}
       showBottomNav={true}
     >
@@ -372,6 +425,79 @@ export default function MobileTaskList() {
           </div>
         )}
       </div>
+
+      {/* 筛选弹窗 */}
+      <SheetModal
+        isOpen={showFilterSheet}
+        onClose={() => setShowFilterSheet(false)}
+        title="筛选任务"
+        height="auto"
+      >
+        <div className="mm-filter-sheet">
+          {/* 优先级筛选 */}
+          <div className="mm-filter-section">
+            <h4 className="mm-filter-label">优先级</h4>
+            <div className="mm-filter-options">
+              {[
+                { key: 'all', label: '全部' },
+                { key: 'critical', label: '紧急' },
+                { key: 'high', label: '高' },
+                { key: 'medium', label: '中' },
+                { key: 'low', label: '低' },
+              ].map((opt) => (
+                <button
+                  key={opt.key}
+                  className={`mm-filter-option ${priorityFilter === opt.key ? 'active' : ''}`}
+                  onClick={() => setPriorityFilter(opt.key)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 日期筛选 */}
+          <div className="mm-filter-section">
+            <h4 className="mm-filter-label">截止日期</h4>
+            <div className="mm-filter-options">
+              {[
+                { key: 'all', label: '全部' },
+                { key: 'overdue', label: '已逾期' },
+                { key: 'today', label: '今天' },
+                { key: 'week', label: '本周' },
+                { key: 'nodate', label: '无日期' },
+              ].map((opt) => (
+                <button
+                  key={opt.key}
+                  className={`mm-filter-option ${dateFilter === opt.key ? 'active' : ''}`}
+                  onClick={() => setDateFilter(opt.key)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 操作按钮 */}
+          <div className="mm-filter-actions">
+            {hasActiveFilters && (
+              <button 
+                className="mm-btn mm-btn-secondary"
+                onClick={clearFilters}
+              >
+                <X size={16} />
+                清除筛选
+              </button>
+            )}
+            <button
+              className="mm-btn mm-btn-primary"
+              onClick={() => setShowFilterSheet(false)}
+            >
+              完成
+            </button>
+          </div>
+        </div>
+      </SheetModal>
     </MobileLayout>
   );
 }
