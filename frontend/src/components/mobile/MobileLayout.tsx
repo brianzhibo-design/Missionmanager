@@ -37,6 +37,10 @@ interface MobileLayoutProps {
   
   // 底部导航
   showBottomNav?: boolean;
+  
+  // FAB 按钮配置
+  fabType?: 'task' | 'custom' | 'none';  // task=创建任务（默认），custom=自定义行为，none=不显示
+  onFabClick?: () => void;  // fabType='custom' 时的点击回调
 }
 
 export default function MobileLayout({
@@ -46,9 +50,21 @@ export default function MobileLayout({
   showHeader = true,
   headerProps = {},
   showBottomNav = true,
+  fabType = 'task',
+  onFabClick,
 }: MobileLayoutProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const navigate = useNavigate();
+
+  // FAB 点击处理
+  const handleFabClick = () => {
+    if (fabType === 'custom' && onFabClick) {
+      onFabClick();
+    } else if (fabType === 'task') {
+      setSheetOpen(true);
+    }
+    // fabType === 'none' 不做任何操作
+  };
 
   const handleTaskCreated = () => {
     setSheetOpen(false);
@@ -75,7 +91,10 @@ export default function MobileLayout({
       </main>
       
       {showBottomNav && (
-        <BottomNav onAddClick={() => setSheetOpen(true)} />
+        <BottomNav 
+          onAddClick={handleFabClick}
+          showFab={fabType !== 'none'}
+        />
       )}
       
       <SheetModal

@@ -1,0 +1,3430 @@
+/**
+ * 移动端 UI UX Pro Max 增强样式
+ * 基于 Swiss Modernism 2.0 + Minimalism 设计哲学
+ * 
+ * 设计原则：
+ * 1. 大留白 - 呼吸感
+ * 2. 高对比度 - 清晰可读
+ * 3. 微交互 - 精确反馈
+ * 4. 一致性 - 统一体验
+ */
+
+@media (max-width: 768px) {
+
+  /* ========================================
+   * 1. 移动端全局增强 - 排版系统
+   * ======================================== */
+  
+  /* 统一间距变量 */
+  :root {
+    --mm-space-xs: 4px;
+    --mm-space-sm: 8px;
+    --mm-space-md: 12px;
+    --mm-space-lg: 16px;
+    --mm-space-xl: 20px;
+    --mm-space-2xl: 24px;
+    --mm-space-3xl: 32px;
+    --mm-page-padding: 20px;
+    --mm-card-gap: 14px;
+    --mm-section-gap: 24px;
+  }
+  
+  /* 页面背景优化 */
+  .mm-layout {
+    background: linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%) !important;
+    padding-bottom: 100px !important;
+  }
+  
+  /* 主内容区域间距 */
+  .mm-content,
+  .mm-main {
+    padding-top: var(--mm-space-lg) !important;
+  }
+
+  /* ========================================
+   * 2. 欢迎卡片增强 - 玻璃态 + 渐变
+   * ======================================== */
+  
+  /* 欢迎区域容器 */
+  .mm-welcome-section {
+    padding: var(--mm-page-padding) !important;
+    padding-bottom: var(--mm-space-lg) !important;
+  }
+  
+  .mm-welcome-card {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+    border: 1px solid rgba(37, 99, 235, 0.1) !important;
+    box-shadow: 
+      0 4px 24px rgba(37, 99, 235, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    padding: var(--mm-space-2xl) var(--mm-page-padding) !important;
+    margin-bottom: 0 !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+  
+  .mm-welcome-header {
+    margin-bottom: var(--mm-space-lg) !important;
+  }
+
+  /* 渐变装饰条 */
+  .mm-welcome-card::before {
+    background: linear-gradient(180deg, #2563EB 0%, #3B82F6 100%) !important;
+    width: 5px !important;
+    border-radius: 3px !important;
+    left: 0 !important;
+    top: 16px !important;
+    bottom: 16px !important;
+  }
+
+  /* 右上角装饰 */
+  .mm-welcome-card::after {
+    content: '' !important;
+    position: absolute !important;
+    top: -50px !important;
+    right: -50px !important;
+    width: 120px !important;
+    height: 120px !important;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.05) 0%, transparent 70%) !important;
+    pointer-events: none !important;
+  }
+
+  .mm-welcome-title {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 26px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+    letter-spacing: -0.3px !important;
+  }
+
+  .mm-welcome-subtitle {
+    color: #64748B !important;
+    font-size: 14px !important;
+  }
+
+  /* 连续天数徽章增强 */
+  .mm-streak-badge {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+    border: 1px solid rgba(37, 99, 235, 0.15) !important;
+    color: #2563EB !important;
+    font-weight: 600 !important;
+    padding: 6px 14px !important;
+    border-radius: 24px !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1) !important;
+  }
+
+  /* 统计数值增强 */
+  .mm-stat-value {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    line-height: 1 !important;
+  }
+
+  .mm-stat-label {
+    font-size: 12px !important;
+    color: #64748B !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+    margin-top: 4px !important;
+  }
+
+  /* ========================================
+   * 3. 快捷入口按钮增强
+   * ======================================== */
+  .mm-quick-actions {
+    padding: var(--mm-space-md) var(--mm-page-padding) var(--mm-space-xl) !important;
+    gap: var(--mm-card-gap) !important;
+    margin-top: 0 !important;
+  }
+
+  .mm-quick-action-btn {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 16px !important;
+    padding: 18px 16px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-quick-action-btn:active {
+    transform: scale(0.97) !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06) !important;
+    background: #F8FAFC !important;
+  }
+
+  .mm-quick-action-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+  }
+
+  .mm-quick-action-icon.ai {
+    background: linear-gradient(135deg, #EFF6FF 0%, #E0E7FF 100%) !important;
+    box-shadow: inset 0 1px 2px rgba(37, 99, 235, 0.1) !important;
+  }
+
+  .mm-quick-action-icon.report {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%) !important;
+    box-shadow: inset 0 1px 2px rgba(16, 185, 129, 0.1) !important;
+  }
+
+  /* ========================================
+   * 4. 任务卡片增强
+   * ======================================== */
+  .mm-task-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  .mm-task-card:active {
+    transform: scale(0.98) !important;
+    background: #F8FAFC !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* 优先级左边框增强 */
+  .mm-task-card.critical,
+  .mm-task-card.high {
+    border-left: 4px solid #EF4444 !important;
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.02) 0%, #FFFFFF 8%) !important;
+  }
+
+  .mm-task-card.medium {
+    border-left: 4px solid #F59E0B !important;
+  }
+
+  .mm-task-title {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+    line-height: 1.5 !important;
+  }
+
+  .mm-task-card.completed .mm-task-title {
+    color: #94A3B8 !important;
+  }
+
+  /* 任务复选框增强 */
+  .mm-task-checkbox,
+  .mm-checkbox {
+    width: 24px !important;
+    height: 24px !important;
+    border: 2px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-task-checkbox.checked,
+  .mm-task-card.completed .mm-checkbox {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+    border-color: #10B981 !important;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3) !important;
+  }
+
+  /* 标签增强 */
+  .mm-tag {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    border-radius: 8px !important;
+    letter-spacing: 0.2px !important;
+  }
+
+  .mm-tag.danger {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%) !important;
+    border-color: #FECACA !important;
+    color: #DC2626 !important;
+  }
+
+  .mm-tag.primary {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+    border-color: #BFDBFE !important;
+    color: #2563EB !important;
+  }
+
+  /* ========================================
+   * 5. 底部导航增强 - 玻璃态
+   * ======================================== */
+  .mm-bottom-nav {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05) !important;
+    padding: 14px 0 !important;
+    height: auto !important;
+    padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .mm-nav-item {
+    font-size: 11px !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
+    gap: 6px !important;
+    transition: color 150ms !important;
+  }
+
+  .mm-nav-item.active {
+    color: #2563EB !important;
+    font-weight: 600 !important;
+  }
+
+  .mm-nav-item svg {
+    width: 26px !important;
+    height: 26px !important;
+    stroke-width: 2px !important;
+    transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-nav-item.active svg {
+    transform: scale(1.05) !important;
+  }
+
+  /* FAB 增强 */
+  .mm-nav-fab {
+    width: 60px !important;
+    height: 60px !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    box-shadow: 
+      0 8px 24px rgba(37, 99, 235, 0.35),
+      0 2px 6px rgba(37, 99, 235, 0.15) !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-nav-fab:active {
+    transform: scale(0.92) !important;
+    box-shadow: 
+      0 4px 12px rgba(37, 99, 235, 0.4),
+      0 1px 3px rgba(37, 99, 235, 0.2) !important;
+  }
+
+  .mm-nav-fab svg {
+    width: 28px !important;
+    height: 28px !important;
+    stroke-width: 2.5px !important;
+  }
+
+  /* ========================================
+   * 6. 空状态增强
+   * ======================================== */
+  .mm-empty-state {
+    padding: var(--mm-space-3xl) var(--mm-page-padding) !important;
+    margin-top: var(--mm-space-xl) !important;
+  }
+
+  .mm-empty-icon {
+    width: 80px !important;
+    height: 80px !important;
+    background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%) !important;
+    border-radius: 20px !important;
+    margin-bottom: 20px !important;
+    color: #94A3B8 !important;
+  }
+
+  .mm-empty-icon svg {
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  .mm-empty-title {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .mm-empty-desc {
+    font-size: 14px !important;
+    color: #64748B !important;
+    line-height: 1.5 !important;
+  }
+
+  /* ========================================
+   * 7. 页面头部增强
+   * ======================================== */
+  .mm-header {
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+    padding: 16px 20px !important;
+  }
+
+  .mm-header-workspace {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+  }
+
+  .mm-header-icon {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 12px !important;
+    background: transparent !important;
+    transition: background 150ms !important;
+  }
+
+  .mm-header-icon:active {
+    background: #F1F5F9 !important;
+  }
+
+  .mm-header-badge {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4) !important;
+    font-size: 10px !important;
+    min-width: 18px !important;
+    height: 18px !important;
+    font-weight: 700 !important;
+  }
+
+  /* ========================================
+   * 8. 表单元素增强
+   * ======================================== */
+  .mm-form-input,
+  .mm-form-textarea,
+  .mm-form-select {
+    background: #FFFFFF !important;
+    border: 1.5px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    padding: 16px 18px !important;
+    font-size: 16px !important;
+    color: #0F172A !important;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-form-input:focus,
+  .mm-form-textarea:focus,
+  .mm-form-select:focus {
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    outline: none !important;
+  }
+
+  .mm-form-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.4px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* ========================================
+   * 9. 按钮系统增强
+   * ======================================== */
+  .mm-btn {
+    border-radius: 14px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    padding: 16px 24px !important;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-btn-primary {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25) !important;
+  }
+
+  .mm-btn-primary:active:not(:disabled) {
+    transform: scale(0.97) !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+  }
+
+  .mm-btn-secondary {
+    background: #FFFFFF !important;
+    border: 1.5px solid #E2E8F0 !important;
+    color: #334155 !important;
+  }
+
+  .mm-btn-secondary:active:not(:disabled) {
+    background: #F8FAFC !important;
+    transform: scale(0.97) !important;
+  }
+
+  /* ========================================
+   * 10. Sheet 弹窗增强
+   * ======================================== */
+  .mm-sheet-overlay {
+    background: rgba(15, 23, 42, 0.4) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+
+  .mm-sheet-modal {
+    border-radius: 24px 24px 0 0 !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.12) !important;
+    padding: 28px 24px !important;
+  }
+
+  .mm-sheet-header {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+    margin-bottom: 28px !important;
+  }
+
+  .mm-sheet-close {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 10px !important;
+    display: grid !important;
+    place-items: center !important;
+    background: #F1F5F9 !important;
+    color: #64748B !important;
+    font-size: 18px !important;
+    transition: all 150ms !important;
+  }
+
+  .mm-sheet-close:active {
+    background: #E2E8F0 !important;
+  }
+
+  /* ========================================
+   * 11. 项目卡片增强
+   * ======================================== */
+  .mm-project-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 18px !important;
+    padding: 20px !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03) !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-project-card:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .mm-project-icon {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+    color: #2563EB !important;
+  }
+
+  .mm-project-name {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+  }
+
+  .mm-project-status {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 4px 10px !important;
+    border-radius: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .mm-project-status.active {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+    color: #2563EB !important;
+  }
+
+  .mm-project-status.completed {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%) !important;
+    color: #059669 !important;
+  }
+
+  /* 进度条增强 */
+  .mm-progress-bar {
+    height: 8px !important;
+    background: #E2E8F0 !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+  }
+
+  .mm-progress-fill {
+    background: linear-gradient(90deg, #2563EB 0%, #3B82F6 100%) !important;
+    border-radius: 4px !important;
+  }
+
+  /* ========================================
+   * 12. 通知增强
+   * ======================================== */
+  .mm-notification-item {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 16px !important;
+    padding: 18px !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-notification-item.unread {
+    border-left: 4px solid #2563EB !important;
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.03) 0%, #FFFFFF 8%) !important;
+  }
+
+  .mm-notification-item:active {
+    transform: scale(0.98) !important;
+    background: #F8FAFC !important;
+  }
+
+  .mm-notification-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+    color: #2563EB !important;
+  }
+
+  .mm-notification-title {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #0F172A !important;
+  }
+
+  .mm-notification-item.unread .mm-notification-title {
+    font-weight: 600 !important;
+  }
+
+  /* ========================================
+   * 13. 加载状态增强
+   * ======================================== */
+  .mm-spinner {
+    width: 28px !important;
+    height: 28px !important;
+    border: 3px solid #E2E8F0 !important;
+    border-top-color: #2563EB !important;
+    border-radius: 50% !important;
+    animation: mm-spin-enhanced 0.7s linear infinite !important;
+  }
+
+  @keyframes mm-spin-enhanced {
+    to { transform: rotate(360deg); }
+  }
+
+  /* 骨架屏 */
+  .mm-skeleton {
+    background: linear-gradient(90deg, #E2E8F0 0%, #F1F5F9 50%, #E2E8F0 100%) !important;
+    background-size: 200% 100% !important;
+    animation: mm-skeleton-shimmer 1.5s ease-in-out infinite !important;
+    border-radius: 8px !important;
+  }
+
+  @keyframes mm-skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ========================================
+   * 14. AI 分析页增强
+   * ======================================== */
+  .mm-ai-score-card {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 50%, #1E40AF 100%) !important;
+    border-radius: 20px !important;
+    padding: 32px 24px !important;
+    box-shadow: 0 8px 32px rgba(37, 99, 235, 0.25) !important;
+  }
+
+  .mm-ai-score-value {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 56px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  .mm-ai-section {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .mm-ai-section-header {
+    background: #F8FAFC !important;
+    padding: 16px 18px !important;
+    font-weight: 600 !important;
+  }
+
+  .mm-ai-section-header.mm-success {
+    background: linear-gradient(90deg, #ECFDF5 0%, #F8FAFC 100%) !important;
+    color: #059669 !important;
+  }
+
+  .mm-ai-section-header.mm-warning {
+    background: linear-gradient(90deg, #FFFBEB 0%, #F8FAFC 100%) !important;
+    color: #D97706 !important;
+  }
+
+  .mm-ai-section-header.mm-primary {
+    background: linear-gradient(90deg, #EFF6FF 0%, #F8FAFC 100%) !important;
+    color: #2563EB !important;
+  }
+
+  /* ========================================
+   * 15. 成员卡片增强
+   * ======================================== */
+  .mm-member-card {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03) !important;
+  }
+
+  .mm-member-card-avatar {
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+    color: #2563EB !important;
+    font-size: 20px !important;
+  }
+
+  .mm-member-card-name {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+  }
+
+  .mm-member-leader-badge {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%) !important;
+    color: #B45309 !important;
+    font-weight: 600 !important;
+    padding: 3px 10px !important;
+    border-radius: 10px !important;
+  }
+
+  /* ========================================
+   * 16. 设置页面增强
+   * ======================================== */
+  .mm-profile-avatar {
+    width: 88px !important;
+    height: 88px !important;
+    background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%) !important;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3) !important;
+    font-size: 32px !important;
+  }
+
+  .mm-profile-name {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+  }
+
+  .mm-settings-list {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .mm-settings-icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%) !important;
+    color: #2563EB !important;
+  }
+
+  .mm-settings-item {
+    padding: 18px !important;
+    border-bottom-color: #F1F5F9 !important;
+  }
+
+  .mm-settings-label {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #0F172A !important;
+  }
+
+  /* 开关增强 */
+  .mm-toggle {
+    width: 52px !important;
+    height: 30px !important;
+    border-radius: 15px !important;
+    background: #E2E8F0 !important;
+    transition: background 200ms !important;
+  }
+
+  .mm-toggle.active {
+    background: linear-gradient(90deg, #2563EB 0%, #3B82F6 100%) !important;
+  }
+
+  .mm-toggle-thumb {
+    width: 26px !important;
+    height: 26px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* ========================================
+   * 17. Toast 提示增强
+   * ======================================== */
+  .mm-toast {
+    border-radius: 14px !important;
+    padding: 16px 18px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid transparent !important;
+    font-weight: 500 !important;
+  }
+
+  .mm-toast-success {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%) !important;
+    border-color: #A7F3D0 !important;
+    color: #047857 !important;
+  }
+
+  .mm-toast-error {
+    background: linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%) !important;
+    border-color: #FECACA !important;
+    color: #B91C1C !important;
+  }
+
+  /* ========================================
+   * 18. 搜索页面增强
+   * ======================================== */
+  .mm-search-input-wrapper {
+    background: #F1F5F9 !important;
+    border-radius: 14px !important;
+    padding: 12px 16px !important;
+  }
+
+  .mm-search-input {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+  }
+
+  .mm-search-result-item {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 16px !important;
+    padding: 16px 18px !important;
+  }
+
+  .mm-search-result-icon {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 12px !important;
+  }
+
+  /* ========================================
+   * 19. 日报页面增强
+   * ======================================== */
+  .mm-date-selector {
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    padding: 14px 20px !important;
+  }
+
+  .mm-date-nav {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+    background: #F1F5F9 !important;
+    transition: all 150ms !important;
+  }
+
+  .mm-date-nav:active:not(:disabled) {
+    background: #E2E8F0 !important;
+    transform: scale(0.95) !important;
+  }
+
+  .mm-date-current {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+  }
+
+  .mm-report-section {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+  }
+
+  .mm-report-section-header {
+    background: #F8FAFC !important;
+    padding: 14px 18px !important;
+    font-weight: 600 !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+  }
+
+  .mm-report-textarea {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+    padding: 18px !important;
+  }
+
+  /* ========================================
+   * 20. 微交互动画
+   * ======================================== */
+  
+  /* 按压反馈 */
+  .mm-pressable {
+    transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  .mm-pressable:active {
+    transform: scale(0.97) !important;
+  }
+
+  /* 加载脉冲 */
+  .mm-pulse {
+    animation: mm-pulse-enhanced 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
+  }
+
+  @keyframes mm-pulse-enhanced {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  /* 淡入动画 */
+  .mm-fade-in {
+    animation: mm-fade-in 300ms ease-out !important;
+  }
+
+  @keyframes mm-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 滑入动画 */
+  .mm-slide-up {
+    animation: mm-slide-up 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  @keyframes mm-slide-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ========================================
+   * 21. 统一排版优化 - 间距规范
+   * ======================================== */
+  
+  /* 页面头部统一间距 */
+  .mm-header {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+    min-height: 60px !important;
+  }
+  
+  .mm-header-home {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+  }
+  
+  /* 页面标题 */
+  .mm-page-header,
+  .mm-header-title {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.3px !important;
+  }
+  
+  /* 区块间距 */
+  .mm-section {
+    padding: 0 var(--mm-page-padding) !important;
+    margin-bottom: var(--mm-section-gap) !important;
+  }
+  
+  .mm-section-header {
+    margin-bottom: var(--mm-space-lg) !important;
+    padding: 0 var(--mm-space-xs) !important;
+  }
+  
+  .mm-section-title {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    letter-spacing: -0.2px !important;
+  }
+  
+  /* 统计区域 */
+  .mm-daily-stats {
+    gap: var(--mm-space-3xl) !important;
+    margin-top: var(--mm-space-lg) !important;
+    padding-top: var(--mm-space-lg) !important;
+  }
+  
+  /* 任务列表间距 */
+  .mm-task-list,
+  .mm-task-groups {
+    padding: 0 var(--mm-page-padding) !important;
+    gap: var(--mm-space-md) !important;
+  }
+  
+  .mm-task-group {
+    margin-bottom: var(--mm-space-xl) !important;
+  }
+  
+  .mm-task-cards {
+    gap: var(--mm-space-sm) !important;
+  }
+  
+  /* 项目列表间距 */
+  .mm-project-list {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+    gap: var(--mm-space-md) !important;
+  }
+  
+  /* 筛选标签栏间距 */
+  .mm-filter-tabs,
+  .mm-tab-bar {
+    padding: var(--mm-space-md) var(--mm-page-padding) !important;
+    gap: var(--mm-space-sm) !important;
+  }
+  
+  /* 通知列表间距 */
+  .mm-notification-list {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+  }
+  
+  .mm-notification-group {
+    margin-bottom: var(--mm-section-gap) !important;
+  }
+  
+  .mm-notification-date {
+    margin-bottom: var(--mm-space-md) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+  
+  .mm-notification-item {
+    margin-bottom: var(--mm-space-sm) !important;
+  }
+  
+  /* 设置页面间距 */
+  .mm-profile-card {
+    padding: var(--mm-space-3xl) var(--mm-page-padding) !important;
+  }
+  
+  .mm-settings-section {
+    margin: var(--mm-space-lg) var(--mm-page-padding) !important;
+  }
+  
+  .mm-settings-title {
+    margin-bottom: var(--mm-space-sm) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    color: #64748B !important;
+  }
+  
+  .mm-settings-item {
+    padding: var(--mm-space-lg) !important;
+  }
+  
+  /* 日报页面间距 */
+  .mm-report-content {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+    padding-bottom: 120px !important;
+  }
+  
+  .mm-report-section {
+    margin-bottom: var(--mm-space-lg) !important;
+  }
+  
+  /* 搜索页面间距 */
+  .mm-search-content {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+  }
+  
+  .mm-search-results {
+    gap: var(--mm-space-sm) !important;
+  }
+  
+  /* AI 分析页面间距 */
+  .mm-ai-content {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+  }
+  
+  .mm-ai-section {
+    margin-bottom: var(--mm-space-md) !important;
+  }
+  
+  /* 成员树页面间距 */
+  .mm-members-list {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+    padding-bottom: 120px !important;
+  }
+  
+  .mm-member-card {
+    margin-bottom: var(--mm-space-md) !important;
+  }
+  
+  /* 详情页面间距 */
+  .mm-detail-header {
+    padding: var(--mm-page-padding) !important;
+  }
+  
+  .mm-detail-attrs {
+    margin: var(--mm-space-lg) var(--mm-page-padding) !important;
+  }
+  
+  .mm-detail-section {
+    margin: var(--mm-space-lg) var(--mm-page-padding) !important;
+  }
+  
+  .mm-section-content {
+    padding: var(--mm-space-lg) !important;
+    line-height: 1.7 !important;
+  }
+  
+  /* 表单间距 */
+  .mm-form,
+  .mm-create-form {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+    gap: var(--mm-space-lg) !important;
+  }
+  
+  .mm-form-group {
+    margin-bottom: var(--mm-space-md) !important;
+  }
+  
+  .mm-form-label {
+    margin-bottom: var(--mm-space-sm) !important;
+  }
+  
+  .mm-form-actions {
+    margin-top: var(--mm-space-xl) !important;
+    gap: var(--mm-space-md) !important;
+  }
+  
+  /* Sheet 弹窗间距 */
+  .mm-sheet-modal {
+    padding: var(--mm-space-2xl) var(--mm-page-padding) !important;
+    padding-bottom: calc(var(--mm-space-2xl) + env(safe-area-inset-bottom)) !important;
+  }
+  
+  .mm-sheet-header {
+    margin-bottom: var(--mm-space-xl) !important;
+  }
+  
+  /* 底部操作栏间距 */
+  .mm-detail-actions,
+  .mm-report-actions {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+    padding-bottom: calc(var(--mm-space-lg) + env(safe-area-inset-bottom)) !important;
+    gap: var(--mm-space-md) !important;
+  }
+  
+  /* 底部导航间距 */
+  .mm-bottom-nav {
+    padding: var(--mm-space-md) 0 !important;
+    padding-bottom: calc(var(--mm-space-md) + env(safe-area-inset-bottom)) !important;
+  }
+  
+  .mm-nav-item {
+    gap: var(--mm-space-xs) !important;
+  }
+  
+  /* 项目详情统计卡片 */
+  .mm-project-stats {
+    padding: var(--mm-space-lg) var(--mm-page-padding) !important;
+    gap: var(--mm-space-md) !important;
+  }
+  
+  .mm-stat-card {
+    padding: var(--mm-space-lg) !important;
+  }
+  
+  /* 日期分组标题 */
+  .mm-date-group {
+    margin-bottom: var(--mm-space-xl) !important;
+  }
+  
+  .mm-date-title {
+    padding: 0 var(--mm-page-padding) !important;
+    margin-bottom: var(--mm-space-md) !important;
+  }
+  
+  /* 评论区间距 */
+  .mm-comment-item {
+    padding: var(--mm-space-lg) !important;
+  }
+  
+  .mm-comment-input-wrapper {
+    padding: var(--mm-space-lg) !important;
+    gap: var(--mm-space-sm) !important;
+  }
+
+  /* ========================================
+   * 22. 任务详情页增强 - UI UX Pro Max
+   * ======================================== */
+  
+  /* 详情页头部 */
+  .mm-detail-header {
+    background: #FFFFFF !important;
+    padding: 24px 20px !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    position: relative !important;
+  }
+  
+  .mm-detail-title {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    line-height: 1.4 !important;
+    margin-bottom: 16px !important;
+    letter-spacing: -0.3px !important;
+  }
+  
+  /* 状态徽章 - 胶囊样式 */
+  .mm-detail-status {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 8px 16px !important;
+    border-radius: 24px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 150ms ease !important;
+  }
+  
+  .mm-detail-status.todo {
+    background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%) !important;
+    color: #475569 !important;
+  }
+  
+  .mm-detail-status.in-progress {
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%) !important;
+    color: #1D4ED8 !important;
+  }
+  
+  .mm-detail-status.done {
+    background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%) !important;
+    color: #047857 !important;
+  }
+  
+  .mm-detail-status:active {
+    transform: scale(0.96) !important;
+  }
+  
+  /* 属性 4 宫格 */
+  .mm-detail-attrs {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1px !important;
+    background: #E2E8F0 !important;
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    margin: 20px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  }
+  
+  .mm-attr-item {
+    background: #FFFFFF !important;
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+  
+  .mm-attr-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+  }
+  
+  .mm-attr-label svg {
+    width: 14px !important;
+    height: 14px !important;
+    opacity: 0.7 !important;
+  }
+  
+  .mm-attr-value {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+  }
+  
+  .mm-attr-value.danger {
+    color: #DC2626 !important;
+  }
+  
+  /* 描述区域 */
+  .mm-detail-section {
+    background: #FFFFFF !important;
+    border-radius: 16px !important;
+    margin: 16px 20px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  }
+  
+  .mm-section-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 16px 18px !important;
+    background: #F8FAFC !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+  
+  .mm-section-title svg {
+    width: 16px !important;
+    height: 16px !important;
+    color: #64748B !important;
+  }
+  
+  .mm-section-content {
+    padding: 18px !important;
+    font-size: 15px !important;
+    color: #475569 !important;
+    line-height: 1.7 !important;
+  }
+  
+  /* 子任务列表 */
+  .mm-subtask-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 16px 18px !important;
+    border-bottom: 1px solid #F1F5F9 !important;
+    cursor: pointer !important;
+    transition: background-color 150ms !important;
+  }
+  
+  .mm-subtask-item:last-child {
+    border-bottom: none !important;
+  }
+  
+  .mm-subtask-item:active {
+    background: #F8FAFC !important;
+  }
+  
+  .mm-subtask-check {
+    width: 24px !important;
+    height: 24px !important;
+    border: 2px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+    transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  .mm-subtask-item.done .mm-subtask-check {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+    border-color: #10B981 !important;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3) !important;
+  }
+  
+  .mm-subtask-check svg {
+    color: #FFFFFF !important;
+  }
+  
+  .mm-subtask-title {
+    font-size: 15px !important;
+    color: #334155 !important;
+    line-height: 1.5 !important;
+  }
+  
+  .mm-subtask-item.done .mm-subtask-title {
+    color: #94A3B8 !important;
+    text-decoration: line-through !important;
+  }
+  
+  /* 添加子任务按钮 */
+  .mm-add-subtask-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding: 16px !important;
+    background: transparent !important;
+    border: none !important;
+    color: #2563EB !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: background-color 150ms !important;
+  }
+  
+  .mm-add-subtask-btn:active {
+    background: #EFF6FF !important;
+  }
+  
+  .mm-add-subtask-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  /* 添加子任务表单 */
+  .mm-add-subtask-form {
+    padding: 16px 18px !important;
+    background: #F8FAFC !important;
+    border-top: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-add-subtask-form .mm-form-input {
+    margin-bottom: 12px !important;
+  }
+  
+  .mm-add-subtask-actions {
+    display: flex !important;
+    gap: 12px !important;
+    justify-content: flex-end !important;
+  }
+  
+  /* 评论区增强 */
+  .mm-comment-item {
+    padding: 18px !important;
+    border-bottom: 1px solid #F1F5F9 !important;
+  }
+  
+  .mm-comment-item:last-child {
+    border-bottom: none !important;
+  }
+  
+  .mm-comment-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-bottom: 10px !important;
+  }
+  
+  .mm-comment-avatar {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-comment-author {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+    flex: 1 !important;
+  }
+  
+  .mm-comment-time {
+    font-size: 12px !important;
+    color: #94A3B8 !important;
+  }
+  
+  .mm-comment-text {
+    font-size: 15px !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+    padding-left: 48px !important;
+  }
+  
+  /* 评论输入框 */
+  .mm-comment-input-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 16px 18px !important;
+    background: #F8FAFC !important;
+    border-top: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-comment-input {
+    flex: 1 !important;
+    padding: 12px 16px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 24px !important;
+    background: #FFFFFF !important;
+    font-size: 15px !important;
+    color: #0F172A !important;
+    outline: none !important;
+    transition: border-color 150ms, box-shadow 150ms !important;
+  }
+  
+  .mm-comment-input:focus {
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  }
+  
+  .mm-comment-input::placeholder {
+    color: #94A3B8 !important;
+  }
+  
+  .mm-comment-send {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-comment-send:active {
+    transform: scale(0.92) !important;
+  }
+  
+  .mm-comment-send:disabled {
+    background: #CBD5E1 !important;
+    cursor: not-allowed !important;
+  }
+  
+  .mm-comment-send svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* 底部操作栏增强 - 玻璃态 */
+  .mm-detail-actions {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    display: flex !important;
+    gap: 12px !important;
+    padding: 16px 20px !important;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-top: 1px solid rgba(226, 232, 240, 0.8) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08) !important;
+    z-index: 100 !important;
+  }
+  
+  .mm-detail-actions .mm-btn {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 14px 20px !important;
+    border-radius: 12px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+    border: none !important;
+  }
+  
+  .mm-btn-primary {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+  }
+  
+  .mm-btn-primary:active {
+    transform: scale(0.97) !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+  }
+  
+  .mm-btn-secondary {
+    background: #F1F5F9 !important;
+    color: #475569 !important;
+    border: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-btn-secondary:active {
+    background: #E2E8F0 !important;
+    transform: scale(0.97) !important;
+  }
+  
+  /* 操作菜单 */
+  .mm-action-menu {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+  
+  .mm-action-menu-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 16px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: #334155 !important;
+    cursor: pointer !important;
+    transition: background-color 150ms !important;
+    text-align: left !important;
+    width: 100% !important;
+  }
+  
+  .mm-action-menu-item:active {
+    background: #F1F5F9 !important;
+  }
+  
+  .mm-action-menu-item svg {
+    width: 20px !important;
+    height: 20px !important;
+    color: #64748B !important;
+  }
+  
+  .mm-action-menu-item.danger {
+    color: #DC2626 !important;
+  }
+  
+  .mm-action-menu-item.danger svg {
+    color: #DC2626 !important;
+  }
+  
+  /* 状态选择器 */
+  .mm-status-options {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .mm-status-option {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    border: 2px solid transparent !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+  }
+  
+  .mm-status-option.todo {
+    background: #F1F5F9 !important;
+    color: #475569 !important;
+  }
+  
+  .mm-status-option.in-progress {
+    background: #DBEAFE !important;
+    color: #1D4ED8 !important;
+  }
+  
+  .mm-status-option.done {
+    background: #D1FAE5 !important;
+    color: #047857 !important;
+  }
+  
+  .mm-status-option.active {
+    border-color: currentColor !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  }
+  
+  .mm-status-option:active:not(:disabled) {
+    transform: scale(0.97) !important;
+  }
+  
+  .mm-status-option:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+  }
+  
+  /* Spinner 图标动画 */
+  .mm-spinner-icon {
+    animation: mm-spin 1s linear infinite !important;
+  }
+  
+  @keyframes mm-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ========================================
+   * 23. 项目详情页增强 - UI UX Pro Max
+   * ======================================== */
+  
+  /* 项目统计卡片网格 */
+  .mm-project-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 12px !important;
+    padding: 20px !important;
+  }
+  
+  .mm-stat-card {
+    background: #FFFFFF !important;
+    border-radius: 16px !important;
+    padding: 20px 16px !important;
+    text-align: center !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-stat-number {
+    display: block !important;
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    line-height: 1 !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .mm-stat-label {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+  }
+  
+  /* 项目描述 */
+  .mm-project-description {
+    font-size: 15px !important;
+    color: #475569 !important;
+    line-height: 1.7 !important;
+    margin: 0 !important;
+    padding: 18px !important;
+  }
+  
+  /* 负责人卡片 */
+  .mm-leader-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 16px 18px !important;
+    background: #FFFFFF !important;
+  }
+  
+  .mm-leader-avatar {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  .mm-leader-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  
+  .mm-leader-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  
+  .mm-leader-name {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+    margin-bottom: 2px !important;
+  }
+  
+  .mm-leader-email {
+    font-size: 13px !important;
+    color: #64748B !important;
+  }
+  
+  .mm-leader-icon {
+    color: #F59E0B !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* Section Header with Action */
+  .mm-section-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 18px !important;
+    background: #F8FAFC !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-section-header .mm-section-title {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+  }
+  
+  .mm-section-action {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 8px 14px !important;
+    background: #EFF6FF !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: #2563EB !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+  }
+  
+  .mm-section-action:active {
+    background: #DBEAFE !important;
+    transform: scale(0.96) !important;
+  }
+  
+  .mm-section-action svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  
+  /* 任务分组 */
+  .mm-task-group {
+    padding: 0 !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .mm-task-group:last-child {
+    margin-bottom: 0 !important;
+  }
+  
+  .mm-task-group-title {
+    padding: 12px 18px 8px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    background: #FFFFFF !important;
+  }
+  
+  /* Mini 任务卡片 */
+  .mm-task-card-mini {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 14px 18px !important;
+    background: #FFFFFF !important;
+    cursor: pointer !important;
+    transition: background-color 150ms !important;
+    border-bottom: 1px solid #F1F5F9 !important;
+  }
+  
+  .mm-task-card-mini:last-child {
+    border-bottom: none !important;
+  }
+  
+  .mm-task-card-mini:active {
+    background: #F8FAFC !important;
+  }
+  
+  .mm-task-icon {
+    flex-shrink: 0 !important;
+    color: #94A3B8 !important;
+  }
+  
+  .mm-task-icon.in-progress {
+    color: #2563EB !important;
+  }
+  
+  .mm-task-icon.done {
+    color: #10B981 !important;
+  }
+  
+  .mm-task-card-title {
+    flex: 1 !important;
+    font-size: 15px !important;
+    color: #334155 !important;
+    line-height: 1.4 !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  .mm-task-card-mini.done .mm-task-card-title {
+    color: #94A3B8 !important;
+    text-decoration: line-through !important;
+  }
+  
+  /* 优先级点 */
+  .mm-task-priority-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-task-priority-dot.critical {
+    background: #DC2626 !important;
+    box-shadow: 0 0 8px rgba(220, 38, 38, 0.4) !important;
+  }
+  
+  .mm-task-priority-dot.high {
+    background: #EA580C !important;
+  }
+  
+  .mm-task-priority-dot.medium {
+    background: #F59E0B !important;
+  }
+  
+  .mm-task-priority-dot.low {
+    background: #94A3B8 !important;
+  }
+  
+  .mm-task-more {
+    padding: 12px 18px !important;
+    font-size: 13px !important;
+    color: #64748B !important;
+    text-align: center !important;
+    background: #F8FAFC !important;
+  }
+  
+  /* 成员列表横向 */
+  .mm-member-list-horizontal {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    padding: 16px 18px !important;
+  }
+  
+  .mm-member-chip {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 8px 14px 8px 8px !important;
+    background: #F8FAFC !important;
+    border-radius: 24px !important;
+    border: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-member-chip-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  .mm-member-chip-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  
+  .mm-member-chip-name {
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: #334155 !important;
+  }
+  
+  /* 空状态内联 */
+  .mm-empty-inline {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 32px 18px !important;
+    color: #64748B !important;
+    font-size: 14px !important;
+  }
+  
+  .mm-empty-inline button {
+    padding: 10px 20px !important;
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+  }
+  
+  .mm-empty-inline button:active {
+    transform: scale(0.96) !important;
+  }
+  
+  /* Loading 增强 */
+  .mm-loading {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 16px !important;
+    padding: 60px 20px !important;
+    color: #64748B !important;
+    font-size: 14px !important;
+  }
+  
+  .mm-loading .mm-spinner-icon {
+    color: #2563EB !important;
+  }
+
+  /* ========================================
+   * 24. 表单组件增强 - UI UX Pro Max
+   * ======================================== */
+  
+  /* 表单容器 */
+  .mm-create-form,
+  .mm-form {
+    padding: 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+  }
+  
+  /* 表单组 */
+  .mm-form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  /* 标签 */
+  .mm-form-label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+  }
+  
+  .mm-form-label svg {
+    width: 14px !important;
+    height: 14px !important;
+    color: #64748B !important;
+  }
+  
+  /* 输入框 */
+  .mm-form-input,
+  .mm-form-textarea {
+    width: 100% !important;
+    padding: 14px 16px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    background: #FFFFFF !important;
+    font-size: 16px !important;
+    color: #0F172A !important;
+    outline: none !important;
+    transition: all 150ms ease !important;
+  }
+  
+  .mm-form-input:focus,
+  .mm-form-textarea:focus {
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  }
+  
+  .mm-form-input::placeholder,
+  .mm-form-textarea::placeholder {
+    color: #94A3B8 !important;
+  }
+  
+  .mm-form-textarea {
+    min-height: 100px !important;
+    resize: vertical !important;
+    line-height: 1.6 !important;
+  }
+  
+  /* 下拉选择框 */
+  .mm-form-select {
+    width: 100% !important;
+    padding: 14px 16px !important;
+    padding-right: 40px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    background: #FFFFFF url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748B' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") no-repeat right 12px center !important;
+    background-size: 20px !important;
+    font-size: 16px !important;
+    color: #0F172A !important;
+    appearance: none !important;
+    outline: none !important;
+    cursor: pointer !important;
+    transition: all 150ms ease !important;
+  }
+  
+  .mm-form-select:focus {
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  }
+  
+  /* 优先级选择器 - 横向胶囊按钮组 */
+  .mm-priority-selector {
+    display: flex !important;
+    gap: 8px !important;
+    flex-wrap: wrap !important;
+  }
+  
+  .mm-priority-btn {
+    flex: 1 !important;
+    min-width: 60px !important;
+    padding: 12px 16px !important;
+    border: 2px solid #E2E8F0 !important;
+    border-radius: 10px !important;
+    background: #FFFFFF !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #64748B !important;
+    cursor: pointer !important;
+    transition: all 150ms ease !important;
+    text-align: center !important;
+  }
+  
+  .mm-priority-btn:active {
+    transform: scale(0.96) !important;
+  }
+  
+  .mm-priority-btn.active.critical {
+    background: #FEF2F2 !important;
+    border-color: #DC2626 !important;
+    color: #DC2626 !important;
+  }
+  
+  .mm-priority-btn.active.high {
+    background: #FFF7ED !important;
+    border-color: #EA580C !important;
+    color: #EA580C !important;
+  }
+  
+  .mm-priority-btn.active.medium {
+    background: #EFF6FF !important;
+    border-color: #2563EB !important;
+    color: #2563EB !important;
+  }
+  
+  .mm-priority-btn.active.low {
+    background: #F1F5F9 !important;
+    border-color: #64748B !important;
+    color: #64748B !important;
+  }
+  
+  /* 表单操作按钮 */
+  .mm-form-actions {
+    display: flex !important;
+    gap: 12px !important;
+    margin-top: 8px !important;
+  }
+  
+  .mm-form-actions .mm-btn {
+    flex: 1 !important;
+  }
+  
+  /* 表单错误提示 */
+  .mm-form-error {
+    padding: 14px 16px !important;
+    background: #FEF2F2 !important;
+    border: 1px solid #FECACA !important;
+    border-radius: 12px !important;
+    color: #DC2626 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  
+  .mm-form-error svg {
+    width: 18px !important;
+    height: 18px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* ========================================
+   * 25. 日报页面增强 - UI UX Pro Max
+   * ======================================== */
+  
+  /* 日期选择器 */
+  .mm-date-selector {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 20px !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-date-nav {
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #F1F5F9 !important;
+    border: none !important;
+    border-radius: 12px !important;
+    color: #475569 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+  }
+  
+  .mm-date-nav:active:not(:disabled) {
+    background: #E2E8F0 !important;
+    transform: scale(0.95) !important;
+  }
+  
+  .mm-date-nav:disabled {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+  }
+  
+  .mm-date-nav svg {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  
+  .mm-date-display {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  
+  .mm-date-display svg {
+    color: #2563EB !important;
+  }
+  
+  .mm-date-current {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+  }
+  
+  /* 日报区块 */
+  .mm-report-section {
+    background: #FFFFFF !important;
+    border-radius: 16px !important;
+    margin: 16px 20px !important;
+    overflow: hidden !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    border: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-report-section-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 16px 18px !important;
+    background: #F8FAFC !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #334155 !important;
+  }
+  
+  .mm-report-section-header svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  .mm-report-textarea {
+    width: 100% !important;
+    border: none !important;
+    padding: 18px !important;
+    font-size: 15px !important;
+    color: #334155 !important;
+    line-height: 1.7 !important;
+    resize: none !important;
+    outline: none !important;
+    min-height: 120px !important;
+    background: transparent !important;
+  }
+  
+  .mm-report-textarea::placeholder {
+    color: #94A3B8 !important;
+  }
+  
+  /* AI 按钮 */
+  .mm-ai-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: calc(100% - 40px) !important;
+    margin: 0 20px 16px !important;
+    padding: 14px 20px !important;
+    background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%) !important;
+    border: 1px solid #C7D2FE !important;
+    border-radius: 12px !important;
+    color: #4F46E5 !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+  }
+  
+  .mm-ai-btn:active:not(:disabled) {
+    transform: scale(0.97) !important;
+  }
+  
+  .mm-ai-btn:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+  }
+  
+  .mm-ai-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  /* 提交区域 */
+  .mm-report-actions {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    display: flex !important;
+    gap: 12px !important;
+    padding: 16px 20px !important;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-top: 1px solid #E2E8F0 !important;
+    z-index: 100 !important;
+  }
+
+  /* ========================================
+   * 26. 通知页面增强 - UI UX Pro Max
+   * ======================================== */
+  
+  /* 通知头部 */
+  .mm-notifications-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 16px 20px !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-mark-read-btn {
+    padding: 8px 14px !important;
+    background: #EFF6FF !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: #2563EB !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+  }
+  
+  .mm-mark-read-btn:active:not(:disabled) {
+    background: #DBEAFE !important;
+    transform: scale(0.96) !important;
+  }
+  
+  .mm-mark-read-btn:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+  }
+  
+  /* 通知分组 */
+  .mm-notification-group {
+    margin-bottom: 24px !important;
+  }
+  
+  .mm-notification-group-title {
+    padding: 12px 20px 8px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    background: #F8FAFC !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+  }
+  
+  /* 通知项 */
+  .mm-notification-item {
+    display: flex !important;
+    gap: 14px !important;
+    padding: 16px 20px !important;
+    background: #FFFFFF !important;
+    cursor: pointer !important;
+    transition: background-color 150ms !important;
+    border-bottom: 1px solid #F1F5F9 !important;
+  }
+  
+  .mm-notification-item:active {
+    background: #F8FAFC !important;
+  }
+  
+  .mm-notification-item.unread {
+    background: #FAFBFF !important;
+  }
+  
+  .mm-notification-item.unread::before {
+    content: '' !important;
+    position: absolute !important;
+    left: 8px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 8px !important;
+    height: 8px !important;
+    background: #2563EB !important;
+    border-radius: 50% !important;
+  }
+  
+  .mm-notification-icon {
+    width: 44px !important;
+    height: 44px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #F1F5F9 !important;
+    border-radius: 12px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-notification-icon svg {
+    width: 20px !important;
+    height: 20px !important;
+    color: #64748B !important;
+  }
+  
+  .mm-notification-icon.task {
+    background: #DBEAFE !important;
+  }
+  
+  .mm-notification-icon.task svg {
+    color: #2563EB !important;
+  }
+  
+  .mm-notification-icon.comment {
+    background: #D1FAE5 !important;
+  }
+  
+  .mm-notification-icon.comment svg {
+    color: #059669 !important;
+  }
+  
+  .mm-notification-icon.mention {
+    background: #FEF3C7 !important;
+  }
+  
+  .mm-notification-icon.mention svg {
+    color: #D97706 !important;
+  }
+  
+  .mm-notification-content {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  
+  .mm-notification-title {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #334155 !important;
+    line-height: 1.4 !important;
+    margin-bottom: 4px !important;
+  }
+  
+  .mm-notification-item.unread .mm-notification-title {
+    font-weight: 600 !important;
+    color: #0F172A !important;
+  }
+  
+  .mm-notification-time {
+    font-size: 12px !important;
+    color: #94A3B8 !important;
+  }
+
+  /* ========================================
+   * 27. 搜索页面增强 - UI UX Pro Max
+   * ======================================== */
+  
+  /* 搜索框 */
+  .mm-search-wrapper {
+    padding: 12px 20px !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+  }
+  
+  .mm-search-input-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+    background: #F1F5F9 !important;
+    border-radius: 24px !important;
+    transition: all 150ms !important;
+  }
+  
+  .mm-search-input-wrapper:focus-within {
+    background: #FFFFFF !important;
+    box-shadow: 0 0 0 2px #2563EB !important;
+  }
+  
+  .mm-search-input-wrapper svg {
+    width: 20px !important;
+    height: 20px !important;
+    color: #64748B !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-search-input {
+    flex: 1 !important;
+    border: none !important;
+    background: transparent !important;
+    font-size: 16px !important;
+    color: #0F172A !important;
+    outline: none !important;
+  }
+  
+  .mm-search-input::placeholder {
+    color: #94A3B8 !important;
+  }
+  
+  .mm-search-clear {
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #CBD5E1 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: #FFFFFF !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-search-clear svg {
+    width: 14px !important;
+    height: 14px !important;
+    color: #FFFFFF !important;
+  }
+  
+  /* 搜索历史 */
+  .mm-search-history {
+    padding: 20px !important;
+  }
+  
+  .mm-search-history-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .mm-search-history-title {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+  }
+  
+  .mm-search-history-clear {
+    font-size: 13px !important;
+    color: #2563EB !important;
+    background: none !important;
+    border: none !important;
+    cursor: pointer !important;
+  }
+  
+  .mm-search-tags {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  
+  .mm-search-tag {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 8px 14px !important;
+    background: #F1F5F9 !important;
+    border: none !important;
+    border-radius: 20px !important;
+    font-size: 14px !important;
+    color: #475569 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+  }
+  
+  .mm-search-tag:active {
+    background: #E2E8F0 !important;
+    transform: scale(0.96) !important;
+  }
+  
+  /* 搜索结果 */
+  .mm-search-results {
+    padding: 16px 20px !important;
+  }
+  
+  .mm-search-result-section {
+    margin-bottom: 24px !important;
+  }
+  
+  .mm-search-result-title {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: #64748B !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .mm-search-result-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 14px 0 !important;
+    border-bottom: 1px solid #F1F5F9 !important;
+    cursor: pointer !important;
+  }
+  
+  .mm-search-result-item:last-child {
+    border-bottom: none !important;
+  }
+  
+  .mm-search-result-icon {
+    width: 40px !important;
+    height: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #F1F5F9 !important;
+    border-radius: 10px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-search-result-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+    color: #64748B !important;
+  }
+  
+  .mm-search-result-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  
+  .mm-search-result-name {
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #0F172A !important;
+    margin-bottom: 2px !important;
+  }
+  
+  .mm-search-result-name mark {
+    background: #DBEAFE !important;
+    color: #1D4ED8 !important;
+    padding: 0 2px !important;
+    border-radius: 2px !important;
+  }
+  
+  .mm-search-result-meta {
+    font-size: 13px !important;
+    color: #64748B !important;
+  }
+
+  /* ========================================
+   * 28. 成员页面增强 - UI UX Pro Max
+   * ======================================== */
+  
+  /* 成员卡片 */
+  .mm-member-card {
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    padding: 16px 20px !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #F1F5F9 !important;
+    cursor: pointer !important;
+    transition: background-color 150ms !important;
+  }
+  
+  .mm-member-card:active {
+    background: #F8FAFC !important;
+  }
+  
+  .mm-member-card-avatar {
+    position: relative !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    color: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  .mm-member-card-avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+  }
+  
+  /* 在线状态点 */
+  .mm-member-online-dot {
+    position: absolute !important;
+    bottom: 2px !important;
+    right: 2px !important;
+    width: 12px !important;
+    height: 12px !important;
+    background: #10B981 !important;
+    border: 2px solid #FFFFFF !important;
+    border-radius: 50% !important;
+  }
+  
+  .mm-member-card-info {
+    flex: 1 !important;
+    min-width: 0 !important;
+  }
+  
+  .mm-member-card-name {
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    color: #0F172A !important;
+    margin-bottom: 2px !important;
+  }
+  
+  .mm-member-card-email {
+    font-size: 13px !important;
+    color: #64748B !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* 角色标签 - 胶囊样式 */
+  .mm-role-badge {
+    padding: 6px 12px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-role-badge.owner {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%) !important;
+    color: #B45309 !important;
+  }
+  
+  .mm-role-badge.director {
+    background: linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%) !important;
+    color: #7C3AED !important;
+  }
+  
+  .mm-role-badge.manager {
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%) !important;
+    color: #1D4ED8 !important;
+  }
+  
+  .mm-role-badge.member {
+    background: #F1F5F9 !important;
+    color: #475569 !important;
+  }
+  
+  .mm-role-badge.observer {
+    background: #F1F5F9 !important;
+    color: #94A3B8 !important;
+  }
+  
+  /* 项目负责人标签 */
+  .mm-member-leader-badge {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 4px 10px !important;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%) !important;
+    border-radius: 12px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    color: #B45309 !important;
+  }
+  
+  .mm-member-leader-badge svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  
+  /* 树形结构 */
+  .mm-tree-node {
+    position: relative !important;
+  }
+  
+  .mm-tree-children {
+    margin-left: 24px !important;
+    border-left: 2px solid #E2E8F0 !important;
+    padding-left: 16px !important;
+  }
+  
+  .mm-tree-toggle {
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #F1F5F9 !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: #64748B !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-tree-toggle:active {
+    background: #E2E8F0 !important;
+    transform: scale(0.95) !important;
+  }
+  
+  .mm-tree-toggle svg {
+    width: 16px !important;
+    height: 16px !important;
+    transition: transform 200ms !important;
+  }
+  
+  .mm-tree-toggle.expanded svg {
+    transform: rotate(90deg) !important;
+  }
+  
+  /* 邀请按钮 */
+  .mm-invite-btn {
+    position: fixed !important;
+    bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+    right: 20px !important;
+    width: 56px !important;
+    height: 56px !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    border: none !important;
+    border-radius: 50% !important;
+    color: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35) !important;
+    cursor: pointer !important;
+    transition: all 200ms !important;
+    z-index: 50 !important;
+  }
+  
+  .mm-invite-btn:active {
+    transform: scale(0.92) !important;
+  }
+  
+  .mm-invite-btn svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  /* ========================================
+   * 29. 登录/注册页面增强 - UI UX Pro Max
+   * ======================================== */
+  
+  /* 登录页容器 */
+  .login-container {
+    min-height: 100vh !important;
+    background: linear-gradient(180deg, #F8FAFC 0%, #EEF2FF 100%) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 32px 24px !important;
+  }
+  
+  /* 登录卡片 */
+  .login-card {
+    width: 100% !important;
+    max-width: 400px !important;
+    background: #FFFFFF !important;
+    border-radius: 20px !important;
+    padding: 32px 24px !important;
+    box-shadow: 
+      0 10px 40px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+  
+  /* Logo 区域 */
+  .login-logo {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    margin-bottom: 28px !important;
+  }
+  
+  .login-logo-icon {
+    width: 64px !important;
+    height: 64px !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    border-radius: 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 16px !important;
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25) !important;
+  }
+  
+  .login-logo-icon svg {
+    width: 32px !important;
+    height: 32px !important;
+    color: #FFFFFF !important;
+  }
+  
+  .login-title {
+    font-family: 'Poppins', -apple-system, sans-serif !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    margin: 0 0 6px 0 !important;
+    text-align: center !important;
+  }
+  
+  .login-subtitle {
+    font-size: 14px !important;
+    color: #64748B !important;
+    text-align: center !important;
+    margin: 0 !important;
+  }
+  
+  /* Tab 切换 */
+  .login-tabs {
+    display: flex !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    background: #F1F5F9 !important;
+    border-radius: 12px !important;
+    margin-bottom: 24px !important;
+  }
+  
+  .login-tab {
+    flex: 1 !important;
+    padding: 12px 16px !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #64748B !important;
+    cursor: pointer !important;
+    transition: all 200ms !important;
+  }
+  
+  .login-tab.active {
+    background: #FFFFFF !important;
+    color: #0F172A !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+  }
+  
+  /* 表单 */
+  .login-form {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 18px !important;
+  }
+  
+  .login-form-group {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  
+  .login-form-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+  }
+  
+  .login-input-wrapper {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+  
+  .login-input {
+    width: 100% !important;
+    padding: 14px 16px !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    background: #FFFFFF !important;
+    font-size: 16px !important;
+    color: #0F172A !important;
+    outline: none !important;
+    transition: all 150ms !important;
+  }
+  
+  .login-input:focus {
+    border-color: #2563EB !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+  }
+  
+  .login-input::placeholder {
+    color: #94A3B8 !important;
+  }
+  
+  .login-input-icon {
+    position: absolute !important;
+    right: 14px !important;
+    width: 20px !important;
+    height: 20px !important;
+    color: #94A3B8 !important;
+    cursor: pointer !important;
+    transition: color 150ms !important;
+  }
+  
+  .login-input-icon:hover {
+    color: #64748B !important;
+  }
+  
+  /* 密码强度指示器 */
+  .password-strength {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    margin-top: 4px !important;
+  }
+  
+  .password-strength-bar {
+    height: 4px !important;
+    background: #E2E8F0 !important;
+    border-radius: 2px !important;
+    overflow: hidden !important;
+  }
+  
+  .password-strength-fill {
+    height: 100% !important;
+    border-radius: 2px !important;
+    transition: all 300ms ease !important;
+  }
+  
+  .password-strength-fill.weak {
+    width: 20% !important;
+    background: #EF4444 !important;
+  }
+  
+  .password-strength-fill.medium {
+    width: 60% !important;
+    background: #F59E0B !important;
+  }
+  
+  .password-strength-fill.strong {
+    width: 100% !important;
+    background: #10B981 !important;
+  }
+  
+  .password-strength-text {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 12px !important;
+  }
+  
+  .password-strength-label {
+    color: #64748B !important;
+  }
+  
+  .password-strength-value {
+    font-weight: 600 !important;
+  }
+  
+  .password-strength-value.weak {
+    color: #EF4444 !important;
+  }
+  
+  .password-strength-value.medium {
+    color: #F59E0B !important;
+  }
+  
+  .password-strength-value.strong {
+    color: #10B981 !important;
+  }
+  
+  /* 密码检查项 */
+  .password-checks {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 8px !important;
+  }
+  
+  .password-check-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    font-size: 12px !important;
+    color: #94A3B8 !important;
+  }
+  
+  .password-check-item.valid {
+    color: #10B981 !important;
+  }
+  
+  .password-check-item svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+  
+  /* 登录按钮 */
+  .login-btn {
+    width: 100% !important;
+    padding: 16px 24px !important;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    color: #FFFFFF !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 10px !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+  }
+  
+  .login-btn:active:not(:disabled) {
+    transform: scale(0.98) !important;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
+  }
+  
+  .login-btn:disabled {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+  }
+  
+  /* 次要按钮 */
+  .login-btn-secondary {
+    width: 100% !important;
+    padding: 16px 24px !important;
+    background: #F1F5F9 !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    color: #475569 !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+  }
+  
+  .login-btn-secondary:active:not(:disabled) {
+    background: #E2E8F0 !important;
+    transform: scale(0.98) !important;
+  }
+  
+  /* 链接 */
+  .login-link {
+    color: #2563EB !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    transition: color 150ms !important;
+  }
+  
+  .login-link:hover {
+    color: #1D4ED8 !important;
+    text-decoration: underline !important;
+  }
+  
+  /* 底部链接 */
+  .login-footer {
+    text-align: center !important;
+    margin-top: 24px !important;
+    font-size: 14px !important;
+    color: #64748B !important;
+  }
+  
+  /* 错误提示 */
+  .login-error {
+    padding: 14px 16px !important;
+    background: #FEF2F2 !important;
+    border: 1px solid #FECACA !important;
+    border-radius: 12px !important;
+    color: #DC2626 !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* 成功提示 */
+  .login-success {
+    padding: 14px 16px !important;
+    background: #F0FDF4 !important;
+    border: 1px solid #BBF7D0 !important;
+    border-radius: 12px !important;
+    color: #16A34A !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    margin-bottom: 16px !important;
+  }
+  
+  /* 分隔线 */
+  .login-divider {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    margin: 24px 0 !important;
+    color: #94A3B8 !important;
+    font-size: 13px !important;
+  }
+  
+  .login-divider::before,
+  .login-divider::after {
+    content: '' !important;
+    flex: 1 !important;
+    height: 1px !important;
+    background: #E2E8F0 !important;
+  }
+  
+  /* 验证码按钮 */
+  .login-code-btn {
+    position: absolute !important;
+    right: 4px !important;
+    padding: 10px 16px !important;
+    background: #2563EB !important;
+    border: none !important;
+    border-radius: 10px !important;
+    color: #FFFFFF !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 150ms !important;
+    white-space: nowrap !important;
+  }
+  
+  .login-code-btn:disabled {
+    background: #CBD5E1 !important;
+    cursor: not-allowed !important;
+  }
+
+  /* ========================================
+   * 30. 通用组件增强 - Toast / Modal
+   * ======================================== */
+  
+  /* Toast 通知 */
+  .mm-toast {
+    position: fixed !important;
+    top: calc(20px + env(safe-area-inset-top)) !important;
+    left: 20px !important;
+    right: 20px !important;
+    padding: 16px 18px !important;
+    background: #FFFFFF !important;
+    border-radius: 14px !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    z-index: 10000 !important;
+    animation: mm-toast-in 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  @keyframes mm-toast-in {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .mm-toast-icon {
+    width: 24px !important;
+    height: 24px !important;
+    flex-shrink: 0 !important;
+  }
+  
+  .mm-toast.success .mm-toast-icon {
+    color: #10B981 !important;
+  }
+  
+  .mm-toast.error .mm-toast-icon {
+    color: #EF4444 !important;
+  }
+  
+  .mm-toast.info .mm-toast-icon {
+    color: #2563EB !important;
+  }
+  
+  .mm-toast-message {
+    flex: 1 !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: #0F172A !important;
+  }
+  
+  .mm-toast-close {
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #F1F5F9 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: #64748B !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+  }
+  
+  /* 确认弹窗 */
+  .mm-confirm-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(15, 23, 42, 0.5) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px !important;
+    z-index: 10000 !important;
+    animation: mm-overlay-in 200ms ease !important;
+  }
+  
+  @keyframes mm-overlay-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  .mm-confirm-dialog {
+    width: 100% !important;
+    max-width: 320px !important;
+    background: #FFFFFF !important;
+    border-radius: 24px !important;
+    padding: 28px !important;
+    text-align: center !important;
+    animation: mm-dialog-in 300ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  
+  @keyframes mm-dialog-in {
+    from {
+      opacity: 0;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .mm-confirm-icon {
+    width: 64px !important;
+    height: 64px !important;
+    margin: 0 auto 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #FEF2F2 !important;
+    border-radius: 50% !important;
+    color: #EF4444 !important;
+  }
+  
+  .mm-confirm-icon svg {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  
+  .mm-confirm-title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .mm-confirm-message {
+    font-size: 14px !important;
+    color: #64748B !important;
+    line-height: 1.6 !important;
+    margin-bottom: 24px !important;
+  }
+  
+  .mm-confirm-actions {
+    display: flex !important;
+    gap: 12px !important;
+  }
+  
+  .mm-confirm-actions .mm-btn {
+    flex: 1 !important;
+  }
+  
+  /* 骨架屏 */
+  .mm-skeleton {
+    background: linear-gradient(90deg, #E2E8F0 0%, #F1F5F9 50%, #E2E8F0 100%) !important;
+    background-size: 200% 100% !important;
+    animation: mm-skeleton-wave 1.5s ease infinite !important;
+    border-radius: 8px !important;
+  }
+  
+  @keyframes mm-skeleton-wave {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  
+  .mm-skeleton-text {
+    height: 16px !important;
+    margin-bottom: 8px !important;
+  }
+  
+  .mm-skeleton-title {
+    height: 24px !important;
+    width: 60% !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .mm-skeleton-avatar {
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+  }
+  
+  .mm-skeleton-card {
+    height: 80px !important;
+    border-radius: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+} /* 媒体查询结束 */
+

@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Folder, Users, ChevronRight } from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
+import SheetModal from '../../components/mobile/SheetModal';
+import CreateProjectForm from '../../components/mobile/CreateProjectForm';
 import { projectService, Project } from '../../services/project';
 import { usePermissions } from '../../hooks/usePermissions';
 import '../../styles/mobile-minimal.css';
@@ -22,6 +24,7 @@ export default function MobileProjects() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showCreateProject, setShowCreateProject] = useState(false);
 
   const loadProjects = useCallback(async () => {
     if (!currentWorkspace?.id) return;
@@ -55,6 +58,11 @@ export default function MobileProjects() {
     navigate(`/projects/${projectId}`);
   };
 
+  const handleProjectCreated = () => {
+    setShowCreateProject(false);
+    loadProjects();
+  };
+
   const getInitials = (name: string) => {
     return name.slice(0, 1).toUpperCase();
   };
@@ -75,6 +83,8 @@ export default function MobileProjects() {
         onSearchClick: () => setShowSearch(true),
       }}
       showBottomNav={true}
+      fabType="custom"
+      onFabClick={() => setShowCreateProject(true)}
     >
       {/* 搜索栏 */}
       {showSearch && (
@@ -182,6 +192,19 @@ export default function MobileProjects() {
           </div>
         )}
       </div>
+
+      {/* 创建项目弹窗 */}
+      <SheetModal
+        isOpen={showCreateProject}
+        onClose={() => setShowCreateProject(false)}
+        title="新建项目"
+        height="60vh"
+      >
+        <CreateProjectForm
+          onSuccess={handleProjectCreated}
+          onCancel={() => setShowCreateProject(false)}
+        />
+      </SheetModal>
     </MobileLayout>
   );
 }

@@ -7,9 +7,10 @@ import { Home, CheckSquare, Plus, Folder, User } from '../Icons';
 
 interface BottomNavProps {
   onAddClick?: () => void;
+  showFab?: boolean;  // 是否显示 FAB 按钮，默认 true
 }
 
-export default function BottomNav({ onAddClick }: BottomNavProps) {
+export default function BottomNav({ onAddClick, showFab = true }: BottomNavProps) {
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -38,6 +39,10 @@ export default function BottomNav({ onAddClick }: BottomNavProps) {
     <nav className="mm-bottom-nav">
       {tabs.map((tab) => {
         if (tab.id === 'add') {
+          // 如果不显示 FAB，渲染一个占位符保持布局平衡
+          if (!showFab) {
+            return <div key={tab.id} className="mm-nav-fab-placeholder" />;
+          }
           return (
             <div key={tab.id} className="mm-nav-fab-wrapper">
               <button className="mm-nav-fab" onClick={onAddClick}>
