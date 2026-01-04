@@ -13,7 +13,6 @@ import {
   ChevronRight,
   Loader2,
   Sparkles,
-  X,
 } from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import {
