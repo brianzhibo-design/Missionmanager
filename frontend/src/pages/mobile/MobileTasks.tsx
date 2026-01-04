@@ -231,7 +231,10 @@ export default function MobileTasks() {
   const hasActiveFilters = statusFilter !== 'all' || priorityFilter !== 'all';
 
   return (
-    <MobileLayout>
+    <MobileLayout
+      headerType="none"
+      showBottomNav={true}
+    >
       <div className="m-tasks-page">
         {/* 页面标题和操作 */}
         <div className="m-page-header">

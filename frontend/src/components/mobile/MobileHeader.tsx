@@ -63,13 +63,23 @@ export default function MobileHeader({
           <ChevronDown size={16} />
         </button>
         <div className="mm-header-actions">
-          <button className="mm-header-icon" onClick={onNotificationClick}>
+          <button 
+            className="mm-header-icon" 
+            onClick={onNotificationClick}
+            aria-label="通知"
+            type="button"
+          >
             <Bell size={22} />
             {notificationCount > 0 && (
               <span className="mm-header-badge">{notificationCount > 99 ? '99+' : notificationCount}</span>
             )}
           </button>
-          <button className="mm-header-icon" onClick={onSearchClick}>
+          <button 
+            className="mm-header-icon" 
+            onClick={onSearchClick}
+            aria-label="搜索"
+            type="button"
+          >
             <Search size={22} />
           </button>
         </div>
@@ -84,12 +94,22 @@ export default function MobileHeader({
         <h1 className="mm-header-title">{title}</h1>
         <div className="mm-header-actions">
           {onSearchClick && (
-            <button className="mm-header-icon" onClick={onSearchClick}>
+            <button 
+              className="mm-header-icon" 
+              onClick={onSearchClick}
+              aria-label="搜索"
+              type="button"
+            >
               <Search size={22} />
             </button>
           )}
           {onFilterClick && (
-            <button className="mm-header-icon" onClick={onFilterClick}>
+            <button 
+              className="mm-header-icon" 
+              onClick={onFilterClick}
+              aria-label="筛选"
+              type="button"
+            >
               <SlidersHorizontal size={22} />
             </button>
           )}
@@ -103,13 +123,23 @@ export default function MobileHeader({
   if (type === 'detail') {
     return (
       <header className="mm-header mm-header-detail">
-        <button className="mm-header-back" onClick={handleBack}>
+        <button 
+          className="mm-header-back" 
+          onClick={handleBack}
+          aria-label="返回"
+          type="button"
+        >
           <ArrowLeft size={24} />
         </button>
         <h1 className="mm-header-title">{title}</h1>
         <div className="mm-header-actions">
           {onMoreClick ? (
-            <button className="mm-header-icon" onClick={onMoreClick}>
+            <button 
+              className="mm-header-icon" 
+              onClick={onMoreClick}
+              aria-label="更多选项"
+              type="button"
+            >
               <MoreHorizontal size={22} />
             </button>
           ) : (
@@ -124,7 +154,12 @@ export default function MobileHeader({
   // 类型 D：管理页
   return (
     <header className="mm-header mm-header-manage">
-      <button className="mm-header-back" onClick={handleBack}>
+      <button 
+        className="mm-header-back" 
+        onClick={handleBack}
+        aria-label="返回"
+        type="button"
+      >
         <ArrowLeft size={24} />
       </button>
       <h1 className="mm-header-title">{title}</h1>
@@ -133,6 +168,8 @@ export default function MobileHeader({
     </header>
   );
 }
+
+
 
 
 

@@ -496,10 +496,12 @@
     display: flex;
     flex-direction: column;
     max-height: 90vh;
+    pointer-events: none;
   }
 
   .mm-sheet-modal.show {
     transform: translateY(0);
+    pointer-events: auto;
   }
 
   .mm-sheet-header {
@@ -4412,6 +4414,8 @@
   }
 
 } /* 媒体查询结束 */
+
+
 
 
 
