@@ -118,7 +118,11 @@ export default function MobileHome() {
 
   // 切换工作区
   const handleSwitchWorkspace = (workspace: Workspace) => {
-    setCurrentWorkspace(workspace);
+    // 将 Workspace 转换为 WorkspaceWithRole（role 类型转换）
+    setCurrentWorkspace({
+      ...workspace,
+      role: workspace.role as 'owner' | 'director' | 'manager' | 'member' | 'observer',
+    });
     setWorkspaceSwitcherOpen(false);
     // 刷新页面数据
     loadTodayTasks();

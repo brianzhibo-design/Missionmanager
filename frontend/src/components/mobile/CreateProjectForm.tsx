@@ -36,11 +36,11 @@ export default function CreateProjectForm({ onSuccess, onCancel }: CreateProject
       setLoading(true);
       setError(null);
 
-      await projectService.createProject(currentWorkspace.id, {
-        name: name.trim(),
-        description: description.trim() || undefined,
-        status: 'active',
-      });
+      await projectService.createProject(
+        currentWorkspace.id,
+        name.trim(),
+        description.trim() || undefined
+      );
 
       // 通知成功
       onSuccess?.();
@@ -116,3 +116,4 @@ export default function CreateProjectForm({ onSuccess, onCancel }: CreateProject
     </form>
   );
 }
+
