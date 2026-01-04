@@ -25,6 +25,7 @@ export default function MobileProjects() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showCreateProject, setShowCreateProject] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
   const loadProjects = useCallback(async () => {
     if (!currentWorkspace?.id) return;
@@ -46,6 +47,11 @@ export default function MobileProjects() {
 
   // 筛选项目
   const filteredProjects = projects.filter(project => {
+    // 状态筛选
+    if (statusFilter !== 'all' && project.status !== statusFilter) {
+      return false;
+    }
+    // 搜索筛选
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -53,6 +59,14 @@ export default function MobileProjects() {
       project.description?.toLowerCase().includes(query)
     );
   });
+
+  // 计算各状态数量
+  const statusCounts = {
+    all: projects.length,
+    active: projects.filter(p => p.status === 'active').length,
+    completed: projects.filter(p => p.status === 'completed').length,
+    archived: projects.filter(p => p.status === 'archived').length,
+  };
 
   const handleProjectClick = (projectId: string) => {
     navigate(`/projects/${projectId}`);
@@ -94,12 +108,19 @@ export default function MobileProjects() {
             <input
               type="text"
               className="mm-search-input"
-              placeholder="搜索项目..."
+              placeholder="搜索项目名称..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              autoFocus
               style={{ flex: 1, border: 'none', background: 'none', outline: 'none', fontSize: 16 }}
             />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                style={{ background: 'var(--min-text-muted)', border: 'none', borderRadius: '50%', width: 20, height: 20, color: 'white', fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                ×
+              </button>
+            )}
             <button 
               className="mm-search-cancel"
               onClick={() => {
@@ -113,6 +134,34 @@ export default function MobileProjects() {
           </div>
         </nav>
       )}
+
+      {/* 状态筛选标签 */}
+      <div className="mm-filter-tabs">
+        <button 
+          className={`mm-filter-tab ${statusFilter === 'all' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('all')}
+        >
+          全部 <span className="mm-filter-count">({statusCounts.all})</span>
+        </button>
+        <button 
+          className={`mm-filter-tab ${statusFilter === 'active' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('active')}
+        >
+          进行中 <span className="mm-filter-count">({statusCounts.active})</span>
+        </button>
+        <button 
+          className={`mm-filter-tab ${statusFilter === 'completed' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('completed')}
+        >
+          已完成 <span className="mm-filter-count">({statusCounts.completed})</span>
+        </button>
+        <button 
+          className={`mm-filter-tab ${statusFilter === 'archived' ? 'active' : ''}`}
+          onClick={() => setStatusFilter('archived')}
+        >
+          已归档 <span className="mm-filter-count">({statusCounts.archived})</span>
+        </button>
+      </div>
 
       {/* 项目列表 */}
       <div className="mm-project-list">

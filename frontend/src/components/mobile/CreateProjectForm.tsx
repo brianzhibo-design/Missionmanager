@@ -64,7 +64,6 @@ export default function CreateProjectForm({ onSuccess, onCancel }: CreateProject
             placeholder="项目名称（必填）"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            autoFocus
           />
         </div>
       </div>

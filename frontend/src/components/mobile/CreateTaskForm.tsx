@@ -150,7 +150,6 @@ export default function CreateTaskForm({
           placeholder="任务标题（必填）"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          autoFocus
         />
       </div>
 

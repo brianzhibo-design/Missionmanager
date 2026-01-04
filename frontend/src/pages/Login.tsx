@@ -123,6 +123,16 @@ function Login() {
     }
   }, [isAuthenticated, user]);
 
+  // 检查登录过期提示
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('expired') === 'true') {
+      setError('登录已过期，请重新登录');
+      // 清除 URL 参数
+      window.history.replaceState({}, '', '/login');
+    }
+  }, [location.search]);
+
   const clearMessages = () => {
     setError('');
     setSuccess('');

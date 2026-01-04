@@ -69,3 +69,5 @@ export default function BottomNav({ onAddClick, showFab = true }: BottomNavProps
     </nav>
   );
 }
+
+

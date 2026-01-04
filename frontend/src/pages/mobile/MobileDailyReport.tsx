@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Loader2,
   Sparkles,
+  X,
 } from '../../components/Icons';
 import MobileLayout from '../../components/mobile/MobileLayout';
 import {
@@ -55,6 +56,7 @@ export default function MobileDailyReport() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // 表单状态
   const [completed, setCompleted] = useState('');
@@ -126,9 +128,13 @@ export default function MobileDailyReport() {
       };
       const savedReport = await dailyReportService.create(input);
       setReport(savedReport);
-      // 可添加成功提示
+      // 显示成功提示
+      setToast({ type: 'success', message: report ? '日报更新成功！' : '日报提交成功！' });
+      setTimeout(() => setToast(null), 3000);
     } catch (error) {
       console.error('Failed to save:', error);
+      setToast({ type: 'error', message: '提交失败，请重试' });
+      setTimeout(() => setToast(null), 3000);
     } finally {
       setSaving(false);
     }
@@ -166,6 +172,13 @@ export default function MobileDailyReport() {
         ),
       }}
     >
+      {/* Toast 提示 */}
+      {toast && (
+        <div className={`mm-toast mm-toast-${toast.type}`}>
+          {toast.type === 'success' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+          <span>{toast.message}</span>
+        </div>
+      )}
       {/* 日期选择器 */}
       <div className="mm-date-selector">
         <button className="mm-date-nav" onClick={handlePrevDay}>

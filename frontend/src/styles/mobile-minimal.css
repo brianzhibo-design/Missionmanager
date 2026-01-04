@@ -1357,18 +1357,18 @@
 
   /* 项目列表 */
   .mm-project-list {
-    padding: 16px;
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
-  /* 项目卡片 */
+  /* 项目卡片 - 紧凑版 */
   .mm-project-card {
     background: var(--min-bg-card);
-    border-radius: var(--min-radius-lg);
+    border-radius: var(--min-radius-md);
     border: 1px solid var(--min-border);
-    padding: 16px;
+    padding: 12px;
     cursor: pointer;
     transition: all 0.2s;
   }
@@ -1378,23 +1378,28 @@
     background: var(--min-bg);
   }
 
-  /* 项目头部 */
+  /* 项目头部 - 紧凑 */
   .mm-project-header {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    margin-bottom: 12px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
   }
 
   .mm-project-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--min-radius-md);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     background: var(--min-primary-light);
     color: var(--min-primary);
     display: grid;
     place-items: center;
     flex-shrink: 0;
+  }
+
+  .mm-project-icon svg {
+    width: 18px;
+    height: 18px;
   }
 
   .mm-project-info {
@@ -1403,17 +1408,20 @@
   }
 
   .mm-project-name {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     color: var(--min-text-title);
-    margin: 0 0 4px 0;
+    margin: 0 0 2px 0;
     line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .mm-project-status {
-    font-size: 12px;
-    padding: 2px 8px;
-    border-radius: 10px;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 8px;
     display: inline-block;
   }
 
@@ -1440,80 +1448,89 @@
   .mm-project-arrow {
     color: var(--min-text-muted);
     flex-shrink: 0;
-    margin-top: 8px;
   }
 
-  /* 项目描述 */
+  .mm-project-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* 项目描述 - 简化 */
   .mm-project-desc {
-    font-size: 14px;
-    color: var(--min-text-body);
-    line-height: 1.5;
-    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: var(--min-text-muted);
+    line-height: 1.4;
+    margin: 0 0 8px 0;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  /* 项目统计 */
-  .mm-project-stats {
+  /* 项目统计 - 紧凑 */
+  .mm-project-card .mm-project-stats {
     display: flex;
-    gap: 16px;
-    margin-bottom: 12px;
-    padding-bottom: 12px;
+    gap: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
     border-bottom: 1px solid var(--min-border);
   }
 
-  .mm-stat-item {
+  .mm-project-card .mm-stat-item {
     display: flex;
     align-items: baseline;
-    gap: 4px;
+    gap: 3px;
   }
 
-  .mm-stat-value {
-    font-size: 18px;
+  .mm-project-card .mm-stat-value {
+    font-size: 16px;
     font-weight: 700;
     color: var(--min-text-title);
   }
 
-  .mm-stat-label {
-    font-size: 12px;
+  .mm-project-card .mm-stat-label {
+    font-size: 11px;
     color: var(--min-text-muted);
   }
 
-  /* 项目底部 */
+  /* 项目底部 - 紧凑 */
   .mm-project-footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px;
   }
 
   .mm-project-members {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 4px;
+    font-size: 11px;
     color: var(--min-text-muted);
+  }
+
+  .mm-project-members svg {
+    width: 12px;
+    height: 12px;
   }
 
   .mm-project-leader {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    gap: 4px;
+    font-size: 11px;
     color: var(--min-text-body);
   }
 
   .mm-leader-avatar {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    background: var(--min-primary-light);
-    color: var(--min-primary);
+    background: var(--min-primary);
+    color: white;
     display: grid;
     place-items: center;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
   }
 

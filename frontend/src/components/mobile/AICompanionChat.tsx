@@ -216,3 +216,5 @@ export default function AICompanionChat({ isOpen, onClose }: AICompanionChatProp
   );
 }
 
+
+

@@ -115,7 +115,9 @@ async function request<T>(
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('tokenExpiresAt');
         localStorage.removeItem(config.storageKeys.user);
-        // 不自动跳转，让 ProtectedRoute 处理
+        // 自动跳转到登录页
+        window.location.href = '/login?expired=true';
+        throw new ApiError('登录已过期，请重新登录', 'TOKEN_EXPIRED', 401);
       }
     } else {
       // 等待刷新完成
